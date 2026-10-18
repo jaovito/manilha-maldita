@@ -1,5 +1,7 @@
+import { assertPlayingCardRatios } from './card-proportions';
 import { devices, expect, test, type Page, type Locator } from '@playwright/test';
 import { assertLobbyContrast } from './lobby-contrast';
+import { assertPowerTargetGeometry } from './power-targets';
 import { assertSeatAlignment } from './seat-alignment';
 import {
   assertNoOverflow,
@@ -117,6 +119,11 @@ for (const count of [2, 4] as const) {
       for (const page of pages)
         await expect(page.getByRole('region', { name: 'Mesa da partida' })).toBeVisible();
       await host.screenshot({
+        path: `/tmp/truco-m3-preparation-${count}-${testInfo.project.name}.png`,
+        fullPage: true,
+      });
+      await preparePowers(pages);
+      await host.screenshot({
         path: `/tmp/truco-viewport-initial-${count}-${testInfo.project.name}.png`,
         fullPage: true,
       });
@@ -135,7 +142,7 @@ for (const count of [2, 4] as const) {
         await checkSmallPhones(host, count, 'initial');
       for (let card = 0; card < count; card++) {
         const player = await findActivePlayer(pages);
-        await clickAndSync(pages, player, player.locator('.card:enabled').first());
+        await playWithPower(pages, player);
       }
       await expect(host.locator('.played-card')).toHaveCount(count);
       await assertTableGeometry(host, count);
@@ -198,6 +205,7 @@ for (const count of [2, 4] as const) {
 async function finish(pages: Page[]) {
   for (let step = 0; step < 100; step++) {
     if (await pages[0]?.getByText(/Partida encerrada/).isVisible()) return;
+    await preparePowers(pages);
     let acted = false;
     for (const page of pages) {
       const raise = page.getByRole('button', { name: 'Contra-aumentar' });
@@ -226,7 +234,7 @@ async function finish(pages: Page[]) {
       }
       const card = page.locator('.card:enabled').first();
       if (await card.isVisible()) {
-        await clickAndSync(pages, page, card);
+        await playWithPower(pages, page);
         acted = true;
         break;
       }
@@ -260,4 +268,51 @@ async function clickAndSync(pages: Page[], page: Page, target: Locator) {
 async function findActivePlayer(pages: Page[]): Promise<Page> {
   for (const page of pages) if ((await page.locator('.card:enabled').count()) > 0) return page;
   throw new Error('Nenhum jogador com turno ativo.');
+}
+
+async function preparePowers(pages: Page[]) {
+  const preparing = await Promise.all(
+    pages.map((page) => page.getByRole('button', { name: 'Passar preparação' }).isVisible()),
+  );
+  if (!preparing.some(Boolean)) return;
+
+  const spies = new Set<Page>();
+  const consumed = new Set<Page>();
+  for (const page of pages) {
+    const pass = page.getByRole('button', { name: 'Passar preparação' });
+    if (!(await pass.isVisible())) continue;
+    const power = page.locator('.power-card[data-can-activate="true"]');
+    if (!(await power.count())) {
+      await clickAndSync(pages, page, pass);
+      continue;
+    }
+    consumed.add(page);
+    await power.click();
+    await expect(page.locator('.power-panel')).toHaveCount(0);
+    await assertPowerTargetGeometry(page);
+    const spy = page.getByRole('button', { name: /^Espionar carta/ });
+    if (await spy.count()) {
+      spies.add(page);
+      await clickAndSync(pages, page, spy.first());
+    } else await clickAndSync(pages, page, page.locator('.hand-cards .card:enabled').first());
+  }
+  for (const page of pages) {
+    await expect(page.locator('.spy-observation')).toHaveCount(spies.has(page) ? 1 : 0);
+    await assertPlayingCardRatios(page);
+    if (consumed.has(page)) await expect(page.locator('.power-card')).toHaveCount(0);
+  }
+}
+
+async function playWithPower(pages: Page[], page: Page) {
+  const power = page.locator('.power-card[data-can-activate="true"]');
+  if (await power.count()) {
+    await power.click();
+    await expect(power).toHaveAttribute('aria-pressed', 'true');
+    await assertPowerTargetGeometry(page);
+    // A boost can be unavailable for every remaining card; passing preserves legality.
+    if ((await page.locator('.card:enabled').count()) === 0) await power.click();
+  }
+  const activated = await page.locator('.power-card[aria-pressed="true"]').count();
+  await clickAndSync(pages, page, page.locator('.card:enabled').first());
+  if (activated) await expect(page.locator('.power-card')).toHaveCount(0);
 }

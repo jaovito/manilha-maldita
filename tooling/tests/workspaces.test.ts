@@ -10,7 +10,13 @@ type Manifest = {
   dependencies?: Record<string, string>;
 };
 const root = resolve(import.meta.dir, '../..');
-const workspacePaths = ['apps/web', 'apps/server', 'packages/game-core', 'packages/game-protocol'];
+const workspacePaths = [
+  'apps/web',
+  'apps/server',
+  'packages/game-core',
+  'packages/game-protocol',
+  'packages/game-sim',
+];
 
 async function manifests() {
   return Promise.all(

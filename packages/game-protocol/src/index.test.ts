@@ -51,6 +51,7 @@ test('configuration bounds and competitive fixed timers are enforced without mut
     preset: 'competitive',
     cardTimeoutMs: 20000,
     responseTimeoutMs: 15000,
+    preparationTimeoutMs: 10000,
   });
   for (const value of [0, 999, 120001, NaN, Infinity])
     expect(() => normalizeConfig({ ...defaultRoomConfig, responseTimeoutMs: value })).toThrow();
@@ -77,4 +78,28 @@ test('server messages accept only the declared safe envelope', () => {
       token: 'SECRET',
     }).success,
   ).toBe(false);
+});
+
+test('power commands reject extra authority, mixed windows and malformed targets; preparation timers normalize', () => {
+  for (const action of [
+    { type: 'PREPARE', intent: { type: 'pass' } },
+    { type: 'PREPARE', intent: { type: 'spy', target: 1 } },
+    { type: 'PREPARE', intent: { type: 'exchange', card: { rank: 'A', suit: 'clubs' } } },
+    { type: 'PLAY_CARD', card: { rank: 'A', suit: 'clubs' }, covered: false, power: 'mask' },
+  ])
+    expect(actionSchema.safeParse(action).success).toBe(true);
+  for (const action of [
+    { type: 'PREPARE', intent: { type: 'spy', target: 4 } },
+    { type: 'PREPARE', intent: { type: 'spy', target: 1, cardIndex: 0 } },
+    { type: 'PREPARE', intent: { type: 'mask' } },
+    { type: 'PREPARE', intent: { type: 'pass' }, seed: 1 },
+    { type: 'PLAY_CARD', card: { rank: 'A', suit: 'clubs' }, covered: false, power: 'spy' },
+  ])
+    expect(actionSchema.safeParse(action).success).toBe(false);
+  for (const value of [0, 999, 120001, NaN])
+    expect(() => normalizeConfig({ ...defaultRoomConfig, preparationTimeoutMs: value })).toThrow();
+  expect(
+    normalizeConfig({ ...defaultRoomConfig, preset: 'competitive', preparationTimeoutMs: 30000 })
+      .preparationTimeoutMs,
+  ).toBe(10000);
 });

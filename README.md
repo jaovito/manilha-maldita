@@ -2,13 +2,13 @@
 
 Base de um jogo de Truco Paulista com poderes para navegador. O projeto usa Bun Workspaces, TypeScript e um backend autoritativo organizado em módulos.
 
-M1 e M2 implementados: motor puro testado e partidas multiplayer 1v1/2v2 com salas privadas, convidados, lobby, apostas, onze, timers, reconexão e revanche. A aplicação tem entrada, lobby e mesa responsiva com direção visual pixel art: feltro, madeira, molduras douradas, retratos e cartas de pergaminho. Poderes entram no M3; áudio e playtests do M4 continuam pendentes. A apresentação conceitual continua em `index.html`, na raiz; a aplicação web é um workspace separado.
+M1, M2 e M3 implementados: motor puro testado e partidas multiplayer 1v1/2v2 com salas privadas, convidados, lobby, apostas, onze, timers, reconexão e revanche. A aplicação tem entrada, lobby e mesa responsiva com direção visual pixel art: feltro, madeira, molduras douradas, retratos e cartas de pergaminho. Energia, preparação selada e os quatro poderes funcionam nos dois presets; áudio e playtests do M4 continuam pendentes. A apresentação conceitual continua em `index.html`, na raiz; a aplicação web é um workspace separado.
 
 Os [assets gerados e seus prompts](apps/web/public/art/README.md) ficam no próprio projeto. A fonte Pixelify Sans é local e acompanha sua licença OFL. Imagens são decorativas; cartas, ações e placares continuam derivados do estado autorizado pelo servidor.
 
-O menu reproduz a composição da referência fornecida, com seis ações numa coluna, logo à esquerda e perfil à direita. O perfil tem apelido editável, criação de sala e entrada por código/link. Jogar, Como jogar, Cosméticos, Configurações e Sair ficam desabilitados e descritos como “Em breve”. Nível/moedas mostram indisponibilidade, sem saldo ou progresso fictício. O lobby reúne configurações, convite com cópia do link e equipes com assentos alternados. A prévia de poderes também permanece desabilitada até o M3; a carta Espião ilustrada no menu é decorativa.
+O menu reproduz a composição da referência fornecida, com seis ações numa coluna, logo à esquerda e perfil à direita. O perfil tem apelido editável, criação de sala e entrada por código/link. Jogar, Como jogar, Cosméticos, Configurações e Sair ficam desabilitados e descritos como “Em breve”. Nível/moedas mostram indisponibilidade, sem saldo ou progresso fictício. O lobby reúne configurações, convite com cópia do link e equipes com assentos alternados. O lobby permite consultar os quatro poderes; a carta Espião ilustrada no menu é decorativa.
 
-Durante a partida, a mesa ocupa o viewport inteiro, sem rolagem da página. Placar, mão, vira, jogadores e ações se reorganizam conforme largura, altura e orientação; o menu “Sala” reúne os dados do lobby e abre ao terminar para oferecer revanche e saída. Histórico e painel da sala podem rolar internamente.
+Durante a partida, a mesa ocupa o viewport inteiro, sem rolagem da página. O status fica no topo, junto ao placar, e um selo “Sua vez” acompanha o avatar próprio apenas quando é possível jogar. As ações da direita são compactas; jogar uma carta é feito diretamente na mão. Faces e versos mantêm a proporção 2:3 na mão, nos assentos, na mesa e na vira, variando apenas o tamanho. Placar, mão, vira, jogadores e ações se reorganizam conforme largura, altura e orientação; o menu “Sala” reúne os dados do lobby e abre ao terminar para oferecer revanche e saída. Histórico e painel da sala podem rolar internamente.
 
 ## Requisitos
 
@@ -30,6 +30,18 @@ Para testar 1v1 ou 2v2 na mesma máquina, use sessões/perfis de navegador disti
 
 O servidor não depende do PostgreSQL para jogar. `bun run dev:server` e `bun run dev:web` iniciam as partes separadamente. `bun run start:server` executa o backend sem watch. O proxy `/api` do Vite/preview mantém HTTP e WebSocket na origem do frontend. Use `/health` na porta 3001 para verificar o processo.
 
+## URL do backend no frontend
+
+Copie `apps/web/.env.example` para `apps/web/.env.local` e configure a origem pública do backend, sem `/api`:
+
+```dotenv
+VITE_BACKEND_URL=https://api.seu-dominio.com
+```
+
+A variável configura as requisições HTTP e o WebSocket (`https` → `wss`, `http` → `ws`). Vazia, mantém `/api` na origem atual e o proxy local. Reinicie o Vite após alterar; em hospedagem, configure no serviço do **frontend antes de executar `bun run build`** e gere um novo build. Variáveis `VITE_*` são públicas no bundle: não coloque credenciais nelas. O arquivo `.env.example` da raiz configura o backend/banco; o arquivo em `apps/web` configura o Vite.
+
+No backend, inclua a origem exata do frontend em `ALLOWED_ORIGINS`; o CORS permite cookies somente para essa lista. A sessão mantém `SameSite=Strict`: para acesso direto, use o mesmo site nos dois serviços (por exemplo, `jogo.seu-dominio.com` e `api.seu-dominio.com`, ambos HTTPS). Se estiverem em sites diferentes, use um proxy `/api` na origem do frontend e deixe `VITE_BACKEND_URL` vazia. Configure `SECURE_COOKIES=true` no backend em HTTPS.
+
 ## Estrutura
 
 ```text
@@ -39,13 +51,16 @@ apps/
 packages/
   game-core/           # motor puro completo de regras-base, apostas e projeções
   game-protocol/       # schemas Zod dos comandos, snapshots e configurações
+  game-sim/            # simulações pareadas com políticas de visão limitada
 tooling/
   architecture/        # regras de importação entre áreas, com parser Oxc
   tests/               # regressões das configurações e do grafo de workspaces
 tests/e2e/             # smoke test do HTML servido pelo build
 ```
 
-Cada workspace declara suas dependências. `game-core` expõe as entradas `./cards`, `./deal`, `./tricks`, `./hands`, `./betting`, `./match` e `./projections` para composição interna do motor; estado privado e identidades físicas não são DTOs de transporte. `game-protocol` expõe somente os schemas/tipos públicos pela entrada raiz; o frontend não importa o core. PixiJS e `game-sim` entram quando o incremento precisar deles.
+No frontend, `app` reúne montagem, `App/` e estilos globais; cada feature agrupa `components`, `pages` e utilitários conforme necessário. `pages` contém apenas páginas e seus testes; componentes e estilos de página ficam nas pastas `components` e `styles` da feature. Componentes usam pastas com `index.tsx`, testes e estilos próximos; filhos exclusivos, como `Lobby/Icon`, ficam no componente pai. O manifesto `app/styles/index.css` preserva a ordem da cascata. Veja a árvore e as responsabilidades na [arquitetura](docs/architecture.md#frontend-funcionalidades-e-separação-de-estados).
+
+Cada workspace declara suas dependências. `game-core` expõe as entradas `./cards`, `./deal`, `./tricks`, `./hands`, `./betting`, `./match` e `./projections` para composição interna do motor; estado privado e identidades físicas não são DTOs de transporte. `game-protocol` expõe somente os schemas/tipos públicos pela entrada raiz; o frontend não importa o core. `game-sim` executa cenários sintéticos com o mesmo core; PixiJS continua previsto para quando necessário.
 
 ## Banco de desenvolvimento e testes
 
@@ -116,7 +131,7 @@ A entrada interna `@truco/game-core/match` expõe `startMatch`, `executeCommand`
 
 Uma mão encerrada permanece em `HAND_END` até o adaptador distribuir outra. `MATCH_END` bloqueia comandos e novas distribuições. `projectPublicView` e `projectPlayerView` são as únicas visões para apresentação; nunca envie o estado interno. Cartas cobertas continuam ocultas para terceiros após o fim da mão/partida. Onze compartilha cartas somente com a equipe autorizada; 11×11 mantém apenas a mão própria.
 
-O M2 usa essas regras-base nas salas privadas e oferece mesa simples no navegador. Poderes e preparação selada entram no M3; não há um preset clássico adicional. A aplicação coordena filas por sala, sessões, ACKs, timers e reconexão. Não há recuperação de partidas após queda do processo.
+O M2 usa essas regras-base nas salas privadas e oferece mesa simples no navegador. Poderes e preparação selada foram acrescentados no M3; não há um preset clássico adicional. A aplicação coordena filas por sala, sessões, ACKs, timers e reconexão. Não há recuperação de partidas após queda do processo.
 
 ## Operação local do M2
 
@@ -125,3 +140,16 @@ O M2 usa essas regras-base nas salas privadas e oferece mesa simples no navegado
 O estado vivo é exclusivamente em memória: reiniciar o processo perde sessões e salas e é falha técnica, sem atribuir derrota por abandono. Reconexão protege somente ausências durante a vida do processo, com 60 s cumulativos no casual e 30 s no competitivo. Se um parceiro pode responder, a decisão de equipe continua. Esgotada a proteção, volta o tempo restante; carta sem timer, quando o ausente não tem mais proteção, recebe fallback em vez de bloquear a sala.
 
 As salas vazias expiram após 60 s no casual/30 s no competitivo. Limites atuais: 256 salas, três salas por sessão, 64 comandos pendentes por sala e 512 respostas de deduplicação recentes por sala. Veja as regras de transporte, recursos e idempotência na [arquitetura](docs/architecture.md) e na [ADR 006](docs/adr/006-room-authority-and-reconnection.md). O backend não grava payloads, cartas ou tokens em logs.
+
+## Poderes e simulação (M3)
+
+Toda mão comum começa em preparação selada, sem abrir um painel automaticamente: o poder aparece como uma carta ilustrada no canto da mesa. Clique no poder e depois diretamente em um verso adversário para Espião ou numa carta da sua mão para Segunda Chance; você também pode passar. O clique no alvo envia uma intenção; cartas e energia mudam quando todos responderem ou o prazo expirar. Na sua vez, clicar na carta de Impulso/Máscara seleciona o efeito; clicar novamente cancela. Depois escolha uma carta da mão: poder e jogada são enviados juntos. As cartas elegíveis são destacadas e uma orientação curta indica o próximo clique. Esc ou clicar novamente no poder cancela a seleção. Após o servidor confirmar o uso, a carta de poder desaparece até a próxima mão; a reserva de energia e o resultado privado do Espião continuam visíveis. Os detalhes abrem por clique, fecham pelo botão ou Esc e mostram poderes revelados/ativações; poderes não usados de outros assentos aparecem como “Poder oculto”, inclusive os do parceiro. A face observada pelo Espião aparece na mão adversária somente para quem o usou; depois de uma jogada do alvo, permanece como memória da preparação até a mesma carta ser revelada numa jogada ou a mão ficar vazia, sem rastrear cartas ocultas. No celular, detalhes permitem rolagem interna. A carta mascarada é distinta de coberta e só revela sua identidade aos demais ao resolver a vaza.
+
+Energia inicial 2, teto 3 e regeneração +1 por mão comum após a primeira. Cada jogador tem no máximo um uso por mão. Onze/decisiva não sorteiam poderes nem regeneram energia. Casual permite ajustar a preparação (default 15 s); competitivo fixa 10 s. O catálogo e custos estão em [docs/rules.md](docs/rules.md).
+
+```sh
+bun run simulate 30        # 30 cenários por estrato, com/sem poderes e troca de assentos
+bun run simulate 100 1234  # tamanho e seed sintética local de reprodução
+```
+
+A ferramenta produz JSON agregado por formato, preset e política conservadora/agressiva/probabilística, com incerteza aproximada e contagens separadas de atribuição/uso. Não usa sessões reais nem bots oniscientes. Veja o [relatório inicial](docs/simulation-m3.md), a [metodologia](docs/balancing.md) e a [ADR 007](docs/adr/007-sealed-powers-and-simulation.md). Os resultados não comprovam equilíbrio ou diversão.

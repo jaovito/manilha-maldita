@@ -1,13 +1,13 @@
+import { cardKey, cardStrength } from '@truco/game-core/cards';
 import {
   dealNextHand,
   executeCommand,
-  startMatch,
   type PlayerCommand,
+  startMatch,
 } from '@truco/game-core/match';
-import { cardKey, cardStrength } from '@truco/game-core/cards';
 import type { Action, ClientMessage } from '@truco/game-protocol';
 import { createClock, expirations, updateConnectivity } from '../../matches';
-import { type Room, type Ports, choices, connected, protectionMs } from './types';
+import { choices, connected, type Ports, powerSetup, protectionMs, type Room } from './types';
 
 export function openDecision(room: Room, ports: Ports): void {
   const state = room.match;
@@ -22,7 +22,12 @@ export function openDecision(room: Room, ports: Ports): void {
   }
 
   if (state.phase.type === 'HAND_END') {
-    room.match = dealNextHand(state, state.revision, choices(ports)).state;
+    room.match = dealNextHand(
+      state,
+      state.revision,
+      choices(ports),
+      state.score.A === 11 || state.score.B === 11 ? undefined : powerSetup(room, ports),
+    ).state;
     openDecision(room, ports);
     return;
   }
@@ -35,19 +40,25 @@ export function openDecision(room: Room, ports: Ports): void {
         ? 'B'
         : 'A';
   const dependencies =
-    phase.type === 'TURN'
-      ? [phase.seat]
-      : room.seats.flatMap((_, seat) => ((seat % 2 === 0 ? 'A' : 'B') === team ? [seat] : []));
+    phase.type === 'PREPARATION'
+      ? room.seats.flatMap((_, seat) => (state.powers?.commitments[seat] === null ? [seat] : []))
+      : phase.type === 'TURN'
+        ? [phase.seat]
+        : room.seats.flatMap((_, seat) => ((seat % 2 === 0 ? 'A' : 'B') === team ? [seat] : []));
 
   room.clock = updateConnectivity(
     createClock(
       ports.id(),
       ports.now(),
-      phase.type === 'TURN' ? room.config.cardTimeoutMs : room.config.responseTimeoutMs,
+      phase.type === 'PREPARATION'
+        ? room.config.preparationTimeoutMs
+        : phase.type === 'TURN'
+          ? room.config.cardTimeoutMs
+          : room.config.responseTimeoutMs,
       dependencies,
       protectionMs(room),
       room.budgets,
-      phase.type === 'TURN' ? 'all' : 'any',
+      phase.type === 'TURN' || phase.type === 'PREPARATION' ? 'all' : 'any',
     ),
     ports.now(),
     connected(room),
@@ -57,7 +68,12 @@ export function openDecision(room: Room, ports: Ports): void {
 export function beginMatch(room: Room, ports: Ports): void {
   const count = room.config.format === '1v1' ? 2 : 4;
 
-  room.match = startMatch(count, ports.randomInt(count), choices(ports)).state;
+  room.match = startMatch(
+    count,
+    ports.randomInt(count),
+    choices(ports),
+    powerSetup(room, ports),
+  ).state;
   room.matchId = ports.id();
   room.status = 'playing';
   room.outcome = null;
@@ -99,6 +115,18 @@ export function advanceClock(room: Room, ports: Ports): boolean {
     }
   }
 
+  if (state.phase.type === 'PREPARATION') {
+    let next = state;
+    for (const pending of clock.dependencies)
+      next = executeCommand(next, next.revision, pending, {
+        type: 'PREPARE',
+        intent: { type: 'pass' },
+      }).state;
+    room.match = next;
+    openDecision(room, ports);
+    return true;
+  }
+
   let action: PlayerCommand;
   const seat = clock.dependencies[0];
   if (seat === undefined) throw new Error('INVALID_PHASE');
@@ -134,22 +162,32 @@ export function applyGameplay(
   if (room.status !== 'playing' || state === null) throw new Error('INVALID_PHASE');
   if (message.matchId !== room.matchId || message.decisionId !== room.clock?.decisionId)
     throw new Error('STALE_CONTEXT');
-  if (message.expectedRevision !== state.revision) throw new Error('STALE_REVISION');
+  if (message.action.type !== 'PREPARE' && message.expectedRevision !== state.revision)
+    throw new Error('STALE_REVISION');
 
   if (message.action.type === 'SURRENDER') {
     closeAbnormally(room, seat % 2 === 0 ? 'B' : 'A', 'surrender');
     return;
   }
 
-  if (room.clock?.pausedAt !== null && room.clock?.pausedAt !== undefined)
+  if (
+    message.action.type !== 'PREPARE' &&
+    room.clock?.pausedAt !== null &&
+    room.clock?.pausedAt !== undefined
+  )
     throw new Error('DECISION_PAUSED');
 
   const action: Action = message.action;
-  if (!['PLAY_CARD', 'REQUEST_RAISE', 'RESPOND_RAISE', 'DECIDE_ELEVEN'].includes(action.type))
+  if (
+    !['PREPARE', 'PLAY_CARD', 'REQUEST_RAISE', 'RESPOND_RAISE', 'DECIDE_ELEVEN'].includes(
+      action.type,
+    )
+  )
     throw new Error('INVALID_COMMAND');
 
   // The discriminated cases below prevent lobby/transport actions entering the core.
   switch (action.type) {
+    case 'PREPARE':
     case 'PLAY_CARD':
     case 'REQUEST_RAISE':
     case 'RESPOND_RAISE':
@@ -161,5 +199,21 @@ export function applyGameplay(
   const member = room.seats[seat];
   if (member) member.strikes = 0;
 
-  openDecision(room, ports);
+  if (
+    state.phase.type === 'PREPARATION' &&
+    room.match?.phase.type === 'PREPARATION' &&
+    room.clock
+  ) {
+    room.clock = updateConnectivity(
+      {
+        ...room.clock,
+        dependencies: room.seats.flatMap((_, owner) =>
+          room.match?.powers?.commitments[owner] === null ? [owner] : [],
+        ),
+      },
+      ports.now(),
+      connected(room),
+    );
+    room.budgets = room.clock.budgets;
+  } else openDecision(room, ports);
 }

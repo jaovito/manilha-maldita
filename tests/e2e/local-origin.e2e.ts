@@ -36,7 +36,7 @@ test('localhost creates a guest, creates a room and connects its lobby socket', 
   }
 
   await expect(page.getByRole('switch', { name: 'Sala privada' })).toBeChecked();
-  await expect(page.getByRole('switch', { name: 'Poderes aleatórios' })).not.toBeChecked();
+  await expect(page.getByRole('switch', { name: 'Poderes aleatórios' })).toBeChecked();
   await expect(page.getByRole('switch', { name: 'Poderes aleatórios' })).toBeDisabled();
   await page.getByRole('radio', { name: '1v1', exact: true }).focus();
   await page.keyboard.press('ArrowRight');
@@ -46,6 +46,6 @@ test('localhost creates a guest, creates a room and connects its lobby socket', 
   await expect(page.getByRole('radio', { name: 'Competitivo', exact: true })).toBeChecked();
   await page.getByText('Ajustes de tempo', { exact: true }).click();
   await expect(page.locator('.clock-summary')).toHaveText(
-    'Carta: 20 segundos · Resposta: 15 segundos',
+    'Carta: 20 segundos · Resposta: 15 segundos · Preparação: 10 segundos',
   );
 });

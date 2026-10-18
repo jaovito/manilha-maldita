@@ -6,6 +6,7 @@ node_modules/
 playwright-report/
 test-results/
 .playwright-mcp/
+.playwright-cli/
 .env
 .env.*
 !.env.example

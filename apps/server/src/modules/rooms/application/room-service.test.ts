@@ -134,10 +134,17 @@ export function fixture() {
 }
 
 type TestRoom = Awaited<ReturnType<ReturnType<typeof fixture>['room']>>;
-export async function start(room: TestRoom) {
+export async function start(room: TestRoom, prepare = true) {
   for (const p of room.peers)
     expect((await p.send({ type: 'READY', ready: true })).type).toBe('ACK');
   expect((await room.host.send({ type: 'START_MATCH' })).type).toBe('ACK');
+  if (prepare) await prepareRoom(room);
+}
+export async function prepareRoom(room: TestRoom) {
+  if (room.host.view.match?.phase.type !== 'PREPARATION') return;
+  for (const p of room.peers)
+    if (!p.view.match?.powers?.players[p.view.selfSeat]?.ready)
+      expect((await p.send({ type: 'PREPARE', intent: { type: 'pass' } })).type).toBe('ACK');
 }
 export function actor(room: TestRoom, seat: number) {
   const p = room.peers.find((candidate) => candidate.view.selfSeat === seat);
@@ -145,6 +152,7 @@ export function actor(room: TestRoom, seat: number) {
   return p;
 }
 export async function playTurn(room: TestRoom) {
+  await prepareRoom(room);
   const match = room.host.view.match;
   if (match?.phase.type !== 'TURN') throw new Error('NO_TURN');
   const p = actor(room, match.phase.seat);
@@ -154,6 +162,7 @@ export async function playTurn(room: TestRoom) {
   expect((await p.send({ type: 'PLAY_CARD', card, covered: false })).type).toBe('ACK');
 }
 export async function giveOneToA(room: TestRoom) {
+  await prepareRoom(room);
   if (room.host.view.match?.phase.type !== 'TURN') throw new Error('NO_TURN');
   if (room.host.view.match.phase.seat % 2 === 1) await playTurn(room);
   const phase = room.host.view.match?.phase;

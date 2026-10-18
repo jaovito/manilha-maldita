@@ -66,7 +66,7 @@ Ambas as mãos especiais proíbem aumentos, poderes e futuros eventos; não sort
 
 ### Sorteio e energia
 
-Por mão comum: distribuir cartas, revelar vira, regenerar energia quando aplicável, sortear poderes e publicar poderes/energia. O poder expira ao fim da mão; não é guardável ou negociável.
+Por mão comum: distribuir cartas, revelar vira, regenerar energia quando aplicável, sortear poderes e entregar cada poder somente ao seu dono; energia permanece pública. O poder expira ao fim da mão; não é guardável ou negociável.
 
 - Energia individual: inicial 2, máxima 3, regeneração +1 por nova mão habilitada, exceto a primeira da partida.
 - Uma ativação bem-sucedida por jogador/mão, também no 2v2; não é limite por equipe.
@@ -75,9 +75,12 @@ Por mão comum: distribuir cartas, revelar vira, regenerar energia quando aplic�
 - Competitivo 2v2: dois poderes distintos uniformemente sorteados; uma cópia de cada por equipe, atribuídas aleatoriamente aos parceiros.
 - Ambos os presets usam os mesmos quatro poderes no MVP. Não adicione experimentos só para diferenciá-los.
 - Não adapte sorteio a conta, placar, cartas, energia ou histórico. Energia insuficiente desabilita a ativação, sem reroll compensatório.
-- Poder, energia, ativação e alvo são públicos; resultados de informação e trocas respeitam privacidade.
+- O poder sorteado é privado ao dono, inclusive em relação ao parceiro. Outros jogadores e a projeção pública só recebem sua identidade após uma ativação aceita.
+- Energia, pronto, ativação resolvida e alvo são públicos; resultados de informação e trocas respeitam privacidade. Pronto não revela a intenção selada.
+- Espião/Segunda Chance revelam o poder somente no fechamento do lote da preparação; Impulso/Máscara, junto da jogada aceita. A revelação da Máscara não revela a identidade da carta antes da resolução.
+- Rejeição, passe, expiração, fim da mão/partida e reconexão não revelam poderes nunca usados. Cada nova mão oculta novamente as novas atribuições.
 
-Espelhamento é simetria de acesso, não garantia de equilíbrio posicional. Não elimine a aleatoriedade escolhida pelo proprietário.
+A política competitiva espelhada ainda permite deduzir poderes a partir da própria atribuição; ocultar o snapshot não elimina essa inferência. Sua substituição por sorteio independente está pendente de decisão do proprietário. Espelhamento é simetria de acesso, não garantia de equilíbrio posicional. Não elimine a aleatoriedade escolhida pelo proprietário.
 
 ### Preparação selada e ordem de resolução
 
@@ -102,7 +105,7 @@ Descartes não retornam ao monte na mão. Não intercale jogadas nem permita rev
 | Impulso | 2 | Sua jogada | Carta comum ganha um nível normal de força nesta vaza, teto no 3. |
 | Máscara | 1 | Sua jogada | Carta oculta para todos, exceto dono, até resolução; disputa com força integral. |
 
-**Espião:** resultado só ao usuário, não automaticamente ao parceiro. Não permite escolher a carta, não altera mãos e não revela o monte. Dois espiões podem descobrir a mesma carta, sem compensação.
+**Espião:** resultado só ao usuário, não automaticamente ao parceiro. Não permite escolher a identidade física da carta, não altera mãos e não revela o monte. Na interface, clicar em um verso anônimo escolhe o adversário; a observação aleatória aparece naquele verso após a resolução. Depois que o alvo jogar, a observação é uma memória da preparação, não rastreamento de cartas ainda na mão ou de jogadas ocultas. Quando uma jogada visível desse alvo, atual ou em vaza concluída, revela o mesmo valor e naipe, a observação deixa o assento; também desaparece quando a contagem da mão chega a zero. Carta coberta ou Máscara ainda oculta não informa se a carta observada saiu. Dois espiões podem descobrir a mesma carta, sem compensação.
 
 **Segunda Chance:** não compra vira, cartas distribuídas ou descartadas, inclusive a devolvida. Descarte/substituição são privados; mão continua com três cartas.
 

@@ -1,0 +1,155 @@
+.game-shell .player-seat {
+  width: clamp(100px, 14vw, 220px);
+  max-width: none;
+  grid-template-columns: clamp(34px, 6dvh, 72px) 1fr;
+  gap: 6px 10px;
+}
+.game-shell .player-seat .seat-avatar {
+  width: clamp(34px, 6dvh, 72px);
+  height: clamp(34px, 6dvh, 72px);
+}
+.game-shell .seat-info {
+  background: #052622d9;
+}
+.game-shell .seat-name {
+  font-size: clamp(13px, 1.4vw, 23px);
+}
+.game-shell .seat-team {
+  font-size: clamp(10px, 0.85vw, 14px);
+}
+.game-shell .mini-card {
+  width: clamp(20px, min(3vw, 3.53dvh), 44px);
+}
+.game-shell .seat-relative-1 {
+  top: 37%;
+  right: 6%;
+  left: auto;
+  transform: none;
+}
+.game-shell .seat-relative-3 {
+  top: 37%;
+  left: 6%;
+}
+.game-shell .seat-relative-2,
+.game-shell .arena[data-player-count="2"] .seat-relative-1 {
+  top: 19%;
+  left: 46%;
+  right: auto;
+  transform: translateX(-50%);
+}
+.game-shell .center-plays {
+  top: 36%;
+  left: 46%;
+  width: clamp(195px, 24vw, 390px);
+  height: 29dvh;
+  transform: translateX(-50%);
+}
+.game-shell .played-card {
+  width: clamp(50px, min(6.3vw, 8.66dvh), 100px);
+}
+.game-shell .play-relative-0 {
+  left: 50%;
+  bottom: 0;
+  top: auto;
+  transform: translateX(-50%);
+}
+.game-shell .play-relative-1 {
+  top: 30%;
+  right: 0;
+  left: auto;
+}
+.game-shell .play-relative-3 {
+  top: 30%;
+  left: 0;
+}
+.game-shell .play-relative-2,
+.game-shell .arena[data-player-count="2"] .play-relative-1 {
+  top: 0;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+.game-shell .table-emblem {
+  top: 50%;
+  left: 50%;
+  width: max-content;
+  transform: translate(-50%, -50%);
+  font-size: clamp(40px, 6vw, 85px);
+}
+.game-shell .vira-panel {
+  top: 28%;
+  right: 28%;
+  width: clamp(62px, min(7vw, calc(8.66dvh + 20px)), 112px);
+  padding: 7px;
+}
+.game-shell .vira-panel small {
+  display: block;
+  white-space: nowrap;
+  letter-spacing: -0.4px;
+}
+.game-shell .own-hand {
+  bottom: 3.5dvh;
+  left: 46%;
+}
+.game-shell .own-player {
+  position: relative;
+  margin-bottom: 1.5dvh;
+  gap: 12px;
+}
+.game-shell .own-player .seat-avatar {
+  width: clamp(34px, 6dvh, 66px);
+  height: clamp(34px, 6dvh, 66px);
+}
+.game-shell .own-player strong {
+  font-size: clamp(15px, 1.5vw, 25px);
+}
+.game-shell .hand-cards {
+  gap: clamp(8px, 1vw, 16px);
+}
+.game-shell .card {
+  width: clamp(72px, min(8.3vw, 14dvh), 140px);
+}
+.game-shell .card-suit {
+  font-size: clamp(38px, 5.6vw, 88px);
+}
+.game-shell .played-card .card-suit,
+.game-shell .vira-panel .card-suit {
+  font-size: clamp(30px, 4vw, 65px);
+}
+.game-shell .mini-card .card-suit {
+  font-size: 19px;
+}
+
+.turn-badge {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  translate: -50% 0;
+  white-space: nowrap;
+  padding: 3px 9px;
+  border: 2px solid #edc973;
+  background: #123d30;
+  box-shadow: 2px 2px #071b18;
+  color: #fff0bd;
+  font-size: 14px;
+  line-height: 1.1;
+}
+.own-player[data-active="true"] .seat-avatar {
+  outline: 2px solid #edc973;
+  outline-offset: 3px;
+}
+@media (max-width: 600px), (max-height: 500px) {
+  .turn-badge {
+    padding: 3px 5px;
+    font-size: 11px;
+    bottom: calc(100% + 5px);
+  }
+}
+
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .turn-badge {
+    left: auto;
+    right: 0;
+    translate: none;
+  }
+}

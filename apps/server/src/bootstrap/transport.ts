@@ -10,6 +10,7 @@ import { Hono } from 'hono';
 import { getConnInfo, upgradeWebSocket, websocket } from 'hono/bun';
 import { getCookie, setCookie } from 'hono/cookie';
 import { bodyLimit } from 'hono/body-limit';
+import { cors } from 'hono/cors';
 import type { RoomPort } from '../modules/transport/adapters/port';
 import { sendSocketMessage } from '../modules/transport/adapters/outbound';
 import { createLimiter, createSessions } from '../modules/transport/adapters/sessions';
@@ -54,6 +55,19 @@ export function createTransport(options: {
   app.get('/health', (context) => context.json({ status: 'ok' }));
 
   app.onError((error, context) => context.json({ code: errorCode(error) }, 400));
+
+  const apiCors = cors({
+    origin: [...options.allowedOrigins],
+    credentials: true,
+    allowMethods: ['GET', 'POST'],
+    allowHeaders: ['Content-Type'],
+  });
+  app.use('/api/*', (context, next) => {
+    // CORS applies to HTTP only; the WS handshake retains its explicit origin check.
+    if (context.req.path.endsWith('/ws')) return next();
+
+    return apiCors(context, next);
+  });
 
   app.use(
     '/api/*',

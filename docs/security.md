@@ -6,7 +6,7 @@ Leia antes de alterar projeções, interface de cartas, HTTP/WS, sessões, logs,
 
 Construa projeções por allowlist: pública, individual e de equipe somente quando autorizado por regra. Não copie o estado inteiro para apagar campos depois. Nunca faça broadcast interno seguido de filtragem no navegador.
 
-Proteja mãos alheias, monte ordenado, sementes, descartes, cartas cobertas/mascaradas e resultados privados de Espião em HTTP, WS, erros, analytics, logs e reconexão. IDs também podem vazar cartas: use referências opacas de apresentação, não `3-clubs` para carta oculta. Não reutilize um ID revelado por Espião em uma jogada mascarada, permitindo correlacioná-la antes da hora. Informação já conhecida não é apagada, mas novas mensagens não podem revelar qual carta foi mascarada.
+Proteja poderes sorteados ainda não ativados de qualquer outro assento, inclusive do parceiro, e mãos alheias, monte ordenado, sementes, descartes, cartas cobertas/mascaradas e resultados privados de Espião em HTTP, WS, erros, analytics, logs e reconexão. IDs também podem vazar cartas: use referências opacas de apresentação, não `3-clubs` para carta oculta. Não reutilize um ID revelado por Espião em uma jogada mascarada, permitindo correlacioná-la antes da hora. Informação já conhecida não é apagada, mas novas mensagens não podem revelar qual carta foi mascarada.
 
 Tokens de retomada são imprevisíveis, vinculados ao assento/sessão, expiráveis e revogáveis. Código da sala é convite, não identidade. Não coloque tokens em URLs/logs. Prefira cookies seguros `HttpOnly` quando viável; valide origem no handshake WS. CORS não substitui autorização.
 
@@ -30,7 +30,7 @@ Não há coleta externa de analytics nem logging de payloads. Erros HTTP e WS us
 
 O apelido é a única preferência gravada no `localStorage` do navegador, na chave `truco.nickname`, para evitar redigitação após recarregar ou perder a sessão. O valor é validado pelo contrato de apelido e fica em texto simples, limitado à origem, até ser substituído, apagado no campo ou removido junto aos dados do site. Não é credencial: scripts da mesma origem podem lê-lo. Cookies de sessão continuam HttpOnly; tokens, assentos, cartas e snapshots não são gravados nesse armazenamento. A sessão válida continua sendo a fonte da identidade e pode repor seu apelido mesmo após remover a preferência local. Bloqueio ou falta de espaço no armazenamento não impedem jogar; não há novo dado de jogador no banco.
 
-Estado atual: M2 não persiste jogadores, sessões ou salas no PostgreSQL. O banco local contém somente infraestrutura e fixtures de testes. O transporte local é HTTP/WS no loopback; não existe TLS publicado/configurado por esta entrega. O cliente seleciona WSS quando servido por HTTPS, mas essa seleção não instala certificados nem assegura o trajeto do proxy ao backend.
+Estado atual: M2/M3 não persistem jogadores, sessões ou salas no PostgreSQL. O banco local contém somente infraestrutura e fixtures de testes. O transporte local é HTTP/WS no loopback; não existe TLS publicado/configurado por esta entrega. O cliente seleciona WSS para backend HTTPS (ou página HTTPS quando não há URL configurada), mas essa seleção não instala certificados nem assegura o trajeto do proxy ao backend.
 
 Antes de uma exposição pública, servir frontend/API por HTTPS e sockets por WSS, configurar cookies Secure e proteger também conexões remotas do banco por TLS com verificação de certificado. Caso haja proxy/CDN, o trecho até a origem também deve ser protegido ou permanecer num canal local controlado. Certificados, redirecionamento para HTTPS e políticas de transporte serão validados no deploy escolhido, sem tratar os defaults de desenvolvimento como configuração de produção.
 
@@ -41,3 +41,19 @@ Persistência de contas opcionais, cosméticos e resultados permanece no M5. Col
 Se forem adotadas senhas, armazenar somente hash apropriado para senhas, preferencialmente Argon2id com salt e parâmetros revisados; nunca senha em claro ou cifra reversível para autenticação. Se credenciais de sessão/retomada passarem a ser persistidas, armazenar verificadores/hash de tokens aleatórios quando apenas a comparação for necessária, não seu valor utilizável. Não foram criados modelos, migrações, login ou recursos de hospedagem nesta revisão.
 
 Referências: [OWASP — WebSocket Security](https://cheatsheetseries.owasp.org/cheatsheets/WebSocket_Security_Cheat_Sheet.html), [Cryptographic Storage](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html) e [Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+
+## Privacidade dos poderes (M3)
+
+Compromissos aceitos na preparação são privados até fechar o lote; só o indicador pronto é público. Gastos, uso e ativações aparecem juntos depois da resolução. Espião fica somente na projeção do usuário; parceiros não recebem esse resultado. O snapshot de reconexão aplica a mesma allowlist. O histórico público de ativações informa poder/autor/alvo, sem descarte, substituição ou carta investigada.
+
+Máscara em vaza aberta envia somente assento, marcador e status, sem identidade física nem IDs correlacionáveis; o dono conserva sua visão. A resolução de vaza revela a carta. Corrida ou término sem resolução não a revela. Cartas cobertas e remanescentes continuam privadas, inclusive após término. Simulações usam dados sintéticos locais, sem analytics externo ou dados pessoais.
+
+Poderes não usados são redigidos na projeção autoritativa, antes da serialização: `players[].power` é `null` para outros assentos até existir ativação pública aceita naquela mão. O dono recebe sua atribuição. A lista pública de ativações só muda no fechamento da preparação ou na jogada atômica; indicador de pronto não revela escolhas. Reconexão e término preservam esse contrato. Isso não impede deduções a partir de uma política de sorteio espelhado conhecida, nem comunicação entre jogadores fora do jogo.
+
+A face revelada por Espião é renderizada somente a partir de `powers.intel` da projeção individual. A escolha visual de um verso fica em memória do componente e não é um ID de carta física nem altera a amostragem. Após qualquer jogada do alvo, a observação fica separada dos versos remanescentes como memória histórica, até uma jogada já autorizada revelar o mesmo valor/naipe desse assento ou a contagem da mão chegar a zero; a UI nunca usa a remoção de um verso para descobrir qual carta mascarada/coberta saiu. Nenhuma carta extra, posição privada ou identificador de rastreamento foi acrescentado ao transporte ou armazenamento local.
+
+## URL pública do backend
+
+`VITE_BACKEND_URL` é configuração pública de build, nunca um segredo ou token. Aceita somente uma origem HTTP(S), sem credenciais, caminho, query ou fragmento. O cliente mantém cookies HttpOnly e envia requisições com credentials=include; CORS libera leitura credenciada somente para origens exatas de `ALLOWED_ORIGINS`, sem wildcard, inclusive respostas de erro. Preflights permitem apenas GET/POST e Content-Type e não criam sessão. A validação de origem das mutações e do handshake WS continua obrigatória; middleware CORS não altera os headers de upgrade.
+
+SameSite=Strict permanece habilitado: front e backend acessados diretamente precisam compartilhar o mesmo site e esquema. Hospedagem entre sites diferentes exige proxy `/api` na origem do frontend, sem flexibilizar o cookie. A variável não comprova TLS, certificados ou configuração de hospedagem; nenhuma publicação foi feita nesta alteração.

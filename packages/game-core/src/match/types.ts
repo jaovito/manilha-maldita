@@ -1,8 +1,10 @@
 import type { BettingState, Stake } from '../betting/betting';
 import type { Card } from '../cards/cards';
 import type { PlayerCount } from '../cards/deal';
+import type { PowerSetup, Powers, PreparationIntent, TurnPower } from '../powers/powers';
 import type { Play, Team, TrickResult } from '../tricks/resolve-trick';
 
+export type { PowerSetup };
 export type Score = Readonly<Record<Team, number>>;
 export type HandKind = 'normal' | 'eleven' | 'decisive';
 export type CompletedTrick = Readonly<{
@@ -18,18 +20,21 @@ export type Hand = Readonly<{
   hands: readonly (readonly Card[])[];
   vira: Card;
   stock: readonly Card[];
+  discards?: readonly Card[];
   trickLeader: number;
   plays: readonly Play[];
   completedTricks: readonly CompletedTrick[];
   betting: BettingState;
 }>;
 export type Phase =
+  | Readonly<{ type: 'PREPARATION' }>
   | Readonly<{ type: 'TURN'; seat: number }>
   | Readonly<{ type: 'RAISE_RESPONSE' }>
   | Readonly<{ type: 'ELEVEN_DECISION'; team: Team }>
   | Readonly<{ type: 'HAND_END'; winner: Team | 'tie'; reward: number }>
   | Readonly<{ type: 'MATCH_END'; winner: Team }>;
 export type MatchState = Readonly<{
+  powers?: Powers;
   playerCount: PlayerCount;
   revision: number;
   score: Score;
@@ -37,7 +42,8 @@ export type MatchState = Readonly<{
   phase: Phase;
 }>;
 export type PlayerCommand =
-  | Readonly<{ type: 'PLAY_CARD'; card: Card; covered: boolean }>
+  | Readonly<{ type: 'PREPARE'; intent: PreparationIntent }>
+  | Readonly<{ type: 'PLAY_CARD'; card: Card; covered: boolean; power?: TurnPower | undefined }>
   | Readonly<{ type: 'REQUEST_RAISE' }>
   | Readonly<{ type: 'RESPOND_RAISE'; response: 'accept' | 'raise' | 'fold' }>
   | Readonly<{ type: 'DECIDE_ELEVEN'; response: 'play' | 'fold' }>;

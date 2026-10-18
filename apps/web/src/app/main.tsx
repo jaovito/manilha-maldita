@@ -1,20 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { App } from './App';
-import './styles.css';
-import './viewport.css';
-import './viewport-seats.css';
-import './viewport-portrait.css';
-import './viewport-landscape.css';
-import './viewport-short.css';
-import './menu-profile.css';
-import './menu-icons.css';
-import './menu-responsive.css';
-import './menu-landscape.css';
-import './menu-join.css';
-import './lobby-scene.css';
-import './lobby-controls.css';
-import './lobby-roster.css';
-import './lobby-responsive.css';
+import './styles/index.css';
 
 const root = document.getElementById('root');
 export const application = root ? createRoot(root) : null;

@@ -1,9 +1,14 @@
-import { type Card, cardKey, cardStrength, assertCard } from '../cards/cards';
-import { type PlayerCount, assertSeat } from '../cards/deal';
+import { assertCard, type Card, cardKey, cardStrength } from '../cards/cards';
+import { assertSeat, type PlayerCount } from '../cards/deal';
 
 export type Team = 'A' | 'B';
 export type TrickWinner = Team | 'tie';
-export type Play = Readonly<{ seat: number; card: Card; covered: boolean }>;
+export type Play = Readonly<{
+  seat: number;
+  card: Card;
+  covered: boolean;
+  power?: 'boost' | 'mask';
+}>;
 export type TrickResult = Readonly<{ winner: TrickWinner; nextLeader: number }>;
 
 export function resolveTrick(
@@ -32,7 +37,8 @@ export function resolveTrick(
     if (typeof play.covered !== 'boolean' || (play.covered && trickNumber === 1)) {
       throw new Error('INVALID_COVERED_PLAY');
     }
-    const strength = play.covered ? -1 : cardStrength(play.card, vira);
+    const base = cardStrength(play.card, vira);
+    const strength = play.covered ? -1 : play.power === 'boost' && base < 9 ? base + 1 : base;
     const team = play.seat % 2 === 0 ? 'A' : 'B';
     if (strength > maximum) {
       maximum = strength;

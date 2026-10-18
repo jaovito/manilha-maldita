@@ -55,6 +55,13 @@
         "zod": "4.6.7",
       },
     },
+    "packages/game-sim": {
+      "name": "@truco/game-sim",
+      "version": "0.0.0",
+      "dependencies": {
+        "@truco/game-core": "workspace:*",
+      },
+    },
   },
   "packages": {
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
@@ -222,6 +229,8 @@
     "@truco/game-core": ["@truco/game-core@workspace:packages/game-core"],
 
     "@truco/game-protocol": ["@truco/game-protocol@workspace:packages/game-protocol"],
+
+    "@truco/game-sim": ["@truco/game-sim@workspace:packages/game-sim"],
 
     "@truco/server": ["@truco/server@workspace:apps/server"],
 

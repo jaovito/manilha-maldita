@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
 import { cardKey, cardStrength } from '@truco/game-core/cards';
 import { defaultRoomConfig } from '@truco/game-protocol';
-import { actor, fixture, giveOneToA, playTurn, start } from './room-service.test';
+import { actor, fixture, giveOneToA, playTurn, prepareRoom, start } from './room-service.test';
 
 test('deadline auto-plays the weakest own card and rejects a command arriving at that boundary', async () => {
   const f = fixture();
@@ -131,7 +131,7 @@ test('cancelled pre-pause callbacks cannot expire resumed turns or permit action
     old?.callback();
     await p.send({ type: 'SYNC' });
     expect(p.view.decisionId).toBe(decision);
-    expect(p.view.match?.revision).toBe(0);
+    expect(p.view.match?.revision).toBe(2);
     expect(p.view.deadline).toBe(1500);
     await f.advance(1500);
     expect(other.view.match?.hand.plays).toHaveLength(1);
@@ -152,6 +152,7 @@ test('three consecutive required decisions expire into abandonment, while valid 
       let expired = 0;
       let resetDone = false;
       for (let action = 0; action < 60 && r.host.view.status === 'playing'; action++) {
+        await prepareRoom(r);
         const current = r.host.view.match?.phase;
         if (current?.type !== 'TURN') throw new Error('NO_TURN');
         if (current.seat === target && (!reset || expired !== 2 || resetDone)) {
@@ -188,7 +189,7 @@ test('empty rooms expire without winner and untimed turns only fallback after ab
     const r = await f.room({ ...defaultRoomConfig, cardTimeoutMs: null });
     await start(r);
     await f.advance(100000);
-    expect(r.host.view.match?.revision).toBe(0);
+    expect(r.host.view.match?.revision).toBe(2);
     const phase = r.host.view.match?.phase;
     if (phase?.type !== 'TURN') throw new Error('NO_TURN');
     await actor(r, phase.seat).disconnect();
@@ -218,10 +219,17 @@ test('new untimed decisions for an absent seat with spent protection still auto-
     r.host = present;
     await f.advance(60000);
     for (let step = 0; step < 20 && present.view.status === 'playing'; step++) {
+      if (present.view.match?.phase.type === 'PREPARATION') {
+        if (!present.view.match.powers?.players[present.view.selfSeat]?.ready)
+          await present.send({ type: 'PREPARE', intent: { type: 'pass' } });
+        const deadline = present.view.deadline;
+        if (deadline !== null) await f.advance(deadline);
+        continue;
+      }
       const current = present.view.match?.phase;
       if (current?.type !== 'TURN') throw new Error('NO_TURN');
       if (current.seat === present.view.selfSeat) await playTurn(r);
-      await f.advance(60001 + step);
+      await f.advance(Math.max(60001 + step, present.view.deadline ?? 0));
     }
     expect(present.view.outcome).toEqual({
       winner: phase.seat % 2 === 0 ? 'B' : 'A',

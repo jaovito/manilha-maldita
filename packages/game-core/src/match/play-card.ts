@@ -1,5 +1,6 @@
 import { assertCard, cardKey } from '../cards/cards';
 import { resolveHand } from '../hands/resolve-hand';
+import { activateTurnPower } from '../powers/powers';
 import { resolveTrick } from '../tricks/resolve-trick';
 import { finishHand } from './lifecycle';
 import type { MatchState, PlayerCommand, Transition } from './types';
@@ -22,11 +23,15 @@ export function playCard(
   const ownCards = hand.hands[seat];
   const card = ownCards?.find((candidate) => cardKey(candidate) === cardKey(command.card));
   if (card === undefined) throw new Error('CARD_NOT_OWNED');
+  const powers = activateTurnPower(state, seat, card, command.covered, command.power);
   const hands = hand.hands.map((cards, owner) =>
     owner === seat ? cards.filter((candidate) => cardKey(candidate) !== cardKey(card)) : cards,
   );
-  const plays = [...hand.plays, { seat, card, covered: command.covered }];
-  const playedState = { ...state, hand: { ...hand, hands, plays } };
+  const plays = [
+    ...hand.plays,
+    { seat, card, covered: command.covered, ...(command.power ? { power: command.power } : {}) },
+  ];
+  const playedState = { ...state, ...(powers ? { powers } : {}), hand: { ...hand, hands, plays } };
   if (plays.length < state.playerCount) {
     return {
       state: {

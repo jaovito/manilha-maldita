@@ -2,11 +2,21 @@
 
 ## Estado atual
 
-O repositório contém documentação, apresentação HTML e bootstrap com quatro Bun Workspaces, dependências fixadas, TypeScript estrito, Biome e checagem de fronteiras, formatação, testes de ambiente e configuração de CI e infraestrutura local PostgreSQL/Drizzle com migrações e seeds transacionais. O motor de regras-base do M1 está concluído e testado: cartas, distribuição, vazas, apostas, onze, pontuação, ciclo completo de partida e projeções autorizadas. O M2 acrescenta servidor autoritativo HTTP/WS e cliente React com lobby e mesa DOM jogável. A apresentação HTML da raiz continua um artefato conceitual separado. O código passou a ser versionado em Git; o histórico dos incrementos anteriores está registrado neste plano.
+O repositório contém documentação, apresentação HTML e bootstrap com cinco Bun Workspaces, dependências fixadas, TypeScript estrito, Biome e checagem de fronteiras, formatação, testes de ambiente e configuração de CI e infraestrutura local PostgreSQL/Drizzle com migrações e seeds transacionais. O motor de regras-base do M1 está concluído e testado: cartas, distribuição, vazas, apostas, onze, pontuação, ciclo completo de partida e projeções autorizadas. O M2 acrescenta servidor autoritativo HTTP/WS e cliente React com lobby e mesa DOM jogável. A apresentação HTML da raiz continua um artefato conceitual separado. O código passou a ser versionado em Git; o histórico dos incrementos anteriores está registrado neste plano.
 
-M1 e M2 concluídos nos respectivos escopos. Já é possível jogar partidas privadas de regras-base no navegador com duas ou quatro sessões distintas. Poderes/preparação entram no M3; arte, áudio e acabamento continuam no M4. A conclusão do M2 não equivale à entrega do MVP com poderes.
+M1, M2 e M3 concluídos nos respectivos escopos. Já é possível jogar partidas privadas com energia, preparação selada e quatro poderes no navegador, com duas ou quatro sessões distintas. O M3 acrescenta simulações pareadas; áudio, demais critérios de acessibilidade e playtests humanos continuam no M4. Concluir o M3 não equivale a concluir todo o MVP.
 
-## M2 — conclusão: salas, autoridade, tempo e reconexão
+## M3 — conclusão: energia, preparação selada, poderes e simulações
+
+- Incremento de domínio: energia inicial 2, teto 3 e regeneração em mãos comuns após a primeira; sorteio independente casual e espelhado competitivo, quatro poderes, uso individual único e expiração por mão. Onze/decisiva preservam energia sem sorteio. Cartas, estoque e descartes conservam as 40 identidades.
+- Preparação simultânea: compromissos definitivos validados, indicador pronto sem revelar escolhas/gastos, substituições sem reposição em ordem a partir do iniciador, Espião nas mãos finais e confirmação atômica do lote. Revisões simultâneas aceitas pelo contexto da preparação; deadline/ID preservados, timeout passa somente pendentes, proteção cumulativa e deduplicação mantidas. Cartas/pontos/energia/entropia não avançam em rejeições ou duplicatas.
+- Incremento de aplicação/interface: Impulso/Máscara acompanham a carta atomicamente. Impulso não cria manilha nem aceita coberta/3/manilha; Máscara fica oculta até resolver a vaza e não revela por corrida. Snapshots e reconexão mantêm allowlists e informação do Espião apenas ao autor. Lobby contém catálogo, poderes obrigatórios nos dois presets e preparação configurável no casual (15 s default), fixa em 10 s no competitivo. Mesa mostra poderes/energia, alvos, ativações, seleção e resultado privado; o painel informativo permite rolagem própria no celular.
+- Incremento de simulação: quinto workspace `game-sim`, com políticas conservadora/agressiva/probabilística limitadas à própria projeção, fontes independentes de entropia, comparação com/sem poderes e troca de assentos/equipes. `bun run simulate 30` concluiu **1.440 partidas sintéticas** em 12 estratos; [relatório](docs/simulation-m3.md) registra médias, incerteza e limites. Uso seletivo não é efeito causal individual; não houve ajuste automático de regras/custos.
+- Verificação local (18/10/2026): `bun run check` aprovado com **195 testes** (141 servidor/core/tooling/simulação/integração, 44 DOM e 10 PostgreSQL), lint/fronteiras, formato, tipos, cobertura e build. **53 fontes executáveis** inventariadas, todas com no mínimo 80% de linhas/funções por arquivo, sem exclusões novas. Os dois módulos de poderes alcançaram 100% de linhas/funções medidas. Permanecem apenas os avisos anteriores de tamanho do teste `App.test.tsx` e revisão de tamanho do serviço de sala.
+- `bun run test:e2e --config playwright.m3.config.ts` executado em configuração temporária com portas isoladas 3002/4273: **12 E2E aprovados** em Chromium desktop/mobile. Exercitam convite, pronto, preparação, ativação disponível de poderes, cartas, apostas, partidas completas 1v1/2v2, reconexão, revanche e saída. Capturas de preparação/mesa desktop/mobile foram inspecionadas; ação de poder precede sua explicação expansível para permanecer acessível no painel móvel. Configurações temporárias removidas após a execução; servidor local existente preservado.
+- [ADR 007](docs/adr/007-sealed-powers-and-simulation.md) registra amostragem, autoridade e limites. Persistência continua fora deste incremento; salas/sessões se perdem em reinício. Sem push, deploy, provisionamento ou analytics externo. CI remoto, Safari/iOS real, playtest humano e efeito marginal individual de cada poder não foram verificados. O M4 continua aberto.
+
+## M2 — histórico da conclusão: salas, autoridade, tempo e reconexão
 
 - Salas privadas por código/link, sessão convidada sem cadastro, lobby com equipes alternadas, escolha de assentos livres, pronto e início pelo anfitrião; regras/configuração congeladas durante a partida; revanche preserva assentos/configuração e pede pronto novamente.
 - Backend Hono/Bun com uma fila limitada por sala coordenando comandos, presença, timers e partida. Autenticação por cookie, associação de assento e invalidação da conexão anterior. Protocolo Zod estrito, contexto/revisão e ACK idempotente por sessão/partida/comando; rejeições sem avanço de carta, pontos ou entropia.
@@ -15,8 +25,8 @@ M1 e M2 concluídos nos respectivos escopos. Já é possível jogar partidas pri
 - Cliente React funcional para criar/entrar, configurar, jogar, apostar, decidir onze, reconectar, pedir revanche e sair/desistir. Interface simples em verde/ouro; sem imagens geradas. Capturas de mesa desktop/mobile foram inspecionadas, e o acabamento pixel art segue no M4.
 - Verificação final (18/10/2026): `bun install --frozen-lockfile` sem mudanças; `bun run check` aprovado com **142 testes** (120 servidor/core/tooling/integração, 12 DOM e 10 PostgreSQL), lint/fronteiras, formato, tipos e build. Cobertura por arquivo acima de 80% em linhas e funções, sem novas exclusões; inventário confirmou **35 fontes executáveis** medidas. Unitários e integração de servidor compartilham medição Bun; DOM e banco permanecem isolados.
 - `bun run test:e2e`: **6 testes aprovados**, incluindo quatro partidas completas 1v1/2v2 em contextos independentes Chromium desktop/mobile, convite, pronto, aumentos, reload/reconexão, revanche, desistência e ACK de saída. Poderes não são simulados nem anunciados como testados. CI remoto e Safari/iOS real não foram executados.
-- `bun run dev` validado iniciando backend3001 e frontend5173; `/health`200 e proxy de autenticação401 para novo convidado. Processo de desenvolvimento encerrado após verificação. ADR 006 documenta autoridade, retomada e operação. Sem deploy/push/provisionamento; pasta continua sem Git.
-- Limites: estado e sessões apenas em memória; reiniciar o processo perde salas como falha técnica, sem derrota registrada. Operação de uma instância e limites conservadores, ainda sem ensaio de carga/produção. M3/M4 permanecem abertos.
+- `bun run dev` validado iniciando backend3001 e frontend5173; `/health`200 e proxy de autenticação401 para novo convidado. Processo de desenvolvimento encerrado após verificação. ADR 006 documenta autoridade, retomada e operação. Sem deploy/push/provisionamento naquela entrega; o repositório foi versionado posteriormente.
+- Limites: estado e sessões apenas em memória; reiniciar o processo perde salas como falha técnica, sem derrota registrada. Operação de uma instância e limites conservadores, ainda sem ensaio de carga/produção. Naquela entrega, M3/M4 permaneciam abertos.
 
 ## M1 — histórico da conclusão: apostas, onze e ciclo de partida
 
@@ -44,7 +54,7 @@ Executados com sucesso: instalação por `bun install --frozen-lockfile`, lint, 
 
 - [x] M1: bootstrap e motor testado: cartas, manilhas, vazas, empates, apostas e onze.
 - [x] M2: salas, convidados, lobby, autoridade, 1v1/2v2, timers e reconexão.
-- [ ] M3: energia, sorteios, preparação selada, quatro poderes e simulações.
+- [x] M3: energia, sorteios, preparação selada, quatro poderes e simulações.
 - [ ] M4: mesa responsiva, áudio, acessibilidade, E2E completo e playtests.
 - [ ] M5: resultados, contas opcionais e cosméticos; ranking/experimentos depois.
 
@@ -169,3 +179,95 @@ Publicação pública no GitHub autorizada pelo usuário, com nome `jaovito/truc
 ### Correção da primeira execução do CI
 
 A execução 39153449872 falhou no typecheck porque a regra genérica `coverage/` também ignorava `tooling/coverage/`; os dois scripts existiam localmente, mas não entraram no commit inicial. O ignore passou a excluir somente relatórios da raiz/workspaces, preservando os scripts de cobertura e inventário. Uma regressão com Git real verifica fontes incluídas e artefatos/ambientes excluídos. A instalação congelada e `bun run check` passaram em cópia limpa dos arquivos preparados para o commit, com 175 testes, cobertura mínima por arquivo e build; a execução remota será acompanhada após o envio.
+
+## Reorganização do frontend por componente
+
+A pedido do usuário, `app` passou a concentrar apenas montagem, composição em `App/` e estilos globais em `styles/`. `features/room/components` agrupa Lobby e Table, com filhos exclusivos dentro do componente pai; cada componente usa `index.tsx`, testes e estilos próximos. A entrada fica em `features/menu/pages/EntryMenu`, com Profile e Icon em `features/menu/components` e estilos de página em `features/menu/styles`. Rótulos de cartas compartilhados pela sala ficam em `room/utils/cards.ts`; HTTP/WS e preferência de apelido continuam em `shared`, atendendo entrada e sala. Não foram criadas pastas vazias de páginas/serviços, nem alteradas regras, contratos ou comportamento de jogo.
+
+O manifesto `app/styles/index.css` preserva explicitamente a cascata anterior. O build manteve o mesmo artefato CSS `index-CpW_4OJ8.css` (59,36 kB), confirmando conteúdo/ordem preservados. Imports, entradas públicas e referências da documentação foram atualizados; o trabalho anterior do M3 foi mantido.
+
+Verificação: `bun run typecheck`, `bun run test:dom` e `bun run check` aprovados. O check inclui lint/fronteiras, formatação, tipos, **195 testes**, cobertura mínima de 80% por arquivo, inventário de **55 fontes executáveis** e build. Permanecem somente os avisos anteriores de tamanho do teste da aplicação e revisão de tamanho do serviço de sala. `bun run test:e2e --config playwright.reorg.config.ts` aprovou **12 E2E** em Chromium desktop/mobile, com portas isoladas 3002/4273 e configurações temporárias removidas depois. O servidor local existente foi preservado. Não houve deploy nem verificação de CI remoto ou Safari/iOS real.
+
+Após a correção de organização solicitada pelo usuário, `menu/pages/EntryMenu` contém somente a página e seu teste; Profile/Icon foram movidos para `menu/components`, e estilos de página para `menu/styles`. Imports e documentação foram atualizados. `bun run check` passou novamente com 195 testes, cobertura mínima, inventário de 55 fontes e build; os artefatos CSS e JavaScript mantiveram os mesmos hashes. E2E não foi repetido neste ajuste de caminhos.
+
+## Carta de poder no canto da mesa
+
+A pedido do usuário, o poder recebido passou a ser uma carta ilustrada próxima da mão, com nome, custo, reserva de energia e estado de uso. A preparação não abre mais detalhes automaticamente: Espião/Segunda Chance pedem parâmetros somente depois do clique; Impulso/Máscara alternam a seleção para acompanhar a carta jogada. O passe e a contagem de prontos ficam na área de ações. Detalhes fecham por botão/Esc com retorno de foco, e um novo contexto descarta a abertura/seleção anterior. Usados e indisponíveis continuam consultáveis sem enviar ativações. Mãos especiais preservam a energia e mostram ausência de poder. Custos, fases, sorteios, prazo da preparação e autoridade do servidor foram preservados.
+
+Arte própria: `apps/web/public/art/power-illustrations.png`, atlas 2×2 gerado com ImageGen integrado. Imagem e prompt estão documentados em `art/README.md`; moldura, títulos, custo, energia e ações permanecem HTML/CSS acessível. `Powers/Card` mantém a estrutura por componente solicitada. O atlas é decorativo e não contém informações de partidas.
+
+Verificação: `bun run check` aprovado com **197 testes** (141 servidor/core/tooling/simulação/integração, 46 DOM e 10 PostgreSQL), cobertura mínima de 80% de linhas/funções por arquivo e inventário de **56 fontes executáveis**, além de lint/fronteiras, formato, tipos e build. Testes DOM verificam abertura explícita, ativação, cancelamento por contexto, fechamento/foco, usados, pausa, janela incorreta e energia insuficiente. Permanecem somente os avisos anteriores de tamanho do teste da aplicação e revisão de tamanho do serviço de sala.
+
+`bun run test:e2e --config playwright.power-card.config.ts`: **12 E2E aprovados** em Chromium desktop/mobile, com clientes independentes, clique na carta de poder, parâmetros, partida completa, reconexão e revanche. Verificações geométricas exigem carta de poder dentro do viewport e sem cruzar cartas da mão. Capturas desktop, celular em retrato/paisagem e 320 px foram inspecionadas; texto/passe foram ajustados para telas pequenas. Execução isolada em 3002/4273, configurações temporárias removidas ao final e servidor local existente preservado. Sem deploy, CI remoto, Safari/iOS real ou playtest humano.
+
+## Refinamento visual da carta de poder
+
+Corrigida a deformação do atlas: cada ilustração agora ocupa uma área quadrada independente do título e do rodapé. A moldura usa bordas rígidas, contraste de pergaminho e tipografia local, com custo dentro da arte e título sem quebras arbitrárias. O tamanho da carta se adapta ao espaço real da mão; telas baixas usam miniatura sem esticar a arte. O resultado do Espião abre pela própria carta com indicação “Ver resultado”, eliminando o botão redundante que deslocava a carta sobre o vira. A regressão DOM verifica acesso ao resultado sem enviar ação; nenhuma regra ou projeção foi alterada.
+
+`bun run check` aprovado: lint, formatação, tipos, **197 testes**, cobertura mínima por arquivo, inventário de **56 fontes executáveis** e build. `bun run test:e2e --config playwright.pixel.config.ts` aprovou **12 E2E** em portas isoladas 3002/4273, incluindo arte quadrada, custo contido, título sem overflow e ausência de sobreposição com cartas, assentos, vira e ações. Configurações temporárias removidas após a execução; processos locais preservados.
+
+Validação final com **playwright-cli** em uma partida real 2v2 com quatro contextos separados: capturas inspecionadas em 1567×882, 390×844, 320×568 e 844×390, incluindo o título Segunda Chance e detalhes do Espião. Seleção da Máscara, cancelamento por Esc, fechamento de detalhes e retorno de foco confirmados. Preferência permanente registrada em `AGENTS.md`; artefatos locais do CLI ignorados pelo Git. Safari/iOS real e playtest humano permanecem não verificados.
+
+## Carta recolhida à esquerda
+
+A carta de poder passou para a esquerda da mão e teve a largura desktop reduzida de até 172 para 140 px. Em ponteiro fino, uma manga mostra aproximadamente metade da carta em repouso; hover/foco revelam o conteúdo completo, sem ativar o poder. Seleção e detalhes abertos mantêm a carta revelada. Energia permanece visível e movimento reduzido elimina a transição. Em toque, a carta menor fica inteira, com mão e identificação própria reposicionadas para reservar espaço. Nenhuma regra, comando ou visibilidade de jogo foi alterada.
+
+`bun run check` aprovado com **197 testes**, mínimo de cobertura por arquivo, inventário de **56 fontes executáveis** e build. **12 E2E** aprovados com configuração temporária `playwright.pocket.config.ts` em portas isoladas 3002/4273, removida depois. As regressões verificam recorte em repouso, revelação por hover/foco sem ativação, posição à esquerda e ausência de colisão da carta/energia com a mão, assentos, identificação própria, vira, ações, conexão e menu. Processos de desenvolvimento existentes preservados.
+
+Verificação final com `playwright-cli` em partida real 2v2: capturas de repouso/revelada em 1567×882, carta revelada em 1024×768 e contexto de toque em 390×844, 320×568 e 844×390 inspecionadas visualmente. Foco sem ação, detalhes por clique, Esc com retorno de foco e transição zero em movimento reduzido confirmados. Safari/iOS real permanece não verificado.
+
+## Poderes privados até a ativação
+
+A mudança de produto solicitada passou a ser aplicada na projeção do servidor: somente o dono recebe a atribuição ainda não usada, inclusive no 2v2 em relação ao parceiro. Para outros assentos e a projeção pública, `power` permanece nulo até existir ativação pública aceita naquela mão. Espião/Segunda Chance são revelados somente ao resolver o lote selado; Impulso/Máscara, junto da jogada aceita. Isso revela a identidade da Máscara, sem antecipar a identidade da carta. Passe, rejeição, término e reconexão não revelam poderes nunca usados; uma nova mão oculta as novas atribuições. Energia continua pública. A interface distingue “Poder oculto” de “Sem poder” e lista “Poderes revelados”. Regras, GDD, arquitetura, segurança e ADR foram reconciliados.
+
+O sorteio competitivo espelhado foi preservado: ainda permite inferência a partir da própria atribuição. Foi enviada pergunta ao proprietário sobre substituí-lo por sorteio independente também no competitivo; essa alteração permanece pendente, sem decisão presumida. O casual já usa sorteio independente.
+
+`bun run check` aprovado: **203 testes**, cobertura mínima de 80% por arquivo, **56 fontes executáveis** medidas e build. As novas regressões verificam não interferência de atribuições ocultas em 1v1/2v2, parceiro/adversário/público, preparação selada, quatro ativações, rejeição, término, nova mão e reconexão HTTP/WS antes/depois da preparação nos dois presets. **12 E2E** aprovados em portas isoladas 3002/4273; configurações temporárias removidas após uso. `playwright-cli` validou visualmente a lista antes e depois de uma ativação real de Espião em quatro contextos: adversários e parceiro permanecem ocultos, Espião usado aparece nos outros clientes e o resultado da carta continua somente com o usuário. Capturas desktop 1567×882 e mobile 390×844 inspecionadas. Sem deploy ou verificação de Safari/iOS real.
+
+## Poderes acionados diretamente na mesa
+
+A seleção dos quatro poderes disponíveis passou a usar os alvos da mesa. Clicar no poder só seleciona; Máscara/Impulso destacam cartas próprias elegíveis na sua vez, Segunda Chance permite clicar na própria carta durante a preparação, e Espião oferece versos clicáveis dos adversários. O aviso fica junto da mão, com cancelamento, ou no HUD em telas baixas/paisagem. Esc e cancelamento retornam o foco ao poder; pausa, prontidão e novo contexto invalidam seleções antigas. Não há selects ou painel no caminho de seleção. Impulso explica quando nenhuma carta é válida. A preparação deixa de mostrar o controle inválido de carta coberta e mantém o passe fora da mão, inclusive em 320 px e paisagem.
+
+Espião mostra a face autorizada no verso clicado, somente para o beneficiário após resolver o lote. Os versos continuam anônimos: o clique determina o adversário e a posição visual, enquanto o servidor mantém a amostra uniforme da mão final. Após qualquer jogada do alvo, a face vira uma memória “VISTO” separada dos versos remanescentes, sem rastrear carta mascarada/coberta. Reconexão restaura a observação pela projeção privada. Não foram alterados protocolo, custos, janelas, sorteio, resolução ou visibilidade no servidor.
+
+`Hand`, `Seats/Cards` e a validação local de seleção receberam responsabilidades próprias, com estilos junto dos componentes e testes comportamentais. `bun run check` aprovado: **206 testes**, cobertura mínima por arquivo, inventário de **59 fontes executáveis** e build. **12 E2E** aprovados com seleção direta, observação privada e geometria durante a seleção (mão/ações, aviso visível, hitboxes ≥44×44, vira e apelidos desobstruídos). Usadas portas isoladas 3002/4273; configurações temporárias removidas depois, preservando processos de desenvolvimento existentes.
+
+`playwright-cli` validou os quatro poderes pela interface em quatro contextos reais 2v2. Capturas inspecionadas em 1567×882, 390×844, 320×568 e 844×390, incluindo Máscara selecionada/enviada e carta oculta para outro jogador, Segunda Chance pela própria mão, Impulso, Espião selecionado/face privada/memória após jogada e Esc com foco restaurado. Na primeira revelação observada, os três outros clientes tinham zero faces do Espião. Não houve deploy, verificação de Safari/iOS real ou playtest humano.
+
+
+## Configuração da URL do backend no frontend
+
+`VITE_BACKEND_URL` configura uma origem pública única para HTTP e WS; o exemplo fica em `apps/web/.env.example`. Sem valor, permanece o proxy `/api` local. Configuração é incorporada no build Vite, valida protocolo/origem e não aceita credenciais/caminhos. CORS usa a allowlist existente de origens e aceita cookies sem alterar SameSite=Strict ou a validação de origem no WS. Front/back em sites diferentes exigem proxy; nenhuma publicação ou mudança de cookie foi feita.
+
+`bun run check` aprovado: **210 testes**, cobertura mínima por arquivo e **60 fontes executáveis** medidas, além de lint, tipos e build. O fluxo de `local-origin.e2e.ts` aprovou **2 E2E** desktop/mobile com build configurado para backend localhost:3002 e frontend localhost:4273; o proxy padrão aponta para 3001, portanto a conexão exercitada foi direta pela variável. A configuração temporária `playwright.backend-env.config.ts` foi removida depois, e o build padrão foi restaurado. Processos locais existentes foram preservados. HTTPS/WSS de produção não foram verificados.
+
+
+## HUD compacto e carta de poder consumida
+
+Carta de poder e detalhes desaparecem somente quando o servidor confirma `used`; seleção, rejeição ou preparação pendente não a removem. Energia e observação privada do Espião permanecem, e a nova atribuição aparece na mão seguinte. O painel redundante “Jogar carta” foi removido, as ações da direita foram compactadas e o status passou para o topo. Um selo “Sua vez” acompanha o avatar próprio apenas em turno ativo, sem pausa. Não houve mudança de regras ou projeções.
+
+`bun run check` aprovado com **212 testes**, cobertura mínima por arquivo, inventário de **60 fontes executáveis**, lint, formatação, tipos e build. **12 E2E** aprovados em Chromium desktop/mobile com `playwright.hud.config.ts` temporário e portas isoladas 3002/4273; verificam consumo de poder, status no topo, selo dentro do viewport, geometria, partidas completas, reconexão e revanche. Configurações temporárias removidas ao final.
+
+`playwright-cli` validou quatro sessões reais em desenvolvimento e no build de produção, com capturas inspecionadas em 1567×882, 390×844, 320×568 e 844×390 antes/depois do uso e durante a seleção. O ajuste de centralização usa transform consistente para evitar deslocamento duplo após otimização do CSS no build. Segunda Chance tem aviso com quebra de linha em telas estreitas. Foram encerrados somente browsers/processos abertos para esta revisão; os processos locais preexistentes foram preservados. Sem deploy, CI remoto ou teste em Safari/iOS real.
+
+
+## Proporções uniformes das cartas de jogo
+
+Mão própria, assentos, jogadas, cobertas, vira e observação do Espião compartilham proporção **2:3**, a mesma do arquivo original do verso. Slots usam aspect-ratio e altura automática; os breakpoints ajustam somente escala/largura e limitam o tamanho conforme a altura disponível. O verso usa contain. Alvos do Espião preservam 44×44 px independentemente da arte; a vira foi reposicionada durante a seleção em telas baixas para manter separação.
+
+`bun run check` aprovado com **212 testes**, cobertura mínima por arquivo, **60 fontes executáveis** medidas, lint, tipos e build. `playwright.ratio.config.ts` temporário aprovou **12 E2E** desktop/mobile em portas isoladas 3002/4273. O helper mede dimensões CSS de todas as faces e versos com tolerância subpixel, incluindo preparação, mesa jogada, alvos e intel do Espião; rotações decorativas não entram nessa razão. Configurações temporárias removidas ao final.
+
+`playwright-cli` conferiu quatro clientes reais, cartas jogadas, seleção de Espião e resultado privado em 1567×882, 390×844, 320×568 e 844×390, com capturas inspecionadas. As faces observadas mediram 2:3 nas quatro resoluções. Browser da revisão encerrado e processos locais anteriores preservados. Sem deploy, CI remoto ou teste em Safari/iOS real.
+
+
+## Espião: remover observação de carta já jogada
+
+A face observada deixa o assento quando uma jogada autorizada daquele alvo revela o mesmo valor e naipe, na vaza atual ou no histórico. Mão vazia também remove a memória. O estado é derivado do snapshot e preserva o resultado após reconexão; não há novos dados ou IDs no transporte. Carta diferente, coberta e Máscara ainda opaca não antecipam a remoção. A revelação posterior de Máscara aplica a mesma comparação.
+
+`bun run check` aprovado com **216 testes**, cobertura mínima por arquivo, **60 fontes executáveis** medidas e build. Regressões reproduzem K de Espadas em 1v1/2v2, jogada aberta, histórico, reconexão, valor/naipe/assento diferentes, opacidade e mão vazia. **12 E2E** aprovados em configuração temporária `playwright.spy-play.config.ts`, com portas isoladas 3002/4273; arquivos temporários removidos.
+
+`playwright-cli` validou o build real com quatro sessões independentes: Espião observou Q de Espadas, o alvo jogou essa carta e a face saiu do assento, permanecendo uma vez na mesa; após reload, continuou ausente do assento. Capturas antes/depois em desktop 1567×882 e celular 390×844 foram inspecionadas, com capturas adicionais em 320×568 e 844×390. Os processos abertos para essa revisão e o browser foram encerrados. Sem deploy, CI remoto ou teste em Safari/iOS real.
+
+## Verificação para publicação no GitHub
+
+Antes do envio autorizado, `bun run check` passou no workspace e em uma cópia limpa exportada do índice Git, com instalação por `bun install --frozen-lockfile`. A cópia limpa aprovou lint/fronteiras, formatação, tipos, **216 testes**, cobertura mínima por arquivo e inventário de **60 fontes executáveis**, além do build. `bun run test:e2e` nessa cópia aprovou **12 E2E Chromium desktop/mobile** com os comandos padrão, sem depender dos arquivos ignorados do workspace. Permanecem avisos de tamanho de arquivos, sem erros de lint. A revisão dos arquivos preparados não encontrou ambientes reais ou correspondências nos padrões de credenciais verificados. Configuração local do editor não faz parte desta entrega. Resultados remotos de CI e deploy não são presumidos por essas verificações locais.

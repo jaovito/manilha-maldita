@@ -1,0 +1,287 @@
+.power-card-pocket {
+  padding: 10px;
+  margin: -10px;
+}
+/* Keep a real, focusable button behind the sleeve; touch screens show it in full. */
+@media (hover: hover) and (pointer: fine) and (min-width: 601px) {
+  .power-card-pocket {
+    position: relative;
+    max-height: 130px;
+    overflow: hidden;
+    transition: max-height 180ms ease-out;
+  }
+  .power-card-pocket::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 6px;
+    right: 6px;
+    height: 5px;
+    border-top: 2px solid #cfaa62;
+    background: #091b25;
+    pointer-events: none;
+  }
+  .power-dock:is(:hover, :focus-within):has(.power-card) .power-card-pocket,
+  .power-dock:has(.power-card[aria-expanded="true"], .power-card[data-selected="true"])
+    .power-card-pocket {
+    max-height: 380px;
+  }
+  .power-dock:is(:hover, :focus-within) .power-card-pocket::after,
+  .power-dock:has(.power-card[aria-expanded="true"], .power-card[data-selected="true"])
+    .power-card-pocket::after {
+    opacity: 0;
+  }
+}
+
+.power-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0;
+  width: 100%;
+  height: auto;
+  padding: 7px;
+  border: 2px solid #e4bb68;
+  border-radius: 0;
+  background: #091b25;
+  color: #f9e1a4;
+  box-shadow:
+    0 0 0 2px #382a1a,
+    0 0 0 4px #ad7c38,
+    0 5px 0 4px #071217,
+    inset 0 0 0 2px #725026;
+  isolation: isolate;
+  text-shadow: none;
+  transition:
+    transform 120ms,
+    outline-color 120ms;
+}
+.power-card::before,
+.power-card::after {
+  content: "◆";
+  position: absolute;
+  top: -9px;
+  color: #ffe0a0;
+  font-size: 12px;
+  line-height: 1;
+  text-shadow: 1px 1px #573a1c;
+  pointer-events: none;
+}
+.power-card::before {
+  left: 4px;
+}
+.power-card::after {
+  right: 4px;
+}
+.power-card:hover:enabled {
+  transform: translateY(-3px);
+  filter: brightness(1.05);
+}
+.power-card[data-selected="true"] {
+  outline: 3px solid #9be0ac;
+  outline-offset: 6px;
+}
+.power-card-title {
+  display: grid;
+  place-items: center;
+  min-height: 1.5em;
+  padding: 4px 2px;
+  border: 1px solid #ac7a39;
+  color: #302519;
+  background: linear-gradient(#f9e7b8, #e9cc8e);
+  font-family: "Jersey 25", sans-serif;
+  font-size: clamp(18px, 1.35vw, 22px);
+  font-weight: 400;
+  line-height: 0.95;
+  text-align: center;
+  text-transform: uppercase;
+  text-wrap: balance;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+.power-card-illustration {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  width: 100%;
+  border: 1px solid #ad8546;
+  background: #071726;
+}
+/* A square viewport preserves both atlas axes and never stretches a portrait. */
+.power-card-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-image: url("/art/power-illustrations.png");
+  background-size: 200% 200%;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.power-exchange .power-card-art {
+  background-position: 100% 0;
+}
+.power-boost .power-card-art {
+  background-position: 0 100%;
+}
+.power-mask .power-card-art {
+  background-position: 100% 100%;
+}
+.power-card-cost {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 34px;
+  min-height: 30px;
+  padding: 2px 5px;
+  border: 2px solid #e6bd68;
+  color: #fff1c4;
+  background: #12374a;
+  box-shadow: 0 2px #050f18;
+  font-family: "Jersey 25", sans-serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1;
+}
+.power-card-cost > span {
+  color: #ffd36b;
+}
+.power-card-hint {
+  display: grid;
+  place-items: center;
+  min-height: 3em;
+  padding: 6px 3px;
+  color: #2c281d;
+  background: #f2dcaa;
+  border: 1px solid #ac7a39;
+  font-size: 12px;
+  line-height: 1.25;
+  text-wrap: balance;
+  overflow-wrap: normal;
+}
+.power-card-state {
+  display: grid;
+  place-items: center;
+  min-height: 2.1em;
+  padding: 5px 2px 1px;
+  color: #e4c78e;
+  font-size: 11px;
+  line-height: 1.15;
+  text-wrap: balance;
+  overflow-wrap: normal;
+}
+.power-card[data-can-activate="true"] .power-card-state {
+  color: #bfedc8;
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .power-card {
+    padding: 4px;
+  }
+  .power-card-title {
+    min-height: 2.15em;
+    font-size: 17px;
+    padding: 4px 1px;
+  }
+  .power-card-hint {
+    display: none;
+  }
+  .power-card-state {
+    min-height: 2.8em;
+    font-size: 10px;
+    padding: 4px 1px 1px;
+  }
+  .power-card-cost {
+    min-width: 26px;
+    min-height: 24px;
+    right: 2px;
+    bottom: 2px;
+    font-size: 19px;
+    border-width: 1px;
+    padding: 1px 3px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .power-card {
+    padding: 4px;
+  }
+  .power-card-title {
+    min-height: 2.15em;
+    min-width: 0;
+    font-size: 13px;
+    padding: 3px 1px;
+  }
+  .power-card-hint {
+    display: none;
+  }
+  .power-card-state {
+    min-height: 2.1em;
+    font-size: 10px;
+    padding: 3px 0 0;
+  }
+  .power-card-cost {
+    min-width: 24px;
+    min-height: 22px;
+    right: 2px;
+    bottom: 2px;
+    font-size: 18px;
+    padding: 1px 3px;
+    border-width: 1px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .power-card {
+    transition: none;
+  }
+  .power-card:hover:enabled {
+    transform: none;
+  }
+  .power-card-pocket {
+    transition: none;
+  }
+}
+/* Small phones use a miniature with the same square illustration, never a stretched crop. */
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .power-card {
+    box-shadow:
+      0 0 0 1px #382a1a,
+      0 0 0 2px #ad7c38,
+      0 3px 0 2px #071217;
+  }
+  .power-card::before,
+  .power-card::after {
+    display: none;
+  }
+  .power-card-title {
+    font-size: 13px;
+    min-width: 0;
+    min-height: 28px;
+    padding: 2px 0;
+  }
+  .power-card-illustration {
+    width: 40px;
+    justify-self: center;
+  }
+  .power-card-cost {
+    font-size: 14px;
+    min-width: 18px;
+    min-height: 18px;
+    padding: 0 2px;
+    right: 1px;
+    bottom: 1px;
+  }
+  .power-card-state {
+    height: 24px;
+    min-height: 24px;
+    overflow: hidden;
+    visibility: hidden;
+  }
+}
+@media (hover: hover) and (pointer: fine) and (min-width: 601px) and (max-height: 500px) {
+  .power-card-pocket {
+    max-height: 78px;
+  }
+}

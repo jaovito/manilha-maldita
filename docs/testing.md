@@ -1,6 +1,6 @@
 # Testes, qualidade e verificação
 
-Leia ao alterar comportamento, criar testes ou configurar ferramentas e CI. Selecione as regressões pertinentes à mudança; os comandos abaixo existem no bootstrap. Os testes atuais validam o ambiente e o motor de regras-base completo do M1 (cartas, distribuição, vazas, empates, apostas, onze, pontuação e projeções); o M2 acrescenta multiplayer real, sessões, timers e reconexão; poderes continuam pendentes.
+Leia ao alterar comportamento, criar testes ou configurar ferramentas e CI. Selecione as regressões pertinentes à mudança; os comandos abaixo existem no bootstrap. Os testes atuais validam o ambiente e o motor de regras-base completo do M1 (cartas, distribuição, vazas, empates, apostas, onze, pontuação e projeções); o M2 acrescenta multiplayer real, sessões, timers e reconexão; o M3 acrescenta poderes e simulações.
 
 ## Testes obrigatórios
 
@@ -50,7 +50,7 @@ CI valida lockfile, tipos, lint, testes com cobertura mínima e build das partes
 
 `bun run test` mantém tooling/domínio e DOM em processos distintos. As regressões atuais cobrem fronteiras de imports, ausência de ciclos entre workspaces, ambientes de tipos e renderização/interação/cleanup de um componente de teste. `bun run test:integration` verifica a fixture Hono/Bun e o servidor do produto com clientes HTTP/WS reais, cookies isolados, partidas e reconexão. As regras implementadas também têm testes próprios junto ao domínio.
 
-O build atual contém o cliente React. `bun run test:e2e` inicia backend e preview, valida o HTML e conclui partidas 1v1/2v2 com convite, pronto, apostas, recarregamento/reconexão, revanche, desistência e saída em Chromium desktop e viewport mobile. Poderes entram nos E2E do M3. `bun run check` não inclui E2E; execute-o separadamente após `bun run test:e2e:install`. O instalador e o runner Playwright são executados com Bun 1.4.3; a instalação limpa foi validada após a atualização do runtime. CI declara esses passos, mas sua execução remota só poderá ser confirmada após publicação do repositório.
+O build atual contém o cliente React. `bun run test:e2e` inicia backend e preview, valida o HTML e conclui partidas 1v1/2v2 com convite, pronto, apostas, recarregamento/reconexão, revanche, desistência e saída em Chromium desktop e viewport mobile. Os E2E do M3 incluem preparação e ativações de poderes. `bun run check` não inclui E2E; execute-o separadamente após `bun run test:e2e:install`. O instalador e o runner Playwright são executados com Bun 1.4.3; a instalação limpa foi validada após a atualização do runtime. CI declara esses passos, mas sua execução remota só poderá ser confirmada após publicação do repositório.
 
 ## Lint e atualizações
 
@@ -86,7 +86,7 @@ A cobertura inventaria também os módulos de conexão, seleção de alvo, migra
 
 `bun test packages/game-core` exercita o motor sem banco/rede. As regressões incluem contra-aumento com valor implícito, primeiro parceiro a responder, revisão antiga, posse de carta, encerramento antecipado, limite de placar com recompensa original, decisões de onze e repetição de 11×11 após três empates. Testes com fast-check verificam conservação das 40 cartas, ausência de mutação e rejeição de jogadas fora de turno; projeções geradas verificam que trocar informações ocultas não altera a visão não autorizada.
 
-Os testes de projeção cobrem cada assento, histórico de cobertas, término e visibilidade de parceiro, incluindo campos secretos extras para testar a allowlist. Nenhum teste puro de M1 é anunciado como teste de autenticação ou concorrência de sockets; esses comportamentos têm regressões próprias no M2. Poderes e regeneração de energia ainda não existem. Os testes do motor não usam bots de produção nem consultam cartas alheias para escolher jogadas.
+Os testes de projeção cobrem cada assento, histórico de cobertas, término e visibilidade de parceiro, incluindo campos secretos extras para testar a allowlist. Nenhum teste puro de M1 é anunciado como teste de autenticação ou concorrência de sockets; esses comportamentos têm regressões próprias no M2. Aquela suíte-base não exercita poderes; as regressões específicas do M3 cobrem energia e poderes. Os testes do motor não usam bots de produção nem consultam cartas alheias para escolher jogadas.
 
 ## Verificação do M2
 
@@ -119,3 +119,37 @@ O E2E de assentos verifica alturas iguais dos cartões e áreas de ação na mes
 O lobby exibe o link completo em vez do código isolado na linha de convite. DOM verifica valor por origem, campo somente leitura, seleção ao focar e continuidade após sucesso/falha de cópia. O E2E usa esse link para identificar a sala e mantém ingresso por código e convite, contraste e ausência de overflow em desktop/mobile.
 
 Na visão do convidado, DOM verifica a indicação de somente leitura vinculada ao fieldset desabilitado. E2E compara a aparência da opção selecionada com a do anfitrião, confirma bloqueio dos radios e preserva a cópia do convite. O contraste inclui a indicação adicional; capturas distinguem as duas permissões sem reduzir a legibilidade do painel inteiro.
+
+## Verificação do M3
+
+Testes puros cobrem sorteio independente/espelhado, energia, teto, bloqueios em especiais, compromissos selados, ordens de chegada diferentes, duas trocas, Espião depois das trocas, conservação das 40 cartas e projeções sem vazamentos. Impulso preserva identidade/classe comum, rejeita manilha/3/coberta e uso repetido; Máscara fica oculta até a resolução e continua oculta após corrida. Propriedades geradas verificam conservação e limites de energia em lotes de preparação.
+
+A aplicação usa relógio falso para deadline exclusivo da preparação, passe somente de pendentes, manutenção de ID/deadline, contexto obsoleto, reconexão, ACK original e proteção somente de assentos ainda necessários. Integração HTTP/WS real usa quatro sessões independentes nos dois presets, compromissos feitos na mesma revisão, sigilo antes do fechamento, resultados privados, reconexão e partida completa. E2E em Chromium conclui partidas e envia as intenções pela interface; a cobertura numérica continua sendo medida separadamente.
+
+`game-sim` executa e testa os mesmos cenários repetidamente, braços com/sem poderes e troca de assentos/equipes. Testes verificam finalização, reprodução, limites, resultados agregados e políticas com observações autorizadas. `bun run simulate 30` é uma experiência sintética, não teste de carga, relógio de produção, balanceamento definitivo ou playtest humano. O [relatório](simulation-m3.md) explicita o tamanho amostral e a incerteza.
+
+As regressões da carta de poder verificam preparação inicialmente recolhida, abertura explícita, seleção/deseleção de poder de turno, seleção de alvos diretamente na mesa, passe sem ativação, energia insuficiente, uso anterior, pausa, término, janela incorreta e especiais. Botão/Esc fecham detalhes com retorno de foco; outro contexto fecha o painel e invalida a seleção anterior. O E2E ativa a carta pela interface e exige que, quando revelada, ela permaneça inteira no viewport sem sobrepor as cartas da mão nas resoluções exercitadas.
+
+Ao modificar layout, a validação final inclui `playwright-cli` no fluxo real, com capturas inspecionadas visualmente em desktop e celular. Para a carta de poder, o E2E exige arte quadrada, custo dentro da ilustração, título sem overflow e ausência de sobreposição com mão, assentos, vira e ações. A inspeção visual cobre também títulos longos e orientação horizontal; medições não substituem essa revisão.
+
+A carta recolhida à esquerda tem regressões E2E para a manga parcial em ponteiro fino, revelação completa por hover e foco sem ativação/abertura dos detalhes, exibição integral em toque e posição à esquerda da mão. A geometria é verificada com a carta revelada, incluindo energia, identificação própria, menu da sala e conexão, para que o recorte não esconda colisões. A inspeção final com `playwright-cli` compara repouso, hover e versões mobile.
+
+Regressões de sigilo dos poderes cobrem 1v1/2v2, dono/parceiro/adversário/projeção pública, não interferência ao trocar atribuições ocultas, preparação ainda selada, todas as quatro ativações, rejeição, fim da mão/partida e ocultação da atribuição seguinte. Integração HTTP/WS verifica os snapshots individualizados nos dois presets, inclusive reconexão antes e depois da preparação. DOM distingue poder oculto de poder ausente e revela somente a ativação recebida.
+
+O fluxo direto de poderes tem regressões DOM para clique no poder e na própria mão, cartas inelegíveis do Impulso, ausência de selects/painéis no caminho de seleção, cancelamento/foco, pausa e contexto novo. Espião aceita somente versos adversários, espera o resultado do servidor, mostra a face no verso escolhido e mantém uma observação histórica após uma jogada mascarada, sem atualizar os versos restantes por identidade. Reconexão restaura a face autorizada e uma projeção sem intel não a renderiza. O E2E ativa preparação clicando na mesa, mede alvos adversários de pelo menos 44×44 px e verifica que somente clientes com Espião têm a observação privada. As verificações de geometria são complementadas por `playwright-cli` em desktop, retrato normal/baixo e paisagem.
+
+A geometria durante a seleção é exercitada separadamente da mesa em repouso: mão e ações não podem se sobrepor, o aviso deve permanecer no viewport e os alvos do Espião não podem cobrir vira nem apelidos. O helper alterna retrato normal, 320×568 e paisagem nos clientes mobile, preservando o estado de seleção, e mede hitboxes mínimas de 44×44 px.
+
+## URL configurável do backend
+
+Regressões do transporte verificam fallback para proxy local, HTTP/WS e HTTPS/WSS, remoção de barra final e rejeição de protocolos, caminhos e credenciais na origem configurada. HTTP mantém credentials=include. Integração exercita preflight sem sessão, cookies e respostas de erro com CORS para origem autorizada, ausência de permissão para origens estranhas e preservação da rejeição no handshake WS. Para verificar o build com backend separado, execute o fluxo de `local-origin.e2e.ts` com `VITE_BACKEND_URL=http://localhost:3002`, frontend em localhost:4273 e backend permitindo essa origem; o proxy padrão aponta a outra porta, portanto não mascara falhas na configuração.
+
+## HUD e remoção da carta usada
+
+DOM verifica os quatro poderes: seleção/rejeição/preparação pendente mantêm a carta, `used` confirmado remove carta e detalhes, a energia permanece e a mão seguinte restaura a nova atribuição. A observação privada do Espião continua na mesa após a remoção. O selo “Sua vez” exige turno próprio ativo, desaparecendo em pausa, turno adversário, preparação, negociação e término. E2E exige status no topo, selo dentro do viewport e ausência do painel “Jogar carta”, além das regressões de alvo e geometria existentes. A inspeção final com `playwright-cli` cobre desktop, retrato 390×844 e 320×568, e paisagem 844×390 antes/depois do consumo real.
+
+## Proporção das cartas
+
+O helper E2E `card-proportions.ts` compara largura/altura computadas de cada face e verso com 2:3, com tolerância de 0,01 para arredondamento subpixel. A medição ignora a rotação decorativa dos assentos e exige dimensões positivas. É exercitado em preparação, mesa com jogadas e seleção direta dos poderes, incluindo observação do Espião. As verificações existentes preservam viewport, ausência de colisões e alvos de toque mínimos; `playwright-cli` complementa a medição com inspeção desktop, retrato normal/baixo e paisagem.
+
+A regressão de descarte visual do Espião reproduz K de Espadas em 1v1/2v2: sai do assento quando jogado aberto, continua na mesa e não reaparece após resolver vaza ou reconectar. Valor/naipe/assento diferentes não removem a observação; coberta e Máscara ainda opacas mantêm o mesmo comportamento, e a revelação posterior da Máscara remove a memória. Mão vazia não exibe carta observada.

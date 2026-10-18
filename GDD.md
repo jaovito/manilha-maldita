@@ -146,7 +146,7 @@ O foco é reduzir vantagens criadas exclusivamente pelo sorteio de poderes.
 
 - No MVP, os mesmos quatro poderes do casual, com sorteio espelhado; o equilíbrio ainda depende de playtests.
 - Sorteio espelhado entre as duas equipes.
-- Todos conhecem os poderes distribuídos no começo da mão.
+- Cada poder é conhecido somente pelo dono até sua ativação, inclusive em relação ao parceiro.
 - Sem eventos aleatórios adicionais.
 - Sem poderes que alterem a pontuação de uma mão.
 - Regras fixas e temporizadores padronizados.
@@ -160,7 +160,7 @@ No 2v2, o servidor sorteia dois poderes distintos, A e B. Cada equipe recebe uma
 
 Isso mantém a aleatoriedade desejada, mas evita que uma equipe receba um conjunto de habilidades objetivamente mais forte que o da outra.
 
-O sorteio espelhado reduz a assimetria de acesso aos poderes, mas não garante equilíbrio perfeito, porque a ordem dos turnos, as cartas e a interação entre habilidades continuam afetando as vantagens.
+O sorteio espelhado reduz a assimetria de acesso aos poderes, mas não garante equilíbrio perfeito, porque a ordem dos turnos, as cartas e a interação entre habilidades continuam afetando as vantagens. Mesmo sem exposição de atribuições alheias, essa política permite inferir poderes. Mudar o competitivo para sorteio independente está pendente de decisão do proprietário.
 
 ### Truco Clássico (futuro)
 
@@ -176,7 +176,7 @@ No início de cada mão, depois da distribuição de cartas e da revelação da 
 
 1. O servidor determina o conjunto de poderes permitido para a modalidade.
 2. Sorteia um poder para cada jogador, obedecendo à política casual ou competitiva.
-3. Revela publicamente quais poderes cada jogador recebeu.
+3. Entrega cada poder somente ao dono; parceiros e adversários não veem atribuições ainda não usadas.
 4. Libera as janelas de ativação.
 5. No encerramento da mão, descarta os poderes sorteados e sorteia novos na próxima.
 
@@ -199,7 +199,7 @@ A energia pode acumular entre mãos, mas nunca ultrapassa 3.
 
 No começo de uma partida, o primeiro sorteio já ocorre com 2 pontos de energia. Nas mãos especiais sem poderes, a reserva permanece inalterada.
 
-A energia de todos os jogadores é pública. O efeito de um poder de informação, entretanto, permanece privado ao beneficiário.
+A energia de todos os jogadores é pública. A identidade de um poder só se torna pública após uma ativação aceita: na resolução selada da preparação ou junto da jogada. Poderes nunca usados continuam ocultos ao encerrar a mão/partida. O resultado de um poder de informação permanece privado ao beneficiário.
 
 ### Janelas de ativação
 

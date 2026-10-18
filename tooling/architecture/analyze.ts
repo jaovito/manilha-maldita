@@ -3,7 +3,13 @@ import path from 'node:path';
 import { parseSync, Visitor } from 'oxc-parser';
 
 const builtins = new Set([...builtinModules, ...builtinModules.map((name) => `node:${name}`)]);
-const workspaceNames = ['@truco/web', '@truco/server', '@truco/game-core', '@truco/game-protocol'];
+const workspaceNames = [
+  '@truco/web',
+  '@truco/server',
+  '@truco/game-core',
+  '@truco/game-protocol',
+  '@truco/game-sim',
+];
 // These are explicit package.json exports, not imports into package internals.
 const coreEntries = new Set([
   'cards',

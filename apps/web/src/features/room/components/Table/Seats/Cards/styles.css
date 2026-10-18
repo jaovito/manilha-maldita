@@ -1,0 +1,139 @@
+.seat-cards {
+  position: relative;
+}
+.player-seat[data-spy-target="true"] {
+  z-index: 6;
+}
+.spy-targets {
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 6px);
+  transform: translate(-50%, -50%);
+  display: flex;
+  gap: 2px;
+  z-index: 6;
+}
+.spy-target-card {
+  flex: none;
+  display: block;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 2px;
+  border: 2px solid #a6e7d3;
+  border-radius: 0;
+  background: #0a2429;
+  box-shadow: 0 3px #071217;
+}
+.mini-card[data-spy-placeholder="true"] {
+  visibility: hidden;
+}
+.spy-observation {
+  position: relative;
+  z-index: 2;
+  outline: 2px solid #a6e7d3;
+  outline-offset: 1px;
+}
+.mini-card > .spy-observation {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  transform: none;
+}
+.spy-observation i {
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1px 2px;
+  background: #0a2429;
+  color: #b8f2de;
+  font-size: 8px;
+  font-style: normal;
+  line-height: 1;
+}
+.spy-observation .card-suit {
+  font-size: clamp(15px, 1.5vw, 24px);
+  top: 60%;
+  filter: none;
+}
+.spy-observation .card-corner {
+  font-size: 8px;
+  top: 2px;
+  left: 2px;
+}
+.spy-observation .card-rank {
+  display: block;
+  font-size: 12px;
+  line-height: 1;
+}
+.spy-observation .card-corner-bottom {
+  display: none;
+}
+.spy-memory {
+  margin-left: 6px;
+  transform: none;
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .seat-relative-1 .spy-targets {
+    left: auto;
+    right: 0;
+    transform: translateY(-50%);
+  }
+  .seat-relative-3 .spy-targets {
+    left: 0;
+    transform: translateY(-50%);
+  }
+  .spy-observation .card-suit {
+    font-size: 14px;
+  }
+  .spy-observation .card-corner {
+    display: none;
+  }
+  .spy-observation .card-corner:first-child {
+    display: block;
+    top: 0;
+    left: 1px;
+  }
+  .spy-observation .card-corner:first-child > span:last-child {
+    display: none;
+  }
+}
+
+/* The remembered face stays in front of anonymous backs without enlarging the seat. */
+.seat-cards > .mini-card:has(.spy-observation) {
+  position: relative;
+  z-index: 3;
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .spy-observation {
+    outline: none;
+  }
+  .spy-observation > .card-face {
+    position: absolute;
+    width: 28px;
+    height: auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    outline: 1px solid #a6e7d3;
+  }
+  .spy-observation i {
+    bottom: -13px;
+  }
+}
+
+.spy-observation .card-face::before {
+  display: none;
+}
+
+.spy-target-card > .card-back {
+  width: 24px;
+  height: auto;
+  margin: auto;
+}
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .game-shell:has(.spy-targets) .vira-panel {
+    top: 84px;
+  }
+}

@@ -77,6 +77,8 @@ Preserve escolhas existentes de stack; os defaults para bootstrap estão em `doc
 
 Legibilidade também é requisito: use uma linha em branco entre blocos lógicos (preparação, validações, efeitos e retorno), entre funções/métodos e entre declarações de responsabilidades diferentes. Mantenha juntas declarações e instruções diretamente relacionadas; não compacte toda a função nem insira uma linha vazia mecanicamente após cada instrução. Preserve esse espaçamento ao executar o Biome e revise o resultado visualmente.
 
+Ao alterar layout, use `playwright-cli` ao final para abrir o fluxo afetado, capturar e inspecionar visualmente desktop e celular. Corrija distorções, cortes e sobreposições antes da entrega; testes geométricos ou Playwright Test não substituem essa checagem visual. Preserve a identidade profissional de pixel art do jogo.
+
 Execute a suíte afetada e verificações gerais viáveis, conforme `docs/testing.md`. Entregue alterações, comandos executados, resultados e limitações em pt-BR. Não declare testes ou deploys não executados. Pronto exige comportamento funcional, regressões pertinentes, documentação atualizada e ausência de novos vazamentos ou corridas; declare o que permanece não verificado.
 
 ## Code Review Rules

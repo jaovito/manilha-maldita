@@ -89,6 +89,15 @@ function fixture() {
   }
   return {
     request,
+    preflight: (requestOrigin: string) =>
+      fetch(new URL('/api/guest', server.url), {
+        method: 'OPTIONS',
+        headers: {
+          Origin: requestOrigin,
+          'Access-Control-Request-Method': 'POST',
+          'Access-Control-Request-Headers': 'content-type',
+        },
+      }),
     guest,
     connect,
     received,
@@ -287,6 +296,39 @@ test('late snapshots close expired sockets without exposing room state', async (
     expect(await closed).toBe(1008);
   } finally {
     socket?.close();
+    await f.stop();
+  }
+});
+
+test('CORS allows credentialed HTTP only for exact configured origins, including errors', async () => {
+  const f = fixture();
+  try {
+    const response = await f.request('/api/guest');
+    expect(response.status).toBe(401);
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(origin);
+    expect(response.headers.get('Access-Control-Allow-Credentials')).toBe('true');
+    expect(response.headers.get('Vary')).toContain('Origin');
+
+    const approved = await f.guest();
+    const authenticated = await f.request('/api/guest', undefined, approved);
+    expect(authenticated.status).toBe(200);
+    expect(authenticated.headers.get('Access-Control-Allow-Origin')).toBe(origin);
+
+    for (const candidate of [origin, 'http://evil.test', 'http://truco.test.evil.test']) {
+      const options = await f.preflight(candidate);
+      expect(options.status).toBe(204);
+      expect(options.headers.get('Access-Control-Allow-Origin')).toBe(
+        candidate === origin ? origin : null,
+      );
+      expect(options.headers.get('Access-Control-Allow-Methods')).toBe('GET,POST');
+      expect(options.headers.get('Access-Control-Allow-Headers')).toBe('Content-Type');
+      const denied = await f.request('/api/guest', { nickname: 'Beto' }, undefined, candidate);
+      expect(denied.status).toBe(candidate === origin ? 201 : 403);
+      expect(denied.headers.get('Access-Control-Allow-Origin')).toBe(
+        candidate === origin ? origin : null,
+      );
+    }
+  } finally {
     await f.stop();
   }
 });

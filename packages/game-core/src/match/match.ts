@@ -1,11 +1,12 @@
 import { requestRaise, respondRaise } from '../betting/betting';
 import { assertSeat } from '../cards/deal';
+import { prepare } from '../powers/preparation';
 import { assertRevision, finishHand } from './lifecycle';
 import { playCard } from './play-card';
 import type { MatchState, PlayerCommand, Transition } from './types';
 
-export { startMatch, dealNextHand } from './lifecycle';
-export type { MatchState, PlayerCommand, Transition } from './types';
+export { dealNextHand, startMatch } from './lifecycle';
+export type { MatchState, PlayerCommand, PowerSetup, Transition } from './types';
 
 /** Actor seat is resolved by the trusted application, never by a client claim.
  * Revision closes every accepted decision; duplicate delivery cannot score twice.
@@ -21,6 +22,8 @@ export function executeCommand(
   assertSeat(seat, state.playerCount);
   const team = seat % 2 === 0 ? 'A' : 'B';
   switch (command.type) {
+    case 'PREPARE':
+      return prepare(state, seat, command.intent);
     case 'PLAY_CARD':
       return playCard(state, seat, command);
     case 'REQUEST_RAISE': {

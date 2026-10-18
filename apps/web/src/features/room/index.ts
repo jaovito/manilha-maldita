@@ -1,3 +1,3 @@
-export { CardFace } from './CardFace';
-export { Lobby } from './Lobby';
-export { Table } from './Table';
+export { CardFace } from './components/Table/Card';
+export { Lobby } from './components/Lobby';
+export { Table } from './components/Table';

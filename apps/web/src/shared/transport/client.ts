@@ -4,6 +4,7 @@ import {
   type ServerMessage,
   serverMessageSchema,
 } from '@truco/game-protocol';
+import { backendUrl } from './backend-url';
 
 const httpErrors = new Map([
   ['FORBIDDEN_ORIGIN', 'Este endereço não está autorizado pelo servidor. Confira a URL do jogo.'],
@@ -17,11 +18,12 @@ const httpErrors = new Map([
 ]);
 
 export async function request<T>(path: string, body?: unknown): Promise<T> {
+  const url = backendUrl(path);
   let response: Response;
   try {
-    response = await fetch(`/api${path}`, {
+    response = await fetch(url, {
       method: body === undefined ? 'GET' : 'POST',
-      credentials: 'same-origin',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
@@ -55,6 +57,7 @@ export async function request<T>(path: string, body?: unknown): Promise<T> {
 export type Action = ClientMessage['action'];
 export function envelope(room: RoomView, action: Action): ClientMessage {
   const gameplay = [
+    'PREPARE',
     'PLAY_CARD',
     'REQUEST_RAISE',
     'RESPOND_RAISE',
@@ -100,9 +103,7 @@ export function connectRoom(
   document.addEventListener('visibilitychange', resume);
 
   const open = () => {
-    socket = new WebSocket(
-      `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/api/rooms/${encodeURIComponent(code)}/ws`,
-    );
+    socket = new WebSocket(backendUrl(`/rooms/${encodeURIComponent(code)}/ws`, true));
     socket.onopen = () => {
       attempts = 0;
       status(true);

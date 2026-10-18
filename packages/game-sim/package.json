@@ -1,0 +1,12 @@
+{
+  "name": "@truco/game-sim",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@truco/game-core": "workspace:*"
+  },
+  "scripts": {
+    "typecheck": "bun --bun ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.json"
+  }
+}

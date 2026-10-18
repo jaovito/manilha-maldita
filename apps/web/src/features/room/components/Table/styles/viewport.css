@@ -1,0 +1,239 @@
+/* The match is a single game surface; only secondary panels scroll. */
+body:has(.game-shell) {
+  overflow: hidden;
+  height: 100dvh;
+  min-height: 0;
+  overscroll-behavior: none;
+}
+.game-shell {
+  position: relative;
+  width: 100%;
+  max-width: none;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+.game-shell .room-stage,
+.game-shell .game-table,
+.game-shell .table-layout {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.game-shell .arena {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  border: 0;
+  box-shadow: none;
+  background-size: 100% 100%;
+}
+.game-shell .app-header {
+  position: absolute;
+  z-index: 3;
+  left: 2.5vw;
+  top: 3dvh;
+  margin: 0;
+  display: block;
+  pointer-events: none;
+}
+.game-shell .brand-main {
+  font-size: clamp(40px, 5.5vw, 90px);
+}
+.game-shell .brand-ribbon {
+  font-size: clamp(14px, 1.8vw, 30px);
+  padding: 6px 24px;
+}
+.game-shell .header-meta {
+  position: fixed;
+  bottom: 86px;
+  left: 2.5vw;
+  text-align: left;
+}
+.game-shell .header-meta .eyebrow {
+  display: none;
+}
+.game-shell .connection-chip {
+  font-size: 12px;
+  background: #072a23df;
+}
+.game-shell .scoreboard {
+  position: absolute;
+  z-index: 2;
+  top: 2.5dvh;
+  left: 28%;
+  width: 44%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.5vw;
+}
+.game-shell .team-score,
+.game-shell .stake-score {
+  padding: 0.8dvh 8px;
+}
+.game-shell .team-score strong,
+.game-shell .stake-score strong {
+  font-size: clamp(28px, 6dvh, 65px);
+}
+.game-shell .team-score span,
+.game-shell .stake-score > span {
+  font-size: clamp(11px, 1.2vw, 20px);
+}
+.game-shell .table-status {
+  top: 15dvh;
+  left: 46%;
+  transform: translateX(-50%);
+  translate: none;
+  margin-top: 0;
+  z-index: 2;
+  padding: 4px 14px;
+  background: #082a24;
+  border: 1px solid #8b7841;
+  max-width: 44%;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.2;
+}
+.game-shell .table-status p:not(.compact-power-prompt) {
+  display: inline;
+  margin-right: 8px;
+  font-size: clamp(14px, 1.1vw, 18px);
+}
+.game-shell .table-status > span,
+.game-shell .table-status small {
+  font-size: 11px;
+}
+.game-shell .table-sidebar {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  display: block;
+  pointer-events: none;
+}
+.game-shell .table-history {
+  position: absolute;
+  top: 2.5dvh;
+  right: 1.5vw;
+  width: 23%;
+  height: 28dvh;
+  min-height: 0;
+  padding: clamp(10px, 1.4vw, 22px);
+  overflow: auto;
+  pointer-events: auto;
+  background: #08171deb;
+}
+.game-shell .table-history h3 {
+  font-size: clamp(12px, 1.15vw, 18px);
+  padding-bottom: 10px;
+}
+.game-shell .history-list {
+  max-height: none;
+}
+.game-shell .history-entry {
+  font-size: clamp(12px, 1vw, 16px);
+  padding: 9px 0;
+}
+.game-shell .table-actions {
+  position: absolute;
+  right: 1.5vw;
+  bottom: 2.5dvh;
+  width: clamp(190px, 19vw, 290px);
+  gap: 6px;
+  pointer-events: auto;
+}
+.game-shell .action-truco,
+.game-shell .action-fold,
+.game-shell .action-accept {
+  min-height: 44px;
+  padding: 8px 10px;
+}
+.game-shell .action-truco {
+  font-size: clamp(20px, 1.7vw, 26px);
+}
+.game-shell .covered-choice {
+  margin: 0;
+  font-size: 12px;
+  padding: 4px 8px;
+  background: #06251fdb;
+}
+.game-shell .decision-actions {
+  gap: 6px;
+}
+.game-shell .decision-actions button {
+  font-size: clamp(14px, 1.5vw, 22px);
+}
+.game-shell .surrender-action {
+  padding: 8px;
+}
+.game-shell .table-actions:has(.decision-actions) .covered-choice {
+  display: none;
+}
+.room-menu {
+  position: absolute;
+  z-index: 5;
+  left: 2.5vw;
+  bottom: 2.5dvh;
+  max-width: calc(100% - 32px);
+}
+.room-menu > summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  width: max-content;
+  cursor: pointer;
+  color: #eed59e;
+  background: #071e24ed;
+  border: 1px solid #b38a46;
+  list-style: none;
+}
+.room-menu > summary::before {
+  content: "☰";
+  margin-right: 10px;
+  color: var(--gold);
+}
+.room-menu > summary:focus-visible {
+  outline: 3px solid #ffe4a1;
+  outline-offset: 3px;
+}
+.room-menu[open] {
+  inset: 50% auto auto 50%;
+  translate: -50% -50%;
+  width: min(850px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  box-shadow:
+    0 0 0 100vmax #02130ed9,
+    0 15px 50px #000a;
+}
+.room-menu .compact-lobby {
+  margin: 0;
+}
+.room-menu .room-result {
+  padding: 14px;
+  border: 1px solid var(--gold);
+  background: #0c3b2d;
+  color: #ffe0a0;
+  font-size: 20px;
+}
+.game-shell .match-result {
+  position: absolute;
+  z-index: 4;
+  top: 15%;
+  left: 25%;
+  width: 50%;
+  margin: 0;
+  font-size: 22px;
+}
+.game-shell .error-banner {
+  position: absolute;
+  z-index: 6;
+  top: 3dvh;
+  left: 25%;
+  width: 50%;
+  max-height: 20dvh;
+  overflow: auto;
+}

@@ -38,7 +38,8 @@
     "test:database": "bun run db:test:up && bun test --coverage --coverage-dir=coverage/database ./apps/server/tests/database",
     "dev:server": "bun --watch apps/server/src/bootstrap/main.ts",
     "dev:web": "bun run --filter @truco/web dev",
-    "start:server": "bun apps/server/src/bootstrap/main.ts"
+    "start:server": "bun apps/server/src/bootstrap/main.ts",
+    "simulate": "bun packages/game-sim/cli.ts"
   },
   "devDependencies": {
     "typescript": "7.0.2",

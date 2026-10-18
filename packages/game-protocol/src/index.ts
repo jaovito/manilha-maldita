@@ -28,6 +28,7 @@ export const roomConfigSchema = z.strictObject({
   format: z.enum(['1v1', '2v2']),
   preset: z.enum(['casual', 'competitive']),
   cardTimeoutMs: z.number().int().min(1000).max(120000).nullable(),
+  preparationTimeoutMs: z.number().int().min(1000).max(120000).default(15000),
   responseTimeoutMs: z.number().int().min(1000).max(120000),
 });
 export type RoomConfig = z.infer<typeof roomConfigSchema>;
@@ -36,16 +37,25 @@ export const defaultRoomConfig: RoomConfig = {
   preset: 'casual',
   cardTimeoutMs: 30000,
   responseTimeoutMs: 20000,
+  preparationTimeoutMs: 15000,
 };
 
 export function normalizeConfig(config: RoomConfig): RoomConfig {
   const parsed = roomConfigSchema.parse(config);
   return parsed.preset === 'competitive'
-    ? { ...parsed, cardTimeoutMs: 20000, responseTimeoutMs: 15000 }
+    ? { ...parsed, cardTimeoutMs: 20000, responseTimeoutMs: 15000, preparationTimeoutMs: 10000 }
     : parsed;
 }
 
+export const powerSchema = z.enum(['spy', 'exchange', 'boost', 'mask']);
+export const preparationIntentSchema = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('pass') }),
+  z.strictObject({ type: z.literal('spy'), target: seat }),
+  z.strictObject({ type: z.literal('exchange'), card: cardSchema }),
+]);
+
 export const actionSchema = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('PREPARE'), intent: preparationIntentSchema }),
   z.strictObject({ type: z.literal('READY'), ready: z.boolean() }),
   z.strictObject({ type: z.literal('SET_SEAT'), seat }),
   z.strictObject({ type: z.literal('CONFIGURE'), config: roomConfigSchema }),
@@ -55,7 +65,12 @@ export const actionSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('SYNC') }),
   z.strictObject({ type: z.literal('SURRENDER') }),
   z.strictObject({ type: z.literal('REQUEST_RAISE') }),
-  z.strictObject({ type: z.literal('PLAY_CARD'), card: cardSchema, covered: z.boolean() }),
+  z.strictObject({
+    type: z.literal('PLAY_CARD'),
+    card: cardSchema,
+    covered: z.boolean(),
+    power: z.enum(['boost', 'mask']).optional(),
+  }),
   z.strictObject({
     type: z.literal('RESPOND_RAISE'),
     response: z.enum(['accept', 'raise', 'fold']),
@@ -74,10 +89,17 @@ export const clientMessageSchema = z.strictObject({
 export type Action = z.infer<typeof actionSchema>;
 export type ClientMessage = z.infer<typeof clientMessageSchema>;
 const play = z.union([
+  z.strictObject({ seat, covered: z.literal(false), power: z.literal('mask') }),
   z.strictObject({ seat, covered: z.literal(true) }),
-  z.strictObject({ seat, covered: z.boolean(), card: cardSchema }),
+  z.strictObject({
+    seat,
+    covered: z.boolean(),
+    card: cardSchema,
+    power: z.enum(['boost', 'mask']).optional(),
+  }),
 ]);
 const phase = z.discriminatedUnion('type', [
+  z.strictObject({ type: z.literal('PREPARATION') }),
   z.strictObject({ type: z.literal('TURN'), seat }),
   z.strictObject({ type: z.literal('RAISE_RESPONSE') }),
   z.strictObject({ type: z.literal('ELEVEN_DECISION'), team }),
@@ -95,6 +117,28 @@ const hand = z.union([
 ]);
 
 export const matchViewSchema = z.strictObject({
+  powers: z
+    .strictObject({
+      players: z
+        .array(
+          z.strictObject({
+            seat,
+            energy: z.number().int().min(0).max(3),
+            // null also means an unrevealed assignment belonging to another seat.
+            power: powerSchema.nullable(),
+            used: z.boolean(),
+            ready: z.boolean(),
+          }),
+        )
+        .max(4)
+        .readonly(),
+      activations: z
+        .array(z.strictObject({ seat, power: powerSchema, target: seat }))
+        .max(4)
+        .readonly(),
+      intel: z.strictObject({ target: seat, card: cardSchema }).nullable().optional(),
+    })
+    .optional(),
   playerCount: z.union([z.literal(2), z.literal(4)]),
   revision: z.number().int().nonnegative(),
   seat,

@@ -99,25 +99,50 @@ O fluxo de um comando é: adaptador valida mensagem e sessão → aplicação en
 
 ```text
 apps/web/src/
-  app/                       # entrada, rotas e composição
+  app/
+    main.tsx                 # montagem da aplicação
+    App/                     # composição e seus testes
+    styles/                  # estilos globais e ordem da cascata
   features/
-    lobby/
-    match/
-      table/                 # cartas e renderização
-      hud/                   # placar, energia e turno
-      actions/               # jogar, apostar e ativar poder
-      model/                 # projeção recebida e estado da interface
-    results/
+    menu/
+      index.ts               # API pública da feature
+      pages/EntryMenu/
+        index.tsx
+        index.test.tsx
+      components/            # Profile, Icon e seus estilos
+      styles/                # estilos da página e adaptações
+    room/
+      index.ts               # API pública da feature
+      components/
+        Lobby/
+          index.tsx
+          index.test.tsx
+          Icon/
+          Settings/
+          Seats/
+          Invite/
+        Table/
+          index.tsx
+          index.test.tsx
+          Actions/
+          Card/
+          History/
+          Powers/
+          Seats/
+          styles/
+      utils/                 # formatação de cartas da feature
   shared/
-    ui/                      # componentes visuais usados por várias features
-    transport/               # conexão e sincronização
+    preferences/             # preferência local de apelido
+    transport/               # HTTP/WS compartilhado pela entrada e sala
 ```
 
-Componentes, hooks, estilos e testes ficam próximos da funcionalidade que os utiliza. Cada feature expõe uma API pública pequena; outras features não importam seus arquivos internos. Código exclusivo de uma feature continua nela. Promova algo a `shared` quando houver reutilização concreta e responsabilidade estável.
+Componentes, hooks, estilos e testes ficam próximos da funcionalidade que os utiliza. Componentes usam uma pasta por responsabilidade, com `index.tsx`, `index.test.tsx` quando houver testes próprios e `styles.css` quando houver estilos; filhos exclusivos ficam dentro do componente pai. Testes de comportamento podem ter nomes específicos, como `viewport.test.tsx`. Estilos responsivos extensos ficam em `styles/` junto ao componente. `pages` contém apenas páginas e seus testes; componentes ficam em `components` da feature, e estilos de página ficam em `styles` da feature. `utils` e `services` são criados apenas quando existe responsabilidade concreta, sem pastas vazias antecipadas. Cada feature expõe uma API pública pequena; outras features não importam seus arquivos internos. Código exclusivo de uma feature continua nela. Promova algo a `shared` quando houver reutilização concreta e responsabilidade estável.
 
 Separe estado confirmado pelo servidor (cartas visíveis, turno, energia e placar), estado local da interface (seleção, painéis e preferências) e estado de animação. Uma seleção pode ser imediata; resultado, gasto e pontuação dependem da confirmação do servidor. Não mantenha uma segunda cópia autoritativa da partida no cliente.
 
 React coordena interface e estado de apresentação; PixiJS recebe dados autorizados e emite intenções de interação. Não replique as regras no renderizador nem faça o servidor depender da duração de animações. O cliente importa contratos públicos de `game-protocol`; o pacote não exporta o estado secreto ou o baralho ordenado. Importações de `game-core` pelo cliente, se necessárias, devem usar uma API explicitamente segura, sem carregar estado autoritativo.
+
+O transporte compartilhado resolve HTTP e WS a partir de `VITE_BACKEND_URL`, uma origem pública HTTP(S) opcional definida no ambiente do build Vite ou em `apps/web/.env.local`. Sem valor, usa `/api` e a origem da página, preservando o proxy de desenvolvimento/preview. Caminhos, credenciais e query na configuração são rejeitados. HTTP inclui cookies; CORS é limitado a `ALLOWED_ORIGINS`, GET/POST e Content-Type. O handshake WS continua com validação explícita de origem. Acesso direto entre origens exige o mesmo site por causa do cookie SameSite=Strict; entre sites diferentes, use proxy na origem do frontend. Veja o exemplo no [README](../README.md#url-do-backend-no-frontend).
 
 ## Tamanho, navegação e fronteiras
 
@@ -178,15 +203,15 @@ Snapshots completos filtrados são aceitáveis no MVP; diffs são otimização p
 
 ## Interface e experiência de jogo
 
-O menu principal fica em `features/menu/EntryMenu`, com ícones pixel art decorativos e uma edição da referência fornecida pelo usuário como fundo. A composição usa posições proporcionais à referência 1567×882: logo no alto à esquerda, perfil no alto à direita, seis ações na coluna central e rodapé inferior. A navegação é HTML funcional sobre a arte, com molduras vetoriais e fonte Jersey 25 local; a imagem não contém botões ou valores de jogador. Em retrato, os elementos são reorganizados para manter legibilidade. O apelido é estado de apresentação até ser enviado ao endpoint de convidado; a identidade é estabelecida pelo servidor. Criar sala usa o fluxo autorizado existente, e entrar por código abre um painel específico. Recursos futuros são nativamente desabilitados com descrição “Em breve”; nível e moedas mostram “—”, sem métricas fictícias. A carta Espião ilustrada no fundo é decorativa, não funcionalidade do M3.
+O menu principal fica em `features/menu/pages/EntryMenu`, com ícones pixel art decorativos e uma edição da referência fornecida pelo usuário como fundo. A composição usa posições proporcionais à referência 1567×882: logo no alto à esquerda, perfil no alto à direita, seis ações na coluna central e rodapé inferior. A navegação é HTML funcional sobre a arte, com molduras vetoriais e fonte Jersey 25 local; a imagem não contém botões ou valores de jogador. Em retrato, os elementos são reorganizados para manter legibilidade. O apelido é estado de apresentação até ser enviado ao endpoint de convidado; a identidade é estabelecida pelo servidor. Criar sala usa o fluxo autorizado existente, e entrar por código abre um painel específico. Recursos futuros são nativamente desabilitados com descrição “Em breve”; nível e moedas mostram “—”, sem métricas fictícias. A carta Espião ilustrada no fundo é decorativa, não funcionalidade do M3.
 
 O lobby compõe `LobbySettings`, `LobbySeats` e `RoomInvite`: configurações editáveis somente pelo anfitrião, equipes relativas ao jogador e cópia do link público exclusivamente após clique. Clipboard indisponível ou rejeitado recebe orientação de cópia manual, sem falso sucesso. O código continua sendo convite, não credencial. As artes do menu não incorporam textos, ações, nível, moeda ou informações da partida.
 
 O apelido digitado é uma preferência local validada em `shared/preferences/nickname`, restaurada no primeiro render e salva ao editar. O cliente consulta a sessão pelo cookie e usa seu apelido confirmado quando o usuário ainda não iniciou uma edição; uma resposta atrasada não sobrescreve o campo em uso. Ao entrar, a resposta da sessão confirma o apelido salvo. A preferência não autentica, não retoma assentos e não grava tokens; falhas do armazenamento são toleradas. Retenção e exclusão estão em [security.md](security.md).
 
-Na sala, a composição segue a referência de criação: coluna esquerda com título, configurações em linhas com ícones, link de convite com cópia e prévia decorativa; coluna direita com equipes, avisos e ações inferiores. Molduras SVG com recorte em nove partes preservam os ornamentos ao redimensionar. As colunas se empilham em telas estreitas. `lobby-scene.css`, `lobby-controls.css`, `lobby-roster.css` e `lobby-responsive.css` separam composição, controles, jogadores e adaptações.
+Na sala, a composição segue a referência de criação: coluna esquerda com título, configurações em linhas com ícones, link de convite com cópia e prévia decorativa; coluna direita com equipes, avisos e ações inferiores. Molduras SVG com recorte em nove partes preservam os ornamentos ao redimensionar. As colunas se empilham em telas estreitas. `Lobby/styles/scene.css`, `Lobby/Settings/styles.css`, `Lobby/Seats/styles.css` e `Lobby/styles/responsive.css` separam composição, controles, jogadores e adaptações.
 
-Modo/preset usam radios nativos com aparência segmentada, seleção confirmada pelo snapshot e teclado preservado; convidados recebem o fieldset desabilitado. Temporizadores ficam em uma seção expansível e respeitam o preset. O switch de sala privada representa o estado fixo atual; o de poderes é desabilitado e indica indisponibilidade. Não há opção de sala pública, ativação de poderes ou chat funcional. Pronto fica no próprio assento; sair/iniciar/revanche ficam no rodapé. O link público de convite fica sempre visível em campo somente leitura, selecionável ao focar, com botão de copiar ao lado e orientação manual se Clipboard falhar.
+Modo/preset usam radios nativos com aparência segmentada, seleção confirmada pelo snapshot e teclado preservado; convidados recebem o fieldset desabilitado. Temporizadores ficam em uma seção expansível e respeitam o preset. Os switches de sala privada e poderes representam os estados fixos habilitados. Não há opção de sala pública nem chat funcional; o catálogo explica os quatro poderes. Pronto fica no próprio assento; sair/iniciar/revanche ficam no rodapé. O link público de convite fica sempre visível em campo somente leitura, selecionável ao focar, com botão de copiar ao lado e orientação manual se Clipboard falhar.
 
 Configurações bloqueadas recebem paleta cinza dessaturada nos ícones, legendas e seletores, além da indicação “Somente leitura” vinculada ao fieldset. A opção atual continua distinguível, sem dourado de controle ativo; o texto mantém contraste sem reduzir a opacidade do painel inteiro. Esse estado acompanha a permissão atual do snapshot e não afeta copiar o convite.
 
@@ -194,7 +219,7 @@ Textos usam marfim e tons claros sobre painéis opacos de verde/azul escuro; dou
 
 Os cartões dos assentos têm alturas uniformes entre equipes e reservam uma área inferior de ações, inclusive quando não há botão para aquele jogador. Os controles se ancoram nessa área, com altura mínima em unidades da fonte para comportar duas linhas sem variar a posição conforme apelidos ou badges.
 
-A interface atual usa React/DOM e CSS responsivo para entrada, lobby e mesa. O acabamento autorizado antecipa a parte visual do M4 sem migrar renderizador ou acrescentar regras: `Table` compõe `CardFace`, `TableSeats`, `TableActions` e `TableHistory`. Os estilos da aplicação separam fundamentos, lobby, mesa e cartas. Assets decorativos locais e a fonte licenciada estão em `apps/web/public/`; origem e prompts em `art/README.md`. Versos representam somente contagem pública, nunca identidade de cartas ocultas. A posição de cada assento é relativa ao jogador, inclusive em 1v1. Não há energia ou poderes simulados para preencher o layout.
+A interface atual usa React/DOM e CSS responsivo para entrada, lobby e mesa. O acabamento autorizado antecipa a parte visual do M4 sem migrar renderizador ou acrescentar regras: `Table` compõe `CardFace`, `TableSeats`, `TableActions` e `TableHistory`. Os estilos da aplicação separam fundamentos, lobby, mesa e cartas. Assets decorativos locais e a fonte licenciada estão em `apps/web/public/`; origem e prompts em `art/README.md`. Versos representam somente contagem pública, nunca identidade de cartas ocultas. A posição de cada assento é relativa ao jogador, inclusive em 1v1. Energia e poderes vêm da projeção autoritativa do M3; não são valores simulados para preencher o layout.
 
 A partida usa uma superfície de `100dvh`, sem largura máxima de página. A mesa é o fundo da cena, com HUD e controles posicionados por regiões proporcionais e tamanhos limitados por `clamp`. Estilos de viewport, assentos, retrato e paisagem ficam separados; a altura também determina a composição. A mão e as ações permanecem dentro da tela. Lobby/convite ficam em um `details` nativo, fechado durante a partida e aberto no término; somente histórico e painéis secundários têm rolagem interna. Não é necessário usar a API de fullscreen do navegador ou bloquear orientação.
 
@@ -220,7 +245,7 @@ Escala horizontal exige roteamento, escritor único por sala e recuperação pro
 
 ## Bootstrap atual
 
-A base contém quatro workspaces (`web`, `server`, `game-core`, `game-protocol`), dependências fixadas, TypeScript por ambiente, Biome e checagem de fronteiras com parser Oxc, além de smoke tests. Use Bun Workspaces sem Turborepo; considere orquestração/cache adicionais quando houver ganho medido. A árvore de módulos acima continua sendo referência de evolução: o core implementa as regras-base do M1; o servidor e o cliente funcional do M2 já usam salas autoritativas, transporte e projeções. A estrutura acima continua orientação para módulos futuros.
+A base contém cinco workspaces (`web`, `server`, `game-core`, `game-protocol`, `game-sim`), dependências fixadas, TypeScript por ambiente, Biome e checagem de fronteiras com parser Oxc, além de smoke tests. Use Bun Workspaces sem Turborepo; considere orquestração/cache adicionais quando houver ganho medido. A árvore de módulos acima continua sendo referência de evolução: o core implementa as regras-base do M1; o servidor e o cliente funcional do M2 já usam salas autoritativas, transporte e projeções. A estrutura acima continua orientação para módulos futuros.
 
 Bun está fixado em 1.4.3. Biome 2.5.15 substitui ESLint/Prettier. TypeScript 7.0.2, Vite 8.3.4 e plugin React 6.1.2 usam as versões estáveis atuais publicadas na revisão; as demais dependências diretas também foram conferidas contra a tag `latest` estável e permanecem fixadas no lockfile. Prefira versões estáveis atuais compatíveis, sem downgrade por conveniência nem versões canary/RC sem necessidade autorizada.
 
@@ -254,7 +279,7 @@ A API de composição tem estados `TURN`, `RAISE_RESPONSE`, `ELEVEN_DECISION`, `
 
 Projeções públicas e individuais são construídas por allowlist. Mãos ocultas têm apenas assento/contagem; cobertas não têm carta nem referência física para terceiros, inclusive em históricos e término. Onze mantém a visibilidade já concedida aos parceiros na mesma mão; 11×11 não concede essa visibilidade. O chamador autentica o destinatário. O protocolo de rede futuro deve adaptar essas visões, sem exportar o estado autoritativo.
 
-Não há campos nem execução de poderes/energia neste marco: portanto mãos especiais não podem sortear poderes ou regenerar energia. M3 acrescentará essas transições respeitando `hand.kind`; não crie um preset de produto sem poderes com base neste estágio do motor. Identificação de partida, sessões, filas, deduplicação por comando com replay de ACK e timers pertencem à aplicação M2. Veja [ADR 005](adr/005-base-match-engine.md).
+O M1 foi entregue sem campos ou execução de poderes/energia. O M3 acrescentou essas transições respeitando `hand.kind`, mantendo mãos especiais sem sorteios ou regeneração; não crie um preset de produto sem poderes com base neste estágio do motor. Identificação de partida, sessões, filas, deduplicação por comando com replay de ACK e timers pertencem à aplicação M2. Veja [ADR 005](adr/005-base-match-engine.md).
 
 ## Autoridade e transporte implementados no M2
 
@@ -266,8 +291,44 @@ A entrada `@truco/game-protocol` contém schemas estritos de envelope, ações, 
 
 `DecisionClock` mantém o tempo restante e orçamento de proteção por assento. Só uma decisão dependente de ausente pausa; respostas de equipe usam política “qualquer parceiro”. Ausências simultâneas consomem orçamentos em paralelo. Após a proteção, o tempo restante volta a correr; quando cartas estão sem relógio e o ausente esgotou a proteção, a decisão recebe fallback imediato. Novas decisões já expiradas são agendadas para a próxima execução da fila, sem recursão nem bloqueio indefinido. Timeouts compartilhados contam para os assentos elegíveis da equipe; uma resposta válida zera a sequência do autor. No terceiro timeout consecutivo exigido do mesmo assento, a equipe perde por abandono.
 
-Configuração casual aceita tempos entre 1 e 120 segundos e pode desligar apenas o timer de carta. Competitivo congela carta/resposta em 20/15 s e proteção em 30 s; casual tem defaults 30/20 s e proteção de 60 s. Preparação só entra no M3. Uma sala sem conexões expira após o período de proteção do preset, sem vencedor e sem autojogadas ilimitadas. Outras salas/filas não dependem dessa espera.
+Configuração casual aceita tempos entre 1 e 120 segundos e pode desligar apenas o timer de carta. Competitivo congela carta/resposta em 20/15 s e proteção em 30 s; casual tem defaults 30/20 s e proteção de 60 s. M3 acrescenta preparação configurável no casual (default 15 s) e fixa em 10 s no competitivo. Uma sala sem conexões expira após o período de proteção do preset, sem vencedor e sem autojogadas ilimitadas. Outras salas/filas não dependem dessa espera.
 
 Lobby permite mudar somente para assento livre antes da partida; assentos ocupados são recusados pelo servidor mesmo quando o ocupante ainda não está pronto. Mudanças de assento/configuração/ingresso retiram confirmações de pronto. O anfitrião inicia apenas com todos presentes e prontos. Saída de lobby/final remove associação e transfere anfitrião; durante partida usa-se desistência explícita. Revanche volta ao lobby com mesmos assentos/configuração e nova confirmação de pronto, gerando novo `matchId` ao iniciar. A saída envia ACK antes de fechar o socket.
 
 Há cliente React DOM com mesa, lobby e reconexão limitada com backoff, usando proxy Vite `/api` e cookie de sessão; não existe estado autoritativo compartilhado entre navegadores. O visual é provisório em verde/ouro, sem assets gerados e sem antecipar o acabamento do M4. O backend não usa banco por jogada e não recupera partidas após reinício. Veja [ADR 006](adr/006-room-authority-and-reconnection.md) e as configurações no README.
+
+## Poderes e simulações implementados no M3
+
+`powers/powers.ts` concentra sorteio, energia e validação de ativação; `powers/preparation.ts` sela intenções e resolve o lote. `PREPARATION` é uma fase explícita; os comandos de carta carregam o poder opcional atomicamente. `PowerSetup` é privado, fornecido pelo adaptador, e não integra o protocolo. A entrada interna sem poderes permanece para regressões-base e controle experimental, nunca como preset de sala. A [ADR 007](adr/007-sealed-powers-and-simulation.md) detalha amostragem, compatibilidade e limites.
+
+`TablePowers` separa seleção local e confirmação do servidor. A carta usa arte própria decorativa; custo, nome, energia e estado são HTML derivados da projeção, sem dados privados na imagem. O histórico ocupa seu painel próprio; poderes ficam numa carta em `Table/Powers/Card`, próxima da mão, com reserva de energia. O passe da preparação fica na área de ações, junto da contagem de prontos, preservando espaço para a carta em telas pequenas. A preparação começa recolhida. Clicar em um poder disponível seleciona os alvos diretamente na mesa: Espião destaca versos adversários; Segunda Chance habilita as cartas próprias para troca; Impulso/Máscara destacam cartas próprias elegíveis na sua vez. `Hand` contém a mão e a orientação contextual, sem selects ou painel para escolher cartas. `Seats/Cards` contém os versos clicáveis e a observação privada do Espião. Detalhes abrem sob demanda, fecham por botão/Esc e restauram foco à carta. A abertura é vinculada ao contexto da decisão; um contexto novo descarta o painel anterior. Seleção de poder de turno fica vinculada ao ID da decisão e é descartada quando ele muda. O servidor revalida custo, janela, alvo e posse independentemente dos bloqueios da interface.
+
+`game-sim` depende somente das entradas públicas do core. As políticas recebem `PlayerView`; o executor privado cuida de fases, entropia e métricas. Fontes separadas por mão mantêm distribuições pareadas, com braços habilitado/controle e permutação de assentos/equipes. CLI local não integra o servidor nem exporta seeds de produção.
+
+## Organização física do frontend
+
+`app` contém somente montagem, composição (`App/`) e estilos globais. `features/menu` mantém apenas a página e seu teste em `pages/EntryMenu`, com Profile/Icon em `components/` e estilos da página em `styles/`, e expõe a entrada pela sua API pública; `features/room` expõe Lobby, Table e CardFace. Os nomes exportados dos componentes foram preservados, enquanto os arquivos seguem o padrão de diretório com `index.tsx`. O formato não exige um teste isolado para cada componente decorativo: os testes de composição existentes continuam junto do pai que exercita esses filhos.
+
+Estilos pertencem à página/componente correspondente, incluindo adaptações da mesa e controles do lobby. `app/styles/index.css` é o único manifesto de carregamento: mantém explicitamente a cascata existente, inclusive a posição dos estilos globais entre as camadas. Não se importa CSS adicional nos componentes, evitando depender da ordem dos imports JavaScript. A ordem pode ser simplificada numa revisão visual própria; esta reorganização preserva o CSS gerado.
+
+`room/utils/cards.ts` contém tipo de apresentação, naipes e rótulos de cartas, utilizados por mesa, assentos, histórico e poderes. Não importa JSX nem domínio privado. HTTP/WS e preferência de apelido permanecem compartilhados porque atendem entrada e sala; mover esses serviços para uma das features criaria uma dependência artificial entre elas.
+
+A ilustração dos poderes usa um viewport quadrado (`aspect-ratio: 1`) para recortar o atlas 2×2 sem deformar os eixos. Moldura, título, custo e estado são elementos separados; o custo fica ancorado dentro da ilustração. Em celulares baixos, a carta vira uma miniatura com nome, arte e custo, reservando o rodapé para energia; o estado continua descrito no botão acessível e a seleção mantém contorno próprio. O clique na carta preserva os detalhes e o resultado privado do Espião. A carta fica à esquerda da mão, menor. Em dispositivos com hover e ponteiro fino (largura acima de 600 px), uma manga recorta aproximadamente a metade inferior em repouso; hover, foco, detalhes abertos ou poder selecionado revelam a carta inteira. A energia permanece visível. O recorte não altera a geometria quadrada da arte nem a semântica do botão. Telas de toque mantêm a carta inteira, sem um toque adicional para revelar. Em retrato e paisagem, a mão e a identificação própria reservam espaço lateral para o poder; movimento reduzido remove a transição.
+
+A projeção de poderes mantém `power: null` nos assentos alheios até uma ativação pública aceita na mão, inclusive para o parceiro. Somente o dono recebe a atribuição ainda não usada. O campo nulo também cobre ausência de poder nas especiais; a UI usa o tipo da mão para distinguir “Poder oculto” de “Sem poder”. Reconexão reaplica a projeção por destinatário, sem um snapshot público enriquecido no cliente. A UI lista poderes revelados e as ativações, preservando a carta própria.
+
+A seleção de poder é local, ligada a partida/mão/decisão/atribuição/prontidão e descartada ao pausar ou mudar o contexto. Esc, botão de cancelamento ou novo clique no poder cancelam sem comando; foco retorna ao poder quando o cancelamento parte de um alvo. A instrução fica junto da mão; retratos baixos e paisagem compacta usam a área de status existente para preservar a mesa. Controles de carta coberta não aparecem durante a preparação; a barra de passe se compacta em paisagem. Clique numa carta de troca envia `PREPARE`; Impulso/Máscara continuam atômicos com `PLAY_CARD`. Não há mudança de autoridade ou protocolo.
+
+No Espião, os versos continuam anônimos: o clique escolhe o adversário e a posição visual de apresentação da observação, sem escolher uma identidade física nem enviar um índice de carta ao servidor. A carta aleatória continua sendo determinada pelo servidor e revelada somente após resolver a preparação. Antes de qualquer jogada do alvo, a face ocupa o verso clicado; após qualquer jogada dele, a UI mostra separadamente a memória “VISTO”, com o aviso de que pode já ter sido jogada. Esse deslocamento depende apenas da existência pública de uma jogada, sem analisar sua identidade. Reconexão restaura a observação da projeção privada; a posição visual pode voltar ao primeiro verso. Nenhum ID permite rastrear uma carta mascarada/coberta.
+
+## HUD de turno e poder consumido
+
+A carta de poder é renderizada enquanto o próprio assento não tem `used` confirmado na projeção. Seleção, intenção selada ainda pendente e rejeição não a removem. O indicador de energia permanece no dock, e Espião mantém a face privada na mão adversária/memória histórica. Na mão seguinte, a nova atribuição volta a aparecer. Não há mudança no sorteio, consumo ou sigilo do servidor.
+
+O status da partida fica no topo, abaixo do placar, com tipo de mão e tempo estimado quando aplicável. O avatar próprio recebe “Sua vez” somente em TURN do próprio assento, partida ativa e sem pausa. A coluna de ações remove o painel redundante “Jogar carta”; Truco e decisões mantêm alvos de toque de pelo menos 44 px, em tamanho compacto. A mão continua sendo o alvo de clique/toque para jogar, com teclado e bloqueios existentes.
+
+## Proporção das cartas de jogo
+
+Faces e versos compartilham `--playing-card-ratio: 2 / 3`, compatível com a arte original do verso (1024×1536). Slots da mão, assentos, mesa e vira usam aspect-ratio e altura automática; regras responsivas ajustam somente a largura, com limites proporcionais à altura da tela quando necessário. O verso usa contain para preservar a imagem. A observação do Espião, inclusive a face ampliada no celular, usa a mesma proporção; a área clicável de alvo permanece independente, com pelo menos 44×44 px. As rotações decorativas dos versos não mudam sua caixa de layout nem revelam identidades.
+
+A observação do Espião no assento é removida quando as jogadas autorizadas do alvo (vaza atual ou concluídas) contêm a mesma carta, comparando assento, valor e naipe. A condição é derivada do snapshot, inclusive após reconexão, sem estado de rastreamento adicional. A contagem pública zero também remove a observação. Uma carta diferente ou uma jogada ainda opaca não a remove nem revela identidades privadas.

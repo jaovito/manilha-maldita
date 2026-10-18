@@ -1,3 +1,4 @@
+import { assertPlayingCardRatios } from './card-proportions';
 import { expect, type Locator, type Page } from '@playwright/test';
 import { assertLobbyContrast } from './lobby-contrast';
 
@@ -9,6 +10,7 @@ export async function assertNoOverflow(page: Page) {
 
 export async function assertTableGeometry(page: Page, count: 2 | 4) {
   await assertNoOverflow(page);
+  await assertPlayingCardRatios(page);
   const arena = await page.locator('.arena').boundingBox();
   const center = await page.locator('.center-plays').boundingBox();
   const opponent = await page
@@ -63,9 +65,96 @@ async function assertGameViewport(page: Page) {
     expect(box.x + box.width, selector).toBeLessThanOrEqual(viewport.width + 1);
     expect(box.y + box.height, selector).toBeLessThanOrEqual(viewport.height + 1);
   }
-  for (const button of await page.locator('.card, .table-actions button').all()) {
+  await expect(page.locator('.action-hint')).toHaveCount(0);
+  const status = await page.locator('.table-status').boundingBox();
+  if (!status) throw new Error('Status da partida ausente.');
+  expect(status.y, 'Status deve ficar no topo').toBeLessThan(viewport.height * 0.22);
+  for (const badge of await page.locator('.turn-badge').all()) {
+    await expect(badge).toBeInViewport({ ratio: 1 });
+  }
+  const powerButton = page.locator('.power-card');
+  const hasPower = (await powerButton.count()) > 0;
+  if (hasPower) await assertPowerReveal(page);
+
+  const power = hasPower ? await powerButton.boundingBox() : null;
+  if (power) {
+    const art = await page.locator('.power-card-art').boundingBox();
+    const illustration = await page.locator('.power-card-illustration').boundingBox();
+    const cost = await page.locator('.power-card-cost').boundingBox();
+    if (!art || !illustration || !cost) throw new Error('Ilustração do poder incompleta.');
+
+    expect(
+      Math.abs(art.width - art.height),
+      'Atlas deve preservar proporção quadrada',
+    ).toBeLessThan(1);
+    expect(cost.x).toBeGreaterThanOrEqual(illustration.x);
+    expect(cost.y).toBeGreaterThanOrEqual(illustration.y);
+    expect(cost.x + cost.width).toBeLessThanOrEqual(illustration.x + illustration.width);
+    expect(cost.y + cost.height).toBeLessThanOrEqual(illustration.y + illustration.height);
+    const title = page.locator('.power-card-title');
+    expect(await title.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
+      true,
+    );
+
+    const dock = await page.locator('.power-dock').boundingBox();
+    if (!dock) throw new Error('Área de poderes ausente.');
+
+    for (const card of await page
+      .locator(
+        '.hand-cards .card, .player-seat, .own-player, .vira-panel, .table-actions, .room-menu > summary, .header-meta',
+      )
+      .all()) {
+      if (!(await card.isVisible())) continue;
+      const box = await card.boundingBox();
+      if (!box) throw new Error('Elemento da mesa ausente.');
+      const overlaps =
+        box.x < dock.x + dock.width &&
+        box.x + box.width > dock.x &&
+        box.y < dock.y + dock.height &&
+        box.y + box.height > dock.y;
+      expect(overlaps, JSON.stringify({ dock, element: box })).toBe(false);
+    }
+  }
+  for (const button of await page.locator('.card, .power-card, .table-actions button').all()) {
     if (await button.isVisible()) await expect(button).toBeInViewport({ ratio: 1 });
   }
+  if (hasPower) await powerButton.evaluate((element) => element.blur());
+}
+
+async function assertPowerReveal(page: Page) {
+  const button = page.locator('.power-card');
+  const pocket = page.locator('.power-card-pocket');
+  const foldable = await page.evaluate<boolean>(
+    "matchMedia('(hover: hover) and (pointer: fine) and (min-width: 601px)').matches",
+  );
+  const selection = await button.getAttribute('aria-pressed');
+  const expanded = await button.getAttribute('aria-expanded');
+
+  await page.mouse.move(0, 0);
+  await button.evaluate((element) => element.blur());
+  if (foldable && selection !== 'true' && expanded !== 'true') {
+    await expect
+      .poll(async () => {
+        const clip = await pocket.boundingBox();
+        const card = await button.boundingBox();
+        return clip && card ? clip.height / card.height : 1;
+      })
+      .toBeLessThan(0.8);
+    await page.locator('.power-card-title').hover();
+  }
+
+  const fullyVisible = () =>
+    pocket.evaluate((element) => element.clientHeight >= element.scrollHeight - 1);
+  await expect.poll(fullyVisible).toBe(true);
+  await page.mouse.move(0, 0);
+  await button.focus();
+  await expect.poll(fullyVisible).toBe(true);
+  await expect(button).toHaveAttribute('aria-pressed', selection ?? 'false');
+  await expect(button).toHaveAttribute('aria-expanded', expanded ?? 'false');
+  const power = await button.boundingBox();
+  const hand = await page.locator('.hand-cards').boundingBox();
+  if (!power || !hand) throw new Error('Mão ou poder ausente.');
+  expect(power.x + power.width, 'Poder deve ocupar a esquerda da mão').toBeLessThanOrEqual(hand.x);
 }
 
 export async function checkSmallPhones(page: Page, count: 2 | 4, phase: 'initial' | 'played') {

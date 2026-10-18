@@ -6,6 +6,7 @@ import {
   type ClientMessage,
   type CommandReply,
   type RoomView,
+  type RoomConfig,
 } from '@truco/game-protocol';
 import { startServer } from '../../src/bootstrap/runtime';
 
@@ -73,7 +74,7 @@ export class Player {
     return this.send(this.envelope(action));
   }
 }
-export async function setup(count: 2 | 4) {
+export async function setup(count: 2 | 4, config: RoomConfig = defaultRoomConfig) {
   const runtime = startServer({ port: 0, allowedOrigins: [origin] });
   const players: Player[] = [];
   const cookies: string[] = [];
@@ -100,7 +101,7 @@ export async function setup(count: 2 | 4) {
     }
     const created = await post(
       '/api/rooms',
-      { config: { ...defaultRoomConfig, format: count === 2 ? '1v1' : '2v2' } },
+      { config: { ...config, format: count === 2 ? '1v1' : '2v2' } },
       cookies[0],
     );
     const body: unknown = await created.json();
@@ -129,10 +130,16 @@ export async function setup(count: 2 | 4) {
       if (reply.type === 'ACK') await all(reply.sequence);
       return reply;
     }
-    async function begin() {
+    async function prepare() {
+      if (players[0]?.view?.match?.phase.type !== 'PREPARATION') return;
+      for (let seat = 0; seat < count; seat++)
+        expect((await act(seat, { type: 'PREPARE', intent: { type: 'pass' } })).type).toBe('ACK');
+    }
+    async function begin(withPreparation = true) {
       for (let seat = 0; seat < count; seat++)
         expect((await act(seat, { type: 'READY', ready: true })).type).toBe('ACK');
       expect((await act(0, { type: 'START_MATCH' })).type).toBe('ACK');
+      if (withPreparation) await prepare();
     }
     return {
       runtime,
@@ -142,6 +149,7 @@ export async function setup(count: 2 | 4) {
       all,
       act,
       begin,
+      prepare,
       post,
       async stop() {
         for (const player of players) player.socket.close();
@@ -179,7 +187,9 @@ export async function completeMatch(game: Awaited<ReturnType<typeof setup>>) {
       expect(Math.max(match.score.A, match.score.B)).toBe(12);
       return;
     }
-    if (match.phase.type === 'ELEVEN_DECISION') {
+    if (match.phase.type === 'PREPARATION') {
+      await game.prepare();
+    } else if (match.phase.type === 'ELEVEN_DECISION') {
       const responder = match.phase.team === 'A' ? 0 : 1;
       expect((await game.act(responder, { type: 'DECIDE_ELEVEN', response: 'play' })).type).toBe(
         'ACK',
