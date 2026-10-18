@@ -165,3 +165,7 @@ Verificação: `bun run check` aprovado com 146 testes e cobertura mínima por a
 ## Publicação inicial do repositório
 
 Publicação pública no GitHub autorizada pelo usuário, com nome `jaovito/truco-caotico`. O commit inicial reúne o código e a documentação até o M2 e os ajustes de interface já autorizados. Dependências, builds, relatórios, arquivos de ambiente reais e caches ficam fora do versionamento; `.env.example` contém somente defaults locais fictícios. A revisão dos arquivos preparados não encontrou correspondências nos padrões de credenciais verificados. O commit usa o endereço noreply do GitHub. Publicar o código não publica o jogo nem provisiona hospedagem.
+
+### Correção da primeira execução do CI
+
+A execução 39153449872 falhou no typecheck porque a regra genérica `coverage/` também ignorava `tooling/coverage/`; os dois scripts existiam localmente, mas não entraram no commit inicial. O ignore passou a excluir somente relatórios da raiz/workspaces, preservando os scripts de cobertura e inventário. Uma regressão com Git real verifica fontes incluídas e artefatos/ambientes excluídos. A instalação congelada e `bun run check` passaram em cópia limpa dos arquivos preparados para o commit, com 175 testes, cobertura mínima por arquivo e build; a execução remota será acompanhada após o envio.

@@ -1,6 +1,8 @@
 node_modules/
 **/dist/
-coverage/
+/coverage/
+/apps/*/coverage/
+/packages/*/coverage/
 playwright-report/
 test-results/
 .playwright-mcp/

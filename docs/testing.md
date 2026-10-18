@@ -60,6 +60,8 @@ Mantenha dependências diretas nas versões estáveis atuais compatíveis e fixa
 
 ## Cobertura mínima obrigatória
 
+As regras de ignore excluem relatórios na raiz e nos workspaces, mas preservam `tooling/coverage/`, que contém código necessário ao runner e ao inventário. Uma regressão com Git real verifica que esses scripts e `.env.example` entram no versionamento, enquanto relatórios, dependências, builds e arquivos de ambiente reais ficam de fora. Uma execução local com arquivos não versionados não substitui validar uma cópia limpa do conteúdo preparado para o commit.
+
 Todo comportamento implementado ou alterado deve ter testes com asserções de resultado, incluindo entradas válidas, rejeições e limites relevantes. A matriz de gameplay permanece obrigatória: atingir uma porcentagem não dispensa regras, privacidade, concorrência e reconexão.
 
 O mínimo é **80% de linhas e 80% de funções por arquivo executável medido**, configurado nos `bunfig.toml` da raiz e do frontend. Bun não oferece aqui uma garantia equivalente para branches/statements; essas métricas não são anunciadas como verificadas. Casos de decisão continuam exigidos pela matriz e pela revisão.
