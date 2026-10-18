@@ -1,0 +1,101 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "files": {
+    "ignoreUnknown": true,
+    "includes": [
+      "**",
+      "!!**/node_modules",
+      "!!**/dist",
+      "!!coverage",
+      "!!playwright-report",
+      "!!test-results",
+      "!!.git",
+      "!index.html"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "trailingCommas": "all"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "correctness": {
+        "useHookAtTopLevel": "error",
+        "useExhaustiveDependencies": "error"
+      },
+      "style": {
+        "noExcessiveLinesPerFile": {
+          "level": "warn",
+          "options": {
+            "maxLines": 300,
+            "skipBlankLines": true
+          }
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "apps/web/src/**",
+        "packages/game-core/src/**",
+        "packages/game-protocol/src/**",
+        "apps/server/src/**/domain/**",
+        "apps/server/src/**/application/**",
+        "!**/*.test.ts",
+        "!**/*.test.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "Bun": "Use explicit ports instead of runtime globals in this layer.",
+                  "process": "Use explicit ports instead of runtime globals in this layer.",
+                  "Buffer": "Use explicit ports instead of runtime globals in this layer.",
+                  "require": "Use explicit ports instead of runtime globals in this layer."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/game-core/src/**", "apps/server/src/**/domain/**", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "Bun": "Use explicit ports instead of runtime globals in this layer.",
+                  "process": "Use explicit ports instead of runtime globals in this layer.",
+                  "Buffer": "Use explicit ports instead of runtime globals in this layer.",
+                  "require": "Use explicit ports instead of runtime globals in this layer.",
+                  "fetch": "Use explicit ports instead of runtime globals in this layer.",
+                  "setTimeout": "Use explicit ports instead of runtime globals in this layer.",
+                  "setInterval": "Use explicit ports instead of runtime globals in this layer.",
+                  "WebSocket": "Use explicit ports instead of runtime globals in this layer."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

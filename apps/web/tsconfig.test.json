@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["bun", "vite/client"]
+  },
+  "include": ["tests/**/*.ts", "tests/**/*.tsx", "src/**/*.test.ts", "src/**/*.test.tsx"],
+  "exclude": ["tests/environment.typecheck.ts"]
+}

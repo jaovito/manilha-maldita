@@ -1,0 +1,188 @@
+@media (max-width: 1150px) {
+  .lobby-shell .lobby-heading {
+    margin-left: 180px;
+  }
+  .lobby-shell .lobby-workbench {
+    gap: 16px;
+    grid-template-columns: 1.1fr 1fr;
+  }
+  .lobby-option-row {
+    grid-template-columns: 30px minmax(0, 1fr) auto;
+    gap: 9px;
+  }
+  .lobby-option-row > .lobby-icon {
+    width: 27px;
+    height: 27px;
+  }
+  .option-caption > strong {
+    font-size: 22px;
+  }
+  .option-caption small {
+    font-size: 14px;
+  }
+  .pixel-options {
+    width: 180px;
+    gap: 5px;
+  }
+  .pixel-options span {
+    font-size: 20px;
+  }
+  .lobby-powers {
+    grid-template-columns: 130px 1fr;
+  }
+  .power-fan {
+    transform: scale(0.65);
+    transform-origin: left center;
+  }
+  .lobby-actions > button {
+    padding: 6px;
+    font-size: 23px;
+    gap: 6px;
+  }
+  .lobby-actions .lobby-icon {
+    width: 24px;
+    height: 24px;
+  }
+}
+@media (max-width: 900px) {
+  main.lobby-shell {
+    padding: 20px;
+  }
+  .lobby-shell .app-header {
+    position: relative;
+    inset: auto;
+    margin-bottom: 20px;
+  }
+  .lobby-shell .header-meta {
+    margin-top: 0;
+  }
+  .lobby-shell .brand-main {
+    font-size: 58px;
+  }
+  .lobby-shell .brand-ribbon {
+    font-size: 18px;
+  }
+  .lobby-shell .room-lobby {
+    max-width: 680px;
+    margin: auto;
+  }
+  .lobby-shell .lobby-workbench {
+    grid-template-columns: 1fr;
+  }
+  .lobby-right-column {
+    padding-top: 0;
+  }
+  .lobby-shell .lobby-heading {
+    grid-column: 1;
+    grid-row: auto;
+    margin: 0;
+    min-height: 0;
+  }
+  .lobby-shell .lobby-config-column,
+  .lobby-shell .lobby-players-column,
+  .lobby-shell .lobby-actions,
+  .lobby-powers {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .lobby-shell .lobby-players-column {
+    order: 3;
+    margin-top: 0;
+  }
+  .lobby-powers {
+    order: 2;
+  }
+  .lobby-shell .lobby-actions {
+    order: 4;
+  }
+  .pixel-options {
+    width: 240px;
+  }
+}
+@media (max-width: 560px) {
+  main.lobby-shell {
+    padding: 18px 12px;
+  }
+  .lobby-config-column,
+  .lobby-players-column,
+  .lobby-powers {
+    border-width: 10px;
+    padding: 5px 7px;
+  }
+  .lobby-option-row {
+    grid-template-columns: 30px minmax(0, 1fr);
+    gap: 7px 9px;
+    padding: 12px 0;
+  }
+  .lobby-option-row > :last-child:not(.option-caption) {
+    grid-column: 2;
+    justify-self: stretch;
+  }
+  .pixel-options {
+    width: 100%;
+  }
+  .pixel-options span {
+    min-height: 44px;
+    font-size: 23px;
+  }
+  .option-caption > strong {
+    font-size: 24px;
+  }
+  .option-caption small {
+    font-size: 16px;
+  }
+  .pixel-switch {
+    justify-content: flex-end;
+  }
+  .room-link-panel .invite-field {
+    width: 100%;
+  }
+  .lobby-powers {
+    grid-template-columns: 106px 1fr;
+    gap: 3px;
+  }
+  .power-fan {
+    transform: scale(0.48);
+    height: 125px;
+  }
+  .lobby-powers h3 {
+    font-size: 23px;
+  }
+  .lobby-powers p {
+    font-size: 16px;
+  }
+  .room-lobby .power-preview {
+    font-size: 17px;
+  }
+  .lobby-players-column > h3 {
+    font-size: 27px;
+  }
+  .team-heading h4 {
+    font-size: 24px;
+  }
+  .lobby-team {
+    padding: 0 5px 7px;
+  }
+  .team-heading {
+    margin: 0 -5px;
+  }
+  .lobby-team .seat-grid {
+    gap: 6px;
+  }
+  .lobby-team .lobby-seat {
+    padding: 9px 3px;
+  }
+  .lobby-team .seat-status {
+    font-size: 17px;
+  }
+  .lobby-actions > button {
+    min-height: 62px;
+    border-width: 9px;
+  }
+  .lobby-actions .button-quiet {
+    font-size: 22px;
+  }
+  .lobby-actions .button-primary {
+    font-size: 23px;
+  }
+}

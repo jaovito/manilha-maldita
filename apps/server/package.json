@@ -1,0 +1,18 @@
+{
+  "name": "@truco/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "bun --bun ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@truco/game-core": "workspace:*",
+    "@truco/game-protocol": "workspace:*",
+    "hono": "4.13.13",
+    "drizzle-orm": "0.45.4"
+  },
+  "devDependencies": {
+    "drizzle-kit": "0.31.11"
+  }
+}

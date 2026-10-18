@@ -1,0 +1,6 @@
+[test]
+preload = ["./tests/setup-dom.ts"]
+coverageThreshold = { lines = 0.8, functions = 0.8 }
+coverageReporter = ["text", "lcov"]
+coverageSkipTestFiles = true
+coveragePathIgnorePatterns = ["**/node_modules/**", "**/tests/**", "**/*.d.ts", "**/*.typecheck.ts", "**/*.config.ts"]

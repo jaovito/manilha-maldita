@@ -1,0 +1,128 @@
+.guest-profile {
+  position: absolute;
+  top: 5.7%;
+  right: 1.5%;
+  width: 31.8%;
+  height: 23%;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.guest-profile .avatar {
+  display: none;
+}
+.profile-info {
+  position: absolute;
+  top: 10%;
+  left: 37%;
+  width: 58%;
+  height: 80%;
+}
+.profile-info label {
+  position: relative;
+  display: block;
+  height: 26%;
+  font-size: 0;
+}
+.profile-info label::before {
+  content: "♛";
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #f7bd52;
+  font-family: Georgia, serif;
+  font-size: clamp(14px, 1.8vw, 30px);
+}
+.profile-info input {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  padding: 0 18px 0 12%;
+  margin: 0;
+  border: 0;
+  border-bottom: 1px solid #ae813d;
+  background: transparent;
+  color: #ffe3a3;
+  font-family: "Jersey 25", sans-serif;
+  font-size: clamp(18px, 2vw, 34px);
+  box-shadow: none;
+}
+.profile-info input::placeholder {
+  color: #e8cc99;
+  opacity: 1;
+}
+.profile-level {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4%;
+  color: #f2d59c;
+  font-size: clamp(13px, 1.5vw, 25px);
+}
+.profile-level small {
+  align-self: center;
+  color: #9aa7aa;
+  font-size: 11px;
+}
+.profile-progress {
+  height: 9px;
+  margin-top: 3px;
+  background: #0c2634;
+  border: 1px solid #27718b;
+  box-shadow: inset 0 0 0 2px #03131e;
+}
+.guest-caption {
+  color: #8aa2b0;
+  font-size: clamp(8px, 0.8vw, 13px);
+  text-align: right;
+  margin-top: 4px;
+}
+.profile-economy {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 13%;
+  border-top: 1px solid #55482e;
+  padding-top: 5%;
+}
+.profile-economy::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 10%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 4px double #f6c05b;
+  background: #b67925;
+  box-shadow: inset 0 0 0 2px #724211;
+}
+.profile-economy strong {
+  color: #f2c36b;
+  font-size: clamp(19px, 2vw, 34px);
+  font-weight: 400;
+}
+.profile-economy small {
+  color: #99a6aa;
+  font-size: 11px;
+}
+.profile-economy button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 11%;
+  aspect-ratio: 1;
+  min-height: 0;
+  padding: 0;
+  border: 2px solid #c8953b;
+  background: #051824;
+  box-shadow: none;
+  color: #e7b359;
+  font-size: clamp(17px, 2vw, 32px);
+  line-height: 1;
+}

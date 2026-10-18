@@ -1,0 +1,51 @@
+{
+  "name": "truco-caotico",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.3",
+  "engines": {
+    "bun": "1.4.3"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --parallel dev:server dev:web",
+    "build": "bun run --filter @truco/web build",
+    "lint": "bun run biome lint . && bun run check:architecture",
+    "format": "bun run biome format --write .",
+    "format:check": "bun run biome format .",
+    "typecheck": "bun run --filter \"@truco/*\" typecheck && bun --bun ./node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+    "test": "bun run test:unit && bun run test:dom",
+    "test:unit": "bun test ./tooling/tests ./packages ./apps/server/src",
+    "test:dom": "bun run --filter @truco/web test",
+    "test:integration": "bun test ./apps/server/tests/integration",
+    "test:e2e": "bun --bun ./node_modules/@playwright/test/cli.js test",
+    "test:e2e:install": "bun --bun ./node_modules/@playwright/test/cli.js install chromium",
+    "check": "bun run lint && bun run format:check && bun run typecheck && bun run test:coverage && bun run build",
+    "check:architecture": "bun tooling/architecture/check.ts",
+    "biome": "bun --bun ./node_modules/@biomejs/biome/bin/biome",
+    "test:coverage": "bun tooling/coverage/run.ts",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:down": "docker compose stop postgres",
+    "db:test:up": "docker compose --profile test up -d --wait postgres-test",
+    "db:test:down": "docker compose --profile test stop postgres-test",
+    "db:generate": "bun --bun apps/server/node_modules/drizzle-kit/bin.cjs generate --config=apps/server/drizzle.config.ts",
+    "db:migrate": "bun apps/server/database/cli.ts migrate",
+    "db:migrate:test": "bun apps/server/database/cli.ts migrate --test",
+    "db:seed": "bun apps/server/database/cli.ts seed",
+    "test:database": "bun run db:test:up && bun test --coverage --coverage-dir=coverage/database ./apps/server/tests/database",
+    "dev:server": "bun --watch apps/server/src/bootstrap/main.ts",
+    "dev:web": "bun run --filter @truco/web dev",
+    "start:server": "bun apps/server/src/bootstrap/main.ts"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "@types/bun": "1.4.3",
+    "fast-check": "4.10.2",
+    "@playwright/test": "1.64.1",
+    "@biomejs/biome": "2.5.15",
+    "oxc-parser": "0.154.0"
+  }
+}

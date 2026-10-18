@@ -1,0 +1,15 @@
+{
+  "name": "@truco/game-protocol",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "bun --bun ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.json && bun --bun ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.test.json"
+  },
+  "dependencies": {
+    "zod": "4.6.7"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

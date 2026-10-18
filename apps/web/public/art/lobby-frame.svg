@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128" shape-rendering="crispEdges" aria-hidden="true">
+<path fill="none" stroke="#09171c" stroke-width="7" d="M12 4H116V8H124V116H120V124H12V120H4V12H8V4Z"/>
+<path fill="none" stroke="#bd7b29" stroke-width="2" d="M12 4H116V8H124V116H120V124H12V120H4V12H8V4Z"/>
+<path fill="none" stroke="#ffdb7b" stroke-width="2" d="M15 8H112V12H120V112H116V120H16V116H8V16H12V8Z"/>
+<path fill="none" stroke="#826030" stroke-width="1" d="M24 16H104V24H112V104H104V112H24V104H16V24H24Z"/>
+<defs><g id="corner" fill="#efb64e"><path d="M6 20V10h4V6h10v4h-6v4h-4v6zM18 12h4v4h-4zM12 18h4v4h-4zM20 20h4v4h-4zM24 10h4v4h-4zM10 24h4v4h-4z"/><path fill="#ffe29b" d="M9 9h4v4H9zM20 20h2v2h-2z"/></g></defs>
+<use href="#corner"/><use href="#corner" transform="translate(128 0) rotate(90)"/><use href="#corner" transform="translate(128 128) rotate(180)"/><use href="#corner" transform="translate(0 128) rotate(270)"/>
+</svg>

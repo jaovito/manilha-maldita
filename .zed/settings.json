@@ -1,0 +1,89 @@
+{
+  "lsp": {
+    "biome": {
+      "settings": {
+        "require_config_file": true
+      }
+    },
+    "eslint": {
+      "settings": {
+        "eslint.enable": false
+      }
+    }
+  },
+  "language_servers": ["!eslint", "..."],
+  "languages": {
+    "JavaScript": {
+      "language_servers": ["biome", "!eslint", "..."],
+      "formatter": {
+        "language_server": {
+          "name": "biome"
+        }
+      },
+      "format_on_save": "on"
+    },
+    "JSX": {
+      "language_servers": ["biome", "!eslint", "..."],
+      "formatter": {
+        "language_server": {
+          "name": "biome"
+        }
+      },
+      "format_on_save": "on"
+    },
+    "TypeScript": {
+      "language_servers": ["biome", "!eslint", "..."],
+      "formatter": {
+        "language_server": {
+          "name": "biome"
+        }
+      },
+      "format_on_save": "on"
+    },
+    "TSX": {
+      "language_servers": ["biome", "!eslint", "..."],
+      "formatter": {
+        "language_server": {
+          "name": "biome"
+        }
+      },
+      "format_on_save": "on"
+    },
+    "JSON": {
+      "language_servers": ["biome", "!eslint", "..."],
+      "formatter": {
+        "language_server": {
+          "name": "biome"
+        }
+      },
+      "format_on_save": "on"
+    },
+    "JSONC": {
+      "language_servers": ["biome", "!eslint", "..."],
+      "formatter": {
+        "language_server": {
+          "name": "biome"
+        }
+      },
+      "format_on_save": "on"
+    },
+    "CSS": {
+      "language_servers": ["biome", "!eslint", "..."],
+      "formatter": {
+        "language_server": {
+          "name": "biome"
+        }
+      },
+      "format_on_save": "on"
+    },
+    "HTML": {
+      "language_servers": ["biome", "!eslint", "..."],
+      "formatter": {
+        "language_server": {
+          "name": "biome"
+        }
+      },
+      "format_on_save": "on"
+    }
+  }
+}

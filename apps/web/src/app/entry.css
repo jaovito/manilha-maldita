@@ -1,0 +1,218 @@
+@font-face {
+  font-family: "Jersey 25";
+  src: url("/fonts/Jersey25.ttf") format("truetype");
+  font-display: swap;
+}
+
+/* Coordinates follow the approved 1567 × 882 reference composition. */
+main.entry-shell {
+  position: relative;
+  max-width: none;
+  min-height: 100dvh;
+  height: 100dvh;
+  width: 100%;
+  padding: 0;
+  overflow: hidden;
+  background: #053c2c url("/art/menu-reference-plate.png") center / 100% 100% no-repeat;
+}
+
+.entry-shell .app-header {
+  position: absolute;
+  top: 1.5%;
+  left: 11.7%;
+  width: 25%;
+  height: 26%;
+  margin: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.entry-shell .brand {
+  position: absolute;
+  inset: 0;
+  padding: 0;
+  opacity: 0;
+}
+.entry-shell .header-meta {
+  display: none;
+}
+.main-menu {
+  position: relative;
+  min-height: 100dvh;
+  height: 100dvh;
+  padding: 0;
+  font-family: "Jersey 25", sans-serif;
+}
+.menu-navigation {
+  position: absolute;
+  top: 19.05%;
+  left: 35.7%;
+  width: 28.7%;
+  height: 70.4%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1;
+}
+.menu-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6%;
+  width: 100%;
+  height: 15%;
+  min-height: 44px;
+  flex-shrink: 0;
+  padding: 4px 8% 4px 10%;
+  border: 0;
+  border-radius: 0;
+  background-color: #073c2b;
+  background-image:
+    url("/art/menu-button-frame.svg"), linear-gradient(100deg, #062f24eb, #08432dd9);
+  background-size: 100% 100%;
+  color: #ffe5a7;
+  font-family: "Jersey 25", sans-serif;
+  font-size: clamp(22px, 2.45vw, 42px);
+  font-weight: 400;
+  line-height: 1;
+  text-transform: uppercase;
+  text-align: left;
+  text-shadow: 2px 3px #081b18;
+  box-shadow: 3px 5px #011413ad;
+}
+.menu-button:first-child {
+  font-size: clamp(26px, 3.25vw, 55px);
+}
+.menu-button:nth-child(2) {
+  font-size: clamp(25px, 2.85vw, 48px);
+}
+
+.menu-button > span {
+  white-space: nowrap;
+  flex: 1;
+  text-align: center;
+}
+.menu-button small {
+  display: none;
+}
+.menu-red {
+  background-image:
+    url("/art/menu-button-frame.svg"), linear-gradient(100deg, #8e1025, #a62331, #670e21);
+  box-shadow:
+    0 0 15px #ffc45480,
+    3px 5px #011413ad;
+}
+.menu-navigation .menu-button::before,
+.menu-navigation .menu-button::after {
+  position: absolute;
+  content: "✦";
+  color: #ffd363;
+  font-family: Georgia, serif;
+  font-size: 32px;
+  top: 30%;
+  text-shadow: 0 0 10px #ffe389;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease-out;
+}
+.menu-navigation .menu-button:hover::before,
+.menu-navigation .menu-button:hover::after,
+.menu-navigation .menu-button:focus-visible::before,
+.menu-navigation .menu-button:focus-visible::after {
+  opacity: 1;
+}
+.menu-navigation .menu-button::before {
+  left: -10%;
+}
+.menu-navigation .menu-button::after {
+  right: -10%;
+}
+.menu-blue {
+  background-image: url("/art/menu-button-frame.svg"), linear-gradient(100deg, #09243c, #051c2f);
+}
+.menu-button:disabled {
+  color: #efdaa2;
+  opacity: 1;
+  filter: brightness(0.9);
+  cursor: not-allowed;
+}
+
+.menu-button:hover:enabled {
+  filter: brightness(1.13);
+}
+.menu-button:focus-visible {
+  outline: 3px solid #fff1b4;
+  outline-offset: 5px;
+}
+.menu-navigation .menu-button:hover,
+.menu-navigation .menu-button:focus-visible {
+  transform: scale(1.025);
+}
+.menu-decoration {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-navigation .menu-button::before,
+  .menu-navigation .menu-button::after {
+    transition: none;
+  }
+
+  .menu-navigation .menu-button:hover,
+  .menu-navigation .menu-button:focus-visible {
+    transform: none;
+  }
+}
+.menu-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 7.2%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3%;
+  border: 0;
+  background: transparent;
+  color: #718199;
+  font-size: clamp(13px, 1.6vw, 25px);
+}
+.menu-footer .menu-exit {
+  margin-left: 3.5%;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-family: "Jersey 25", sans-serif;
+  font-size: clamp(17px, 1.8vw, 29px);
+  font-weight: 400;
+  color: #f4d591;
+  text-transform: uppercase;
+}
+.menu-exit small {
+  display: none;
+}
+.menu-progress {
+  position: absolute;
+  top: 91%;
+  left: 50%;
+  translate: -50% -50%;
+  z-index: 3;
+  background: #06251ff0;
+  border: 1px solid #a98243;
+  padding: 6px 14px;
+  color: #ffe6a8;
+  font-size: 16px;
+}
+.entry-shell .error-banner {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 1%;
+  translate: -50% 0;
+  width: min(500px, 90%);
+}

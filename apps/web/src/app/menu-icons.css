@@ -1,0 +1,31 @@
+.menu-button .menu-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  height: 75%;
+  aspect-ratio: 1;
+  background-image: url("/art/menu-icons.png");
+  background-size: 200% 300%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+.icon-cards {
+  background-position: 0 0;
+}
+.icon-house {
+  background-position: 100% 0;
+}
+.icon-players {
+  background-position: 0 50%;
+}
+.icon-book {
+  background-position: 100% 50%;
+}
+.icon-hat {
+  background-position: 0 100%;
+  transform: rotate(180deg);
+}
+.icon-gear {
+  background-position: 100% 100%;
+}

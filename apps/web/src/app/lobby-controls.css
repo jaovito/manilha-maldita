@@ -1,0 +1,291 @@
+.room-lobby .lobby-settings {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  min-width: 0;
+}
+.room-lobby .lobby-settings legend {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.lobby-option-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 10px 0;
+  border-bottom: 1px solid #77623b;
+}
+.option-caption {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.option-caption > strong {
+  text-transform: uppercase;
+  color: #ffe9b4;
+  font-size: 25px;
+  font-weight: 400;
+  line-height: 1;
+}
+.option-caption small {
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--lobby-muted);
+}
+.pixel-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: clamp(200px, 19vw, 290px);
+}
+.pixel-options label {
+  position: relative;
+  cursor: pointer;
+  min-width: 0;
+}
+.pixel-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+}
+.pixel-options input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  z-index: 1;
+  cursor: pointer;
+}
+.pixel-options span {
+  display: grid;
+  place-items: center;
+  min-height: 47px;
+  background: #101c2b;
+  color: #d6dfec;
+  border: 4px double #9a7244;
+  clip-path: polygon(
+    8px 0,
+    calc(100% - 8px) 0,
+    100% 8px,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    8px 100%,
+    0 calc(100% - 8px),
+    0 8px
+  );
+  font-size: 23px;
+}
+.pixel-switch {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--lobby-ink);
+}
+.pixel-switch > span {
+  display: block;
+  width: 62px;
+  height: 32px;
+  padding: 3px;
+  border: 2px solid #84958a;
+  background: #12232c;
+  clip-path: polygon(8px 0, 54px 0, 62px 8px, 62px 24px, 54px 32px, 8px 32px, 0 24px, 0 8px);
+}
+.pixel-switch > span::after {
+  content: "";
+  display: block;
+  width: 22px;
+  height: 22px;
+  background: #85969c;
+  box-shadow: inset -3px -3px #44535d;
+}
+.pixel-switch input:checked + span {
+  background: #07552f;
+  border-color: #91db80;
+}
+.pixel-switch input:checked + span::after {
+  margin-left: 29px;
+  background: #a4ed87;
+  box-shadow: inset -3px -3px #589c43;
+}
+.pixel-switch small {
+  font-size: 16px;
+  color: var(--lobby-ink);
+}
+.pixel-options input:checked + span {
+  background: #ffc762;
+  color: #171e24;
+  border-color: #fff0ba;
+  box-shadow: inset 0 0 0 3px #a96229;
+}
+.pixel-options input:focus-visible + span {
+  outline: 3px solid #fff0cd;
+  outline-offset: -6px;
+}
+.pixel-options input:disabled + span {
+  cursor: not-allowed;
+}
+.pixel-options input:disabled {
+  cursor: not-allowed;
+}
+.lobby-clock-options {
+  padding: 9px 0;
+  border-bottom: 1px solid #77623b;
+}
+.lobby-clock-options summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  min-height: 32px;
+  color: var(--lobby-muted);
+  font-size: 18px;
+}
+.lobby-clock-options summary::after {
+  content: "+";
+  margin-left: auto;
+  color: #ffe0a0;
+}
+.lobby-clock-options[open] summary::after {
+  content: "−";
+}
+.lobby-clock-options .lobby-icon {
+  width: 22px;
+  height: 22px;
+  margin-left: 8px;
+}
+.clock-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-top: 10px;
+}
+.clock-fields label {
+  color: var(--lobby-ink);
+  font-size: 18px;
+}
+.room-lobby select,
+.room-lobby input:not([type="radio"]):not([type="checkbox"]) {
+  font-size: 17px;
+  background: #071720;
+  color: var(--lobby-ink);
+  opacity: 1;
+}
+.clock-summary {
+  color: var(--lobby-muted);
+  font-size: 17px;
+  padding-top: 8px;
+}
+.lobby-config-column .invite-field {
+  max-width: none;
+  padding: 10px 0;
+  border-bottom: 1px solid #77623b;
+}
+.invite-field > label {
+  color: var(--lobby-muted);
+  font-size: 16px;
+}
+.invite-control {
+  display: flex;
+  gap: 8px;
+  margin-top: 5px;
+}
+.invite-control input {
+  min-width: 0;
+  margin: 0;
+  min-height: 44px;
+}
+.room-lobby .invite-control button {
+  padding: 5px 10px;
+  font-size: 17px;
+  max-width: 110px;
+}
+.invite-feedback {
+  font-size: 16px;
+  color: #c3edb8;
+  line-height: 1.3;
+}
+.invite-feedback:not(:empty) {
+  margin-top: 7px;
+}
+.room-privacy {
+  border-top: 0;
+  border-bottom: 0;
+}
+.room-link-panel .invite-field {
+  width: clamp(210px, 24vw, 355px);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+.room-link-panel .invite-field > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.room-link-panel .invite-control {
+  margin: 0;
+}
+.room-link-panel .invite-control button {
+  width: 44px;
+  min-width: 44px;
+  height: 46px;
+  padding: 5px;
+}
+.room-link-panel .invite-control .lobby-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.settings-locked-note {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 0;
+  border-bottom: 1px solid #46504e;
+  color: #bdc8c5;
+  font-size: 17px;
+}
+.lobby-settings .settings-locked-note .lobby-icon {
+  width: 18px;
+  height: 18px;
+}
+.lobby-settings:disabled .option-caption > strong {
+  color: #b5c0bc;
+}
+.lobby-settings:disabled .option-caption small {
+  color: #a5b4b8;
+}
+.lobby-settings:disabled .lobby-icon {
+  color: #83918c;
+}
+.lobby-settings:disabled .pixel-options label {
+  cursor: not-allowed;
+}
+.lobby-settings:disabled .pixel-options span {
+  background: #101a22;
+  color: #a8b6c0;
+  border-color: #556462;
+  box-shadow: none;
+}
+.lobby-settings:disabled .pixel-options input:checked + span {
+  background: #34434a;
+  color: #e3e9e5;
+  border-color: #8c9d98;
+  box-shadow: inset 0 0 0 2px #172a30;
+}

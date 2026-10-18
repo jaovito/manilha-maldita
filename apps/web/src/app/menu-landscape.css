@@ -1,0 +1,46 @@
+@media (max-height: 500px) and (orientation: landscape) {
+  .menu-navigation {
+    top: 14%;
+    height: 73%;
+  }
+  .menu-navigation .menu-button {
+    min-height: 44px;
+    height: 15.2%;
+    padding: 3px 8%;
+    font-size: clamp(19px, 2.7vw, 28px);
+  }
+
+  .menu-navigation .menu-button::before,
+  .menu-navigation .menu-button::after {
+    font-size: 20px;
+  }
+  .profile-level {
+    font-size: 12px;
+    margin-top: 2%;
+  }
+  .profile-level small,
+  .profile-economy small {
+    font-size: 8px;
+  }
+  .profile-progress {
+    height: 5px;
+  }
+  .guest-caption {
+    display: none;
+  }
+  .profile-economy {
+    padding-top: 2%;
+  }
+  .profile-economy strong {
+    font-size: 16px;
+  }
+  .profile-info input {
+    font-size: 18px;
+  }
+  .menu-footer {
+    min-height: 30px;
+  }
+  .menu-footer .menu-exit {
+    min-height: 30px;
+  }
+}

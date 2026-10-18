@@ -1,0 +1,227 @@
+.player-seat {
+  position: absolute;
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 7px 10px;
+  align-items: center;
+  width: 190px;
+  max-width: 190px;
+  z-index: 2;
+}
+.player-seat .seat-avatar {
+  width: 52px;
+  height: 52px;
+}
+.seat-cards {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 0 15px;
+}
+.mini-card {
+  display: block;
+  width: 33px;
+  height: 47px;
+  margin-left: -8px;
+  transform: rotate(-6deg);
+}
+.mini-card:nth-child(2) {
+  transform: translateY(-3px);
+}
+.mini-card:nth-child(3) {
+  transform: rotate(6deg);
+}
+.seat-name {
+  font-size: 17px;
+  display: block;
+  color: #ffefcf;
+  overflow-wrap: anywhere;
+}
+.seat-team {
+  font-size: 11px;
+  display: block;
+  color: #c2c8ad;
+}
+.player-seat .seat-info {
+  background: #08242bd9;
+  border-bottom: 1px solid #b68f48;
+  padding: 4px 6px;
+}
+.seat-active .seat-avatar {
+  box-shadow:
+    0 0 0 3px #082a23,
+    0 0 0 5px #ffde8e,
+    0 0 20px #ffd77f55;
+}
+.seat-relative-1 {
+  right: 22px;
+  top: 51%;
+}
+.seat-relative-3 {
+  left: 22px;
+  top: 51%;
+}
+.seat-relative-2,
+:where(.arena[data-player-count="2"]) .seat-relative-1 {
+  top: 95px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.center-plays {
+  position: absolute;
+  width: 270px;
+  height: 220px;
+  top: 220px;
+  left: 44%;
+  transform: translateX(-50%);
+}
+
+.table-emblem {
+  position: absolute;
+  top: 30px;
+  left: 60px;
+  color: #c9b05b35;
+  font-size: 65px;
+  line-height: 0.95;
+  text-align: center;
+  letter-spacing: 8px;
+}
+.played-card {
+  position: absolute;
+  width: 78px;
+  text-align: center;
+}
+.played-card > span {
+  display: block;
+  height: 110px;
+}
+.played-card small {
+  font-size: 11px;
+  display: block;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 4px;
+  color: #e2d7b4;
+}
+.played-card .card-suit {
+  font-size: 48px;
+}
+.played-card .card-rank {
+  font-size: 21px;
+}
+.played-card .card-corner {
+  font-size: 16px;
+  left: 5px;
+  top: 5px;
+}
+.played-card .card-corner-bottom {
+  right: 5px;
+  bottom: 5px;
+  left: auto;
+  top: auto;
+}
+.play-relative-0 {
+  bottom: 0;
+  left: 95px;
+  z-index: 2;
+}
+.play-relative-1 {
+  top: 70px;
+  right: 0;
+}
+.play-relative-3 {
+  top: 70px;
+  left: 0;
+}
+.play-relative-2,
+:where(.arena[data-player-count="2"]) .play-relative-1 {
+  top: 0;
+  left: 95px;
+}
+.vira-panel {
+  position: absolute;
+  right: 26px;
+  top: 100px;
+  width: 96px;
+  text-align: center;
+  background: #071e21ed;
+  border: 3px double #c39746;
+  padding: 7px;
+}
+
+.vira-panel h3 {
+  font-size: 15px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+.vira-panel > span[role="img"] {
+  display: block;
+  height: 105px;
+  margin-bottom: 9px;
+}
+.vira-panel .card-suit {
+  font-size: 42px;
+}
+.vira-panel .card-corner {
+  font-size: 14px;
+  left: 4px;
+  top: 5px;
+}
+.vira-panel .card-rank {
+  font-size: 19px;
+}
+.vira-panel .card-corner-bottom {
+  right: 4px;
+  bottom: 5px;
+  left: auto;
+  top: auto;
+}
+.vira-panel strong {
+  display: block;
+  color: var(--gold);
+  font-size: 12px;
+}
+.vira-panel > span:not([role]) {
+  display: block;
+  color: #ffe1a0;
+  font-size: 22px;
+}
+.vira-panel small {
+  font-size: 10px;
+}
+.own-hand {
+  position: absolute;
+  bottom: 23px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.own-player {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+.own-player .seat-avatar {
+  width: 45px;
+  height: 45px;
+}
+.own-player strong {
+  color: #ffe7b2;
+  font-size: 18px;
+  max-width: 200px;
+  overflow-wrap: anywhere;
+}
+.own-player small {
+  display: block;
+  color: #c5b46e;
+  font-size: 11px;
+  letter-spacing: 3px;
+}
+.hand-cards {
+  display: flex;
+  justify-content: center;
+  gap: 11px;
+}

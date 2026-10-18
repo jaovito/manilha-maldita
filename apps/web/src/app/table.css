@@ -1,0 +1,116 @@
+.game-table {
+  position: relative;
+}
+.game-shell .app-header {
+  margin-bottom: 16px;
+}
+.game-shell .brand-main {
+  font-size: 54px;
+}
+.game-shell .brand-ribbon {
+  font-size: 17px;
+  padding: 5px 24px;
+}
+.scoreboard {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr 1fr;
+  gap: 18px;
+  width: calc(100% - 300px);
+  max-width: 780px;
+  margin: 0 auto 18px 0;
+  padding: 0 40px;
+  text-align: center;
+}
+.team-score,
+.stake-score {
+  position: relative;
+  border: 3px double #c69a49;
+  background: linear-gradient(#102c43, #081b30);
+  box-shadow:
+    inset 0 0 0 4px #061b22,
+    3px 4px #051713;
+  padding: 9px 8px;
+}
+.team-score::before,
+.stake-score::before {
+  content: "✦";
+  position: absolute;
+  left: 4px;
+  top: 35%;
+  color: #dba749;
+}
+.team-score::after,
+.stake-score::after {
+  content: "✦";
+  position: absolute;
+  right: 4px;
+  top: 35%;
+  color: #dba749;
+}
+.team-score span,
+.stake-score > span {
+  display: block;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+.team-score strong,
+.stake-score strong {
+  display: block;
+  font-size: 53px;
+  line-height: 1;
+  color: #ffe0a0;
+}
+.team-score.enemy {
+  background: linear-gradient(#471925, #2d101c);
+}
+.stake-score {
+  background: #0a2527;
+}
+.stake-score > span {
+  color: var(--gold);
+}
+.stake-score small {
+  display: block;
+  font-size: 12px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+.table-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 20px;
+}
+.arena {
+  position: relative;
+  min-height: 700px;
+  background: #073c2d url("/art/tabletop.png") center / 100% 100% no-repeat;
+  image-rendering: pixelated;
+  border: 1px solid #765d32;
+  box-shadow: 0 15px 30px #0006;
+  overflow: hidden;
+}
+.table-status {
+  position: absolute;
+  top: 19px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  width: max-content;
+  max-width: 90%;
+  z-index: 1;
+  padding: 7px 17px;
+  background: #05291fe8;
+  border: 1px solid #8b7841;
+}
+.table-status p {
+  color: #ffe2a0;
+  font-size: 20px;
+}
+.table-status > span,
+.table-status small {
+  color: #c0cfb0;
+  font-size: 12px;
+}
+.table-status small::before {
+  content: " · ";
+}

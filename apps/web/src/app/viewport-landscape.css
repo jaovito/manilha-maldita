@@ -1,0 +1,230 @@
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell .app-header {
+    top: 14px;
+    left: 16px;
+  }
+  .game-shell .brand-main {
+    font-size: 36px;
+  }
+  .game-shell .brand-ribbon {
+    font-size: 12px;
+    padding: 4px 16px;
+  }
+  .game-shell .header-meta {
+    bottom: 65px;
+    left: 16px;
+  }
+  .game-shell .connection-chip {
+    font-size: 10px;
+    padding: 4px;
+  }
+  .game-shell .scoreboard {
+    top: 10px;
+    left: 24%;
+    width: 48%;
+    gap: 10px;
+  }
+  .game-shell .team-score strong,
+  .game-shell .stake-score strong {
+    font-size: 28px;
+  }
+  .game-shell .team-score span,
+  .game-shell .stake-score > span {
+    font-size: 10px;
+  }
+  .game-shell .stake-score small {
+    font-size: 9px;
+  }
+  .game-shell .table-status {
+    top: 24%;
+    left: 3%;
+    margin: 0;
+    padding: 2px 8px;
+    translate: none;
+    text-align: left;
+    font-size: 9px;
+  }
+  .game-shell .table-status p {
+    font-size: 12px;
+  }
+  .game-shell .table-status > span,
+  .game-shell .table-status small {
+    font-size: 9px;
+  }
+  .game-shell .player-seat {
+    width: 110px;
+    grid-template-columns: 30px 1fr;
+    gap: 3px 6px;
+  }
+  .game-shell .player-seat .seat-avatar {
+    width: 30px;
+    height: 30px;
+    border-width: 2px;
+  }
+  .game-shell .seat-name {
+    font-size: 12px;
+  }
+  .game-shell .seat-team {
+    font-size: 8px;
+  }
+  .game-shell .mini-card {
+    width: 22px;
+    height: 25px;
+  }
+  .game-shell .seat-relative-1 {
+    top: 34%;
+    right: 5%;
+  }
+  .game-shell .seat-relative-3 {
+    top: 34%;
+    left: 5%;
+  }
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    top: 24%;
+    left: 45%;
+  }
+  .game-shell .center-plays {
+    top: 43%;
+    left: 45%;
+    width: 180px;
+    height: 30dvh;
+  }
+  .game-shell .played-card {
+    width: 44px;
+  }
+  .game-shell .played-card > span {
+    height: 59px;
+  }
+  .game-shell .played-card small {
+    font-size: 8px;
+  }
+  .game-shell .played-card .card-suit {
+    font-size: 28px;
+  }
+  .game-shell .played-card .card-corner {
+    font-size: 10px;
+  }
+  .game-shell .played-card .card-rank {
+    font-size: 13px;
+  }
+  .game-shell .vira-panel {
+    top: 25%;
+    right: 28%;
+    width: 54px;
+    padding: 4px;
+  }
+  .game-shell .vira-panel > span[role="img"] {
+    height: 59px;
+  }
+  .game-shell .vira-panel h3,
+  .game-shell .vira-panel strong {
+    font-size: 9px;
+  }
+  .game-shell .vira-panel > span:not([role]) {
+    font-size: 15px;
+  }
+  .game-shell .vira-panel small {
+    font-size: 8px;
+  }
+  .game-shell .vira-panel .card-suit {
+    font-size: 26px;
+  }
+  .game-shell .own-hand {
+    bottom: 12px;
+    left: 45%;
+  }
+  .game-shell .own-player {
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 20px;
+    width: 110px;
+    margin: 0;
+    gap: 8px;
+  }
+  .game-shell .own-player .seat-avatar {
+    width: 30px;
+    height: 30px;
+  }
+  .game-shell .own-player strong {
+    font-size: 13px;
+  }
+  .game-shell .card {
+    width: 60px;
+    height: 84px;
+  }
+  .game-shell .hand-cards .card-suit {
+    font-size: 30px;
+  }
+  .game-shell .hand-cards .card-corner {
+    font-size: 11px;
+    top: 4px;
+    left: 4px;
+  }
+  .game-shell .hand-cards .card-rank {
+    font-size: 14px;
+  }
+  .game-shell .hand-cards .card-corner-bottom {
+    top: auto;
+    left: auto;
+    right: 4px;
+    bottom: 4px;
+  }
+  .game-shell .table-history {
+    top: 10px;
+    height: 27dvh;
+    padding: 8px;
+  }
+  .game-shell .table-history h3 {
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding-bottom: 5px;
+  }
+  .game-shell .history-empty,
+  .game-shell .history-entry {
+    font-size: 11px;
+    padding-top: 5px;
+  }
+  .game-shell .action-hint {
+    display: none;
+  }
+  .game-shell .table-actions {
+    bottom: 10px;
+    gap: 4px;
+  }
+  .game-shell .action-truco {
+    padding: 6px;
+    font-size: 21px;
+  }
+  .game-shell .action-truco small {
+    font-size: 10px;
+  }
+  .game-shell .decision-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+  }
+  .game-shell .decision-actions button {
+    padding: 4px;
+    font-size: 13px;
+  }
+  .game-shell .covered-choice {
+    font-size: 10px;
+    line-height: 1.2;
+  }
+  .game-shell .surrender-action {
+    font-size: 11px;
+    padding: 4px;
+  }
+  .game-shell .room-menu {
+    left: 16px;
+    bottom: 12px;
+  }
+  .game-shell .room-menu > summary {
+    font-size: 11px;
+    padding: 7px;
+  }
+  .game-shell .room-menu[open] {
+    left: 50%;
+    bottom: auto;
+  }
+}

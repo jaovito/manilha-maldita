@@ -1,0 +1,254 @@
+@media (max-width: 1100px) and (min-width: 761px) {
+  .app-shell {
+    padding: 20px;
+  }
+  .table-layout {
+    grid-template-columns: minmax(0, 1fr) 230px;
+    gap: 14px;
+  }
+  .scoreboard {
+    width: calc(100% - 244px);
+    padding: 0;
+    gap: 10px;
+  }
+  .player-seat {
+    max-width: 140px;
+    grid-template-columns: 40px 1fr;
+  }
+  .player-seat .seat-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .seat-relative-1 {
+    right: 10px;
+  }
+  .seat-relative-3 {
+    left: 10px;
+  }
+  .seat-team {
+    font-size: 10px;
+  }
+  .center-plays {
+    transform: translateX(-50%) scale(0.85);
+  }
+  .vira-panel {
+    right: 12px;
+    width: 82px;
+  }
+}
+@media (max-width: 760px) {
+  .game-shell {
+    padding: 16px 10px 25px;
+  }
+  .game-shell .brand-main {
+    font-size: 42px;
+  }
+  .game-shell .brand-ribbon {
+    font-size: 14px;
+    padding: 4px 20px;
+  }
+  .scoreboard {
+    width: 100%;
+    gap: 8px;
+    padding: 0;
+    margin-bottom: 12px;
+  }
+  .team-score,
+  .stake-score {
+    padding: 8px 4px;
+  }
+  .team-score span,
+  .stake-score > span {
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+  .team-score strong,
+  .stake-score strong {
+    font-size: 39px;
+  }
+  .stake-score small {
+    font-size: 10px;
+  }
+  .team-score::before,
+  .team-score::after,
+  .stake-score::before,
+  .stake-score::after {
+    display: none;
+  }
+  .table-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .arena {
+    min-height: 600px;
+    background-size: auto 100%;
+  }
+  .table-status {
+    top: 16px;
+    padding: 5px 12px;
+  }
+  .table-status p {
+    font-size: 17px;
+  }
+  .table-status > span,
+  .table-status small {
+    font-size: 10px;
+  }
+  .player-seat {
+    max-width: 100px;
+    grid-template-columns: 34px 1fr;
+    gap: 4px 6px;
+  }
+  .player-seat .seat-avatar {
+    width: 34px;
+    height: 34px;
+    border-width: 2px;
+  }
+  .seat-name {
+    font-size: 13px;
+  }
+  .seat-team {
+    font-size: 9px;
+    line-height: 1.2;
+  }
+  .player-seat .seat-info {
+    padding: 3px;
+  }
+  .seat-relative-1 {
+    top: 47%;
+    right: 8px;
+  }
+  .seat-relative-3 {
+    top: 47%;
+    left: 8px;
+  }
+  .seat-relative-2,
+  :where(.arena[data-player-count="2"]) .seat-relative-1 {
+    top: 85px;
+  }
+  .mini-card {
+    width: 24px;
+    height: 35px;
+  }
+  .seat-cards {
+    padding: 0 8px;
+  }
+  .center-plays {
+    top: 205px;
+    left: 50%;
+    width: 140px;
+    height: 190px;
+  }
+  .played-card {
+    width: 53px;
+  }
+  .played-card > span {
+    height: 76px;
+  }
+  .played-card .card-suit {
+    font-size: 32px;
+  }
+  .played-card .card-corner {
+    font-size: 12px;
+    left: 3px;
+    top: 3px;
+  }
+  .played-card .card-rank {
+    font-size: 15px;
+  }
+  .played-card .card-corner-bottom {
+    right: 3px;
+    bottom: 3px;
+    left: auto;
+    top: auto;
+  }
+  .played-card small {
+    font-size: 9px;
+  }
+  .play-relative-0,
+  .play-relative-2,
+  :where(.arena[data-player-count="2"]) .play-relative-1 {
+    left: 44px;
+  }
+  .play-relative-1,
+  .play-relative-3 {
+    top: 58px;
+  }
+  .table-emblem {
+    font-size: 43px;
+    left: 50%;
+    top: 30px;
+    width: max-content;
+    transform: translateX(-50%);
+  }
+  .vira-panel {
+    width: 63px;
+    right: 12px;
+    top: 90px;
+    padding: 5px;
+  }
+  .vira-panel h3 {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+  .vira-panel > span[role="img"] {
+    height: 70px;
+    margin-bottom: 6px;
+  }
+  .vira-panel .card-suit {
+    font-size: 29px;
+  }
+  .vira-panel .card-corner {
+    font-size: 10px;
+    left: 2px;
+    top: 2px;
+  }
+  .vira-panel .card-rank {
+    font-size: 14px;
+  }
+  .vira-panel .card-corner-bottom {
+    right: 2px;
+    bottom: 2px;
+    left: auto;
+    top: auto;
+  }
+  .vira-panel strong {
+    font-size: 9px;
+  }
+  .vira-panel > span:not([role]) {
+    font-size: 17px;
+  }
+  .vira-panel small {
+    font-size: 8px;
+  }
+  .own-hand {
+    bottom: 24px;
+  }
+  .own-player {
+    margin-bottom: 13px;
+  }
+  .own-player .seat-avatar {
+    width: 37px;
+    height: 37px;
+  }
+  .own-player strong {
+    font-size: 16px;
+  }
+  .hand-cards {
+    gap: 9px;
+  }
+  .table-sidebar {
+    margin-top: 0;
+    gap: 16px;
+  }
+  .table-actions {
+    order: -1;
+    gap: 12px;
+  }
+  .table-history {
+    min-height: 140px;
+  }
+  .history-list {
+    max-height: 180px;
+  }
+}

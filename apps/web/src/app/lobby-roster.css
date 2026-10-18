@@ -1,0 +1,133 @@
+.lobby-teams {
+  display: grid;
+  grid-template-rows: repeat(2, 1fr);
+  gap: 12px;
+}
+.lobby-team {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  border: 10px solid transparent;
+  border-image: var(--lobby-frame) 32 stretch;
+  background: #0b2540;
+  padding: 0 8px 8px;
+}
+.lobby-team.team-enemy {
+  background: #351322;
+}
+.team-heading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  background: #0d325b;
+  border-bottom: 1px solid #ac8240;
+  padding: 5px 0 7px;
+  margin: 0 -8px;
+}
+.team-enemy .team-heading {
+  background: #64162e;
+}
+.team-heading h4 {
+  margin: 0;
+  color: #ffe4a4;
+  text-transform: uppercase;
+  font-size: 27px;
+  line-height: 1;
+}
+.team-heading > span {
+  color: #d3dde1;
+  font-size: 16px;
+}
+.lobby-team .seat-grid {
+  flex: 1;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 10px 0 0;
+}
+.lobby-team .seat-grid:has(> :only-child) {
+  grid-template-columns: 1fr;
+}
+.lobby-team .lobby-seat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: center;
+  gap: 5px;
+  background: #0a1e30;
+  border: 1px solid #725b34;
+  padding: 8px 6px;
+  min-width: 0;
+}
+.lobby-team .lobby-seat.is-ready {
+  background: #092c2a;
+}
+.lobby-team.team-enemy .lobby-seat {
+  background: #251824;
+}
+.lobby-team .lobby-seat.is-empty {
+  border-style: dashed;
+}
+.lobby-team .avatar {
+  width: clamp(58px, 4.3vw, 72px);
+  height: clamp(58px, 4.3vw, 72px);
+}
+.lobby-team .avatar-empty::after {
+  content: "?";
+  color: #a1b2bc;
+  font-size: 44px;
+}
+.lobby-team .seat-info {
+  width: 100%;
+}
+.lobby-team .seat-info > strong {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  display: block;
+  color: #c7d3d6;
+  font-size: 14px;
+  font-weight: 400;
+}
+.lobby-team .seat-status {
+  font-size: 18px;
+  line-height: 1.1;
+  margin: 5px 0 0;
+  color: #fff0cd;
+  overflow-wrap: anywhere;
+}
+.lobby-team .seat-badges {
+  justify-content: center;
+  margin-top: 5px;
+  gap: 5px;
+}
+.lobby-team .seat-badge {
+  font-size: 14px;
+  padding: 2px 5px;
+}
+.lobby-team .seat-actions {
+  display: flex;
+  width: 100%;
+  min-height: 3.3em;
+  margin-top: auto;
+  font-size: 17px;
+}
+.lobby-team .seat-actions > button {
+  margin: 0;
+  padding: 5px;
+  width: 100%;
+  min-height: 3.3em;
+  font-size: inherit;
+  line-height: 1.15;
+}
+.lobby-team .seat-actions > button:hover:enabled {
+  transform: none;
+}
+.lobby-team .seat-ready-toggle[aria-pressed="true"] {
+  color: #d0f6c0;
+  border-color: #80c76c;
+  background: #133b28;
+}

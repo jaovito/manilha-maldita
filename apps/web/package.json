@@ -1,0 +1,27 @@
+{
+  "name": "@truco/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --bun vite --host 127.0.0.1",
+    "build": "bun run --bun vite build",
+    "preview": "bun run --bun vite preview --host 127.0.0.1",
+    "typecheck": "bun --bun ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.json && bun --bun ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.test.json",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@truco/game-protocol": "workspace:*",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "vite": "8.3.4",
+    "@vitejs/plugin-react": "6.1.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@happy-dom/global-registrator": "21.0.3",
+    "@testing-library/dom": "10.4.2",
+    "@testing-library/react": "16.3.3"
+  }
+}

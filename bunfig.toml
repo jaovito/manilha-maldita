@@ -1,0 +1,8 @@
+[test]
+# DOM tests use a separate process and preload in apps/web/bunfig.toml.
+root = "."
+coverageThreshold = { lines = 0.8, functions = 0.8 }
+coverageReporter = ["text", "lcov"]
+coverageSkipTestFiles = true
+# Infrastructure and test harnesses are outside runtime application coverage.
+coveragePathIgnorePatterns = ["**/node_modules/**", "**/tests/**", "**/*.d.ts", "**/*.typecheck.ts", "**/*.config.ts", "tooling/coverage/**", "tooling/architecture/check.ts"]
