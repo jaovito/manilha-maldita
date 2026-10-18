@@ -1,5 +1,7 @@
 import { cardLabel } from '../../../utils/cards';
 import type { MatchView, RoomView } from '@truco/game-protocol';
+import { explainTrick } from '../Feedback/explanation';
+import { powerNames } from '../Powers';
 
 export function TableHistory({ room, match }: { room: RoomView; match: MatchView }) {
   const { hand } = match;
@@ -8,6 +10,18 @@ export function TableHistory({ room, match }: { room: RoomView; match: MatchView
     <section className="table-history" aria-label="Histórico público">
       <h3>✦ ÚLTIMAS AÇÕES</h3>
       <ol className="history-list">
+        {match.powers?.activations.map((activation) => (
+          <li
+            className="history-entry power-reveal"
+            key={`${hand.number}:power:${activation.seat}`}
+          >
+            <strong>
+              {room.seats[activation.seat]?.nickname ?? 'Jogador'} ativou{' '}
+              {powerNames[activation.power]}
+            </strong>
+            <p>Alvo: {room.seats[activation.target]?.nickname ?? 'Jogador'}.</p>
+          </li>
+        ))}
         {hand.completedTricks.map((trick, index) => (
           // biome-ignore lint/suspicious/noArrayIndexKey: Completed tricks are append-only and numbered within the hand.
           <li className="history-entry" key={`${hand.number}:${index}`}>
@@ -15,6 +29,7 @@ export function TableHistory({ room, match }: { room: RoomView; match: MatchView
               Vaza {index + 1} ·{' '}
               {trick.result.winner === 'tie' ? 'Empate' : `Equipe ${trick.result.winner}`}
             </strong>
+            <p className="trick-explanation">{explainTrick(room, match, trick)}</p>
             <ul>
               {trick.plays.map((play) => (
                 <li key={play.seat}>

@@ -1,3 +1,5 @@
+import { disabledHint } from '../../../../shared/DisabledTooltip';
+
 type Props = {
   nickname: string;
   busy: boolean;
@@ -17,6 +19,7 @@ export function MenuProfile({ nickname, busy, onNicknameChange }: Props) {
             maxLength={24}
             value={nickname}
             disabled={busy}
+            {...disabledHint(busy ? 'Aguarde a entrada na sala para editar o apelido.' : null)}
             onChange={(event) => onNicknameChange(event.target.value)}
           />
         </label>
@@ -29,7 +32,12 @@ export function MenuProfile({ nickname, busy, onNicknameChange }: Props) {
         <div className="profile-economy">
           <strong>—</strong>
           <small>Em breve</small>
-          <button type="button" disabled aria-label="Moedas · Em breve">
+          <button
+            type="button"
+            disabled
+            aria-label="Moedas · Em breve"
+            {...disabledHint('Cosméticos e moedas estarão disponíveis em uma versão futura.')}
+          >
             +
           </button>
         </div>

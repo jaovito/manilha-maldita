@@ -130,7 +130,15 @@ export async function setup(count: 2 | 4, config: RoomConfig = defaultRoomConfig
       if (reply.type === 'ACK') await all(reply.sequence);
       return reply;
     }
+    async function settle() {
+      while (players[0]?.view?.transition) {
+        const transition = players[0].view.transition;
+        const view = await players[0].wait((current) => current.transition?.id !== transition.id);
+        await all(view.sequence);
+      }
+    }
     async function prepare() {
+      await settle();
       if (players[0]?.view?.match?.phase.type !== 'PREPARATION') return;
       for (let seat = 0; seat < count; seat++)
         expect((await act(seat, { type: 'PREPARE', intent: { type: 'pass' } })).type).toBe('ACK');
@@ -139,6 +147,7 @@ export async function setup(count: 2 | 4, config: RoomConfig = defaultRoomConfig
       for (let seat = 0; seat < count; seat++)
         expect((await act(seat, { type: 'READY', ready: true })).type).toBe('ACK');
       expect((await act(0, { type: 'START_MATCH' })).type).toBe('ACK');
+      await settle();
       if (withPreparation) await prepare();
     }
     return {
@@ -150,6 +159,7 @@ export async function setup(count: 2 | 4, config: RoomConfig = defaultRoomConfig
       act,
       begin,
       prepare,
+      settle,
       post,
       async stop() {
         for (const player of players) player.socket.close();
@@ -179,6 +189,7 @@ export function assertPrivacy(players: readonly Player[]) {
 }
 export async function completeMatch(game: Awaited<ReturnType<typeof setup>>) {
   for (let step = 0; step < 90; step++) {
+    await game.settle();
     const view = game.players[0]?.view;
     const match = view?.match;
     if (!view || !match) throw new Error('Missing game');

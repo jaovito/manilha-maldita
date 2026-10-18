@@ -1,0 +1,104 @@
+.audio-controls {
+  position: fixed;
+  z-index: 50;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+  color: #fff0ce;
+}
+
+.audio-controls summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 78px;
+  min-height: 44px;
+  border: 1px solid #cfa359;
+  background: #102629;
+  padding: 8px 12px;
+  cursor: pointer;
+  list-style: none;
+  box-shadow: 0 3px 0 #071311;
+}
+
+.audio-controls summary::-webkit-details-marker {
+  display: none;
+}
+
+.audio-controls summary:focus-visible {
+  outline: 3px solid #ffe4a1;
+  outline-offset: 4px;
+}
+
+.audio-settings {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  width: min(280px, calc(100vw - 32px));
+  max-height: min(300px, calc(100dvh - 80px));
+  overflow-y: auto;
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #cfa359;
+  background: #0b1e23;
+  box-shadow: 0 6px 18px #0009;
+}
+
+.audio-settings label {
+  color: #fff0ce;
+}
+
+.audio-toggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+}
+
+.audio-volume output {
+  float: right;
+}
+
+.audio-settings input[type="range"] {
+  min-height: 44px;
+  margin-top: 6px;
+  padding: 0;
+  accent-color: #e5b35c;
+  box-shadow: none;
+}
+
+.audio-settings p {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #d6caa9;
+}
+
+.room-menu .audio-controls {
+  position: relative;
+  inset: auto;
+  margin: 12px 0;
+}
+
+.room-menu .audio-controls summary {
+  width: max-content;
+}
+
+.room-menu .audio-settings {
+  position: static;
+  width: 100%;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px), (max-height: 500px) {
+  .audio-controls {
+    right: 8px;
+    bottom: 8px;
+  }
+
+  .audio-controls summary {
+    min-width: 64px;
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+}

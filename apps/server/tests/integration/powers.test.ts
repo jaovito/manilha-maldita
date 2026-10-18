@@ -82,7 +82,7 @@ for (const preset of ['casual', 'competitive'] as const)
     } finally {
       await game.stop();
     }
-  });
+  }, 60000);
 
 function assertVisiblePowers(players: readonly Player[]) {
   const assignments = players.map((player) => {

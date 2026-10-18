@@ -1,12 +1,17 @@
 import { defaultRoomConfig, nicknameSchema, type RoomView } from '@truco/game-protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { EntryMenu } from '../../features/menu';
-import { Lobby, Table } from '../../features/room';
+import { EntryMenu, Welcome } from '../../features/menu';
+import { Lobby, Table, MatchResult } from '../../features/room';
+import { Candlelight } from '../../shared/Candlelight';
+import { DisabledTooltip, disabledHint } from '../../shared/DisabledTooltip';
+import { AudioControls, useGameFeedback } from '../../shared/feedback';
 import { loadNickname, saveNickname } from '../../shared/preferences/nickname';
 import { type Action, connectRoom, envelope, request } from '../../shared/transport/client';
 
 export function App() {
+  const { preferences, changePreferences, observe, reset } = useGameFeedback();
   const [nickname, setNickname] = useState(loadNickname);
+  const [nicknameConfirmed, setNicknameConfirmed] = useState(() => Boolean(loadNickname()));
   const nicknameEdited = useRef(false);
   const [code, setCode] = useState(new URLSearchParams(location.search).get('room') ?? '');
   const [room, setRoom] = useState<RoomView | null>(null);
@@ -18,16 +23,44 @@ export function App() {
   const changeNickname = (value: string) => {
     nicknameEdited.current = true;
     setNickname(value);
-    saveNickname(value);
+    if (nicknameConfirmed) saveNickname(value);
   };
 
-  const join = useCallback(async (roomCode: string) => {
-    await request(`/rooms/${encodeURIComponent(roomCode)}/join`, {});
-    connection.current?.close();
-    setRoom(null);
-    history.replaceState(null, '', `/?room=${encodeURIComponent(roomCode)}`);
-    connection.current = connectRoom(roomCode, setRoom, setConnected, setError);
-  }, []);
+  const confirmNickname = () => {
+    const parsed = nicknameSchema.safeParse(nickname);
+    if (!parsed.success) return;
+
+    setNickname(parsed.data);
+    saveNickname(parsed.data);
+    setNicknameConfirmed(true);
+  };
+
+  const receiveRoom = useCallback(
+    (next: RoomView) => {
+      observe(next);
+      setRoom(next);
+    },
+    [observe],
+  );
+  const connectionStatus = useCallback(
+    (active: boolean) => {
+      if (!active) reset();
+      setConnected(active);
+    },
+    [reset],
+  );
+
+  const join = useCallback(
+    async (roomCode: string) => {
+      await request(`/rooms/${encodeURIComponent(roomCode)}/join`, {});
+      connection.current?.close();
+      setRoom(null);
+      reset();
+      history.replaceState(null, '', `/?room=${encodeURIComponent(roomCode)}`);
+      connection.current = connectRoom(roomCode, receiveRoom, connectionStatus, setError);
+    },
+    [connectionStatus, receiveRoom, reset],
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -40,11 +73,13 @@ export function App() {
         if (!nicknameEdited.current) {
           setNickname(parsed.data);
           saveNickname(parsed.data);
-        }
-        const invitation = new URLSearchParams(location.search).get('room');
-        if (invitation) {
-          await join(invitation);
-          if (!mounted) connection.current?.close();
+          setNicknameConfirmed(true);
+
+          const invitation = new URLSearchParams(location.search).get('room');
+          if (invitation) {
+            await join(invitation);
+            if (!mounted) connection.current?.close();
+          }
         }
       })
       .catch(() => {
@@ -101,6 +136,9 @@ export function App() {
     <main
       className={`app-shell ${!room ? 'entry-shell' : room.match ? 'game-shell' : 'lobby-shell'}`}
     >
+      <DisabledTooltip />
+      {!room?.match && <Candlelight variant={room ? 'lobby' : 'menu'} />}
+      {!room?.match && <AudioControls preferences={preferences} onChange={changePreferences} />}
       <header className="app-header">
         <div className="brand">
           <span className="brand-suits" aria-hidden="true">
@@ -131,7 +169,14 @@ export function App() {
           {error}
         </p>
       )}
-      {!room ? (
+      {!room && !nicknameConfirmed ? (
+        <Welcome
+          nickname={nickname}
+          invitation={Boolean(code)}
+          onChange={changeNickname}
+          onContinue={confirmNickname}
+        />
+      ) : !room ? (
         <EntryMenu
           nickname={nickname}
           code={code}
@@ -144,21 +189,23 @@ export function App() {
         <div
           data-sequence={room.sequence}
           aria-disabled={!connected}
+          {...disabledHint(!connected ? 'Aguarde reconectar para usar as ações da sala.' : null)}
           className={`room-stage ${!connected ? 'disconnected' : ''}`}
         >
-          {room.match && <Table room={room} send={send} />}
+          {room.match && (
+            <div className="table-surface" inert={room.status === 'finished'}>
+              <Table room={room} send={send} />
+            </div>
+          )}
+          <MatchResult room={room} send={send} connected={connected} />
           {room.match ? (
-            <details className="room-menu" open={room.status === 'finished'}>
-              <summary>Sala · {room.code}</summary>
-              {room.outcome && (
-                <p className="room-result">
-                  {room.outcome.winner
-                    ? `Equipe ${room.outcome.winner} venceu a partida.`
-                    : 'Partida sem vencedor.'}
-                </p>
-              )}
-              <Lobby room={room} send={send} />
-            </details>
+            room.status === 'playing' && (
+              <details className="room-menu">
+                <summary>Sala · {room.code}</summary>
+                <p>As regras e equipes ficam fixas durante a partida.</p>
+                <AudioControls preferences={preferences} onChange={changePreferences} />
+              </details>
+            )
           ) : (
             <Lobby room={room} send={send} />
           )}

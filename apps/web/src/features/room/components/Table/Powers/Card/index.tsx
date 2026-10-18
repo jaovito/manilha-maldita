@@ -1,4 +1,5 @@
 import type { Ref } from 'react';
+import { disabledHint } from '../../../../../../shared/DisabledTooltip';
 
 export function PowerCard({
   power,
@@ -25,13 +26,16 @@ export function PowerCard({
   buttonRef: Ref<HTMLButtonElement>;
   canActivate: boolean;
 }) {
+  const reason = canActivate ? null : `${state}. Clique para consultar os detalhes do poder.`;
+
   return (
     <div className="power-card-pocket">
       <button
         type="button"
         className={`power-card power-${power}`}
         aria-label={`Poder ${name}`}
-        aria-description={state}
+        {...disabledHint(reason)}
+        aria-description={reason ?? state}
         aria-expanded={expanded}
         aria-controls={controls}
         aria-pressed={selected}

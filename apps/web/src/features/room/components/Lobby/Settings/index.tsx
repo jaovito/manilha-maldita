@@ -1,11 +1,17 @@
 import { normalizeConfig, type RoomConfig, type RoomView } from '@truco/game-protocol';
 import { useId } from 'react';
+import { disabledHint } from '../../../../../shared/DisabledTooltip';
 import type { Action } from '../../../../../shared/transport/client';
 import { LobbyIcon } from '../Icon';
 
 export function LobbySettings({ room, send }: { room: RoomView; send: (action: Action) => void }) {
   const editable = room.selfSeat === room.hostSeat && room.status === 'lobby';
   const group = useId();
+  const lockedReason = editable
+    ? null
+    : room.status !== 'lobby'
+      ? 'As configurações ficam bloqueadas durante e após a partida.'
+      : 'Somente o anfitrião pode alterar as configurações da sala.';
   const configure = (config: RoomConfig) =>
     send({ type: 'CONFIGURE', config: normalizeConfig(config) });
 
@@ -13,6 +19,7 @@ export function LobbySettings({ room, send }: { room: RoomView; send: (action: A
     <fieldset
       className="lobby-settings"
       disabled={!editable}
+      {...disabledHint(lockedReason)}
       aria-describedby={!editable ? `${group}-locked` : undefined}
     >
       <legend>Configurações da sala</legend>
@@ -36,6 +43,7 @@ export function LobbySettings({ room, send }: { room: RoomView; send: (action: A
                 name={`${group}-format`}
                 value={format}
                 checked={room.config.format === format}
+                {...disabledHint(lockedReason)}
                 onChange={() => configure({ ...room.config, format })}
               />
               <span>{format}</span>
@@ -57,6 +65,7 @@ export function LobbySettings({ room, send }: { room: RoomView; send: (action: A
                 name={`${group}-preset`}
                 value={preset}
                 checked={room.config.preset === preset}
+                {...disabledHint(lockedReason)}
                 onChange={() => configure({ ...room.config, preset })}
               />
               <span>{preset === 'casual' ? 'Casual' : 'Competitivo'}</span>
@@ -77,6 +86,7 @@ export function LobbySettings({ room, send }: { room: RoomView; send: (action: A
             aria-checked="true"
             aria-label="Poderes aleatórios"
             disabled
+            {...disabledHint('Os quatro poderes ficam ativos nos dois presets do MVP.')}
             checked={true}
             readOnly
           />

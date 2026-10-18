@@ -1,4 +1,6 @@
+import { nicknameSchema } from '@truco/game-protocol';
 import { useState } from 'react';
+import { disabledHint } from '../../../../shared/DisabledTooltip';
 import { MenuIcon } from '../../components/Icon';
 import { MenuProfile } from '../../components/Profile';
 
@@ -20,6 +22,14 @@ export function EntryMenu({
   onEnter,
 }: Props) {
   const [joining, setJoining] = useState(Boolean(code));
+  const entryReason = busy
+    ? 'Aguarde a entrada na sala.'
+    : !nicknameSchema.safeParse(nickname).success
+      ? 'Escolha um apelido válido antes de entrar.'
+      : null;
+  const joinReason =
+    entryReason ||
+    (!/^[A-Z0-9]{6}$/.test(code) ? 'Informe um código de sala com 6 letras ou números.' : null);
 
   return (
     <div className="main-menu">
@@ -40,6 +50,7 @@ export function EntryMenu({
               placeholder="ABC123"
               value={code}
               disabled={busy}
+              {...disabledHint(busy ? 'Aguarde a entrada na sala para editar o código.' : null)}
               onChange={(event) => onCodeChange(event.target.value.toUpperCase())}
             />
           </label>
@@ -47,7 +58,8 @@ export function EntryMenu({
             className="menu-button menu-green"
             type="button"
             aria-label="Entrar na sala"
-            disabled={busy || !nickname.trim() || !/^[A-Z0-9]{6}$/.test(code)}
+            disabled={Boolean(joinReason)}
+            {...disabledHint(joinReason)}
             onClick={() => onEnter(false)}
           >
             <MenuIcon name="players" />
@@ -57,6 +69,7 @@ export function EntryMenu({
             className="menu-back"
             type="button"
             disabled={busy}
+            {...disabledHint(busy ? 'Aguarde a entrada na sala.' : null)}
             onClick={() => setJoining(false)}
           >
             ← Voltar ao menu
@@ -64,7 +77,12 @@ export function EntryMenu({
         </section>
       ) : (
         <nav className="menu-navigation" aria-label="Menu principal">
-          <button className="menu-button menu-green" type="button" disabled title="Em breve">
+          <button
+            className="menu-button menu-green"
+            type="button"
+            disabled
+            {...disabledHint('Este recurso estará disponível em uma versão futura.')}
+          >
             <MenuIcon name="cards" />
             <span>
               Jogar<small>Em breve</small>
@@ -74,7 +92,8 @@ export function EntryMenu({
             className="menu-button menu-red"
             type="button"
             aria-label="Criar sala"
-            disabled={busy || !nickname.trim()}
+            disabled={Boolean(entryReason)}
+            {...disabledHint(entryReason)}
             onClick={() => onEnter(true)}
           >
             <MenuIcon name="house" />
@@ -89,19 +108,34 @@ export function EntryMenu({
             <MenuIcon name="players" />
             <span>Entrar em sala</span>
           </button>
-          <button className="menu-button menu-green" type="button" disabled title="Em breve">
+          <button
+            className="menu-button menu-green"
+            type="button"
+            disabled
+            {...disabledHint('Este recurso estará disponível em uma versão futura.')}
+          >
             <MenuIcon name="book" />
             <span>
               Como jogar<small>Em breve</small>
             </span>
           </button>
-          <button className="menu-button menu-blue" type="button" disabled title="Em breve">
+          <button
+            className="menu-button menu-blue"
+            type="button"
+            disabled
+            {...disabledHint('Este recurso estará disponível em uma versão futura.')}
+          >
             <MenuIcon name="hat" />
             <span>
               Cosméticos<small>Em breve</small>
             </span>
           </button>
-          <button className="menu-button menu-green" type="button" disabled title="Em breve">
+          <button
+            className="menu-button menu-green"
+            type="button"
+            disabled
+            {...disabledHint('Este recurso estará disponível em uma versão futura.')}
+          >
             <MenuIcon name="gear" />
             <span>
               Configurações<small>Em breve</small>
@@ -115,7 +149,12 @@ export function EntryMenu({
         </p>
       )}
       <footer className="menu-footer">
-        <button className="menu-exit" type="button" disabled title="Em breve">
+        <button
+          className="menu-exit"
+          type="button"
+          disabled
+          {...disabledHint('Este recurso estará disponível em uma versão futura.')}
+        >
           Sair <small>Em breve</small>
         </button>
         <span>alpha · M2</span>

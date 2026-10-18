@@ -1,5 +1,5 @@
-import { assertPlayingCardRatios } from './card-proportions';
 import { expect, type Page } from '@playwright/test';
+import { assertPlayingCardRatios } from './card-proportions';
 
 const checked = new WeakMap<Page, Set<string>>();
 

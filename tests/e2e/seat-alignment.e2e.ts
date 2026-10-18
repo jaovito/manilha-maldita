@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { enterNickname } from './entry-flow';
 import { assertSeatAlignment } from './seat-alignment';
 
 test('seat actions stay aligned with long nicknames, badges and readiness changes', async ({
   page,
 }, info) => {
   await page.goto('/');
-  await page.getByLabel('Apelido').fill('NomeMuitoLongoDoAnfitriao');
+  await enterNickname(page, 'NomeMuitoLongoDoAnfitriao');
   await page.getByRole('button', { name: 'Criar sala', exact: true }).click();
   await expect(page.getByRole('heading', { name: /^Sala / })).toBeVisible();
   await page.getByRole('radio', { name: '2v2', exact: true }).click();

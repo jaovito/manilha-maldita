@@ -1,7 +1,15 @@
 import { expect, test } from 'bun:test';
 import { cardKey, cardStrength } from '@truco/game-core/cards';
 import { defaultRoomConfig } from '@truco/game-protocol';
-import { actor, fixture, giveOneToA, playTurn, prepareRoom, start } from './room-service.test';
+import {
+  actor,
+  fixture,
+  giveOneToA,
+  playTurn,
+  prepareRoom,
+  settleRoom,
+  start,
+} from './room-service.test';
 
 test('deadline auto-plays the weakest own card and rejects a command arriving at that boundary', async () => {
   const f = fixture();
@@ -55,6 +63,7 @@ test('raise response timeout folds at accepted value and eleven timeout awards e
     await f.advance(elevenDeadline);
     expect(r.host.view.match?.score.A).toBe(11);
     expect(r.host.view.match?.score.B).toBe(beforeB + 1);
+    await settleRoom(r);
     expect((await actor(r, 0).send({ type: 'DECIDE_ELEVEN', response: 'play' })).type).toBe('ACK');
     expect(r.host.view.match?.phase.type).toBe('TURN');
   } finally {
@@ -70,19 +79,19 @@ test('reconnection preserves remaining time and cumulatively spends protection i
     const phase = r.host.view.match?.phase;
     if (phase?.type !== 'TURN') throw new Error('NO_TURN');
     const p = actor(r, phase.seat);
-    f.setNow(200);
+    f.setNow(1100);
     await p.disconnect();
     expect(actor(r, (phase.seat + 1) % 2).view.paused).toBe(true);
-    f.setNow(10200);
+    f.setNow(11100);
     await p.connect(r.code);
-    expect(p.view.deadline).toBe(11000);
-    f.setNow(10300);
+    expect(p.view.deadline).toBe(11900);
+    f.setNow(11200);
     await p.disconnect();
-    await f.advance(60300);
+    await f.advance(61200);
     const spectator = actor(r, (phase.seat + 1) % 2);
     expect(spectator.view.paused).toBe(false);
-    expect(spectator.view.deadline).toBe(61000);
-    await f.advance(61000);
+    expect(spectator.view.deadline).toBe(61900);
+    await f.advance(61900);
     expect(spectator.view.match?.hand.plays).toHaveLength(1);
   } finally {
     f.service.close();
@@ -120,20 +129,20 @@ test('cancelled pre-pause callbacks cannot expire resumed turns or permit action
     const p = actor(r, phase.seat);
     const other = actor(r, (phase.seat + 1) % 2);
     const old = f.timers.at(-1);
-    f.setNow(200);
+    f.setNow(1100);
     await p.disconnect();
     expect(await other.send({ type: 'REQUEST_RAISE' })).toMatchObject({ code: 'DECISION_PAUSED' });
-    f.setNow(700);
+    f.setNow(1600);
     await p.connect(r.code);
-    expect(p.view.deadline).toBe(1500);
+    expect(p.view.deadline).toBe(2400);
     const decision = p.view.decisionId;
-    f.setNow(1000);
+    f.setNow(1900);
     old?.callback();
     await p.send({ type: 'SYNC' });
     expect(p.view.decisionId).toBe(decision);
     expect(p.view.match?.revision).toBe(2);
-    expect(p.view.deadline).toBe(1500);
-    await f.advance(1500);
+    expect(p.view.deadline).toBe(2400);
+    await f.advance(2400);
     expect(other.view.match?.hand.plays).toHaveLength(1);
   } finally {
     f.service.close();
@@ -217,8 +226,9 @@ test('new untimed decisions for an absent seat with spent protection still auto-
     await absent.disconnect();
     // Continue observing through the connected recipient; disconnected snapshots stop updating.
     r.host = present;
-    await f.advance(60000);
+    await f.advance(60900);
     for (let step = 0; step < 20 && present.view.status === 'playing'; step++) {
+      await settleRoom(r);
       if (present.view.match?.phase.type === 'PREPARATION') {
         if (!present.view.match.powers?.players[present.view.selfSeat]?.ready)
           await present.send({ type: 'PREPARE', intent: { type: 'pass' } });
@@ -229,7 +239,7 @@ test('new untimed decisions for an absent seat with spent protection still auto-
       const current = present.view.match?.phase;
       if (current?.type !== 'TURN') throw new Error('NO_TURN');
       if (current.seat === present.view.selfSeat) await playTurn(r);
-      await f.advance(Math.max(60001 + step, present.view.deadline ?? 0));
+      await f.advance(Math.max(f.ports.now() + 1, present.view.deadline ?? 0));
     }
     expect(present.view.outcome).toEqual({
       winner: phase.seat % 2 === 0 ? 'B' : 'A',

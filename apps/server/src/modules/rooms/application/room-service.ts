@@ -72,6 +72,7 @@ export class RoomService {
       matchId: null,
       outcome: null,
       clock: null,
+      transition: null,
       budgets: [],
       emptySince: this.ports.now(),
       cache: new Map(),
@@ -288,14 +289,20 @@ export class RoomService {
     room.cancel = null;
     const times = [
       room.clock === null ? null : room.clock.expired ? this.ports.now() : nextWakeAt(room.clock),
+      room.transition?.until ?? null,
       room.emptySince === null ? null : room.emptySince + protectionMs(room),
     ].filter((at): at is number => at !== null);
     if (times.length === 0 || this.rooms.get(room.code) !== room) return;
 
     const decision = room.clock?.decisionId ?? null;
+    const transition = room.transition?.id ?? null;
     room.cancel = this.ports.schedule(Math.min(...times), () => {
       void this.enqueue(room, () => {
-        if ((room.clock?.decisionId ?? null) !== decision) return;
+        if (
+          (room.clock?.decisionId ?? null) !== decision ||
+          (room.transition?.id ?? null) !== transition
+        )
+          return;
         this.tick(room);
       }).catch(() => {});
     });

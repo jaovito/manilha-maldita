@@ -103,3 +103,19 @@ test('power commands reject extra authority, mixed windows and malformed targets
       .preparationTimeoutMs,
   ).toBe(10000);
 });
+
+test('transition metadata is optional, bounded to public presentation kinds and rejects extra state', async () => {
+  const { roomViewSchema } = await import('./index');
+  const schema = roomViewSchema.shape.transition;
+  expect(schema.safeParse(undefined).success).toBe(true);
+  for (const kind of ['deal', 'trick', 'hand'])
+    expect(schema.safeParse({ id: 'pause_1', kind, until: 900 }).success).toBe(true);
+  for (const value of [
+    null,
+    { id: 'pause_1', kind: 'power', until: 900 },
+    { id: 'pause_1', kind: 'deal', until: Infinity },
+    { id: 'pause_1', kind: 'deal', until: 900, seed: 1 },
+    { id: 'private/card', kind: 'deal', until: 900 },
+  ])
+    expect(schema.safeParse(value).success).toBe(false);
+});

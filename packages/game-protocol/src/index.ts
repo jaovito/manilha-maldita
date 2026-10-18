@@ -197,6 +197,9 @@ export const roomViewSchema = z.strictObject({
   decisionId: id.nullable(),
   deadline: z.number().finite().nullable(),
   paused: z.boolean(),
+  transition: z
+    .strictObject({ id, kind: z.enum(['deal', 'trick', 'hand']), until: z.number().finite() })
+    .optional(),
   match: matchViewSchema.nullable(),
   outcome: z
     .strictObject({

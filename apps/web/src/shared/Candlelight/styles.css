@@ -1,0 +1,164 @@
+.candlelight,
+.candlelight * {
+  pointer-events: none;
+}
+
+.candlelight {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.candlelight-plane {
+  position: absolute;
+  inset: 0;
+  --flame-x: 4.55%;
+  --flame-y: 7.4%;
+  --flame-width: 1.5%;
+  --flame-height: 6.1%;
+}
+
+.candlelight-menu .candlelight-plane {
+  --flame-x: 2.95%;
+  --flame-y: 16.2%;
+  --flame-width: 2.3%;
+  --flame-height: 10.5%;
+}
+
+/* Match the fixed, centered cover background instead of the scrolling lobby. */
+.candlelight-lobby {
+  position: fixed;
+}
+
+.candlelight-lobby .candlelight-plane {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  width: max(100vw, 150dvh);
+  height: max(100dvh, 66.6667vw);
+  translate: -50% -50%;
+  --flame-x: 5.7%;
+  --flame-y: 7.4%;
+  --flame-width: 1.35%;
+  --flame-height: 6%;
+}
+
+.candlelight-flame {
+  position: absolute;
+  left: var(--flame-x);
+  top: var(--flame-y);
+  width: var(--flame-width);
+  height: var(--flame-height);
+  translate: -50% -100%;
+  transform-origin: center bottom;
+  background: #ffab32;
+  clip-path: polygon(
+    44% 0,
+    56% 0,
+    56% 18%,
+    64% 18%,
+    64% 35%,
+    72% 35%,
+    72% 50%,
+    80% 50%,
+    80% 66%,
+    88% 66%,
+    88% 83%,
+    72% 83%,
+    72% 94%,
+    60% 94%,
+    60% 100%,
+    32% 100%,
+    32% 94%,
+    20% 94%,
+    20% 85%,
+    12% 85%,
+    12% 65%,
+    20% 65%,
+    20% 50%,
+    28% 50%,
+    28% 35%,
+    36% 35%,
+    36% 18%,
+    44% 18%
+  );
+  animation: candle-flame 1700ms steps(5, end) infinite;
+}
+
+.candlelight-flame::after {
+  content: "";
+  position: absolute;
+  inset: 18% 16% 1%;
+  background: #fff4b5;
+  clip-path: polygon(
+    44% 0,
+    56% 0,
+    56% 36%,
+    68% 36%,
+    68% 55%,
+    80% 55%,
+    80% 83%,
+    64% 83%,
+    64% 100%,
+    32% 100%,
+    32% 88%,
+    20% 88%,
+    20% 62%,
+    32% 62%,
+    32% 36%,
+    44% 36%
+  );
+}
+
+.candlelight-glow {
+  position: absolute;
+  left: var(--flame-x);
+  top: var(--flame-y);
+  width: calc(var(--flame-width) * 8);
+  height: calc(var(--flame-height) * 3.5);
+  translate: -50% -60%;
+  background: radial-gradient(ellipse, #ffc35830, #ffb52e0d 40%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: candle-glow 2300ms steps(6, end) infinite;
+}
+
+@keyframes candle-flame {
+  0%,
+  100% {
+    transform: scaleX(1) scaleY(0.98);
+  }
+  30% {
+    transform: scaleX(0.91) scaleY(1.06);
+  }
+  65% {
+    transform: scaleX(1.05) scaleY(0.93);
+  }
+}
+
+@keyframes candle-glow {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+/* Portrait uses a centered crop: the candle is outside the visible artwork. */
+@media (max-width: 600px) and (orientation: portrait) {
+  .candlelight-menu {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candlelight {
+    display: none;
+  }
+
+  .candlelight-flame,
+  .candlelight-glow {
+    animation: none;
+  }
+}

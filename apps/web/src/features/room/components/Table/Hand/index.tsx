@@ -1,5 +1,7 @@
 import type { Action, MatchView, RoomView } from '@truco/game-protocol';
+import { disabledHint } from '../../../../../shared/DisabledTooltip';
 import { cardLabel, manilhaRanks } from '../../../utils/cards';
+import { gameplayDisabledReason } from '../../../utils/disabled-reason';
 import { CardFace } from '../Card';
 import { hasBoostTarget, powerInstructions } from '../Powers/selection';
 
@@ -24,12 +26,23 @@ export function TableHand({
   const own = hand.hands[room.selfSeat];
   const turn = phase.type === 'TURN' && phase.seat === room.selfSeat;
   const boostHasTarget = hasBoostTarget(match, room.selfSeat);
-  const disabled = room.paused || room.status !== 'playing';
+  const disabled = room.paused || Boolean(room.transition) || room.status !== 'playing';
+  const baseReason = gameplayDisabledReason(room);
+  const waitingReason =
+    phase.type === 'PREPARATION'
+      ? 'Conclua a preparação ou selecione Segunda Chance para trocar uma carta.'
+      : phase.type === 'RAISE_RESPONSE' || phase.type === 'ELEVEN_DECISION'
+        ? 'Aguarde a decisão da equipe antes de jogar uma carta.'
+        : 'Aguarde sua vez para jogar esta carta.';
 
   return (
     <div className="own-hand" data-targeting={selected !== null}>
       <div className="own-player" data-active={turn && !disabled}>
-        {turn && !disabled && <span className="turn-badge">Sua vez</span>}
+        {turn && !disabled && (
+          <span className="turn-badge" key={room.decisionId}>
+            Sua vez
+          </span>
+        )}
         <span className={`seat-avatar avatar-${room.selfSeat}`} aria-hidden="true" />
         <strong>
           {room.seats[room.selfSeat]?.nickname ?? 'Você'} <small>VOCÊ</small>
@@ -64,6 +77,15 @@ export function TableHand({
                 (selected === 'boost' &&
                   (card.rank === manilhaRanks[hand.vira.rank] || card.rank === '3'))
               }
+              {...disabledHint(
+                baseReason ||
+                  (selected !== 'exchange' && !turn
+                    ? waitingReason
+                    : selected === 'boost' &&
+                        (card.rank === manilhaRanks[hand.vira.rank] || card.rank === '3')
+                      ? 'Impulso não aceita manilhas nem cartas de valor 3.'
+                      : null),
+              )}
               onClick={() => {
                 if (selected === 'exchange')
                   send({ type: 'PREPARE', intent: { type: 'exchange', card } });

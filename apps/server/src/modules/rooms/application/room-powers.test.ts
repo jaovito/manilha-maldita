@@ -46,12 +46,12 @@ test('preparation deadline passes only missing players, and cancelled callback c
   try {
     const r = await f.room();
     await start(r, false);
-    expect(r.host.view.deadline).toBe(15000);
+    expect(r.host.view.deadline).toBe(15900);
     const oldTimer = f.timers.at(-1);
     await r.host.send({ type: 'PREPARE', intent: { type: 'pass' } });
     const guest = actor(r, 1);
     const late = guest.message({ type: 'PREPARE', intent: { type: 'pass' } });
-    f.setNow(15000);
+    f.setNow(15900);
     expect(await guest.raw(late)).toMatchObject({ code: 'STALE_CONTEXT' });
     expect(r.host.view.match?.phase.type).toBe('TURN');
     expect(r.host.view.match?.powers?.players.every((p) => p.ready)).toBe(true);
@@ -80,7 +80,7 @@ test('disconnecting a prepared player does not pause; missing intent consumes cu
     expect(host.view.paused).toBe(true);
     f.setNow(6000);
     await guest.connect(r.code);
-    expect(host.view.deadline).toBe(20000);
+    expect(host.view.deadline).toBe(20900);
     expect(host.view.decisionId).toBe(guest.view.decisionId);
     expect((await guest.send({ type: 'PREPARE', intent: { type: 'pass' } })).type).toBe('ACK');
   } finally {

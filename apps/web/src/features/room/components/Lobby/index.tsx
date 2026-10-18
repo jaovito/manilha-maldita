@@ -1,9 +1,10 @@
 import type { RoomView } from '@truco/game-protocol';
+import { disabledHint } from '../../../../shared/DisabledTooltip';
 import type { Action } from '../../../../shared/transport/client';
-import { LobbySettings } from './Settings';
-import { LobbySeats } from './Seats';
-import { RoomInvite } from './Invite';
 import { LobbyIcon } from './Icon';
+import { RoomInvite } from './Invite';
+import { LobbySeats } from './Seats';
+import { LobbySettings } from './Settings';
 
 export function Lobby({ room, send }: { room: RoomView; send: (action: Action) => void }) {
   const host = room.selfSeat === room.hostSeat;
@@ -12,6 +13,14 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
   const disconnected = occupants.filter((player) => !player.connected);
   const unready = occupants.filter((player) => player.connected && !player.ready);
   const canStart = missing === 0 && disconnected.length === 0 && unready.length === 0;
+  const startReason =
+    missing > 0
+      ? 'Convide os jogadores que faltam para completar a sala.'
+      : disconnected.length > 0
+        ? 'Aguarde todos os jogadores reconectarem.'
+        : unready.length > 0
+          ? 'Todos os jogadores precisam confirmar Estou pronto.'
+          : null;
 
   return (
     <section className={`room-lobby ${room.match ? 'compact-lobby' : ''}`} aria-label="Lobby">
@@ -45,6 +54,9 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
                   aria-label="Sala privada"
                   checked
                   disabled
+                  {...disabledHint(
+                    'O MVP tem somente salas privadas. Compartilhe o link para convidar.',
+                  )}
                   readOnly
                 />
                 <span aria-hidden="true" />
@@ -165,6 +177,7 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
                 className="button-primary"
                 type="button"
                 disabled={!canStart}
+                {...disabledHint(startReason)}
                 aria-describedby="start-requirements"
                 onClick={() => send({ type: 'START_MATCH' })}
               >

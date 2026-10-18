@@ -1,13 +1,15 @@
-import { assertPlayingCardRatios } from './card-proportions';
-import { devices, expect, test, type Page, type Locator } from '@playwright/test';
+import { devices, expect, type Page, test } from '@playwright/test';
+import { enterNickname } from './entry-flow';
 import { assertLobbyContrast } from './lobby-contrast';
-import { assertPowerTargetGeometry } from './power-targets';
+import { assertCompletedMatch } from './match-results';
+import { clickAndSync, findActivePlayer, observeRoomSnapshots } from './multiplayer-flow';
+import { playWithPower, preparePowers } from './multiplayer-powers';
 import { assertSeatAlignment } from './seat-alignment';
 import {
   assertNoOverflow,
   assertTableGeometry,
-  checkSmallPhones,
   captureRoomSurface,
+  checkSmallPhones,
 } from './viewport';
 
 for (const count of [2, 4] as const) {
@@ -25,13 +27,14 @@ for (const count of [2, 4] as const) {
       ),
     );
     const pages = await Promise.all(contexts.map((context) => context.newPage()));
+    const views = pages.map(observeRoomSnapshots);
     const host = pages[0];
     if (!host) throw new Error('MISSING_HOST');
     try {
       await host.goto('/');
       await assertNoOverflow(host);
+      await enterNickname(host, 'Ana');
       await captureRoomSurface(host, 'menu', testInfo.project.name);
-      await host.getByLabel('Apelido').fill('Ana');
       await host.getByRole('button', { name: 'Criar sala' }).click();
       const heading = host.getByRole('heading', { name: /^Sala / });
       await expect(heading).toBeVisible();
@@ -66,7 +69,7 @@ for (const count of [2, 4] as const) {
         const page = pages[index];
         if (!page) throw new Error('MISSING_PLAYER');
         await page.goto(index === 1 ? '/' : `/?room=${code}`);
-        await page.getByLabel('Apelido').fill(`Amigo ${index}`);
+        await enterNickname(page, `Amigo ${index}`);
         if (index === 1) {
           await page.getByRole('button', { name: 'Entrar em sala', exact: true }).click();
           await page.getByLabel('Código da sala').fill(code);
@@ -179,13 +182,17 @@ for (const count of [2, 4] as const) {
       await expect(host.getByRole('region', { name: 'Mesa da partida' })).toBeVisible();
       await finish(pages);
       for (const page of pages) await expect(page.getByText(/Partida encerrada/)).toBeVisible();
+      await assertCompletedMatch(pages, views, count, testInfo.project.name);
       await host.screenshot({
         path: `/tmp/truco-viewport-finished-${count}-${testInfo.project.name}.png`,
         fullPage: true,
       });
-      await host.getByRole('button', { name: 'Revanche' }).click();
+      await host
+        .getByRole('button', { name: count === 2 ? 'Revanche' : 'Voltar ao lobby', exact: true })
+        .click();
       for (const page of pages) {
         await expect(page.getByRole('button', { name: 'Estou pronto' })).toBeVisible();
+        await expect(page.locator('.match-end-layer')).toHaveCount(0);
         await clickAndSync(pages, page, page.getByRole('button', { name: 'Estou pronto' }));
       }
       await expect(host.getByRole('button', { name: 'Iniciar partida' })).toBeEnabled();
@@ -193,7 +200,9 @@ for (const count of [2, 4] as const) {
       await expect(host.getByRole('button', { name: 'Desistir da partida' })).toBeVisible();
       await expect(host.getByRole('button', { name: 'Sair da sala' })).toHaveCount(0);
       await host.getByRole('button', { name: 'Desistir da partida' }).click();
-      await expect(host.getByText(/Partida encerrada.*desistência/)).toBeVisible();
+      await expect(
+        host.getByText('Partida encerrada por desistência', { exact: true }),
+      ).toBeVisible();
       await host.getByRole('button', { name: 'Sair da sala' }).click();
       await expect(host.getByLabel('Apelido')).toBeVisible();
     } finally {
@@ -249,70 +258,4 @@ async function finish(pages: Page[]) {
         .toBeGreaterThan(0);
   }
   throw new Error('Partida não encerrou em 100 ações.');
-}
-
-async function clickAndSync(pages: Page[], page: Page, target: Locator) {
-  const previous = Number(await page.locator('[data-sequence]').getAttribute('data-sequence'));
-  await target.click();
-  await Promise.all(
-    pages.map((client) =>
-      expect
-        .poll(async () =>
-          Number(await client.locator('[data-sequence]').getAttribute('data-sequence')),
-        )
-        .toBeGreaterThan(previous),
-    ),
-  );
-}
-
-async function findActivePlayer(pages: Page[]): Promise<Page> {
-  for (const page of pages) if ((await page.locator('.card:enabled').count()) > 0) return page;
-  throw new Error('Nenhum jogador com turno ativo.');
-}
-
-async function preparePowers(pages: Page[]) {
-  const preparing = await Promise.all(
-    pages.map((page) => page.getByRole('button', { name: 'Passar preparação' }).isVisible()),
-  );
-  if (!preparing.some(Boolean)) return;
-
-  const spies = new Set<Page>();
-  const consumed = new Set<Page>();
-  for (const page of pages) {
-    const pass = page.getByRole('button', { name: 'Passar preparação' });
-    if (!(await pass.isVisible())) continue;
-    const power = page.locator('.power-card[data-can-activate="true"]');
-    if (!(await power.count())) {
-      await clickAndSync(pages, page, pass);
-      continue;
-    }
-    consumed.add(page);
-    await power.click();
-    await expect(page.locator('.power-panel')).toHaveCount(0);
-    await assertPowerTargetGeometry(page);
-    const spy = page.getByRole('button', { name: /^Espionar carta/ });
-    if (await spy.count()) {
-      spies.add(page);
-      await clickAndSync(pages, page, spy.first());
-    } else await clickAndSync(pages, page, page.locator('.hand-cards .card:enabled').first());
-  }
-  for (const page of pages) {
-    await expect(page.locator('.spy-observation')).toHaveCount(spies.has(page) ? 1 : 0);
-    await assertPlayingCardRatios(page);
-    if (consumed.has(page)) await expect(page.locator('.power-card')).toHaveCount(0);
-  }
-}
-
-async function playWithPower(pages: Page[], page: Page) {
-  const power = page.locator('.power-card[data-can-activate="true"]');
-  if (await power.count()) {
-    await power.click();
-    await expect(power).toHaveAttribute('aria-pressed', 'true');
-    await assertPowerTargetGeometry(page);
-    // A boost can be unavailable for every remaining card; passing preserves legality.
-    if ((await page.locator('.card:enabled').count()) === 0) await power.click();
-  }
-  const activated = await page.locator('.power-card[aria-pressed="true"]').count();
-  await clickAndSync(pages, page, page.locator('.card:enabled').first());
-  if (activated) await expect(page.locator('.power-card')).toHaveCount(0);
 }

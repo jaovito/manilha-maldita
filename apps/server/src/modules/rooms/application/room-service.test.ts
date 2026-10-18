@@ -108,7 +108,18 @@ export function fixture() {
       await service.join(code, p.session, `Jogador ${index}`);
       await p.connect(code);
     }
-    return { code, peers, host };
+    return { code, peers, host, advance };
+  }
+  async function advance(value: number) {
+    now = value;
+    for (let iteration = 0; iteration < 200; iteration++) {
+      const timer = timers.find((entry) => !entry.cancelled && entry.at <= now);
+      if (!timer) return;
+      timer.cancelled = true;
+      timer.callback();
+      for (let count = 0; count < 15; count++) await Promise.resolve();
+    }
+    throw new Error('TIMER_LOOP');
   }
   return {
     service,
@@ -119,17 +130,7 @@ export function fixture() {
     setNow(value: number) {
       now = value;
     },
-    async advance(value: number) {
-      now = value;
-      for (let iteration = 0; iteration < 200; iteration++) {
-        const timer = timers.find((entry) => !entry.cancelled && entry.at <= now);
-        if (!timer) return;
-        timer.cancelled = true;
-        timer.callback();
-        for (let count = 0; count < 15; count++) await Promise.resolve();
-      }
-      throw new Error('TIMER_LOOP');
-    },
+    advance,
   };
 }
 
@@ -138,9 +139,16 @@ export async function start(room: TestRoom, prepare = true) {
   for (const p of room.peers)
     expect((await p.send({ type: 'READY', ready: true })).type).toBe('ACK');
   expect((await room.host.send({ type: 'START_MATCH' })).type).toBe('ACK');
+  await settleRoom(room);
   if (prepare) await prepareRoom(room);
 }
+export async function settleRoom(room: TestRoom) {
+  for (let count = 0; count < 2 && room.host.view.transition; count++)
+    await room.advance(room.host.view.transition.until);
+}
+
 export async function prepareRoom(room: TestRoom) {
+  await settleRoom(room);
   if (room.host.view.match?.phase.type !== 'PREPARATION') return;
   for (const p of room.peers)
     if (!p.view.match?.powers?.players[p.view.selfSeat]?.ready)
@@ -169,6 +177,7 @@ export async function giveOneToA(room: TestRoom) {
   if (phase?.type !== 'TURN') throw new Error('NO_TURN');
   expect((await actor(room, phase.seat).send({ type: 'REQUEST_RAISE' })).type).toBe('ACK');
   expect((await actor(room, 1).send({ type: 'RESPOND_RAISE', response: 'fold' })).type).toBe('ACK');
+  await settleRoom(room);
 }
 
 test('lobby enforces host, readiness, free seats, configuration and membership', async () => {

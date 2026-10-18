@@ -211,15 +211,24 @@
     bottom: auto;
   }
   .game-shell .room-menu > summary {
-    font-size: 10px;
+    font-size: 0;
     padding: 6px;
+    width: 44px;
+    justify-content: center;
   }
   .game-shell .room-menu > summary::before {
-    margin-right: 5px;
+    margin-right: 0;
+    font-size: 16px;
   }
   .game-shell .room-menu[open] {
     top: 50%;
     left: 50%;
+  }
+  .game-shell .room-menu[open] > summary {
+    font-size: 12px;
+    width: 100%;
+    justify-content: flex-start;
+    gap: 8px;
   }
   .game-shell .match-result {
     top: 25%;

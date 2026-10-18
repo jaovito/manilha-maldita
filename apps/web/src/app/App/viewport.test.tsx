@@ -10,6 +10,8 @@ import { App } from './index';
 
 const originalFetch = globalThis.fetch;
 const originalWebSocket = globalThis.WebSocket;
+const originalTimeout = window.setTimeout;
+const originalClearTimeout = window.clearTimeout;
 
 class ViewportSocket {
   static OPEN = 1;
@@ -116,6 +118,8 @@ async function openGame() {
 }
 
 afterEach(() => {
+  window.setTimeout = originalTimeout;
+  window.clearTimeout = originalClearTimeout;
   globalThis.fetch = originalFetch;
   Object.defineProperty(globalThis, 'WebSocket', {
     configurable: true,
@@ -126,7 +130,7 @@ afterEach(() => {
   location.href = 'http://localhost/';
 });
 
-test('the active game keeps room settings collapsed while preserving table actions', async () => {
+test('the active game keeps the audio menu collapsed and omits frozen room settings', async () => {
   const view = await openGame();
 
   expect(view.container.querySelector('main')?.classList.contains('game-shell')).toBe(true);
@@ -134,6 +138,8 @@ test('the active game keeps room settings collapsed while preserving table actio
   expect(view.menu.hasAttribute('open')).toBe(false);
   expect(screen.getByText('Sala · ABC123')).toBeDefined();
   expect(screen.queryByRole('button', { name: 'Revanche' })).toBeNull();
+  expect(screen.queryByLabelText('Tempo de carta')).toBeNull();
+  expect(view.container.querySelector('.room-lobby')).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: '3 de Copas ♥' }));
   expect(view.socket.sent.at(-1)?.action).toEqual({
     type: 'PLAY_CARD',
@@ -146,8 +152,23 @@ test('the active game keeps room settings collapsed while preserving table actio
   expect(view.socket.sent).toHaveLength(1);
 });
 
-test('finishing opens the room menu and keeps rematch and acknowledged leave available', async () => {
+test('finishing holds the celebration before a compact menu with rematch and acknowledged leave', async () => {
   const view = await openGame();
+  let finishCelebration: (() => void) | undefined;
+  Object.defineProperty(window, 'setTimeout', {
+    configurable: true,
+    writable: true,
+    value: (run: () => void, delay: number) => {
+      expect(delay).toBe(5000);
+      finishCelebration = run;
+      return 1;
+    },
+  });
+  Object.defineProperty(window, 'clearTimeout', {
+    configurable: true,
+    writable: true,
+    value: () => {},
+  });
   const game = playing();
   const match = game.match;
   if (!match) throw new Error('MISSING_MATCH');
@@ -162,8 +183,18 @@ test('finishing opens the room menu and keeps rematch and acknowledged leave ava
       match: { ...match, phase: { type: 'MATCH_END', winner: 'A' }, score: { A: 12, B: 0 } },
     }),
   );
-  expect(view.menu.open).toBe(true);
-  expect(view.menu.querySelector('.room-result')?.textContent).toBe('Equipe A venceu a partida.');
+  expect(view.container.querySelector('.room-menu')).toBeNull();
+  expect(document.querySelector('.room-result')?.textContent).toBe('Equipe A venceu a partida.');
+  expect(document.querySelector('.match-end-layer')?.getAttribute('data-stage')).toBe(
+    'celebration',
+  );
+  expect(screen.queryByRole('button', { name: 'Revanche' })).toBeNull();
+  expect(screen.queryByRole('button', { name: 'Sair da sala' })).toBeNull();
+  expect(view.container.querySelector('.table-surface')?.hasAttribute('inert')).toBe(true);
+  act(() => finishCelebration?.());
+  expect(screen.getByRole('dialog', { name: 'Resultado da partida' })).toBeDefined();
+  expect(screen.getByRole('button', { name: 'Voltar ao lobby' })).toBeDefined();
+  expect(screen.queryByLabelText('Tempo de carta')).toBeNull();
   expect(screen.getByRole('button', { name: 'Revanche' })).toBeDefined();
   expect(screen.getByRole('button', { name: 'Sair da sala' })).toBeDefined();
   fireEvent.click(screen.getByRole('button', { name: 'Revanche' }));
@@ -174,7 +205,7 @@ test('finishing opens the room menu and keeps rematch and acknowledged leave ava
   fireEvent.click(screen.getByRole('button', { name: 'Sair da sala' }));
   const leave = view.socket.sent.at(-1);
   expect(leave?.action).toEqual({ type: 'LEAVE' });
-  expect(screen.getByRole('region', { name: 'Mesa da partida' })).toBeDefined();
+  expect(view.container.querySelector('.game-table')).not.toBeNull();
   act(() =>
     view.socket.onmessage?.({
       data: JSON.stringify({ type: 'ACK', commandId: leave?.commandId, ok: true, sequence: 3 }),

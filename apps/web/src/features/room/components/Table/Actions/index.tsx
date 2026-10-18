@@ -1,5 +1,7 @@
 import type { MatchView, RoomView } from '@truco/game-protocol';
+import { disabledHint } from '../../../../../shared/DisabledTooltip';
 import type { Action } from '../../../../../shared/transport/client';
+import { gameplayDisabledReason } from '../../../utils/disabled-reason';
 
 type Props = {
   room: RoomView;
@@ -15,7 +17,28 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
   const turn = phase.type === 'TURN' && phase.seat === room.selfSeat;
   const response = phase.type === 'RAISE_RESPONSE' && hand.betting.lastRaisingTeam !== team;
   const eleven = phase.type === 'ELEVEN_DECISION' && phase.team === team;
-  const disabled = room.paused || room.status !== 'playing';
+  const disabled = room.paused || Boolean(room.transition) || room.status !== 'playing';
+  const baseReason = gameplayDisabledReason(room);
+  const raiseReason =
+    baseReason ||
+    (hand.kind !== 'normal'
+      ? 'Não é permitido aumentar em mão de onze ou decisiva.'
+      : hand.betting.acceptedStake === 12
+        ? 'A aposta já atingiu o limite de 12 pontos.'
+        : hand.betting.lastRaisingTeam === team
+          ? 'Sua equipe não pode aumentar a própria proposta.'
+          : !turn
+            ? 'Você só pode pedir Truco antes de jogar, na sua vez.'
+            : null);
+  const coveredReason =
+    baseReason ||
+    (hand.kind === 'decisive'
+      ? 'A mão decisiva não permite cartas cobertas.'
+      : hand.completedTricks.length === 0
+        ? 'Cartas cobertas são permitidas a partir da segunda vaza.'
+        : !turn
+          ? 'Aguarde sua vez para escolher jogar coberta.'
+          : null);
 
   return (
     <div className="table-actions">
@@ -35,6 +58,7 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
               className="action-accept"
               aria-label="Passar preparação"
               disabled={disabled}
+              {...disabledHint(baseReason)}
               onClick={() => send({ type: 'PREPARE', intent: { type: 'pass' } })}
             >
               Passar preparação
@@ -47,6 +71,7 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
             className="action-accept"
             type="button"
             disabled={disabled}
+            {...disabledHint(baseReason)}
             onClick={() => send({ type: 'RESPOND_RAISE', response: 'accept' })}
           >
             Aceitar
@@ -55,6 +80,12 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
             className="action-truco"
             type="button"
             disabled={disabled || hand.betting.pendingStake === 12}
+            {...disabledHint(
+              baseReason ||
+                (hand.betting.pendingStake === 12
+                  ? 'A proposta já é de 12 pontos. Você pode aceitar ou correr.'
+                  : null),
+            )}
             onClick={() => send({ type: 'RESPOND_RAISE', response: 'raise' })}
           >
             Contra-aumentar
@@ -63,6 +94,7 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
             className="action-fold"
             type="button"
             disabled={disabled}
+            {...disabledHint(baseReason)}
             onClick={() => send({ type: 'RESPOND_RAISE', response: 'fold' })}
           >
             Correr
@@ -74,6 +106,7 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
             className="action-accept"
             type="button"
             disabled={disabled}
+            {...disabledHint(baseReason)}
             onClick={() => send({ type: 'DECIDE_ELEVEN', response: 'play' })}
           >
             Jogar por 3
@@ -82,6 +115,7 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
             className="action-fold"
             type="button"
             disabled={disabled}
+            {...disabledHint(baseReason)}
             onClick={() => send({ type: 'DECIDE_ELEVEN', response: 'fold' })}
           >
             Correr por 1
@@ -92,13 +126,8 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
           className="action-truco"
           type="button"
           aria-label="Pedir Truco / aumentar"
-          disabled={
-            !turn ||
-            disabled ||
-            hand.kind !== 'normal' ||
-            hand.betting.acceptedStake === 12 ||
-            hand.betting.lastRaisingTeam === team
-          }
+          disabled={Boolean(raiseReason)}
+          {...disabledHint(raiseReason)}
           onClick={() => send({ type: 'REQUEST_RAISE' })}
         >
           <span aria-hidden="true">⚑</span> TRUCO!
@@ -112,6 +141,7 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
             disabled={
               !turn || disabled || hand.completedTricks.length === 0 || hand.kind === 'decisive'
             }
+            {...disabledHint(coveredReason)}
             onChange={(event) => setCovered(event.target.checked)}
           />
           Jogar coberta (a partir da segunda vaza)
@@ -121,7 +151,10 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
         <button
           className="surrender-action"
           type="button"
-          disabled={disabled}
+          disabled={room.paused}
+          {...disabledHint(
+            room.paused ? 'Aguarde a pausa de reconexão terminar para desistir.' : null,
+          )}
           onClick={() => send({ type: 'SURRENDER' })}
         >
           Desistir da partida

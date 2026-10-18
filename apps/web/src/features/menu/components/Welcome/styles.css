@@ -1,0 +1,75 @@
+.welcome-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+  background: #031d18e8;
+}
+.welcome-panel {
+  width: min(520px, 100%);
+  padding: clamp(20px, 4vw, 36px);
+  display: grid;
+  gap: 18px;
+  border: 6px double #e5b35c;
+  background: #0b3028;
+  box-shadow:
+    inset 0 0 0 4px #061c1b,
+    6px 6px #020c09;
+}
+.welcome-suits {
+  color: #e5b35c;
+  font-size: 30px;
+  letter-spacing: 14px;
+  text-align: center;
+}
+.welcome-panel h2 {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1.05;
+}
+.welcome-panel > p {
+  line-height: 1.4;
+}
+.welcome-panel .eyebrow {
+  font-size: 13px;
+  letter-spacing: 2px;
+}
+.welcome-panel label {
+  color: #fff0ce;
+}
+.welcome-help,
+.welcome-note {
+  color: #dfd3b0;
+  font-size: 14px;
+}
+.welcome-note {
+  text-align: center;
+}
+@media (max-height: 600px) {
+  .welcome-scene {
+    place-items: safe center;
+    padding: 12px;
+  }
+  .welcome-panel {
+    gap: 12px;
+    padding: 18px;
+  }
+  .welcome-suits {
+    font-size: 20px;
+  }
+}
+@media (max-height: 500px) and (min-width: 600px) {
+  .welcome-panel {
+    width: min(720px, 100%);
+    gap: 10px;
+    padding: 14px 24px;
+  }
+  .welcome-suits {
+    display: none;
+  }
+  .welcome-panel h2 {
+    font-size: 30px;
+  }
+}

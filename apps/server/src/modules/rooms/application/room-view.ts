@@ -25,6 +25,7 @@ export function roomView(room: Room, selfSeat: number): RoomView {
     decisionId: room.clock?.decisionId ?? null,
     deadline: room.clock?.deadline ?? null,
     paused: room.clock?.pausedAt != null,
+    ...(room.transition === null ? {} : { transition: { ...room.transition } }),
     match: room.match === null ? null : projectPlayerView(room.match, selfSeat),
     outcome: room.outcome === null ? null : { ...room.outcome },
   };

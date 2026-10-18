@@ -35,6 +35,7 @@ export type Room = {
   matchId: string | null;
   outcome: RoomView['outcome'];
   clock: DecisionClock | null;
+  transition: NonNullable<RoomView['transition']> | null;
   budgets: readonly number[];
   emptySince: number | null;
   cache: Map<string, CachedReply>;

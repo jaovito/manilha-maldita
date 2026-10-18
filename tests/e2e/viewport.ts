@@ -1,5 +1,5 @@
-import { assertPlayingCardRatios } from './card-proportions';
 import { expect, type Locator, type Page } from '@playwright/test';
+import { assertPlayingCardRatios } from './card-proportions';
 import { assertLobbyContrast } from './lobby-contrast';
 
 export async function assertNoOverflow(page: Page) {
@@ -275,6 +275,15 @@ async function assertMenuHover(page: Page) {
 
     await expect.poll(() => stars(button)).toEqual(['0', '0']);
     await button.hover();
+    if (await button.isDisabled()) {
+      await expect(button).toHaveCSS('opacity', '0.25');
+      await expect(button).toHaveCSS('transform', 'none');
+      await expect.poll(() => stars(button)).toEqual(['0', '0']);
+      await expect(page.getByRole('tooltip')).toBeVisible();
+      await page.mouse.move(0, 0);
+      await expect(page.getByRole('tooltip')).toHaveCount(0);
+      continue;
+    }
     await expect.poll(() => stars(button)).toEqual(['1', '1']);
     await expect
       .poll(async () => (await button.boundingBox())?.width ?? 0)

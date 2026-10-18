@@ -66,7 +66,7 @@ test('1v1 real multiplayer protects authority, idempotence, reconnect and rematc
   } finally {
     await game.stop();
   }
-});
+}, 60000);
 
 test('2v2 real clients serialize competing partner responses and finish a complete match', async () => {
   const game = await setup(4);
@@ -91,14 +91,15 @@ test('2v2 real clients serialize competing partner responses and finish a comple
     expect(replies.filter((reply) => reply.type === 'ERROR')).toHaveLength(1);
     const accepted = replies.find((reply) => reply.type === 'ACK');
     if (accepted?.type === 'ACK') await game.all(accepted.sequence);
-    // If fold wins the race, the next hand already starts; otherwise the saved turn remains.
+    // A fold preserves HAND_END during the result pause; acceptance resumes the saved turn.
+    await game.settle();
     const view = game.players[0]?.view;
     if (view?.match?.hand.number === 1) expect(view.match.hand.betting.acceptedStake).toBe(3);
     await completeMatch(game);
   } finally {
     await game.stop();
   }
-});
+}, 60000);
 
 test('leaving a real lobby acknowledges removal before closing the socket', async () => {
   const game = await setup(2);
@@ -125,3 +126,58 @@ test('leaving a real lobby acknowledges removal before closing the socket', asyn
     await game.stop();
   }
 });
+
+test('real clients observe deal, trick and hand pauses with reconnect and server-owned deadlines', async () => {
+  const game = await setup(2);
+  try {
+    for (let seat = 0; seat < 2; seat++) await game.act(seat, { type: 'READY', ready: true });
+    await game.act(0, { type: 'START_MATCH' });
+    const host = game.players[0];
+    if (!host) throw new Error('Missing host');
+    const deal = host.view?.transition;
+    expect(deal?.kind).toBe('deal');
+    expect(host.view?.deadline).toBeNull();
+    expect(await game.act(0, { type: 'PREPARE', intent: { type: 'pass' } })).toMatchObject({
+      code: 'DECISION_PAUSED',
+    });
+
+    const replacement = new Player(host.cookie, game.code, game.runtime.server.url);
+    await replacement.wait();
+    game.players[0] = replacement;
+    expect(replacement.view?.transition).toEqual(deal);
+    await game.settle();
+    expect(replacement.view?.decisionId).not.toBeNull();
+    await game.prepare();
+
+    for (let play = 0; play < 2; play++) {
+      const phase = game.players[0]?.view?.match?.phase;
+      if (phase?.type !== 'TURN') throw new Error('Missing turn');
+      const player = game.players[phase.seat];
+      if (!player) throw new Error('Missing player');
+      expect(
+        (await game.act(phase.seat, { type: 'PLAY_CARD', card: ownCard(player), covered: false }))
+          .type,
+      ).toBe('ACK');
+    }
+    expect(replacement.view?.transition?.kind).toBe('trick');
+    expect(replacement.view?.match?.hand.completedTricks).toHaveLength(1);
+    expect(replacement.view?.decisionId).toBeNull();
+    await game.settle();
+
+    const phase = replacement.view?.match?.phase;
+    if (phase?.type !== 'TURN') throw new Error('Missing turn');
+    await game.act(phase.seat, { type: 'REQUEST_RAISE' });
+    await game.act((phase.seat + 1) % 2, { type: 'RESPOND_RAISE', response: 'fold' });
+    expect(replacement.view?.transition?.kind).toBe('hand');
+    expect(replacement.view?.match?.phase.type).toBe('HAND_END');
+    expect(replacement.view?.match?.hand.number).toBe(1);
+    assertPrivacy(game.players);
+    const score = replacement.view?.match?.score;
+    await game.settle();
+    expect(replacement.view?.match?.hand.number).toBe(2);
+    expect(replacement.view?.match?.score).toEqual(score);
+    expect(replacement.view?.decisionId).not.toBeNull();
+  } finally {
+    await game.stop();
+  }
+}, 15000);

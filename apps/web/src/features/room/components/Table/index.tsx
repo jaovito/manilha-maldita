@@ -9,6 +9,10 @@ import { TableHand } from './Hand';
 import { availablePower, hasBoostTarget } from './Powers/selection';
 import { TablePowers, powerNames } from './Powers';
 import { TableSeats } from './Seats';
+import { TableFeedback } from './Feedback';
+import { TableAtmosphere } from './Atmosphere';
+import { TurnAnnouncement } from './Feedback/TurnAnnouncement';
+import { RoundAnnouncement } from './Feedback/RoundAnnouncement';
 
 export function Table({ room, send }: { room: RoomView; send: (action: Action) => void }) {
   const powerRef = useRef<HTMLButtonElement>(null);
@@ -28,9 +32,14 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
 
   const selectionContext = `${room.matchId}:${room.match?.hand.number}:${room.decisionId}:${room.match?.powers?.players[room.selfSeat]?.power}:${room.match?.powers?.players[room.selfSeat]?.ready}`;
   useEffect(() => {
-    if (powerDecision !== selectionContext || room.paused || room.status !== 'playing')
+    if (
+      powerDecision !== selectionContext ||
+      room.paused ||
+      room.transition ||
+      room.status !== 'playing'
+    )
       setPowerDecision(null);
-  }, [powerDecision, selectionContext, room.paused, room.status]);
+  }, [powerDecision, selectionContext, room.paused, room.transition, room.status]);
 
   const match = room.match;
   if (!match) return null;
@@ -51,6 +60,21 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
   const covered = coveredHand === hand.number;
   const tablePlays =
     hand.plays.length > 0 ? hand.plays : (hand.completedTricks.at(-1)?.plays ?? []);
+  const resolvedTrick =
+    room.transition?.kind !== 'deal' &&
+    room.transition &&
+    hand.plays.length === 0 &&
+    hand.betting.pendingStake === null
+      ? hand.completedTricks.at(-1)
+      : undefined;
+  const trickIndex = Math.max(0, hand.completedTricks.length - (hand.plays.length === 0 ? 1 : 0));
+  const openingTrick =
+    !room.transition &&
+    !room.paused &&
+    room.status === 'playing' &&
+    phase.type === 'TURN' &&
+    hand.plays.length === 0 &&
+    hand.completedTricks.length > 0;
   const status =
     room.status === 'finished'
       ? 'Partida encerrada'
@@ -71,6 +95,7 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
   return (
     <section
       className="game-table"
+      data-transition={room.transition?.kind}
       aria-label="Mesa da partida"
       onKeyDown={(event) => {
         if (event.key === 'Escape' && selectedPower) cancelSelection(true);
@@ -101,10 +126,14 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
       </section>
       <div className="table-layout">
         <div className="arena" data-player-count={match.playerCount}>
+          <TableAtmosphere room={room} />
+          <TurnAnnouncement room={room} />
+          <RoundAnnouncement room={room} />
           <section
             className="table-status"
             aria-label="Status da partida"
             data-targeting={selectedPower !== null}
+            data-resolving={Boolean(room.transition)}
           >
             {selectedPower && (
               <p className="compact-power-prompt" role="status">
@@ -113,18 +142,23 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
                   : `${powerNames[selectedPower]} · Escolha ${selectedPower === 'spy' ? 'um verso' : 'sua carta'}.`}
               </p>
             )}
-            <p role="status">{status}</p>
-            <span>
-              {hand.kind === 'normal'
-                ? 'Mão comum'
-                : hand.kind === 'eleven'
-                  ? 'Mão de onze'
-                  : 'Mão decisiva'}
-            </span>
+            {!room.transition && !openingTrick && (
+              <p role="status" key={room.decisionId}>
+                {status}
+              </p>
+            )}
+            <TableFeedback room={room} />
+            {!room.transition && !openingTrick && (
+              <span>
+                {hand.kind === 'normal'
+                  ? 'Mão comum'
+                  : hand.kind === 'eleven'
+                    ? 'Mão de onze'
+                    : 'Mão decisiva'}
+              </span>
+            )}
             {room.deadline !== null && (
-              <small>
-                Tempo estimado: {Math.max(0, Math.ceil((room.deadline - now) / 1000))} s
-              </small>
+              <small>Tempo: {Math.max(0, Math.ceil((room.deadline - now) / 1000))} s</small>
             )}
           </section>
           <TableSeats
@@ -157,7 +191,16 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
                       : 'Carta oculta';
 
               return (
-                <div className={`played-card play-relative-${relative}`} key={play.seat}>
+                <div
+                  className={`played-card play-relative-${relative}`}
+                  key={`${handKey}:${trickIndex}:${play.seat}`}
+                  data-power={'power' in play ? play.power : undefined}
+                  data-winner={
+                    resolvedTrick?.result.winner !== 'tie' &&
+                    resolvedTrick?.result.nextLeader === play.seat
+                  }
+                  data-resolved={Boolean(resolvedTrick)}
+                >
                   <span role="img" aria-label={label}>
                     {play.covered || !('card' in play) ? (
                       <CardBack />

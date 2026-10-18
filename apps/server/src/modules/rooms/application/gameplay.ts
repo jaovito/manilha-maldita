@@ -1,69 +1,10 @@
 import { cardKey, cardStrength } from '@truco/game-core/cards';
-import {
-  dealNextHand,
-  executeCommand,
-  type PlayerCommand,
-  startMatch,
-} from '@truco/game-core/match';
+import { executeCommand, type PlayerCommand, startMatch } from '@truco/game-core/match';
 import type { Action, ClientMessage } from '@truco/game-protocol';
-import { createClock, expirations, updateConnectivity } from '../../matches';
+import { expirations, updateConnectivity } from '../../matches';
+import { openDecision } from './decisions';
+import { advanceTransition, openTransition, settleGameplay } from './transitions';
 import { choices, connected, type Ports, powerSetup, protectionMs, type Room } from './types';
-
-export function openDecision(room: Room, ports: Ports): void {
-  const state = room.match;
-  room.clock = null;
-
-  if (state === null || room.status !== 'playing') return;
-
-  if (state.phase.type === 'MATCH_END') {
-    room.status = 'finished';
-    room.outcome = { winner: state.phase.winner, reason: 'completed' };
-    return;
-  }
-
-  if (state.phase.type === 'HAND_END') {
-    room.match = dealNextHand(
-      state,
-      state.revision,
-      choices(ports),
-      state.score.A === 11 || state.score.B === 11 ? undefined : powerSetup(room, ports),
-    ).state;
-    openDecision(room, ports);
-    return;
-  }
-
-  const phase = state.phase;
-  const team =
-    phase.type === 'ELEVEN_DECISION'
-      ? phase.team
-      : state.hand.betting.lastRaisingTeam === 'A'
-        ? 'B'
-        : 'A';
-  const dependencies =
-    phase.type === 'PREPARATION'
-      ? room.seats.flatMap((_, seat) => (state.powers?.commitments[seat] === null ? [seat] : []))
-      : phase.type === 'TURN'
-        ? [phase.seat]
-        : room.seats.flatMap((_, seat) => ((seat % 2 === 0 ? 'A' : 'B') === team ? [seat] : []));
-
-  room.clock = updateConnectivity(
-    createClock(
-      ports.id(),
-      ports.now(),
-      phase.type === 'PREPARATION'
-        ? room.config.preparationTimeoutMs
-        : phase.type === 'TURN'
-          ? room.config.cardTimeoutMs
-          : room.config.responseTimeoutMs,
-      dependencies,
-      protectionMs(room),
-      room.budgets,
-      phase.type === 'TURN' || phase.type === 'PREPARATION' ? 'all' : 'any',
-    ),
-    ports.now(),
-    connected(room),
-  );
-}
 
 export function beginMatch(room: Room, ports: Ports): void {
   const count = room.config.format === '1v1' ? 2 : 4;
@@ -81,7 +22,7 @@ export function beginMatch(room: Room, ports: Ports): void {
 
   for (const member of room.seats) if (member) member.strikes = 0;
 
-  openDecision(room, ports);
+  openTransition(room, ports, 'deal');
 }
 
 export function closeAbnormally(
@@ -92,9 +33,12 @@ export function closeAbnormally(
   room.status = 'finished';
   room.outcome = { winner, reason };
   room.clock = null;
+  room.transition = null;
 }
 
 export function advanceClock(room: Room, ports: Ports): boolean {
+  if (room.transition !== null) return advanceTransition(room, ports);
+
   if (room.clock === null || room.match === null || room.status !== 'playing') return false;
 
   const { state: clock, expired } = expirations(room.clock, ports.now(), connected(room));
@@ -146,7 +90,7 @@ export function advanceClock(room: Room, ports: Ports): boolean {
   }
 
   room.match = executeCommand(state, state.revision, seat, action).state;
-  openDecision(room, ports);
+  settleGameplay(room, state, ports);
 
   return true;
 }
@@ -160,7 +104,7 @@ export function applyGameplay(
   const state = room.match;
 
   if (room.status !== 'playing' || state === null) throw new Error('INVALID_PHASE');
-  if (message.matchId !== room.matchId || message.decisionId !== room.clock?.decisionId)
+  if (message.matchId !== room.matchId || message.decisionId !== (room.clock?.decisionId ?? null))
     throw new Error('STALE_CONTEXT');
   if (message.action.type !== 'PREPARE' && message.expectedRevision !== state.revision)
     throw new Error('STALE_REVISION');
@@ -169,6 +113,8 @@ export function applyGameplay(
     closeAbnormally(room, seat % 2 === 0 ? 'B' : 'A', 'surrender');
     return;
   }
+
+  if (room.transition !== null) throw new Error('DECISION_PAUSED');
 
   if (
     message.action.type !== 'PREPARE' &&
@@ -215,5 +161,5 @@ export function applyGameplay(
       connected(room),
     );
     room.budgets = room.clock.budgets;
-  } else openDecision(room, ports);
+  } else settleGameplay(room, state, ports);
 }

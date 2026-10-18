@@ -18,6 +18,7 @@ test('main menu keeps future features disabled, edits nickname and creates only 
   for (const name of [/^Jogar/, /^Como jogar/, /^Cosméticos/, /^Configurações/, /^Sair/]) {
     const button = screen.getByRole('button', { name });
     expect(button.hasAttribute('disabled')).toBe(true);
+    expect(button.getAttribute('data-disabled-reason')).toBeTruthy();
     fireEvent.click(button);
   }
   expect(events.onEnter).not.toHaveBeenCalled();
@@ -27,9 +28,15 @@ test('main menu keeps future features disabled, edits nickname and creates only 
   );
   expect(screen.queryByRole('progressbar')).toBeNull();
   expect(screen.getByRole('button', { name: 'Criar sala' }).hasAttribute('disabled')).toBe(true);
+  expect(
+    screen.getByRole('button', { name: 'Criar sala' }).getAttribute('aria-description'),
+  ).toContain(props.nickname ? 'Aguarde' : 'apelido');
   fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Ana' } });
   expect(events.onNicknameChange).toHaveBeenCalledWith('Ana');
   view.rerender(<EntryMenu {...props} nickname="Ana" />);
+  expect(
+    screen.getByRole('button', { name: 'Criar sala' }).getAttribute('data-disabled-reason'),
+  ).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Criar sala' }));
   expect(events.onEnter).toHaveBeenCalledWith(true);
 
@@ -89,6 +96,7 @@ test('invitation code opens joining immediately and busy state protects its fiel
   for (const name of ['Entrar na sala', '← Voltar ao menu']) {
     const button = screen.getByRole('button', { name });
     expect(button.hasAttribute('disabled')).toBe(true);
+    expect(button.getAttribute('data-disabled-reason')).toBeTruthy();
     fireEvent.click(button);
   }
   expect(events.onEnter).not.toHaveBeenCalled();

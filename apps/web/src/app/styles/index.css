@@ -23,3 +23,11 @@
 @import "../../features/room/components/Lobby/Settings/styles.css";
 @import "../../features/room/components/Lobby/Seats/styles.css";
 @import "../../features/room/components/Lobby/styles/responsive.css";
+@import "../../shared/feedback/styles.css";
+@import "../../shared/Candlelight/styles.css";
+@import "../../features/room/components/Table/Atmosphere/styles.css";
+@import "../../features/room/components/Table/Feedback/styles.css";
+@import "../../features/room/components/Table/Feedback/TurnAnnouncement/styles.css";
+@import "../../features/room/components/Table/Feedback/results.css";
+@import "../../features/menu/components/Welcome/styles.css";
+@import "../../shared/DisabledTooltip/styles.css";

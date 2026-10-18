@@ -21,7 +21,12 @@ export function TableSeats({
         .map((hand) => {
           const relative = (hand.seat - room.selfSeat + match.playerCount) % match.playerCount;
           const member = room.seats[hand.seat];
-          const active = match.phase.type === 'TURN' && match.phase.seat === hand.seat;
+          const active =
+            !room.transition &&
+            !room.paused &&
+            room.status === 'playing' &&
+            match.phase.type === 'TURN' &&
+            match.phase.seat === hand.seat;
           const teammate = hand.seat % 2 === room.selfSeat % 2;
 
           const intel = match.powers?.intel?.target === hand.seat ? match.powers.intel : null;

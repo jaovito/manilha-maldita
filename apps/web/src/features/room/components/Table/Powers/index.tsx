@@ -78,21 +78,23 @@ export function TablePowers({
                 ? 'Partida encerrada'
                 : room.paused
                   ? 'Pausado'
-                  : selected
-                    ? power === 'spy'
-                      ? 'Escolha um verso'
-                      : 'Escolha sua carta'
-                    : preparing
-                      ? own?.ready
-                        ? 'Pronto'
-                        : turnPower
-                          ? 'Na sua vez'
-                          : 'Preparar'
-                      : turn && turnPower
-                        ? 'Clique para usar'
-                        : turnPower
-                          ? 'Aguarde sua vez'
-                          : 'Expirou'
+                  : room.transition
+                    ? 'Aguarde a mesa'
+                    : selected
+                      ? power === 'spy'
+                        ? 'Escolha um verso'
+                        : 'Escolha sua carta'
+                      : preparing
+                        ? own?.ready
+                          ? 'Pronto'
+                          : turnPower
+                            ? 'Na sua vez'
+                            : 'Preparar'
+                        : turn && turnPower
+                          ? 'Clique para usar'
+                          : turnPower
+                            ? 'Aguarde sua vez'
+                            : 'Expirou'
           }
           expanded={open}
           selected={selected}

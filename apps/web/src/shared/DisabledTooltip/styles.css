@@ -1,0 +1,58 @@
+/* Disabled action controls recede; physical cards remain readable game information. */
+.app-shell button:disabled:not(.card):not(.spy-target-card),
+.match-end-layer button:disabled,
+.disconnected button:not(.card):not(.spy-target-card) {
+  opacity: 0.25;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
+  transition: none;
+}
+
+.app-shell button:disabled:hover,
+.match-end-layer button:disabled:hover,
+.app-shell .power-card[data-can-activate="false"]:hover {
+  filter: none;
+  transform: none;
+}
+
+.menu-navigation .menu-button:disabled::before,
+.menu-navigation .menu-button:disabled::after {
+  opacity: 0;
+}
+
+.app-shell .power-card[data-can-activate="false"] {
+  opacity: 0.25;
+  filter: none;
+  transition: none;
+}
+
+.app-shell .card:disabled,
+.app-shell .spy-target-card:disabled {
+  opacity: 1;
+  filter: none;
+  cursor: not-allowed;
+}
+
+.app-shell .card:disabled .card-face {
+  box-shadow: none;
+}
+
+.disabled-tooltip {
+  position: fixed;
+  z-index: 1000;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: calc(100dvh - 16px);
+  overflow-wrap: anywhere;
+  overflow-y: auto;
+  pointer-events: auto;
+  border: 2px solid #e5b35c;
+  background: #0b1e23;
+  color: #fff0ce;
+  padding: 10px 14px;
+  font-family: "Pixelify Sans", monospace;
+  font-size: 16px;
+  line-height: 1.4;
+  text-shadow: none;
+  box-shadow: 3px 4px 0 #000;
+}

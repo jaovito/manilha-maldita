@@ -178,6 +178,7 @@ test('guest creates a room, receives lobby, sends ready and leaves without stori
   });
   render(<App />);
   fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Ana' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
   fireEvent.click(screen.getByRole('button', { name: 'Criar sala' }));
   await waitFor(() => expect(Socket.instances).toHaveLength(1));
   act(() => {
@@ -239,6 +240,7 @@ test('join by code handles network failure and allows editing form', async () =>
   });
   render(<App />);
   fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Beto' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
   fireEvent.click(screen.getByRole('button', { name: 'Entrar em sala' }));
   fireEvent.change(screen.getByLabelText('Código da sala'), { target: { value: 'abc123' } });
   fireEvent.click(screen.getByRole('button', { name: 'Entrar na sala' }));

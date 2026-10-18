@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test';
 
-/** Check rendered colors, including gradient stops, against a minimum contrast of 4.5. */
+/** Readable text keeps 4.5:1; deliberately dimmed actions require their explanatory hint. */
 export async function assertLobbyContrast(page: Page) {
   const selectors = [
     '.lobby-heading h2',
@@ -66,12 +66,19 @@ export async function assertLobbyContrast(page: Page) {
         backgrounds,
         size: Number.parseFloat(style.fontSize),
         opacity: style.opacity,
+        disabled: element.matches('button:disabled'),
+        reason: element.getAttribute('data-disabled-reason'),
         label: element.textContent?.trim() || element.getAttribute('aria-label') || element.tagName,
       };
     });
 
     expect(sample.backgrounds.length, sample.label).toBeGreaterThan(0);
     expect(sample.size, sample.label).toBeGreaterThanOrEqual(14);
+    if (sample.disabled) {
+      expect(sample.opacity, sample.label).toBe('0.25');
+      expect(sample.reason, sample.label).toBeTruthy();
+      continue;
+    }
     expect(sample.opacity, sample.label).toBe('1');
     for (const background of sample.backgrounds) {
       const foregroundLuminance = luminance(sample.color);
@@ -82,6 +89,21 @@ export async function assertLobbyContrast(page: Page) {
       expect(ratio, `${sample.label}: ${sample.color} / ${background}`).toBeGreaterThanOrEqual(4.5);
     }
   }
+}
+
+export async function assertTooltipContrast(page: Page) {
+  const sample = await page.getByRole('tooltip').evaluate((element) => {
+    const style = element.ownerDocument.defaultView?.getComputedStyle(element);
+    if (!style) throw new Error('Tooltip sem estilo computado.');
+
+    return { color: style.color, background: style.backgroundColor, opacity: style.opacity };
+  });
+  const foreground = luminance(sample.color);
+  const background = luminance(sample.background);
+  expect(
+    (Math.max(foreground, background) + 0.05) / (Math.min(foreground, background) + 0.05),
+  ).toBeGreaterThanOrEqual(4.5);
+  expect(sample.opacity).toBe('1');
 }
 
 function luminance(color: string) {

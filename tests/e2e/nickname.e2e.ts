@@ -1,11 +1,12 @@
 import { expect, test } from '@playwright/test';
+import { enterNickname } from './entry-flow';
 
 test('nickname survives reload before joining and remains a preference after the cookie is lost', async ({
   page,
   context,
 }) => {
   await page.goto('/');
-  await page.getByLabel('Apelido').fill('João local');
+  await enterNickname(page, 'João local');
   await page.reload();
   await expect(page.getByLabel('Apelido')).toHaveValue('João local');
   await page.getByRole('button', { name: 'Criar sala', exact: true }).click();

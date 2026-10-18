@@ -17,6 +17,7 @@ export function applyLobby(room: Room, seat: number, message: ClientMessage, por
     room.matchId = null;
     room.outcome = null;
     room.clock = null;
+    room.transition = null;
     for (const occupant of room.seats) if (occupant) occupant.ready = false;
   } else if (action.type === 'LEAVE') {
     if (room.status === 'playing') throw new Error('INVALID_PHASE');

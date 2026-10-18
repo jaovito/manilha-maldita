@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { enterNickname } from './entry-flow';
 import { assertLobbyContrast } from './lobby-contrast';
 
 test('localhost creates a guest, creates a room and connects its lobby socket', async ({
@@ -10,7 +11,7 @@ test('localhost creates a guest, creates a room and connects its lobby socket', 
   address.hostname = 'localhost';
 
   await page.goto(address.href);
-  await page.getByLabel('Apelido').fill('Convidado local');
+  await enterNickname(page, 'Convidado local');
   await page.getByRole('button', { name: 'Criar sala', exact: true }).click();
 
   await expect(page.getByRole('heading', { name: /^Sala / })).toBeVisible();

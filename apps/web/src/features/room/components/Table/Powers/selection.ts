@@ -9,6 +9,7 @@ export function availablePower(room: RoomView, match: MatchView) {
     !own ||
     own.used ||
     room.paused ||
+    room.transition ||
     room.status !== 'playing' ||
     match.hand.kind !== 'normal' ||
     own.energy < (power === 'spy' || power === 'mask' ? 1 : 2)
