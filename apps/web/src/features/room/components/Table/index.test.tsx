@@ -292,3 +292,71 @@ test('public trick history uses authorized cards, preserves covered identities a
   expect(view.container.querySelectorAll('.center-plays .card-back')).toHaveLength(1);
   expect(view.container.querySelectorAll('.center-plays .card-face')).toHaveLength(1);
 });
+
+test('covered selection resets only when the server confirms consumption of the played card', () => {
+  const state = playing();
+  if (!state.match) throw new Error('MISSING_MATCH');
+
+  state.match.hand.hands = [
+    {
+      seat: 0,
+      count: 2,
+      visibility: 'visible',
+      cards: [
+        { rank: '3', suit: 'hearts' },
+        { rank: '4', suit: 'clubs' },
+      ],
+    },
+    { seat: 1, count: 2, visibility: 'hidden' },
+  ];
+  state.match.hand.completedTricks = [
+    { leader: 0, plays: [], result: { winner: 'tie', nextLeader: 0 } },
+  ];
+
+  const send = mock(() => {});
+  const view = render(<Table room={state} send={send} />);
+  const checkbox = screen.getByLabelText(
+    'Jogar coberta (a partir da segunda vaza)',
+  ) as HTMLInputElement;
+
+  fireEvent.click(checkbox);
+  fireEvent.click(screen.getByRole('button', { name: '3 de Copas ♥' }));
+  expect(send).toHaveBeenLastCalledWith({
+    type: 'PLAY_CARD',
+    card: { rank: '3', suit: 'hearts' },
+    covered: true,
+  });
+  expect(checkbox.checked).toBe(true);
+
+  // A rejected command or unrelated snapshot must not consume the selection.
+  view.rerender(<Table room={{ ...state, sequence: 2, decisionId: 'other' }} send={send} />);
+  expect(checkbox.checked).toBe(true);
+
+  const confirmed: RoomView = {
+    ...state,
+    sequence: 3,
+    match: {
+      ...state.match,
+      hand: {
+        ...state.match.hand,
+        hands: [
+          { seat: 0, count: 1, visibility: 'visible', cards: [{ rank: '4', suit: 'clubs' }] },
+          { seat: 1, count: 2, visibility: 'hidden' },
+        ],
+      },
+    },
+  };
+  view.rerender(<Table room={confirmed} send={send} />);
+  expect(checkbox.checked).toBe(false);
+  fireEvent.click(screen.getByRole('button', { name: '4 de Paus ♣' }));
+  expect(send).toHaveBeenLastCalledWith({
+    type: 'PLAY_CARD',
+    card: { rank: '4', suit: 'clubs' },
+    covered: false,
+  });
+
+  fireEvent.click(checkbox);
+  expect(checkbox.checked).toBe(true);
+  view.rerender(<Table room={{ ...confirmed, matchId: 'rematch' }} send={send} />);
+  expect(checkbox.checked).toBe(false);
+});

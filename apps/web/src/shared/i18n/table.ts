@@ -108,6 +108,10 @@ export const tableEnglish = {
   'Memória do Espião: {0}. Pode já ter sido jogada.':
     'Spy memory: {0}. It may already have been played.',
   'Visto: {0}': 'Seen: {0}',
+  NÓS: 'US',
+  ELES: 'THEM',
+  'Expandir histórico': 'Expand history',
+  'Recolher histórico': 'Collapse history',
   'Vista na preparação; pode já ter sido jogada.':
     'Seen during preparation; may already have been played.',
   '{0} cartas na mão': '{0} cards in hand',
@@ -149,4 +153,7 @@ export const tableEnglish = {
   'Uma vitória e um empate definem a mão.': 'One win and a tie decide the hand.',
   'Empate na terceira: vence quem ganhou a primeira vaza.':
     "Third trick tied: the first trick's winner wins the hand.",
+  'Carta revelada pelo Espião': 'Card revealed by Spy',
+  'Ampliar carta revelada: {0}': 'Enlarge revealed card: {0}',
+  'Fechar carta': 'Close card',
 } as const;

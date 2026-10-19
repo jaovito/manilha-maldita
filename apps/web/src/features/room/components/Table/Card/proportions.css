@@ -1,0 +1,83 @@
+/* One 115 × 172.5 design, scaled by the card itself instead of viewport breakpoints. */
+.game-shell .game-table .card-face {
+  container-type: inline-size;
+  border: 0;
+  outline: 0;
+  background: none;
+  border-radius: 4.35%;
+}
+
+.game-shell .game-table .card-face::before,
+.game-shell .game-table .card-face::after {
+  content: none;
+}
+
+.card-artwork {
+  display: block;
+  position: absolute;
+  inset: 0;
+  border: 2.61cqw solid #f7e3b7;
+  outline: 0.87cqw solid #815e30;
+  border-radius: 4.35cqw;
+  background: radial-gradient(ellipse at 30% 15%, #fff2d6, #ecd29d);
+}
+
+.card-artwork::before {
+  content: "";
+  position: absolute;
+  inset: 3.48cqw;
+  border: 0.87cqw solid #c19a55;
+  box-shadow: inset 0 0 0 1.74cqw #fff0cb;
+}
+
+.card-artwork::after {
+  content: "✦";
+  position: absolute;
+  top: 5.22cqw;
+  right: 6.96cqw;
+  color: #b78a3d;
+  font-size: 11.3cqw;
+}
+
+.game-shell .game-table .card-face .card-corner {
+  display: flex;
+  top: 6.09cqw;
+  left: 6.96cqw;
+  font-size: 21.74cqw;
+}
+
+.game-shell .game-table .card-face .card-rank {
+  font-size: 25.22cqw;
+  line-height: inherit;
+}
+
+.game-shell .game-table .card-face .card-corner-bottom {
+  top: auto;
+  left: auto;
+  bottom: 6.09cqw;
+  right: 6.96cqw;
+}
+
+.game-shell .game-table .card-face .card-suit {
+  top: 50%;
+  left: 50%;
+  font-size: 66.09cqw;
+  filter: drop-shadow(0.87cqw 1.74cqw 0 #ba984d);
+}
+
+.game-shell .game-table .card-face .card-corner > span {
+  display: block;
+}
+
+/* Original font metrics and bold pixel strokes, with a distinct five. */
+@font-face {
+  font-family: "Manilha Card Numerals";
+  src: url("/fonts/ManilhaCardNumerals.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0035;
+}
+
+.card-rank[data-rank="5"] {
+  font-family: "Manilha Card Numerals", "Pixelify Sans", monospace;
+}

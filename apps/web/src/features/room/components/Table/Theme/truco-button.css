@@ -1,0 +1,65 @@
+/* Preserve the ribbon artwork's aspect ratio instead of stretching its height. */
+.game-shell .table-actions .action-truco {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-width: 0;
+  max-width: 320px;
+  min-height: 64px;
+  aspect-ratio: 4 / 1;
+  align-self: center;
+  margin-inline: auto;
+  padding: 12px 14%;
+  font-size: clamp(20px, 1.7vw, 26px);
+  line-height: 1.15;
+}
+
+.game-shell .action-truco::before {
+  inset: -30% -6px;
+  background-size: 100% auto;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .game-shell .table-actions .action-truco {
+    max-width: 240px;
+    min-height: 58px;
+    padding: 10px 12%;
+    font-size: 22px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell .table-actions .action-truco {
+    max-width: 220px;
+    min-height: 48px;
+    padding: 8px 12%;
+    font-size: 18px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell .decision-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .game-shell .decision-actions .action-truco {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .game-shell .table-actions .action-truco {
+    max-width: 192px;
+    min-height: 48px;
+    padding: 8px 24px;
+    font-size: 20px;
+  }
+}
+
+/* The pixel font's visible capitals sit below its line box center. */
+.game-shell .action-truco .truco-label {
+  display: block;
+  transform: translateY(-0.22em);
+}

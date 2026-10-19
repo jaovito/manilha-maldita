@@ -9,8 +9,18 @@ export async function assertPlayingCardRatios(page: Page) {
         const view = element.ownerDocument.defaultView;
         if (!view) throw new Error('Documento sem viewport.');
         const style = view.getComputedStyle(element);
+        const suit = element.querySelector('.card-suit');
+        const rank = element.querySelector('.card-rank');
         return {
           context: element.parentElement?.className,
+          suitScale: suit
+            ? Number.parseFloat(view.getComputedStyle(suit).fontSize) /
+              Number.parseFloat(style.width)
+            : null,
+          rankScale: rank
+            ? Number.parseFloat(view.getComputedStyle(rank).fontSize) /
+              Number.parseFloat(style.width)
+            : null,
           width: Number.parseFloat(style.width),
           height: Number.parseFloat(style.height),
         };
@@ -18,6 +28,10 @@ export async function assertPlayingCardRatios(page: Page) {
     );
   expect(cards.length).toBeGreaterThan(0);
   for (const card of cards) {
+    if (card.suitScale !== null && card.rankScale !== null) {
+      expect(Math.abs(card.suitScale - 0.6609), JSON.stringify(card)).toBeLessThan(0.002);
+      expect(Math.abs(card.rankScale - 0.2522), JSON.stringify(card)).toBeLessThan(0.002);
+    }
     expect(card.width, JSON.stringify(card)).toBeGreaterThan(0);
     expect(card.height, JSON.stringify(card)).toBeGreaterThan(0);
     expect(Math.abs(card.width / card.height - 2 / 3), JSON.stringify(card)).toBeLessThan(0.01);

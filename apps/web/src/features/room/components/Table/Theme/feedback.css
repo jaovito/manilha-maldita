@@ -1,0 +1,84 @@
+/* Keep timing, reduced-motion behavior and server-authoritative events intact. */
+.game-shell .table-status {
+  background: #143629ed;
+  border: 2px ridge #c69a49;
+  border-radius: 3px 14px 3px 14px;
+  box-shadow: 2px 3px #051c16;
+}
+.game-shell .table-status[data-resolving="true"] {
+  background: #143629f5;
+  border: 4px ridge #ddb366;
+  border-radius: 8px 30px 8px 30px;
+  box-shadow: 0 5px #0c1c17;
+}
+.game-shell .table-status:has(.round-announcement[data-result="lose"]) {
+  background: #491d29f5;
+}
+.game-shell .table-status:has(.round-announcement[data-result="tie"]) {
+  background: #183344f5;
+}
+.turn-announcement-ribbon {
+  position: relative;
+  isolation: isolate;
+  padding: 28px 38px;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.turn-announcement-ribbon::before {
+  content: "";
+  position: absolute;
+  inset: -12px -5px;
+  background: url("/art/table-ui/ribbon.png") center / 100% 160% no-repeat;
+  z-index: -1;
+}
+.game-shell .raise-impact,
+.game-shell .raise-announcement[data-stake="12"] .raise-impact {
+  clip-path: none;
+  inset: -28% -2%;
+  background: var(--ui-ribbon) center / 100% 160% no-repeat;
+  filter: drop-shadow(0 6px 0 #23151099);
+}
+.game-shell .raise-caption {
+  background: var(--ui-wood) center / 100% 100% no-repeat;
+  padding: 10px 26px;
+  border: 0;
+}
+.match-result-panel {
+  padding: 28px;
+  box-shadow:
+    0 0 0 3px #342317,
+    0 12px 30px #0008;
+}
+.match-result-panel .match-result-title {
+  border-block: 1px solid #e2b56566;
+  padding-block: 16px;
+}
+.match-end-actions .button-primary {
+  background: #6b2030;
+}
+.match-end-actions .button-primary:enabled {
+  color: #fff0ce;
+  text-shadow: 0 2px #32101a;
+}
+@media (max-width: 600px) {
+  .turn-announcement-ribbon {
+    padding: 18px 24px;
+  }
+  .turn-announcement-title {
+    font-size: clamp(25px, 7vw, 40px);
+  }
+  .turn-announcement-caption {
+    font-size: 11px;
+  }
+  .game-shell .raise-shout {
+    font-size: clamp(24px, 7.2vw, 40px);
+  }
+}
+
+/* Touch hints must never intercept a subsequent tap on a playing card. */
+@media (hover: none) {
+  body:has(.game-shell) .disabled-tooltip {
+    pointer-events: none;
+  }
+}

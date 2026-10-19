@@ -1,0 +1,391 @@
+.game-shell .table-status {
+  top: 16dvh;
+}
+.game-shell .seat-relative-2,
+.game-shell .arena[data-player-count="2"] .seat-relative-1 {
+  top: 20%;
+}
+.game-shell .stake-score {
+  max-width: 110px;
+}
+.game-shell .team-score {
+  min-height: 120px;
+  padding: 22px 26px 30px;
+}
+.game-shell .team-score strong {
+  font-size: clamp(28px, 4.8dvh, 48px);
+}
+.game-shell .table-actions {
+  width: clamp(210px, 22vw, 330px);
+}
+.game-shell .table-actions .action-truco {
+  font-size: clamp(22px, 2vw, 32px);
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .game-shell .scoreboard {
+    left: 26%;
+    width: 72%;
+    top: 6px;
+  }
+  .game-shell .team-score {
+    min-height: 76px;
+    padding: 16px 5px 19px;
+  }
+  .game-shell .team-score span,
+  .game-shell .stake-score > span {
+    font-size: 9px;
+    letter-spacing: 0;
+  }
+  .game-shell .team-score strong {
+    font-size: 25px;
+  }
+  .game-shell .stake-score {
+    border-width: 3px;
+    padding: 10px 2px;
+    max-width: 64px;
+  }
+  .game-shell .stake-score strong {
+    font-size: 25px;
+  }
+  .game-shell .stake-score small {
+    padding: 7px 3px;
+    font-size: 8px;
+    min-height: 20px;
+  }
+  .game-shell .table-status {
+    top: 91px;
+    padding: 4px 8px;
+  }
+  .game-shell .table-information {
+    top: 129px;
+    left: 8%;
+    right: auto;
+    width: 84%;
+    max-height: none;
+  }
+  .game-shell .table-information .table-history {
+    padding: 8px 14%;
+  }
+  .game-shell .history-heading {
+    gap: 5px;
+  }
+  .game-shell .table-history h3 {
+    font-size: 10px;
+  }
+  .game-shell .table-history .history-list {
+    max-height: 34px;
+  }
+  .game-shell .table-history[data-expanded="false"] .history-entry:not(:last-child) {
+    display: none;
+  }
+  .game-shell .table-history[data-expanded="false"] .history-entry p {
+    display: none;
+  }
+  .game-shell .history-heading {
+    float: right;
+    margin-left: 6px;
+  }
+  .game-shell .table-history[data-expanded="false"] h3 {
+    display: none;
+  }
+  .game-shell .table-history .history-entry {
+    font-size: 11px;
+    padding: 5px 0;
+    border: 0;
+  }
+  .game-shell .table-history .history-empty {
+    font-size: 11px;
+    margin: 0;
+    padding: 4px 0;
+  }
+  .game-shell .table-history[data-expanded="true"] .history-heading {
+    float: none;
+  }
+  .game-shell .table-history[data-expanded="true"] .history-list {
+    max-height: 48dvh;
+  }
+  .game-shell .history-toggle {
+    min-height: 44px;
+  }
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    top: 24%;
+    left: 50%;
+  }
+  .game-shell .player-seat {
+    width: 96px;
+    gap: 4px;
+  }
+  .game-shell .seat-info {
+    padding: 6px 7px;
+  }
+  .game-shell .seat-name {
+    font-size: 12px;
+  }
+  .game-shell .seat-team {
+    font-size: 8px;
+  }
+  .game-shell .seat-relative-1 {
+    right: 2%;
+    top: 43%;
+  }
+  .game-shell .seat-relative-3 {
+    left: 2%;
+    top: 43%;
+  }
+  .game-shell .center-plays {
+    top: 36%;
+    height: 22dvh;
+  }
+  .game-shell .vira-panel {
+    top: 24%;
+    left: 5%;
+    padding: 5px;
+    width: 49px;
+  }
+  .game-shell .vira-panel h3 {
+    margin: -12px -10px 3px;
+    padding: 6px 4px;
+  }
+  .game-shell .vira-panel small {
+    font-size: 7px;
+  }
+  .game-shell .own-hand,
+  .game-shell .power-dock {
+    bottom: 175px;
+  }
+  .game-shell .own-player > strong {
+    padding: 5px 10px;
+  }
+  .game-shell .power-energy {
+    padding: 8px 5px;
+    gap: 3px;
+    min-height: 32px;
+  }
+  .game-shell .table-actions {
+    width: calc(100% - 28px);
+    right: 14px;
+    gap: 2px;
+  }
+  .game-shell .table-actions .action-truco {
+    font-size: 25px;
+  }
+  .game-shell .action-truco,
+  .game-shell .action-accept,
+  .game-shell .action-fold {
+    min-height: 48px;
+    padding: 10px 20px;
+  }
+  .game-shell .covered-choice {
+    padding: 4px 20px;
+    font-size: 11px;
+    min-height: 44px;
+  }
+  .game-shell .surrender-action {
+    min-height: 36px;
+    font-size: 12px;
+    padding: 9px;
+  }
+  .game-shell .turn-badge {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+  .game-shell .table-status[data-resolving="true"] {
+    top: 8px;
+    left: 25%;
+    width: 73%;
+    max-width: 73%;
+  }
+}
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .game-shell .table-status {
+    top: 80px;
+  }
+  .game-shell .table-information {
+    top: 116px;
+    left: 23%;
+    width: 73%;
+  }
+  .game-shell .table-history .history-empty {
+    font-size: 10px;
+  }
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    top: 158px;
+  }
+  .game-shell .vira-panel {
+    top: 125px;
+    left: 4%;
+    width: 42px;
+  }
+  .game-shell .center-plays {
+    top: 42%;
+    height: 16dvh;
+  }
+  .game-shell .seat-relative-1,
+  .game-shell .seat-relative-3 {
+    top: calc(39% + 8px);
+    width: 84px;
+  }
+  .game-shell .own-hand,
+  .game-shell .power-dock {
+    bottom: 150px;
+  }
+  .game-shell .own-player > strong {
+    padding: 5px 2px;
+    font-size: 10px;
+  }
+  .game-shell .own-player > strong::before {
+    inset: -2px;
+  }
+  .game-shell .turn-badge {
+    right: -6px;
+    bottom: calc(100% + 5px);
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell .scoreboard {
+    top: 4px;
+    left: 25%;
+    width: 44%;
+  }
+  .game-shell .team-score {
+    min-height: 74px;
+    padding: 14px 16px 20px;
+  }
+  .game-shell .team-score span,
+  .game-shell .stake-score > span {
+    font-size: 9px;
+  }
+  .game-shell .team-score strong {
+    font-size: 26px;
+  }
+  .game-shell .stake-score {
+    max-width: 64px;
+    padding: 6px 2px;
+    border-width: 3px;
+  }
+  .game-shell .stake-score strong {
+    font-size: 26px;
+  }
+  .game-shell .stake-score small {
+    font-size: 8px;
+    padding: 5px;
+    min-height: 20px;
+  }
+  .game-shell .table-status {
+    top: 88px;
+  }
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    top: 24%;
+  }
+  .game-shell .table-information {
+    max-height: none;
+  }
+  .game-shell .table-information .table-history {
+    padding: 12px 14%;
+  }
+  .game-shell .table-history .history-list {
+    max-height: 14dvh;
+  }
+  .game-shell .table-history h3 {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+  .game-shell .table-history .history-empty {
+    font-size: 10px;
+  }
+  .game-shell .table-actions {
+    width: 23%;
+  }
+  .game-shell .action-truco,
+  .game-shell .action-accept,
+  .game-shell .action-fold {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+  .game-shell .surrender-action {
+    padding: 8px;
+  }
+  .game-shell .table-actions .action-truco {
+    font-size: 20px;
+  }
+  .game-shell .seat-info {
+    padding: 5px 9px;
+  }
+  .game-shell .own-player > strong {
+    padding: 5px 8px;
+  }
+  .game-shell .power-energy {
+    min-height: 30px;
+    padding: 6px;
+  }
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .game-shell .center-plays {
+    width: min(160px, 42vw);
+  }
+}
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .game-shell .table-information {
+    top: 112px;
+  }
+  .game-shell .table-information .table-history {
+    padding: 0 14%;
+    min-height: 44px;
+  }
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    top: 164px;
+  }
+  .game-shell .seat-team {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 7px;
+    margin-top: 7px;
+  }
+  .game-shell .seat-info {
+    padding: 5px 6px 0;
+  }
+  .game-shell .seat-info::before {
+    height: 30px;
+  }
+  .game-shell .vira-panel {
+    top: 90px;
+  }
+  .game-shell .turn-badge {
+    right: 0;
+    padding: 3px 5px;
+    font-size: 10px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell .table-status {
+    top: 70px;
+  }
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    top: 24%;
+  }
+  .game-shell .seat-team {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8px;
+  }
+  .game-shell .table-information .table-history {
+    padding: 12px 14%;
+  }
+}
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .game-shell:has(.spy-targets) .vira-panel {
+    top: 70px;
+  }
+}
+@media (max-width: 600px) and (orientation: portrait) {
+  .game-shell .table-information .table-history[data-expanded="true"] {
+    padding-block: 16px 28px;
+  }
+}

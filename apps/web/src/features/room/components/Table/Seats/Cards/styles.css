@@ -121,7 +121,7 @@
   .spy-observation {
     outline: none;
   }
-  .spy-observation > .card-face {
+  .spy-observation .card-face {
     position: absolute;
     width: 28px;
     height: auto;
@@ -148,4 +148,62 @@
   .game-shell:has(.spy-targets) .vira-panel {
     top: 84px;
   }
+}
+
+button.spy-observation {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  box-shadow: none;
+  min-height: 0;
+  cursor: zoom-in;
+}
+.spy-observation-face {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.spy-card-preview {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100dvh - 24px);
+  padding: 20px;
+  border: 3px ridge #e2b55e;
+  border-radius: 20px 6px;
+  background: #09262a;
+  color: #fff0ce;
+  text-align: center;
+  overflow: auto;
+  box-shadow: 0 12px 45px #000a;
+}
+.spy-card-preview::backdrop {
+  background: #001712cc;
+}
+.spy-card-preview h2 {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+.spy-card-preview .spy-preview-face {
+  display: block;
+  width: min(42vw, 180px, 32dvh);
+  aspect-ratio: 2 / 3;
+  margin: 0 auto 16px;
+}
+.spy-card-preview > strong {
+  display: block;
+  font-size: 20px;
+}
+.spy-card-preview p {
+  margin: 10px 0 16px;
+  font-size: 16px;
+  line-height: 1.25;
+}
+.spy-card-preview button {
+  width: 100%;
+  min-height: 44px;
+  cursor: pointer;
 }

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { SpyCardPreview } from './Preview';
 import { t } from '../../../../../../shared/i18n';
 import type { MatchView } from '@truco/game-protocol';
 import { cardLabel } from '../../../../utils/cards';
@@ -6,16 +8,29 @@ import { CardBack, CardFace } from '../../Card';
 type Intel = NonNullable<NonNullable<MatchView['powers']>['intel']>;
 
 function Observation({ intel }: { intel: Intel }) {
+  const [expanded, setExpanded] = useState(false);
+
   return (
-    <span
-      className="mini-card spy-observation"
-      role="img"
-      aria-label={t('Espião · Só você: {0}. Vista na preparação.', [cardLabel(intel.card)])}
-      title={t('Vista na preparação; pode já ter sido jogada.')}
-    >
-      <CardFace card={intel.card} />
-      <i aria-hidden="true">{t('VISTO')} </i>
-    </span>
+    <>
+      <button
+        type="button"
+        className="mini-card spy-observation"
+        aria-label={t('Ampliar carta revelada: {0}', [cardLabel(intel.card)])}
+        aria-haspopup="dialog"
+        onClick={() => setExpanded(true)}
+        title={t('Ampliar carta revelada: {0}', [cardLabel(intel.card)])}
+      >
+        <span
+          className="spy-observation-face"
+          role="img"
+          aria-label={t('Espião · Só você: {0}. Vista na preparação.', [cardLabel(intel.card)])}
+        >
+          <CardFace card={intel.card} />
+        </span>
+        <i aria-hidden="true">{t('VISTO')} </i>
+      </button>
+      {expanded && <SpyCardPreview card={intel.card} onClose={() => setExpanded(false)} />}
+    </>
   );
 }
 
@@ -53,7 +68,10 @@ export function SeatCards({
             // biome-ignore lint/suspicious/noArrayIndexKey: Backs are anonymous; the observed face is not a tracking identifier.
             <span className="mini-card" key={index} data-spy-placeholder={spying}>
               {intel && !hasOpaquePlay && index === Math.min(position, hand.count - 1) ? (
-                <Observation intel={intel} />
+                <Observation
+                  key={`${intel.target}:${intel.card.rank}:${intel.card.suit}`}
+                  intel={intel}
+                />
               ) : (
                 <CardBack />
               )}

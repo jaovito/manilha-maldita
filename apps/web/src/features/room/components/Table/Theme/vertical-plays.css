@@ -1,0 +1,52 @@
+/* Each row reserves the face and caption; the local play always stays below. */
+.game-shell .arena[data-player-count="2"] .played-card {
+  width: var(--played-width);
+}
+
+@media (min-width: 601px) and (min-height: 501px) and (max-height: 800px) {
+  .game-shell .arena[data-player-count="2"] .center-plays {
+    --played-width: clamp(40px, 7dvh, 56px);
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .game-shell .arena[data-player-count="2"] .center-plays {
+    --played-width: 49px;
+    --caption-height: 20px;
+    top: 36%;
+    gap: 12px;
+  }
+}
+
+/* Captions sit beside the faces on low screens, preserving card size and clarity. */
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait),
+  (max-height: 500px) and (orientation: landscape) {
+  .game-shell .arena[data-player-count="2"] .center-plays {
+    --played-width: 35px;
+    --caption-height: 0px;
+    gap: 8px;
+  }
+
+  .game-shell .arena[data-player-count="2"] .played-card small {
+    position: absolute;
+    left: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    width: max-content;
+    max-width: 64px;
+  }
+}
+
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .game-shell .arena[data-player-count="2"] .center-plays {
+    --played-width: 30px;
+    top: 42%;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell .arena[data-player-count="2"] .center-plays {
+    --played-width: 38px;
+  }
+}

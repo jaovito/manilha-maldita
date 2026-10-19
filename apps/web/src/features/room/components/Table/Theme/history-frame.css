@@ -1,0 +1,36 @@
+/* Nine-slice framing keeps the scroll's folds outside the text at any height. */
+@media (min-width: 601px) {
+  .game-shell .table-information .table-history {
+    --paper-top: 24px;
+    --paper-bottom: 40px;
+    background: none;
+    border-style: solid;
+    border-color: transparent;
+    border-width: var(--paper-top) 0 var(--paper-bottom);
+    border-image:
+      url("/art/table-ui/parchment.png") 120 90 140 fill / var(--paper-top) 14% var(--paper-bottom)
+      / 0 stretch;
+    padding: 8px 14%;
+  }
+}
+
+.game-shell .table-information .table-history[data-expanded="true"] {
+  --paper-top: 24px;
+  --paper-bottom: 40px;
+  background: none;
+  border-style: solid;
+  border-color: transparent;
+  border-width: var(--paper-top) 0 var(--paper-bottom);
+  border-image:
+    url("/art/table-ui/parchment.png") 120 90 140 fill / var(--paper-top) 14% var(--paper-bottom) /
+    0 stretch;
+  padding: 8px 14%;
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell .table-information .table-history[data-expanded="false"] {
+    --paper-top: 8px;
+    --paper-bottom: 16px;
+    padding-block: 4px;
+  }
+}

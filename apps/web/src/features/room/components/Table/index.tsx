@@ -1,3 +1,4 @@
+import { useCardFlight } from './Flight';
 import { t } from '../../../../shared/i18n';
 import { cardLabel, manilhaRanks } from '../../utils/cards';
 import type { RoomView } from '@truco/game-protocol';
@@ -17,6 +18,7 @@ import { TurnAnnouncement } from './Feedback/TurnAnnouncement';
 import { RoundAnnouncement } from './Feedback/RoundAnnouncement';
 
 export function Table({ room, send }: { room: RoomView; send: (action: Action) => void }) {
+  const { tableRef, captureCard } = useCardFlight(room);
   const powerRef = useRef<HTMLButtonElement>(null);
   const [powerDecision, setPowerDecision] = useState<string | null>(null);
   const [spyPosition, setSpyPosition] = useState<{
@@ -24,7 +26,7 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
     seat: number;
     index: number;
   } | null>(null);
-  const [coveredHand, setCoveredHand] = useState<number | null>(null);
+  const [coveredSelection, setCoveredSelection] = useState<string | null>(null);
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -59,7 +61,9 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
     powerDecision !== null && powerDecision === selectionContext
       ? availablePower(room, match)
       : null;
-  const covered = coveredHand === hand.number;
+  // A confirmed play consumes a card; rejected commands keep the selection available.
+  const coveredContext = `${handKey}:${room.selfSeat}:${hand.hands[room.selfSeat]?.count}`;
+  const covered = coveredSelection === coveredContext;
   const tablePlays =
     hand.plays.length > 0 ? hand.plays : (hand.completedTricks.at(-1)?.plays ?? []);
   const resolvedTrick =
@@ -96,6 +100,8 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
 
   return (
     <section
+      ref={tableRef}
+      onClickCapture={captureCard}
       className="game-table"
       data-transition={room.transition?.kind}
       aria-label={t('Mesa da partida')}
@@ -109,9 +115,9 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
       >
         <div className="team-score own">
           <span>
-            {match.playerCount === 4 ? t('SUA DUPLA') : t('VOCÊ')} · {team}
+            {t('NÓS')} · {team}
           </span>
-          <strong>{match.score[team]}</strong>
+          <strong key={match.score[team]}>{match.score[team]}</strong>
         </div>
         <div className="stake-score">
           <span>{t('VALENDO')}</span>
@@ -125,9 +131,9 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
         </div>
         <div className="team-score enemy">
           <span>
-            {t('ADVERSÁRIOS ·')} {enemyTeam}
+            {t('ELES')} · {enemyTeam}
           </span>
-          <strong>{match.score[enemyTeam]}</strong>
+          <strong key={match.score[enemyTeam]}>{match.score[enemyTeam]}</strong>
         </div>
       </section>
       <div className="table-layout">
@@ -212,6 +218,8 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
                 <div
                   className={`played-card play-relative-${relative}`}
                   key={`${handKey}:${trickIndex}:${play.seat}`}
+                  data-play-id={`${handKey}:${trickIndex}:${play.seat}`}
+                  data-relative={relative}
                   data-power={'power' in play ? play.power : undefined}
                   data-winner={
                     resolvedTrick?.result.winner !== 'tie' &&
@@ -272,7 +280,7 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
             selected={Boolean(selectedPower)}
             select={(selected) => {
               setPowerDecision(selected ? selectionContext : null);
-              if (selected) setCoveredHand(null);
+              if (selected) setCoveredSelection(null);
             }}
           />
           <div className="table-information">
@@ -283,7 +291,7 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
             match={match}
             covered={covered}
             setCovered={(checked) => {
-              setCoveredHand(checked ? hand.number : null);
+              setCoveredSelection(checked ? coveredContext : null);
               if (checked) setPowerDecision(null);
             }}
             send={send}

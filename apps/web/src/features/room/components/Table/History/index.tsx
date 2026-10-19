@@ -1,3 +1,4 @@
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import { t } from '../../../../../shared/i18n';
 import { cardLabel } from '../../../utils/cards';
 import type { MatchView, RoomView } from '@truco/game-protocol';
@@ -6,11 +7,57 @@ import { powerNames } from '../Powers';
 
 export function TableHistory({ room, match }: { room: RoomView; match: MatchView }) {
   const { hand } = match;
+  const [expanded, setExpanded] = useState(false);
+  const listId = useId();
+  const listRef = useRef<HTMLOListElement>(null);
+  const followLatest = useRef(true);
+  const context = `${hand.number}:${expanded}`;
+  const previousContext = useRef(context);
+
+  // Content can regroup when a trick resolves; never pull a reader away from older entries.
+  useLayoutEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+
+    if (previousContext.current !== context) {
+      followLatest.current = true;
+      previousContext.current = context;
+    }
+
+    if (followLatest.current) list.scrollTop = list.scrollHeight;
+  });
 
   return (
-    <section className="table-history" aria-label={t('Histórico público')}>
-      <h3>{t('✦ ÚLTIMAS AÇÕES')}</h3>
-      <ol className="history-list">
+    <section
+      className="table-history"
+      data-expanded={expanded}
+      aria-label={t('Histórico público')}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') setExpanded(false);
+      }}
+    >
+      <header className="history-heading">
+        <h3>{t('✦ ÚLTIMAS AÇÕES')}</h3>
+        <button
+          type="button"
+          className="history-toggle"
+          aria-expanded={expanded}
+          aria-controls={listId}
+          aria-label={expanded ? t('Recolher histórico') : t('Expandir histórico')}
+          onClick={() => setExpanded(!expanded)}
+        >
+          <span aria-hidden="true">{expanded ? '−' : '+'}</span>
+        </button>
+      </header>
+      <ol
+        className="history-list"
+        id={listId}
+        ref={listRef}
+        onScroll={(event) => {
+          const list = event.currentTarget;
+          followLatest.current = list.scrollHeight - list.clientHeight - list.scrollTop <= 2;
+        }}
+      >
         {match.powers?.activations.map((activation) => (
           <li
             className="history-entry power-reveal"

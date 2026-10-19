@@ -66,8 +66,14 @@ export async function assertCompletedMatch(
     for (const name of ['Revanche', 'Voltar ao lobby']) {
       const action = page.getByRole('button', { name, exact: true });
       await expect(action).toBeInViewport();
-      if (room.selfSeat === room.hostSeat) await expect(action).toBeEnabled();
-      else await expect(action).toBeDisabled();
+      if (room.selfSeat === room.hostSeat) {
+        await expect(action).toBeEnabled();
+        if (name === 'Revanche') {
+          await expect(action).toHaveCSS('color', 'rgb(255, 240, 206)');
+          await expect(action).toHaveCSS('background-color', 'rgb(107, 32, 48)');
+          await expect(action).toHaveCSS('opacity', '1');
+        }
+      } else await expect(action).toBeDisabled();
     }
   }
   await winner.screenshot({ path: `/tmp/truco-m4-compact-win-${count}-${project}.png` });

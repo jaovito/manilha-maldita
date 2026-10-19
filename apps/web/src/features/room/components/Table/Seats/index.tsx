@@ -52,6 +52,7 @@ export function TableSeats({
               key={hand.seat}
               className={`player-seat seat-relative-${relative}${active ? ' seat-active' : ''}`}
               data-spy-target={spying && !teammate}
+              data-team={teammate ? 'own' : 'enemy'}
               aria-label={`${member?.nickname ?? t('Jogador')}${teammate ? t(', sua dupla') : t(', adversário')}`}
             >
               <SeatCards

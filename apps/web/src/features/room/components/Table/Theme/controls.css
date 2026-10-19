@@ -1,0 +1,131 @@
+.game-shell .action-truco,
+.game-shell .action-accept,
+.game-shell .action-fold {
+  position: relative;
+  isolation: isolate;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  min-height: 58px;
+  padding: 15px 26px;
+  color: #ffe9b6;
+  text-shadow: 2px 2px #431519;
+}
+.game-shell .action-truco::before,
+.game-shell .action-accept::before,
+.game-shell .action-fold::before {
+  content: "";
+  position: absolute;
+  inset: 0 -6px;
+  background: var(--ui-ribbon) center / 100% 160% no-repeat;
+  z-index: -1;
+}
+.game-shell .action-accept::before {
+  background-image: url("/art/table-ui/ribbon-green.png");
+}
+.game-shell .action-fold::before {
+  filter: hue-rotate(210deg) saturate(0.65);
+}
+.game-shell .table-actions button:enabled:hover {
+  filter: brightness(1.13);
+}
+.game-shell .table-actions button:enabled:active {
+  translate: 0 2px;
+}
+.game-shell .table-actions button:disabled {
+  filter: saturate(0.4);
+  opacity: 0.65;
+}
+.game-shell .surrender-action,
+.game-shell .room-menu:not([open]) > summary,
+.game-shell .power-energy {
+  background: var(--ui-wood) center / 100% 100% no-repeat;
+  border: 0;
+  box-shadow: none;
+  padding: 12px 18px;
+  color: #ffe3a1;
+}
+.game-shell .power-energy {
+  margin-top: 4px;
+  padding: 10px 12px;
+  min-height: 40px;
+  gap: 5px;
+}
+.game-shell .energy-gems i {
+  background: #181f26;
+  border: 2px ridge #b3863b;
+}
+.game-shell .energy-gems i[data-filled="true"] {
+  background: #ffd46b;
+  box-shadow:
+    inset 0 0 0 1px #fff1bd,
+    0 0 8px #ffc34e88;
+}
+.game-shell .covered-choice {
+  position: relative;
+  padding: 6px 14px;
+  border: 0;
+  background: var(--ui-wood) center / 100% 100% no-repeat;
+  color: #eadbb5;
+  gap: 10px;
+  cursor: pointer;
+}
+.game-shell .covered-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.covered-card-toggle {
+  display: block;
+  flex: none;
+  width: 24px;
+  height: 36px;
+  rotate: -10deg;
+}
+.covered-choice:has(input:checked) .covered-card-toggle {
+  rotate: 0deg;
+  translate: 0 -3px;
+  outline: 2px solid #ffe099;
+  box-shadow: 0 0 10px #ffd462;
+}
+.covered-choice:has(input:focus-visible) {
+  outline: 3px solid #ffe099;
+  outline-offset: 3px;
+}
+.covered-choice:has(input:disabled) {
+  opacity: 0.6;
+  cursor: default;
+}
+.game-shell .preparation-actions-bar {
+  background: #102b24d9;
+  border-radius: 14px 4px;
+  border-color: #c19445;
+}
+.game-shell .turn-badge {
+  background: #143e31;
+  border: 2px ridge #e3b969;
+  border-radius: 2px 12px 2px 12px;
+  padding: 5px 14px;
+  box-shadow: 3px 3px #10271c;
+}
+.game-shell .room-menu[open],
+.match-result-panel {
+  border-radius: 18px 5px 22px 5px;
+  border: 7px ridge #bf914a;
+  border-image: none;
+  background: #20190f;
+}
+.game-shell .room-menu-panel {
+  background:
+    linear-gradient(#20190ff0, #091e1af7),
+    url("/art/layers/felt.png") center / 256px;
+}
+.game-shell .room-menu-panel h2 {
+  color: #ffe1a0;
+}
+.game-shell .room-menu-panel button,
+.match-end-actions button {
+  border-radius: 8px 2px 8px 2px;
+  border: 3px ridge #bc8c43;
+}

@@ -10,8 +10,12 @@ test('confirmed 3/6/9/12 raises shout for both players, synthesize distinct cues
       ? { width: 390, height: 844 }
       : { width: 1280, height: 720 };
   const contexts = await Promise.all([
-    browser.newContext({ viewport }),
-    browser.newContext({ viewport, reducedMotion: 'reduce' }),
+    browser.newContext({ viewport, hasTouch: testInfo.project.name === 'mobile-chromium' }),
+    browser.newContext({
+      viewport,
+      hasTouch: testInfo.project.name === 'mobile-chromium',
+      reducedMotion: 'reduce',
+    }),
   ]);
   try {
     const pages = await Promise.all(contexts.map((context) => context.newPage()));
@@ -47,6 +51,24 @@ test('confirmed 3/6/9/12 raises shout for both players, synthesize distinct cues
     for (const page of pages)
       await clickAndSync(pages, page, page.getByRole('button', { name: 'Passar preparação' }));
     let actor = await findActivePlayer(pages);
+    const raiseButton = actor.getByRole('button', { name: 'Pedir Truco / aumentar' });
+    const buttonBox = await raiseButton.boundingBox();
+    if (!buttonBox) throw new Error('Botão de Truco ausente');
+    expect(buttonBox.width / buttonBox.height).toBeLessThanOrEqual(4.1);
+    expect(buttonBox.height).toBeGreaterThanOrEqual(58);
+    const artworkSize = await raiseButton.evaluate(
+      (element) =>
+        element.ownerDocument.defaultView?.getComputedStyle(element, '::before').backgroundSize,
+    );
+    expect(artworkSize).toBe('100% auto');
+    const labelBox = await raiseButton.locator('.truco-label').boundingBox();
+    if (!labelBox) throw new Error('Texto do Truco ausente');
+    expect(
+      Math.abs(labelBox.x + labelBox.width / 2 - buttonBox.x - buttonBox.width / 2),
+    ).toBeLessThan(1);
+    const opticalOffset = buttonBox.y + buttonBox.height / 2 - labelBox.y - labelBox.height / 2;
+    expect(opticalOffset).toBeGreaterThan(3);
+    expect(opticalOffset).toBeLessThan(6);
     let expectedNotes = 0;
     for (const [index, shout] of ['TRUCOOOOOOO!!', 'SEEEIS!', 'NOOVE!', 'DOOOZE!!'].entries()) {
       await clickAndSync(
@@ -89,6 +111,15 @@ test('confirmed 3/6/9/12 raises shout for both players, synthesize distinct cues
         .toBe(expectedNotes + 4);
       await expect(page.locator('.stake-score')).toContainText('12');
     }
+    if (testInfo.project.name === 'mobile-chromium') {
+      actor = await findActivePlayer(pages);
+      await actor.getByRole('button', { name: 'Pedir Truco / aumentar' }).hover();
+      await expect(actor.getByRole('tooltip')).toBeVisible();
+      await expect(actor.getByRole('tooltip')).toHaveCSS('pointer-events', 'none');
+      await clickAndSync(pages, actor, actor.locator('.hand-cards .card:enabled').first());
+      await expect(actor.locator('.played-card')).toHaveCount(1);
+    }
+
     await guest.reload();
     await expect(guest.locator('.game-table')).toBeVisible();
     await expect(guest.locator('.raise-announcement')).toHaveCount(0);

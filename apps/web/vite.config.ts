@@ -3,6 +3,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    'import.meta.env.VITE_BUILD_NUMBER': JSON.stringify(String(Math.floor(Date.now() / 1000))),
+  },
   server: {
     port: 5173,
     strictPort: true,

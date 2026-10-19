@@ -120,3 +120,15 @@
     animation: none;
   }
 }
+
+@media (min-width: 601px) {
+  .table-atmosphere[data-player-count="2"] .deal-deck,
+  .table-atmosphere[data-player-count="2"] .deal-card {
+    left: 50%;
+  }
+
+  .table-atmosphere[data-player-count="2"] .deal-relative-0,
+  .table-atmosphere[data-player-count="2"] .deal-relative-1 {
+    --deal-left: 50%;
+  }
+}

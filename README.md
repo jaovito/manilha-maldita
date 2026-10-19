@@ -182,3 +182,7 @@ Flags independentes no backend:
 `bun run start:server` mantém ambas fechadas por padrão. Nenhuma configuração VITE ou parâmetro no navegador concede permissão. O build de produção exclui o painel mesmo apontando para um backend dev. O bot decide com suas próprias cartas e informações públicas, sem ler sua mão. Revanche solo inicia imediatamente; Voltar ao menu sai da sala.
 
 `bun run test:e2e:solo` abre servidores isolados nas portas 3002/5174/4174 e exercita dev e build de produção em desktop/mobile. Essas portas devem estar livres. O comando produz um build de teste apontando para 3002; rode `VITE_BACKEND_URL='' bun run build` depois para gerar novamente o build padrão, ou use a URL de backend do seu ambiente.
+
+## Versão e build do frontend
+
+O rodapé do menu exibe `v<versão>+<build>`, por exemplo `v0.1.0+1792414800`. A versão semântica vem de `apps/web/package.json` e deve ser incrementada ao preparar uma release. O Vite gera o build numérico em segundos Unix (UTC) ao iniciar uma compilação ou servidor dev; o valor fica fixo naquele artefato e não muda ao recarregar a página. Não depende do relógio do navegador nem expõe informações do ambiente.

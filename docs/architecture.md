@@ -203,6 +203,20 @@ Snapshots completos filtrados são aceitáveis no MVP; diffs são otimização p
 
 ## Interface e experiência de jogo
 
+Jogadas confirmadas animam a face autorizada da origem na mão até o slot da mesa por 380 ms, usando Web Animations. O clique local apenas registra geometria; rejeição não inicia movimento. Adversários partem de um verso anônimo, sem identificar a carta privada. Cobertas e máscaras preservam a representação já autorizada. Primeira carga, troca de mão/partida e retomada após pausa não reproduzem jogadas antigas; SYNC repetido não duplica o voo. Movimento reduzido desativa o deslocamento. O destaque de vencedor e os efeitos do poder iniciam ao pousar, dentro da pausa autoritativa existente.
+
+O título e o valor da aposta ocupam áreas proporcionais dentro do medalhão, com folga para sua borda circular também em telas compactas.
+
+O baralho da distribuição e a origem dos voos acompanham o eixo das cartas jogadas. Em telas acima de 600 px, a mão local compartilha esse eixo horizontal: centro da arena no 1v1 e eixo da composição no 2v2. Em retrato compacto, a mão mantém o espaço lateral reservado aos poderes.
+
+Cartas comuns usam uma composição única proporcional à largura da própria face (unidades cqw), incluindo naipe, números, margens e moldura. O contexto muda apenas o tamanho externo; mão, mesa, vira e faces observadas mantêm o mesmo desenho.
+
+O botão de Truco centraliza ícone e texto como um único bloco, com compensação óptica da fonte pixelada; a mesma composição atende aos contra-aumentos. “Passar preparação” também centraliza seu texto com compensação óptica, sem depender de padding assimétrico.
+
+Na mesa, avatar e moldura do nome compartilham espaçamento de 12 px no desktop e 8 px nas telas compactas. Nomes têm largura intrínseca limitada pela coluna, sem margens automáticas que afastem a moldura do avatar; em retrato, os versos ficam acima da identidade.
+
+A seleção “Jogar coberta” vale para uma jogada: expira quando o snapshot confirma a redução da mão do jogador. Comandos rejeitados e atualizações sem consumo de carta preservam a seleção; outra mão ou partida começa desmarcada.
+
 O menu principal fica em `features/menu/pages/EntryMenu`. `shared/MenuScenery` compõe as camadas decorativas de menu e lobby: feltro repetível no shell, quatro cantos, quatro segmentos do símbolo central, vela, cuia, moedas, baralho e cartas do menu. PNGs com alpha preservam proporção; CSS define âncoras e tamanhos limitados, sem esticar uma imagem única. Logo Manilha Maldita e demais assets derivam da referência anterior, com procedência e prompts em `public/art/layers/README.md`. O perfil e navegação são HTML. A decoração não recebe estado de partida, não captura ponteiro/foco e fica oculta da árvore acessível. Animações CSS de cartas respeitam movimento reduzido. Em retrato, elementos secundários cedem espaço e o conteúdo pode rolar; em paisagem baixa, os controles ficam compactos. Criação/ingresso e recursos futuros desabilitados preservam os fluxos existentes.
 
 O lobby compõe `LobbySettings`, `LobbySeats` e `RoomInvite`: configurações editáveis somente pelo anfitrião, equipes relativas ao jogador e cópia do link público exclusivamente após clique. Clipboard indisponível ou rejeitado recebe orientação de cópia manual, sem falso sucesso. O código continua sendo convite, não credencial. As artes do menu não incorporam textos, ações, nível, moeda ou informações da partida.
@@ -404,3 +418,25 @@ O sintetizador Web Audio produz quatro efeitos originais de aumento e um motivo 
 ### Cenário modular da partida
 
 `Table/Scenery` compõe piso, feltro repetível, moldura em nove partes, quatro arabescos e objetos independentes ancorados nos cantos. Usa assets de `art/table-layers/` derivados do fundo original preservado. `shared/ScenicCandle` reutiliza a mesma vela animada no menu e na mesa. O cenário não recebe projeção nem produz eventos: fica atrás da arena, inacessível e sem interceptar ponteiro. O tamanho da textura é fixo; cantos e objetos têm escala própria em retrato/paisagem. O layout e a autoridade das cartas reais permanecem nos componentes existentes.
+
+### Materiais da interface da partida
+
+`Table/Theme` aplica brasões de equipe, medalhão de aposta, molduras de nomes e faixas de ações, pergaminho do histórico e placas de madeira. Os PNGs transparentes em `public/art/table-ui` não contêm textos/valores; a UI continua derivando tudo das projeções e do i18n. Faces, versos, atlas dos poderes e regras de proporção permanecem em seus componentes originais. Cores das faixas são decorativas; rótulos e posições continuam identificando equipes e estados.
+
+`TableHistory` começa compacto: três entradas recentes no desktop e a última no celular. O botão com `aria-expanded` expande o histórico público da mão, com rolagem interna; Escape recolhe sem enviar comandos. A lista acompanha o final enquanto o leitor está a até 2 px dele; rolar para cima preserva a posição nas atualizações e voltar ao fim retoma o acompanhamento. Nova mão ou alternância entre compacto/expandido volta à ação mais recente. Jogadas opacas continuam redigidas pela projeção. Não há armazenamento novo. Seleção de carta coberta conserva o checkbox nativo acessível, apresentado com uma miniatura do verso; Máscara mantém seu visual distinto.
+
+Avisos de turno, resultados, aumentos e término reutilizam os materiais da mesa. Eventos, pausas, foco, áudios, respeito a movimento reduzido e autoridade do servidor permanecem nos componentes de feedback existentes.
+
+`Table/Theme/nameplates.css` substitui as imagens dos nomes por molduras CSS de borda dupla dourada e cantos assimétricos. A altura acompanha o apelido completo, com quebra inclusive sem espaços; a descrição fica em linha separada. No celular, o assento superior reserva uma linha inteira para a identificação. `alignment.css` mantém a área útil das faixas de ações. Medalhão, placa de mão e status usam dimensões coordenadas por viewport para manter espaço entre os elementos.
+
+O pergaminho reserva 14% da largura de cada lado para madeira e ornamentos. No desktop e no histórico expandido, `history-frame.css` renderiza o mesmo PNG com border-image em nove partes: a dobra inferior ocupa uma borda própria de 40 px, seguida de 8 px de respiro interno. Apenas o centro se expande; a rolagem fica dentro da área útil. Em paisagem compacta, a borda inferior usa 16 px. O acompanhamento da rolagem permanece inalterado.
+
+No 1v1, `Table/Theme/tableau.css` reserva a altura da carta e da legenda em cada posição central, com intervalo de 16 px. As duas posições ficam em coluna em todas as telas, com a jogada local abaixo. No desktop, a identificação do assento superior fica ao lado da mão, liberando altura sem alterar as proporções das cartas.
+
+`Table/Theme/heading.css` organiza o status e o assento superior em linhas consecutivas de grid no desktop e em paisagem, com 12 px entre eles. A altura real do texto participa do fluxo. O centro do 1v1 começa depois dessas linhas; `vertical-plays.css` mantém as jogadas em coluna e ajusta a escala à altura disponível. Em telas baixas, as legendas ficam ao lado das faces, sem alterar sua proporção. Molduras de nomes usam `fit-content`, limitadas à largura do assento. Alvos do Espião centralizam os versos na linha de toque sem esticar sua proporção.
+
+`Table/Theme/truco-button.css` preserva a proporção do PNG da faixa com background-size 100% auto. O botão principal usa proporção 4:1, limite de largura e escala menor em celulares baixos; o contra-aumento ocupa uma linha inteira da grade de respostas em paisagem.
+
+A face observada pelo Espião aceita clique/toque para ampliar a mesma carta autorizada em um diálogo nativo, mantendo proporção 2:3. O diálogo retém o foco, fecha por botão, Escape ou fundo e restaura o foco ao acionador quando ele ainda existe. A troca/remoção da observação desmonta a ampliação; a memória textual após jogada opaca não cria uma nova face na mão. Essa consulta local não envia comandos nem pausa os timers.
+
+O valor 5 nas faces usa Manilha Card Numerals, uma derivação de um único glifo da Pixelify Sans Bold sob SIL OFL 1.1. Mantém as métricas, baseline e espessuras originais; topo reto e haste esquerda contínua distinguem o cinco de S. O asset é reproduzível por `tooling/fonts/build-card-five.py`. Não há SVG sobreposto: o valor continua texto, herda a cor do naipe e a rotação da quina inferior. Os demais caracteres usam a fonte original.

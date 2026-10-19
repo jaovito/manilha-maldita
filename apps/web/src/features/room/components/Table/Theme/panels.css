@@ -1,0 +1,245 @@
+/* Presentation materials only: card faces, backs and aspect ratios stay in Card/. */
+.game-shell {
+  --ui-ribbon: url("/art/table-ui/ribbon.png");
+  --ui-wood: url("/art/table-ui/wood.png");
+  --ui-paper: url("/art/table-ui/parchment.png");
+  --ui-crest: url("/art/table-ui/crest.png");
+}
+.game-shell .scoreboard {
+  gap: 0;
+  align-items: start;
+  grid-template-columns: 1fr 0.8fr 1fr;
+  width: 42%;
+  left: 29%;
+  top: 1.5dvh;
+  filter: drop-shadow(0 4px 2px #00130c99);
+}
+.game-shell .team-score {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 18px 22px 30px;
+  min-height: 126px;
+  isolation: isolate;
+}
+.game-shell .team-score::before {
+  display: block;
+  content: "";
+  inset: 0;
+  z-index: -1;
+  background: var(--ui-crest) center / 100% 100% no-repeat;
+}
+.game-shell .team-score.enemy::before {
+  background-image: url("/art/table-ui/crest-enemy.png");
+}
+.game-shell .team-score::after,
+.game-shell .stake-score::before,
+.game-shell .stake-score::after {
+  content: none;
+}
+.game-shell .team-score span {
+  font-size: clamp(11px, 1.1vw, 17px);
+}
+.game-shell .team-score strong {
+  animation: score-arrival 350ms ease-out;
+}
+.game-shell .stake-score {
+  align-self: start;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 5px ridge #f3c363;
+  background: radial-gradient(circle at 35% 25%, #ffe6a3, #d69b33 60%, #9a591c);
+  box-shadow:
+    inset 0 0 0 3px #815018,
+    0 4px #482915;
+  color: #332315;
+  padding: 14px 4px;
+  max-width: 140px;
+  justify-self: center;
+  width: 100%;
+}
+.game-shell .stake-score > span,
+.game-shell .stake-score strong {
+  color: #372214;
+  text-shadow: 1px 1px #ffe6a3;
+}
+.game-shell .stake-score small {
+  position: absolute;
+  top: calc(100% - 3px);
+  left: -5%;
+  width: 110%;
+  min-height: 26px;
+  padding: 7px 8px;
+  background: var(--ui-wood) center / 100% 100% no-repeat;
+  color: #ffe5a5;
+  line-height: 1.1;
+}
+.game-shell .table-information {
+  height: auto;
+  max-height: 31dvh;
+  overflow: visible;
+  border: 0;
+  background: none;
+  z-index: 6;
+}
+.game-shell .table-information .table-history {
+  border: 0;
+  padding: 24px 14% 32px;
+  background: var(--ui-paper) center / 100% 100% no-repeat;
+  box-shadow: none;
+  color: #372414;
+}
+.history-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.game-shell .table-history h3 {
+  flex: 1;
+  padding: 0;
+  border: 0;
+  color: #382515;
+  letter-spacing: 1px;
+}
+.game-shell .history-toggle {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: var(--ui-wood) center / 100% 100% no-repeat;
+  box-shadow: none;
+  color: #ffe6b3;
+  font-size: 24px;
+}
+.game-shell .table-history .history-list {
+  max-height: 18dvh;
+  overflow-y: auto;
+  overflow-anchor: none;
+}
+.game-shell .table-history[data-expanded="true"] .history-list {
+  max-height: 55dvh;
+}
+.table-history[data-expanded="false"] .history-entry:nth-last-child(n + 4) {
+  display: none;
+}
+.table-history[data-expanded="false"] .history-entry ul {
+  display: none;
+}
+.game-shell .table-history .history-entry,
+.game-shell .table-history .history-entry ul,
+.game-shell .table-history .trick-explanation,
+.game-shell .table-history .history-empty {
+  color: #3b291b;
+  border-color: #89603755;
+  line-height: 1.3;
+}
+.game-shell .table-history .history-entry {
+  padding: 7px 0;
+}
+.game-shell .table-history .history-empty {
+  padding: 8px 0 0;
+  font-size: 13px;
+}
+.game-shell .seat-info,
+.game-shell .own-player > strong {
+  position: relative;
+  isolation: isolate;
+  border: 0;
+  background: none;
+  padding: 9px 18px;
+  text-shadow: 1px 2px #031d21;
+}
+.game-shell .seat-info::before,
+.game-shell .own-player > strong::before {
+  content: "";
+  position: absolute;
+  inset: -5px -8px;
+  background: var(--ui-ribbon) center / 100% 160% no-repeat;
+  z-index: -1;
+}
+.game-shell .player-seat[data-team="own"] .seat-info::before,
+.game-shell .own-player > strong::before {
+  background-image: url("/art/table-ui/ribbon-green.png");
+}
+.game-shell .seat-team {
+  color: #f2d9b0;
+}
+.game-shell .seat-active .seat-avatar,
+.game-shell .own-player[data-active="true"] .seat-avatar {
+  box-shadow:
+    0 0 0 2px #3e2615,
+    0 0 0 4px #f8cf70,
+    0 0 20px #efba4766;
+}
+.game-shell .played-card small {
+  color: #ffe4b2;
+  padding: 3px 5px;
+  background: #261c13e8;
+  border-inline: 2px solid #b88842;
+  border-radius: 0 0 8px 8px;
+}
+.game-shell .vira-panel {
+  border: 0;
+  background: #25190fe8;
+  border-radius: 12px 12px 20px 20px;
+  box-shadow:
+    0 0 0 2px #ac792f,
+    0 0 0 5px #4a2b13,
+    0 5px 0 5px #0b1716;
+  padding: 10px;
+}
+.game-shell .vira-panel h3 {
+  background: var(--ui-wood) center / 100% 100% no-repeat;
+  margin: -20px -15px 6px;
+  padding: 10px 5px;
+  color: #ffe6a9;
+}
+.game-shell .vira-panel > span:not([role]) {
+  border: 3px ridge #e6b658;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 20%, #f5d481, #a86a27);
+  color: #281a10;
+  width: 1.5em;
+  margin: 3px auto;
+  text-align: center;
+}
+@keyframes score-arrival {
+  from {
+    scale: 1.15;
+  }
+  to {
+    scale: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-shell .team-score strong {
+    animation: none;
+  }
+}
+
+.game-shell .seat-info {
+  min-width: 0;
+  padding: 8px 8px 0;
+}
+.game-shell .seat-info::before {
+  inset: 0 -6px auto;
+  height: 38px;
+}
+.game-shell .seat-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: clamp(12px, 1.3vw, 20px);
+}
+.game-shell .seat-team {
+  margin-top: 9px;
+  font-size: 10px;
+  line-height: 1.2;
+}
+.game-shell .own-player > strong {
+  padding: 9px 16px;
+}
+.game-shell .table-history .history-empty {
+  overflow-wrap: anywhere;
+}

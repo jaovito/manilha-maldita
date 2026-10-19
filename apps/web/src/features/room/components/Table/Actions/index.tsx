@@ -1,3 +1,4 @@
+import { CardBack } from '../Card';
 import { t, loadLocale } from '../../../../../shared/i18n';
 import type { MatchView, RoomView } from '@truco/game-protocol';
 import { disabledHint } from '../../../../../shared/DisabledTooltip';
@@ -68,7 +69,7 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
               {...disabledHint(baseReason)}
               onClick={() => send({ type: 'PREPARE', intent: { type: 'pass' } })}
             >
-              {t('Passar preparação')}
+              <span className="preparation-label">{t('Passar preparação')}</span>
             </button>
           )}
         </div>
@@ -96,7 +97,9 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
             )}
             onClick={() => send({ type: 'RESPOND_RAISE', response: 'raise' })}
           >
-            {counter ? raiseText.shouts[counter] : raiseText.limit}
+            <span className="truco-label">
+              {counter ? raiseText.shouts[counter] : raiseText.limit}
+            </span>
           </button>
           <button
             className="action-fold"
@@ -138,10 +141,12 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
           {...disabledHint(raiseReason)}
           onClick={() => send({ type: 'REQUEST_RAISE' })}
         >
-          <span aria-hidden="true">⚑</span>{' '}
-          {hand.betting.acceptedStake === 1
-            ? raiseText.call
-            : raiseText.shouts[nextRaise(hand.betting.acceptedStake) ?? 12]}
+          <span className="truco-label">
+            <span aria-hidden="true">⚑</span>{' '}
+            {hand.betting.acceptedStake === 1
+              ? raiseText.call
+              : raiseText.shouts[nextRaise(hand.betting.acceptedStake) ?? 12]}
+          </span>
         </button>
       )}
       {phase.type !== 'PREPARATION' && (
@@ -155,7 +160,10 @@ export function TableActions({ room, match, covered, setCovered, send }: Props) 
             {...disabledHint(coveredReason)}
             onChange={(event) => setCovered(event.target.checked)}
           />
-          {t('Jogar coberta (a partir da segunda vaza)')}
+          <span className="covered-card-toggle" aria-hidden="true">
+            <CardBack />
+          </span>
+          <span>{t('Jogar coberta (a partir da segunda vaza)')}</span>
         </label>
       )}
       {room.status === 'playing' && (

@@ -1,0 +1,44 @@
+/* Reserve a complete card and its caption in each 1v1 slot. */
+.game-shell .arena[data-player-count="2"] .center-plays {
+  --played-width: clamp(50px, min(6.3vw, 8.66dvh), 100px);
+  --caption-height: 23px;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(2, calc(var(--played-width) * 1.5 + var(--caption-height)));
+  justify-items: center;
+  gap: 16px;
+  height: auto;
+  top: 29%;
+}
+
+.game-shell .arena[data-player-count="2"] .played-card {
+  position: relative;
+  inset: auto;
+  transform: none;
+  align-self: start;
+}
+
+.game-shell .arena[data-player-count="2"] .play-relative-1 {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+.game-shell .arena[data-player-count="2"] .play-relative-0 {
+  grid-row: 2;
+  grid-column: 1;
+}
+
+@media (min-width: 601px) and (min-height: 501px) {
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    width: clamp(250px, 28vw, 420px);
+    grid-template-columns: minmax(70px, 1fr) clamp(34px, 6dvh, 72px) minmax(110px, 1.6fr);
+    gap: 12px;
+  }
+
+  .game-shell .seat-relative-2 .seat-cards,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 .seat-cards {
+    grid-column: 1;
+    padding-inline: 8px;
+  }
+}

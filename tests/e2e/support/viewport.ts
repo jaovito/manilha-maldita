@@ -23,7 +23,12 @@ export async function assertTableGeometry(page: Page, count: 2 | 4) {
     await page
       .locator(count === 2 ? '.seat-relative-1' : '.seat-relative-2')
       .evaluate((element) => element.ownerDocument.defaultView?.getComputedStyle(element).position),
-  ).toBe('absolute');
+  ).toBe(arena.width > 600 ? 'relative' : 'absolute');
+  if (arena.width > 600) {
+    const hand = await page.locator('.hand-cards').boundingBox();
+    if (!hand) throw new Error('Mão ausente.');
+    expect(Math.abs(hand.x + hand.width / 2 - center.x - center.width / 2)).toBeLessThanOrEqual(1);
+  }
   expect(opponent.width).toBeGreaterThan(0);
   expect(opponent.width).toBeLessThan(arena.width * 0.5);
   expect(vira.width).toBeLessThan(120);
@@ -34,6 +39,19 @@ export async function assertTableGeometry(page: Page, count: 2 | 4) {
   expect(logo.width).toBeLessThanOrEqual(230);
   expect(logo.x + logo.width).toBeLessThanOrEqual(score.x);
   await assertGameViewport(page);
+  if (count === 2) {
+    const plays = await page.locator('.played-card').all();
+    if (plays.length === 2) {
+      const first = await plays[0]?.boundingBox();
+      const second = await plays[1]?.boundingBox();
+      if (!first || !second) throw new Error('Jogadas ausentes');
+      const gapY = Math.max(second.y - first.y - first.height, first.y - second.y - second.height);
+      expect(gapY, 'Jogadas do 1v1 devem ficar em coluna, sem sobreposição').toBeGreaterThanOrEqual(
+        8,
+      );
+      expect(Math.abs(first.x - second.x)).toBeLessThanOrEqual(1);
+    }
+  }
   expect(opponent.y + opponent.height).toBeLessThanOrEqual(center.y);
   expect(center.y + center.height, JSON.stringify({ center, ownPlayer })).toBeLessThanOrEqual(
     ownPlayer.y,

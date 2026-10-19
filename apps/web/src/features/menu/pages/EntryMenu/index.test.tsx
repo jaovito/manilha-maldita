@@ -1,6 +1,7 @@
 import { expect, mock, test } from 'bun:test';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EntryMenu } from './index';
+import { version } from '../../../../../package.json';
 
 function handlers() {
   return {
@@ -14,6 +15,10 @@ test('main menu keeps future features disabled, edits nickname and creates only 
   const events = handlers();
   const props = { nickname: '', code: '', busy: false, ...events };
   const view = render(<EntryMenu {...props} />);
+  expect(view.container.querySelector('.menu-version')?.textContent).toBe(
+    `v${version}+${import.meta.env.VITE_BUILD_NUMBER ?? '0'}`,
+  );
+  expect(screen.queryByText('alpha · M2')).toBeNull();
 
   for (const name of [/^Jogar/, /^Cosméticos/, /^Sair/]) {
     const button = screen.getByRole('button', { name });

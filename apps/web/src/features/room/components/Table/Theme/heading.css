@@ -1,0 +1,138 @@
+.game-shell .seat-name {
+  width: fit-content;
+  margin-inline: auto;
+}
+
+/* Status and the upper seat share normal flow, so wrapped text reserves space. */
+@media (min-width: 601px) {
+  .game-shell .arena {
+    display: grid;
+    grid-template-columns: 92% 8%;
+    grid-template-rows: max-content max-content 1fr;
+    padding-top: calc(1.5dvh + clamp(64px, 10dvh, 110px) + 26px);
+  }
+
+  .game-shell .opponents {
+    display: contents;
+  }
+
+  .game-shell .table-status:not([data-resolving="true"]),
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    position: relative;
+    inset: auto;
+    transform: none;
+    grid-column: 1;
+    justify-self: center;
+    align-self: start;
+  }
+
+  .game-shell .table-status:not([data-resolving="true"]) {
+    grid-row: 1;
+    margin: 0;
+  }
+
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    grid-row: 2;
+    margin-top: 12px;
+  }
+
+  .game-shell .arena:has(.table-status[data-resolving="true"]) {
+    grid-template-rows: 32px max-content 1fr;
+  }
+
+  .game-shell .arena[data-player-count="2"] .center-plays {
+    grid-column: 1;
+    grid-row: 3;
+    top: 16px;
+    left: 50%;
+  }
+}
+
+@media (min-width: 601px) and (max-height: 500px) {
+  .game-shell .arena {
+    padding-top: 70px;
+  }
+}
+
+.game-shell .player-seat[data-spy-target="true"] .seat-cards {
+  align-items: center;
+}
+
+/* Keep intrinsic nameplates beside their avatar, not centered in the remaining column. */
+@media (min-width: 601px) {
+  .game-shell .player-seat,
+  .game-shell .own-player {
+    column-gap: 12px;
+  }
+
+  .game-shell .seat-name {
+    margin-inline: 0;
+  }
+
+  .game-shell .seat-team {
+    text-align: left;
+  }
+}
+
+@media (min-width: 601px) and (max-height: 500px) {
+  .game-shell .player-seat,
+  .game-shell .own-player {
+    column-gap: 8px;
+  }
+
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1 {
+    grid-template-columns: 50px 30px minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .game-shell .player-seat,
+  .game-shell .seat-relative-2,
+  .game-shell .arena[data-player-count="2"] .seat-relative-1,
+  .game-shell .arena[data-player-count="4"] :is(.seat-relative-1, .seat-relative-3) {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 8px;
+  }
+
+  .game-shell .own-player {
+    gap: 8px;
+  }
+
+  .game-shell .arena[data-player-count] .player-seat .seat-cards {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .game-shell .arena[data-player-count] .player-seat .seat-avatar {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .game-shell .arena[data-player-count] .player-seat .seat-info {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .game-shell .seat-name {
+    margin-inline: 0;
+  }
+}
+
+@media (min-width: 601px) {
+  .game-shell .arena .own-hand {
+    left: 46%;
+  }
+
+  .game-shell .arena[data-player-count="2"] .own-hand {
+    left: 50%;
+  }
+}
+
+@media (min-width: 601px) {
+  .game-shell .arena[data-player-count="4"] .center-plays {
+    left: 46%;
+  }
+}

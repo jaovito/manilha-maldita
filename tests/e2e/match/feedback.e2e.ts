@@ -26,6 +26,16 @@ test('M4 real clients see distribution, result pauses, next leader, sound contro
   const guest = pages[1];
   if (!host || !guest) throw new Error('Jogadores ausentes.');
   const views = pages.map(observeRoomSnapshots);
+  for (const page of pages) {
+    await page.addInitScript(`
+      window.cardFlightCount = 0;
+      const animate = Element.prototype.animate;
+      Element.prototype.animate = function (frames, options) {
+        if (this.parentElement?.matches('.played-card')) window.cardFlightCount++;
+        return animate.call(this, frames, options);
+      };
+    `);
+  }
   try {
     await host.goto('/');
     await enterNickname(host, 'Ana');
@@ -58,6 +68,15 @@ test('M4 real clients see distribution, result pauses, next leader, sound contro
       await expect(page.locator('.hand-cards .card:enabled')).toHaveCount(0);
       await expect(page.locator('.turn-badge')).toHaveCount(0);
     }
+    const alignment = await host.locator('.deal-deck').evaluate((deck) => {
+      const arena = deck.closest('.arena');
+      const plays = arena?.querySelector('.center-plays');
+      if (!arena || !plays) throw new Error('Mesa ausente.');
+      const deckBox = deck.getBoundingClientRect();
+      const playsBox = plays.getBoundingClientRect();
+      return Math.abs(deckBox.x + deckBox.width / 2 - playsBox.x - playsBox.width / 2);
+    });
+    expect(alignment).toBeLessThanOrEqual(1);
     const deal = views[0]?.();
     expect(deal?.decisionId).toBeNull();
     expect(deal?.deadline).toBeNull();
@@ -74,6 +93,16 @@ test('M4 real clients see distribution, result pauses, next leader, sound contro
       'prop-candle-breathe',
     );
     await waitForPresentation(pages);
+    const preparation = host.getByRole('button', { name: 'Passar preparação', exact: true });
+    const buttonBox = await preparation.boundingBox();
+    const labelBox = await preparation.locator('.preparation-label').boundingBox();
+    if (!buttonBox || !labelBox) throw new Error('Botão de preparação ausente.');
+    expect(
+      Math.abs(labelBox.x + labelBox.width / 2 - buttonBox.x - buttonBox.width / 2),
+    ).toBeLessThan(1);
+    const opticalOffset = buttonBox.y + buttonBox.height / 2 - labelBox.y - labelBox.height / 2;
+    expect(opticalOffset).toBeGreaterThan(2);
+    expect(opticalOffset).toBeLessThan(8);
     for (const page of pages)
       await clickAndSync(pages, page, page.getByRole('button', { name: 'Passar preparação' }));
 
@@ -131,6 +160,8 @@ test('M4 real clients see distribution, result pauses, next leader, sound contro
       if (play === 1) await expect(lastActor.locator('.turn-announcement')).toBeVisible();
       await clickAndSync(pages, lastActor, lastActor.locator('.hand-cards .card:enabled').first());
       await expect(lastActor.locator('.turn-announcement')).toHaveCount(0);
+      await expect.poll(() => host.evaluate<number>('window.cardFlightCount')).toBe(play + 1);
+      expect(await guest.evaluate<number>('window.cardFlightCount')).toBe(0);
     }
     const result = views[0]?.();
     if (!result) throw new Error('Resultado ausente.');

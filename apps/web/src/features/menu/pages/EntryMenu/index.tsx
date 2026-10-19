@@ -1,3 +1,4 @@
+import { version } from '../../../../../package.json';
 import { t } from '../../../../shared/i18n';
 import { nicknameSchema } from '@truco/game-protocol';
 import { useEffect, useRef, useState } from 'react';
@@ -181,7 +182,9 @@ export function EntryMenu({
         >
           {t('Sair')} <small>{t('Em breve')}</small>
         </button>
-        <span>alpha · M2</span>
+        <span className="menu-version">
+          v{version}+{import.meta.env.VITE_BUILD_NUMBER ?? '0'}
+        </span>
       </footer>
     </div>
   );

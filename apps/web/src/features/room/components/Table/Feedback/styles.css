@@ -36,17 +36,13 @@
     0 0 24px #edc97322;
 }
 .played-card > span {
-  animation: card-arrival 180ms ease-out both;
+  animation: none;
 }
 .played-card[data-power="boost"] > span {
-  animation:
-    card-arrival 180ms ease-out both,
-    boost-flare 650ms ease-out;
+  animation: boost-flare 650ms ease-out;
 }
 .played-card[data-power="mask"] > span {
-  animation:
-    card-arrival 180ms ease-out both,
-    mask-flare 650ms ease-out;
+  animation: mask-flare 650ms ease-out;
 }
 .played-card[data-winner="true"] {
   z-index: 3;
@@ -98,16 +94,6 @@
   }
   100% {
     transform: scale(1.12) rotate(0deg);
-  }
-}
-@keyframes card-arrival {
-  from {
-    opacity: 0;
-    translate: 0 16px;
-  }
-  to {
-    opacity: 1;
-    translate: 0 0;
   }
 }
 @keyframes boost-flare {
@@ -228,4 +214,16 @@
   height: 1px;
   overflow: hidden;
   clip-path: inset(50%);
+}
+
+/* Flight owns the transform; result/power feedback begins once it lands. */
+.game-shell .played-card[data-flying="true"] {
+  z-index: 5;
+}
+.game-shell .played-card[data-flying="true"] > span {
+  animation: none;
+  filter: none;
+}
+.game-shell .played-card[data-flying="true"] > small {
+  visibility: hidden;
 }

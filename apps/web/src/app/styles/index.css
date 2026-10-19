@@ -51,3 +51,17 @@
 @import "../../features/room/components/Table/Feedback/RaiseAnnouncement/styles.css";
 
 @import "../../features/room/components/Table/Scenery/styles.css";
+@import "../../features/room/components/Table/Theme/panels.css";
+@import "../../features/room/components/Table/Theme/controls.css";
+@import "../../features/room/components/Table/Theme/feedback.css";
+@import "../../features/room/components/Table/Theme/responsive.css";
+@import "../../features/room/components/Table/Theme/alignment.css";
+@import "../../features/room/components/Table/Theme/tableau.css";
+
+@import "../../features/room/components/Table/Theme/nameplates.css";
+@import "../../features/room/components/Table/Theme/heading.css";
+@import "../../features/room/components/Table/Theme/history-frame.css";
+@import "../../features/room/components/Table/Theme/truco-button.css";
+@import "../../features/room/components/Table/Theme/vertical-plays.css";
+
+@import "../../features/room/components/Table/Card/proportions.css";

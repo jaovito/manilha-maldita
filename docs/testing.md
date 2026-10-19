@@ -255,3 +255,27 @@ Regressões da aplicação verificam partida completa por pontos, relógios/time
 ### Contagem da mão e Espião
 
 As regressões de `Seats/Cards/observed-play.test.tsx` verificam remoção da observação quando a carta fica pública, preservação da incerteza em jogadas ocultas e memória textual sem carta extra em mãos com uma ou duas cartas, inclusive após reconexão. Também verificam que outra carta aberta preserva a face em um slot real, com ajuste do índice quando a mão encolhe e após reconexão. Carta coberta usa o verso sem símbolo; Máscara preserva símbolo e descrição. O helper multiplayer confere, após cada jogada em 1v1/2v2, que os slots visuais correspondem à contagem pública da mão em todos os clientes e que a memória não contém uma face de carta.
+
+### Interface da mesa em brasões e faixas
+
+O histórico tem regressão DOM para expansão/recolhimento, associação `aria-controls`, Escape e preservação de cartas cobertas. `match/scenery.e2e.ts` verifica os seis materiais carregáveis e a expansão pelo teclado. Os E2E de partidas completas mantêm as exigências de proporção 2:3, dimensões do atlas, ausência de colisões e fluxo 1v1/2v2. Os testes de feedback e aumentos validam os mesmos eventos e tempos com os novos materiais; a conferência visual com playwright-cli cobre desktop, retrato e paisagem.
+
+No celular, a regressão de aumentos também abre a explicação do limite de 12 e joga uma carta com a dica visível, garantindo que ela não intercepte o toque.
+
+O histórico tem testes DOM de acompanhamento do final, leitura manual, retomada com tolerância de 2 px e reinício por mão/expansão. `match/history.e2e.ts` exercita novas jogadas reais e agrupamento de vaza em desktop/mobile, com janela de leitura limitada para garantir overflow.
+
+A regressão de cenário confere em cinco resoluções a separação vertical entre a placa da mão e o status, além da centralização e altura de linha dos nomes nas faixas.
+
+O E2E de cenário também exige margens laterais de pelo menos 13% entre a lista e a caixa do pergaminho nas cinco resoluções, preservando a área útil da ilustração.
+
+O helper multiplayer exige ao menos 8 px de separação vertical entre as duas jogadas do 1v1 e alinhamento horizontal entre suas faces; em telas baixas, as legendas ficam ao lado. As partidas 1v1/2v2 continuam verificando proporções e separação entre mão superior, centro e jogador local em desktop/mobile.
+
+O cenário usa apelidos longos, incluindo 24 caracteres sem espaços, e confere que nomes próprios e adversários não têm overflow horizontal/vertical em cinco resoluções. As molduras CSS são verificadas visualmente por playwright-cli.
+
+O cenário também exige ao menos 8 px entre o aviso de status e o assento superior em todas as resoluções exercitadas. A geometria multiplayer acompanha o posicionamento em fluxo do cabeçalho em desktop/paisagem, mantendo as verificações de separação das jogadas e proporção dos versos durante o Espião.
+
+A regressão do histórico expandido exige 48 px entre o fim da lista rolável e o limite inferior do quadro (40 px de borda e 8 px de respiro), em desktop/mobile, além de preservar acompanhamento do final e leitura manual.
+
+O E2E de aumentos verifica a proporção máxima 4,1:1 e altura mínima de 58 px do botão principal nos viewports desktop/mobile padrão, além do fundo com altura automática. Os cenários multiplayer mantêm a verificação de que ações não cobrem a mão durante seleção de poderes em celulares pequenos.
+
+A ampliação da observação do Espião tem regressões DOM para abertura, foco, fechamento por botão/Escape/fundo, troca e remoção do intel e descarte da face após jogada opaca. O E2E solo usa a preparação real do Espião e verifica o diálogo, proporção 2:3 e restauração de foco em desktop/mobile.
