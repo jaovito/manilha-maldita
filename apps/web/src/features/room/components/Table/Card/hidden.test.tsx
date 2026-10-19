@@ -27,7 +27,9 @@ test('masked and covered plays have distinct public backs without concealed iden
 
   view.rerender(<Table room={state} send={send} />);
   const covered = screen.getByRole('img', { name: 'Carta coberta' });
-  expect(covered.textContent).toContain('Sem força');
+  expect(covered.querySelector('.hidden-card-mark')).toBeNull();
+  expect(covered.querySelector('svg')).toBeNull();
+  expect(covered.getAttribute('aria-description')).toContain('perde para qualquer');
   expect(covered.querySelector('.card-back-covered')).not.toBeNull();
   expect(covered.querySelector('.card-back-masked')).toBeNull();
 

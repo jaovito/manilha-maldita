@@ -5,10 +5,10 @@ import { CardBack, CardFace } from '../../Card';
 
 type Intel = NonNullable<NonNullable<MatchView['powers']>['intel']>;
 
-function Observation({ intel, memory }: { intel: Intel; memory: boolean }) {
+function Observation({ intel }: { intel: Intel }) {
   return (
     <span
-      className={`mini-card spy-observation${memory ? ' spy-memory' : ''}`}
+      className="mini-card spy-observation"
       role="img"
       aria-label={t('Espião · Só você: {0}. Vista na preparação.', [cardLabel(intel.card)])}
       title={t('Vista na preparação; pode já ter sido jogada.')}
@@ -26,7 +26,7 @@ export function SeatCards({
   spy,
   intel,
   position,
-  played,
+  hasOpaquePlay,
 }: {
   hand: MatchView['hand']['hands'][number];
   name: string;
@@ -34,7 +34,7 @@ export function SeatCards({
   spy: (index: number) => void;
   intel: Intel | null;
   position: number;
-  played: boolean;
+  hasOpaquePlay: boolean;
 }) {
   return (
     <section className="seat-cards" aria-label={t('{0} cartas na mão', [hand.count])}>
@@ -52,14 +52,25 @@ export function SeatCards({
         : Array.from({ length: hand.count }, (_, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: Backs are anonymous; the observed face is not a tracking identifier.
             <span className="mini-card" key={index} data-spy-placeholder={spying}>
-              {intel && !played && index === position ? (
-                <Observation intel={intel} memory={false} />
+              {intel && !hasOpaquePlay && index === Math.min(position, hand.count - 1) ? (
+                <Observation intel={intel} />
               ) : (
                 <CardBack />
               )}
             </span>
           ))}
-      {intel && played && <Observation intel={intel} memory />}
+      {intel && hasOpaquePlay && (
+        <span
+          className="spy-memory"
+          role="note"
+          aria-label={t('Memória do Espião: {0}. Pode já ter sido jogada.', [
+            cardLabel(intel.card),
+          ])}
+          title={t('Memória do Espião: {0}. Pode já ter sido jogada.', [cardLabel(intel.card)])}
+        >
+          {t('Visto: {0}', [cardLabel(intel.card)])}
+        </span>
+      )}
       {spying && (
         <div className="spy-targets">
           {Array.from({ length: hand.count }, (_, index) => (

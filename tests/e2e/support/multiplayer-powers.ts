@@ -49,4 +49,14 @@ export async function playWithPower(pages: Page[], page: Page) {
   const activated = await page.locator('.power-card[aria-pressed="true"]').count();
   await clickAndSync(pages, page, page.locator('.card:enabled').first());
   if (activated) await expect(page.locator('.power-card')).toHaveCount(0);
+
+  for (const client of pages) {
+    for (const hand of await client.locator('.seat-cards').all()) {
+      const label = await hand.getAttribute('aria-label');
+      const count = Number(label?.match(/^\d+/)?.[0]);
+      expect(Number.isInteger(count)).toBe(true);
+      await expect(hand.locator(':scope > .mini-card')).toHaveCount(count);
+      await expect(hand.locator('.spy-memory .card-face')).toHaveCount(0);
+    }
+  }
 }

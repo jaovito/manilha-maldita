@@ -35,7 +35,7 @@ export function TableSeats({
             ...match.hand.plays,
             ...match.hand.completedTricks.flatMap((trick) => trick.plays),
           ];
-          const played = plays.some((play) => play.seat === hand.seat);
+          const hasOpaquePlay = plays.some((play) => play.seat === hand.seat && !('card' in play));
           // Only compare faces already authorized by the server, never opaque plays.
           const observedPlayed =
             intel !== null &&
@@ -61,7 +61,7 @@ export function TableSeats({
                 spy={(index) => spy(hand.seat, index)}
                 intel={observedPlayed || hand.count === 0 ? null : intel}
                 position={spyPosition?.seat === hand.seat ? spyPosition.index : 0}
-                played={played}
+                hasOpaquePlay={hasOpaquePlay}
               />
               <span className={`seat-avatar avatar-${hand.seat}`} aria-hidden="true" />
               <div className="seat-info">

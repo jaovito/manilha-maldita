@@ -105,6 +105,9 @@ export const tableEnglish = {
   Adversário: 'Opponent',
   Reconectando: 'Reconnecting',
   'Espião · Só você: {0}. Vista na preparação.': 'Spy · Only you: {0}. Seen during preparation.',
+  'Memória do Espião: {0}. Pode já ter sido jogada.':
+    'Spy memory: {0}. It may already have been played.',
+  'Visto: {0}': 'Seen: {0}',
   'Vista na preparação; pode já ter sido jogada.':
     'Seen during preparation; may already have been played.',
   '{0} cartas na mão': '{0} cards in hand',

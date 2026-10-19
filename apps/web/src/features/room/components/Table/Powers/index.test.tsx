@@ -132,7 +132,7 @@ test('turn power selection accompanies card atomically, resets on decision, bloc
   );
   expect(screen.getByRole('img', { name: 'Carta mascarada' })).toBeDefined();
   expect(screen.queryByRole('button', { name: 'Poder Espião' })).toBeNull();
-  expect(screen.getByRole('img', { name: /Espião · Só você/ })).toBeDefined();
+  expect(screen.getByRole('note', { name: /Memória do Espião/ })).toBeDefined();
 });
 
 test('active power selection cancels by Escape or button without spending, while inactive details restore focus', () => {

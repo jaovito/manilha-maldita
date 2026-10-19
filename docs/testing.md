@@ -251,3 +251,7 @@ Regressões da aplicação verificam partida completa por pontos, relógios/time
 ### Camadas da mesa
 
 `Table/Scenery/index.test.tsx` exige todas as categorias decorativas, ausência de controles/texto de partida e reuso da vela entre renders. `match/scenery.e2e.ts` inicia uma sala com dois clientes reais e verifica imagens carregadas, texturas com escala fixa, quatro cantos presentes, ausência de overflow e proporção da vela em 1440×900, 1920×1080, 390×844, 320×568 e 844×390. Movimento reduzido desliga filtro/halo e o cenário não impede passar a preparação. O E2E de feedback verifica o filtro da nova vela; os E2E do menu mantêm a comparação de pixels animados da chama e fixos da cera. Inspeção visual com playwright-cli complementa os testes de geometria.
+
+### Contagem da mão e Espião
+
+As regressões de `Seats/Cards/observed-play.test.tsx` verificam remoção da observação quando a carta fica pública, preservação da incerteza em jogadas ocultas e memória textual sem carta extra em mãos com uma ou duas cartas, inclusive após reconexão. Também verificam que outra carta aberta preserva a face em um slot real, com ajuste do índice quando a mão encolhe e após reconexão. Carta coberta usa o verso sem símbolo; Máscara preserva símbolo e descrição. O helper multiplayer confere, após cada jogada em 1v1/2v2, que os slots visuais correspondem à contagem pública da mão em todos os clientes e que a memória não contém uma face de carta.

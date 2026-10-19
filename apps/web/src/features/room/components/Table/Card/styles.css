@@ -164,8 +164,7 @@
 }
 
 /* Public play state only; the concealed card never contributes styling or labels. */
-.card-back-masked,
-.card-back-covered {
+.card-back-masked {
   container-type: inline-size;
   display: grid;
   place-items: center;
@@ -177,11 +176,6 @@
     inset 0 0 0 3px #170b2c,
     0 0 8px #bb71e077;
   color: #ffe2a1;
-}
-.card-back-covered {
-  background: #162b34;
-  color: #c6d1d6;
-  border-color: #71838a;
 }
 .hidden-card-mark {
   display: flex;

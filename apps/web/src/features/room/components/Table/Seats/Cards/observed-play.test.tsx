@@ -3,6 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import type { MatchView, RoomView } from '@truco/game-protocol';
 import { Table } from '../..';
 import { powered } from '../../Powers/index.test';
+import { SeatCards } from '.';
 
 type State = RoomView & { match: MatchView };
 const observed = { rank: 'K', suit: 'spades' } as const;
@@ -56,9 +57,12 @@ function withPlays(room: State, plays: MatchView['hand']['plays']): State {
 }
 
 function observation() {
-  return within(screen.getByRole('region', { name: 'Bia, adversário' })).queryByRole('img', {
-    name: /Espião · Só você/,
-  });
+  const seat = within(screen.getByRole('region', { name: 'Bia, adversário' }));
+
+  return (
+    seat.queryByRole('img', { name: /Espião · Só você/ }) ??
+    seat.queryByRole('note', { name: /Memória do Espião/ })
+  );
 }
 
 for (const count of [2, 4] as const) {
@@ -165,4 +169,67 @@ test('a mask removes the observation only after its face is revealed; an empty h
     />,
   );
   expect(observation()).toBeNull();
+});
+
+for (const count of [1, 2]) {
+  test(`opaque play leaves exactly ${count} cards, with history rendered only as text`, () => {
+    const room = fixture(2);
+    const masked = withPlays(room, [{ seat: 1, covered: false, power: 'mask' }]);
+    masked.match.hand.hands = masked.match.hand.hands.map((hand) =>
+      hand.seat === 1 ? { ...hand, count } : hand,
+    );
+    const view = render(<Table room={masked} send={mock(() => {})} />);
+    const seat = screen.getByRole('region', { name: 'Bia, adversário' });
+
+    expect(seat.querySelectorAll('.seat-cards > .mini-card')).toHaveLength(count);
+    expect(seat.querySelectorAll('.card-back')).toHaveLength(count);
+    expect(seat.querySelectorAll('.card-face')).toHaveLength(0);
+    expect(within(seat).getByRole('note').textContent).toContain('K de Espadas');
+    view.rerender(
+      <Table room={{ ...masked, sequence: masked.sequence + 1 }} send={mock(() => {})} />,
+    );
+    expect(seat.querySelectorAll('.seat-cards > .mini-card')).toHaveLength(count);
+    view.unmount();
+  });
+}
+
+for (const count of [1, 2]) {
+  test(`another public card keeps the observed face inside the remaining ${count} slots`, () => {
+    const room = fixture(2);
+    const played = withPlays(room, [
+      { seat: 1, covered: false, card: { rank: 'Q', suit: 'hearts' } },
+    ]);
+    played.match.hand.hands = played.match.hand.hands.map((hand) =>
+      hand.seat === 1 ? { ...hand, count } : hand,
+    );
+    const view = render(<Table room={played} send={mock(() => {})} />);
+    const seat = screen.getByRole('region', { name: 'Bia, adversário' });
+
+    expect(seat.querySelectorAll('.seat-cards > .mini-card')).toHaveLength(count);
+    expect(seat.querySelectorAll('.card-face')).toHaveLength(1);
+    expect(seat.querySelectorAll('.card-back')).toHaveLength(count - 1);
+    expect(seat.querySelector('.spy-memory')).toBeNull();
+    view.unmount();
+
+    render(<Table room={played} send={mock(() => {})} />);
+    expect(screen.getByRole('img', { name: /Espião · Só você: K de Espadas/ })).toBeDefined();
+  });
+}
+
+test('the observed face moves into the final remaining slot when its original index disappears', () => {
+  const view = render(
+    <SeatCards
+      hand={{ seat: 1, count: 1, visibility: 'hidden' }}
+      name="Bia"
+      spying={false}
+      spy={mock(() => {})}
+      intel={{ target: 1, card: observed }}
+      position={2}
+      hasOpaquePlay={false}
+    />,
+  );
+
+  expect(view.container.querySelectorAll('.seat-cards > .mini-card')).toHaveLength(1);
+  expect(view.container.querySelectorAll('.card-face')).toHaveLength(1);
+  expect(view.container.querySelectorAll('.card-back')).toHaveLength(0);
 });

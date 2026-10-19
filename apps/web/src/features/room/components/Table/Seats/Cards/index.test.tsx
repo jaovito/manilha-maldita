@@ -86,13 +86,14 @@ test('spy targets only enemy backs, reveals the result at the clicked back and k
   view.rerender(<Table room={masked} send={send} />);
   expect(screen.getByRole('img', { name: 'Carta mascarada' })).toBeDefined();
   expect(bia.querySelector('.spy-memory')).not.toBeNull();
-  expect(bia.querySelectorAll('.seat-cards > .mini-card')).toHaveLength(3);
-  expect(within(bia).getByRole('img', { name: /Vista na preparação/ })).toBeDefined();
+  expect(bia.querySelectorAll('.seat-cards > .mini-card')).toHaveLength(2);
+  expect(bia.querySelectorAll('.card-face')).toHaveLength(0);
+  expect(within(bia).getByRole('note', { name: /Memória do Espião: A de Paus/ })).toBeDefined();
   expect(screen.queryByText(/Só você · Espião: Bia tinha/)).toBeNull();
 
   view.unmount();
   const resumed = render(<Table room={masked} send={send} />);
-  expect(screen.getByRole('img', { name: /Espião · Só você: A de Paus/ })).toBeDefined();
+  expect(screen.getByRole('note', { name: /Memória do Espião: A de Paus/ })).toBeDefined();
   resumed.rerender(<Table room={state} send={send} />);
   expect(screen.queryByRole('img', { name: /Espião · Só você/ })).toBeNull();
 });

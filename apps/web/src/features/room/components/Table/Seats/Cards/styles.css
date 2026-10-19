@@ -71,8 +71,20 @@
   display: none;
 }
 .spy-memory {
-  margin-left: 6px;
-  transform: none;
+  position: absolute;
+  bottom: calc(100% + 5px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 190px;
+  width: max-content;
+  padding: 3px 5px;
+  border: 1px solid #638f81;
+  background: #0a2429;
+  color: #b8f2de;
+  font-size: 10px;
+  line-height: 1.25;
+  text-align: center;
+  pointer-events: none;
 }
 @media (max-width: 600px) and (orientation: portrait) {
   .seat-relative-1 .spy-targets {
