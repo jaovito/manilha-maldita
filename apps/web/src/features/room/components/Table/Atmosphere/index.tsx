@@ -1,6 +1,6 @@
 import type { RoomView } from '@truco/game-protocol';
 import type { CSSProperties } from 'react';
-import { Candlelight } from '../../../../../shared/Candlelight';
+import { TableScenery } from '../Scenery';
 import { CardBack } from '../Card';
 
 export function TableAtmosphere({ room }: { room: RoomView }) {
@@ -9,7 +9,7 @@ export function TableAtmosphere({ room }: { room: RoomView }) {
 
   return (
     <>
-      <Candlelight variant="table" />
+      <TableScenery />
       {dealing && (
         <div
           key={`${room.matchId}:${match.hand.number}:${transition.id}`}

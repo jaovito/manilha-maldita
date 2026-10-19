@@ -399,3 +399,8 @@ O sintetizador Web Audio produz quatro efeitos originais de aumento e um motivo 
 ### Treino solo e ferramentas dev
 
 [ADR 009](adr/009-solo-training-and-development-tools.md) registra a extensão autorizada. RoomService agenda bot e timers na mesma fila; `solo/bot.ts` passa somente a projeção ao pacote game-sim. O bootstrap resolve flags independentes e bloqueia ferramentas fora de development. `solo/dev-tools.ts` recria uma mão consistente preservando o placar; o envelope e cache existentes impedem replay e contexto obsoleto. O frontend busca `/api/features` para habilitar Jogar e importa o painel condicionalmente apenas no Vite dev, exigindo também autorização da sala.
+
+
+### Cenário modular da partida
+
+`Table/Scenery` compõe piso, feltro repetível, moldura em nove partes, quatro arabescos e objetos independentes ancorados nos cantos. Usa assets de `art/table-layers/` derivados do fundo original preservado. `shared/ScenicCandle` reutiliza a mesma vela animada no menu e na mesa. O cenário não recebe projeção nem produz eventos: fica atrás da arena, inacessível e sem interceptar ponteiro. O tamanho da textura é fixo; cantos e objetos têm escala própria em retrato/paisagem. O layout e a autoridade das cartas reais permanecem nos componentes existentes.

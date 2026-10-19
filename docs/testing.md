@@ -246,3 +246,8 @@ Regressões da aplicação verificam partida completa por pontos, relógios/time
 ### Idioma global
 
 `bun run test:e2e --config=playwright.i18n.config.ts` sobe backend de desenvolvimento e Vite isolados (3002/5174). Em desktop/mobile valida idioma persistido, troca no lobby e durante partida real contra bot, ausência de comandos causados pela tradução, preservação do cenário em edição, resultados, erros e tutorial. Testes DOM verificam catálogo/placeholder, sincronização entre assinantes/abas, foco do painel e storage bloqueado. A preferência é local ao navegador, independente das regras da sala.
+
+
+### Camadas da mesa
+
+`Table/Scenery/index.test.tsx` exige todas as categorias decorativas, ausência de controles/texto de partida e reuso da vela entre renders. `match/scenery.e2e.ts` inicia uma sala com dois clientes reais e verifica imagens carregadas, texturas com escala fixa, quatro cantos presentes, ausência de overflow e proporção da vela em 1440×900, 1920×1080, 390×844, 320×568 e 844×390. Movimento reduzido desliga filtro/halo e o cenário não impede passar a preparação. O E2E de feedback verifica o filtro da nova vela; os E2E do menu mantêm a comparação de pixels animados da chama e fixos da cera. Inspeção visual com playwright-cli complementa os testes de geometria.

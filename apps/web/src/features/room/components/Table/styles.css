@@ -83,7 +83,8 @@
 .arena {
   position: relative;
   min-height: 700px;
-  background: #073c2d url("/art/tabletop.png") center / 100% 100% no-repeat;
+  background: #073c2d;
+  isolation: isolate;
   image-rendering: pixelated;
   border: 1px solid #765d32;
   box-shadow: 0 15px 30px #0006;

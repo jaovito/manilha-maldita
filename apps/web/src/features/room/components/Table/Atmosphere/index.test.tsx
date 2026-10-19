@@ -86,7 +86,7 @@ test('only server-confirmed deals animate; trick results, absent matches and fin
   ]) {
     view.rerender(<TableAtmosphere room={nextRoom} />);
     expect(view.container.querySelector('.table-atmosphere')).toBeNull();
-    expect(view.container.querySelector('.candlelight-table')).not.toBeNull();
+    expect(view.container.querySelector('.table-scenery')).not.toBeNull();
   }
 });
 

@@ -39,7 +39,7 @@
 @import "../../shared/MenuScenery/composition.css";
 @import "../../shared/MenuScenery/responsive.css";
 
-@import "../../shared/MenuScenery/candle.css";
+@import "../../shared/ScenicCandle/styles.css";
 
 @import "../../features/room/components/RoomMenu/styles.css";
 
@@ -49,3 +49,5 @@
 @import "../../features/room/components/Table/Feedback/MatchResult/sequence.css";
 @import "../../features/menu/components/Tutorial/styles.css";
 @import "../../features/room/components/Table/Feedback/RaiseAnnouncement/styles.css";
+
+@import "../../features/room/components/Table/Scenery/styles.css";

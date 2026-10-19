@@ -67,10 +67,11 @@ test('M4 real clients see distribution, result pauses, next leader, sound contro
     );
     await expect(guest.locator('.table-atmosphere')).toBeHidden();
     await expect(guest.locator('.deal-card').first()).toHaveCSS('animation-name', 'none');
-    await expect(guest.locator('.candlelight-flame').first()).toHaveCSS('animation-name', 'none');
-    await expect(host.locator('.candlelight-flame').first()).toHaveCSS(
+    await expect(guest.locator('.prop-candle-body')).toHaveCSS('filter', 'none');
+    await expect(host.locator('.prop-candle-body')).not.toHaveCSS('filter', 'none');
+    await expect(host.locator('.prop-candle-glow')).toHaveCSS(
       'animation-name',
-      'candle-flame',
+      'prop-candle-breathe',
     );
     await waitForPresentation(pages);
     for (const page of pages)

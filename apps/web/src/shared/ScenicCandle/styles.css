@@ -1,6 +1,6 @@
 /* Keep the source intact. Displacement fades to neutral above the wick,
    avoiding seams between independently moving image fragments. */
-.menu-scenery .prop-candle-art {
+.prop-candle-art {
   inset: 0;
   width: 100%;
   height: 100%;
@@ -8,7 +8,7 @@
   overflow: visible;
   image-rendering: pixelated;
 }
-.menu-scenery .prop-candle {
+.prop-candle {
   aspect-ratio: 477 / 512;
 }
 .prop-candle-body {

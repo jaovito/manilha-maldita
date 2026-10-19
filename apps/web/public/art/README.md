@@ -56,7 +56,7 @@ Prompt utilizado:
 
 ## Revisão Manilha Maldita: cenário em camadas
 
-A entrada e o lobby agora consomem os assets independentes de [layers/README.md](layers/README.md), gerados usando `menu-reference-plate.png` como referência direta. Os fundos anteriores são preservados como fontes; a mesa da partida continua com seu cenário existente. O atlas novo dos poderes segue a referência de quatro cartas fornecida pelo usuário. Textos, custos, estados e controles continuam em HTML.
+A entrada e o lobby agora consomem os assets independentes de [layers/README.md](layers/README.md), gerados usando `menu-reference-plate.png` como referência direta. Os fundos anteriores são preservados como fontes; a mesa da partida usa agora as camadas independentes de [table-layers/README.md](table-layers/README.md). O atlas novo dos poderes segue a referência de quatro cartas fornecida pelo usuário. Textos, custos, estados e controles continuam em HTML.
 
 ## Perfil clássico e avatares pixel art
 

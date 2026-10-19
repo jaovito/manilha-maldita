@@ -1,0 +1,199 @@
+/* Nine-slice rails preserve the diagonal joints; felt and floor repeat at a fixed scale. */
+.table-scenery {
+  --table-corner: clamp(90px, 28vmin, 340px);
+  --table-prop: clamp(100px, 22vmin, 250px);
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+.table-scenery * {
+  pointer-events: none;
+}
+
+.table-floor,
+.table-felt,
+.table-rail {
+  position: absolute;
+  inset: 0;
+}
+
+.table-floor {
+  background: #1c110e url("/art/table-layers/wood.png") repeat;
+  background-size: 512px;
+}
+
+.table-felt {
+  background: #063c2d url("/art/layers/felt.png") repeat;
+  background-size: 320px;
+  clip-path: polygon(
+    calc(var(--table-corner) * 0.9) calc(var(--table-corner) * 0.1),
+    calc(100% - var(--table-corner) * 0.9) calc(var(--table-corner) * 0.1),
+    calc(100% - var(--table-corner) * 0.27) calc(var(--table-corner) * 0.82),
+    calc(100% - var(--table-corner) * 0.27) calc(100% - var(--table-corner) * 0.82),
+    calc(100% - var(--table-corner) * 0.9) calc(100% - var(--table-corner) * 0.1),
+    calc(var(--table-corner) * 0.9) calc(100% - var(--table-corner) * 0.1),
+    calc(var(--table-corner) * 0.27) calc(100% - var(--table-corner) * 0.82),
+    calc(var(--table-corner) * 0.27) calc(var(--table-corner) * 0.82)
+  );
+}
+
+.table-rail {
+  border: var(--table-corner) solid transparent;
+  border-image: url("/art/table-layers/rail.png") 350 400 400 400 / var(--table-corner) / 0 stretch;
+  image-rendering: pixelated;
+  z-index: 2;
+}
+
+.table-scenery img {
+  position: absolute;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.table-ornament {
+  z-index: 3;
+  width: clamp(120px, 20vmin, 220px);
+  height: min(48%, 470px);
+  opacity: 0.68;
+}
+
+.ornament-left,
+.ornament-right {
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.ornament-left {
+  left: calc(var(--table-corner) * 0.22);
+}
+
+.ornament-right {
+  right: calc(var(--table-corner) * 0.22);
+  scale: -1 1;
+}
+
+.ornament-top,
+.ornament-bottom {
+  left: 50%;
+  translate: -50% -50%;
+  rotate: 90deg;
+}
+
+.ornament-top {
+  top: calc(var(--table-corner) * 0.29);
+}
+
+.ornament-bottom {
+  top: calc(100% - var(--table-corner) * 0.36);
+}
+
+.table-corner-props {
+  position: absolute;
+  width: var(--table-prop);
+  aspect-ratio: 1;
+  z-index: 1;
+}
+
+.props-nw {
+  top: 0;
+  left: 0;
+}
+.props-ne {
+  top: 0;
+  right: 0;
+}
+.props-sw {
+  bottom: 0;
+  left: 0;
+}
+.props-se {
+  bottom: 0;
+  right: 0;
+}
+
+.table-cloth {
+  inset: 0;
+  width: 130%;
+  height: 130%;
+}
+
+.props-ne .table-cloth {
+  rotate: 90deg;
+  left: -30%;
+}
+.props-sw .table-cloth {
+  rotate: -90deg;
+  top: -30%;
+}
+.props-se .table-cloth {
+  rotate: 180deg;
+  inset: -30% 0 0 -30%;
+}
+
+.table-candle {
+  position: absolute;
+  width: 66%;
+  top: 1%;
+  left: -8%;
+  z-index: 1;
+}
+
+.table-coins {
+  width: 38%;
+  top: 10%;
+  right: 4%;
+}
+.table-mate {
+  width: 65%;
+  top: -15%;
+  right: -8%;
+}
+.table-deck {
+  width: 108%;
+  bottom: -16%;
+  left: -18%;
+  rotate: -20deg;
+}
+.props-se .table-deck {
+  left: auto;
+  right: -40%;
+  rotate: 24deg;
+}
+.props-se .table-coins {
+  top: auto;
+  bottom: 6%;
+  right: 28%;
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .table-scenery {
+    --table-corner: clamp(88px, 26vw, 145px);
+    --table-prop: clamp(95px, 27vw, 155px);
+  }
+
+  .table-ornament {
+    width: 95px;
+    height: 32%;
+    opacity: 0.48;
+  }
+  .ornament-left {
+    left: calc(var(--table-corner) * 0.05);
+  }
+  .ornament-right {
+    right: calc(var(--table-corner) * 0.05);
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .table-scenery {
+    --table-corner: 25dvh;
+    --table-prop: 29dvh;
+  }
+  .table-ornament {
+    opacity: 0.45;
+  }
+}
