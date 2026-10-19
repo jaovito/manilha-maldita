@@ -5,7 +5,7 @@ function gainNode() {
   return {
     gain: {
       setValueAtTime: mock(() => {}),
-      linearRampToValueAtTime: mock(() => {}),
+      linearRampToValueAtTime: mock((_value: number, _time: number) => {}),
       exponentialRampToValueAtTime: mock(() => {}),
     },
     connect: mock(() => {}),
@@ -163,4 +163,23 @@ test('unsupported or failing audio never blocks play and resumes may be rejected
   });
   expect(() => failing.close()).not.toThrow();
   await Promise.resolve();
+});
+
+test('five original negotiation cues have different envelopes and restrained retro timbre', () => {
+  installAudio();
+  const engine = new GameAudio();
+  engine.unlock();
+  const context = TestAudioContext.instances[0];
+  if (!context) throw new Error('missing context');
+  const signatures: string[] = [];
+  for (const sound of ['truco', 'six', 'nine', 'twelve', 'acceptRaise'] satisfies Sound[]) {
+    const start = context.oscillators.length;
+    engine.play(sound, { muted: false, volume: 1 });
+    const notes = context.oscillators.slice(start);
+    expect(notes.every((note) => note.type === 'sawtooth')).toBe(true);
+    signatures.push(JSON.stringify(notes.map((note) => note.frequency.setValueAtTime.mock.calls)));
+    expect(context.gains.at(-1)?.gain.linearRampToValueAtTime.mock.calls[0]?.[0]).toBe(0.055);
+  }
+  expect(new Set(signatures).size).toBe(5);
+  engine.close();
 });

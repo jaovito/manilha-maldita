@@ -8,9 +8,9 @@ import {
   type ServerMessage,
 } from '@truco/game-protocol';
 import { RoomService } from './room-service';
-import type { Ports, Sink } from './types';
+import type { Ports, Sink } from './state/types';
 
-export function fixture() {
+export function fixture(options: { soloEnabled?: boolean; devTools?: boolean } = {}) {
   let now = 0;
   let serial = 0;
   let seed = 12345;
@@ -30,7 +30,7 @@ export function fixture() {
       };
     },
   };
-  const service = new RoomService(ports);
+  const service = new RoomService(ports, options);
   function peer(session: string) {
     const snapshots: RoomView[] = [];
     let closed = 0;

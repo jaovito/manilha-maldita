@@ -1,0 +1,41 @@
+export type Locale = 'pt-BR' | 'en';
+export type LessonId = 'start' | 'ranks' | 'manilhas' | 'tricks' | 'bets' | 'powers' | 'ready';
+export type Lesson = {
+  id: LessonId;
+  title: string;
+  lead: string;
+  blocks: { title: string; body: string }[];
+  question: string;
+  choices: string[];
+  answer: number;
+  explanation: string;
+};
+export type TutorialMessages = {
+  title: string;
+  subtitle: string;
+  back: string;
+  previous: string;
+  next: string;
+  finish: string;
+  language: string;
+  contents: string;
+  practice: string;
+  correct: string;
+  retry: string;
+  weakest: string;
+  strongest: string;
+  vira: string;
+  manilhas: string;
+  suitOrder: string;
+  suits: [string, string, string, string];
+  energy: string;
+  lessons: Lesson[];
+  powers: {
+    id: 'spy' | 'exchange' | 'boost' | 'mask';
+    name: string;
+    cost: number;
+    timing: string;
+    description: string;
+    tip: string;
+  }[];
+};

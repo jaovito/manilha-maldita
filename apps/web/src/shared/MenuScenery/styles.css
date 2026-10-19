@@ -1,0 +1,147 @@
+/* Independent anchors preserve sprite proportions at every viewport size. */
+main.entry-shell,
+main.lobby-shell {
+  isolation: isolate;
+  background: #063c2d url("/art/layers/felt.png") repeat;
+  background-size: 320px 320px;
+}
+.menu-scenery {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+.menu-scenery img {
+  position: absolute;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.scene-corner {
+  width: clamp(130px, 26vw, 420px);
+  aspect-ratio: 1;
+}
+.corner-nw {
+  left: 0;
+  top: 0;
+}
+.corner-ne {
+  right: 0;
+  top: 0;
+}
+.corner-sw {
+  left: 0;
+  bottom: 0;
+}
+.corner-se {
+  right: 0;
+  bottom: 0;
+}
+.scene-crest {
+  opacity: 0.65;
+}
+.crest-top {
+  width: 340px;
+  height: 120px;
+  left: 50%;
+  top: 1%;
+  translate: -50% 0;
+}
+.crest-bottom {
+  width: 340px;
+  height: 120px;
+  left: 50%;
+  bottom: 1%;
+  translate: -50% 0;
+}
+.crest-left {
+  width: 160px;
+  height: 360px;
+  right: calc(50% + 205px);
+  top: 50%;
+  translate: 0 -50%;
+}
+.crest-right {
+  width: 160px;
+  height: 360px;
+  left: calc(50% + 205px);
+  top: 50%;
+  translate: 0 -50%;
+}
+.scene-prop {
+  position: absolute;
+  width: clamp(80px, 13vw, 200px);
+  aspect-ratio: 1;
+}
+.prop-candle {
+  left: -1%;
+  top: 2%;
+  filter: drop-shadow(0 0 24px #eeb24745);
+}
+.prop-mate {
+  right: -2%;
+  top: 46%;
+  rotate: 12deg;
+}
+.prop-coins {
+  left: 2%;
+  bottom: 1%;
+}
+.prop-deck {
+  right: 2%;
+  bottom: -2%;
+  rotate: -14deg;
+}
+.scene-playing-card {
+  position: absolute;
+  width: clamp(90px, 12vw, 180px);
+  height: auto;
+  filter: drop-shadow(5px 7px 2px #001c1970);
+}
+.scene-card-one {
+  left: 8%;
+  top: 48%;
+  rotate: -19deg;
+  animation: menu-float 7s ease-in-out infinite;
+}
+.scene-card-two {
+  left: 17%;
+  top: 52%;
+  rotate: 12deg;
+  color: #102332;
+  animation: menu-float 8s ease-in-out -3s infinite;
+}
+.scene-power-card {
+  position: absolute;
+  right: 12%;
+  top: 42%;
+  width: clamp(120px, 15vw, 215px);
+  rotate: 13deg;
+  animation: menu-float 9s ease-in-out -2s infinite;
+}
+.scene-power-card .power-card-title {
+  font-size: clamp(18px, 2vw, 28px);
+}
+.scene-power-card .power-card-hint {
+  font-size: clamp(12px, 1.2vw, 18px);
+}
+@keyframes menu-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scene-playing-card,
+  .scene-power-card {
+    animation: none;
+  }
+}
+
+.menu-scenery[data-lobby="true"] .prop-candle {
+  display: none;
+}

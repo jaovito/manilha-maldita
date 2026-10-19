@@ -141,3 +141,9 @@ Reconexão preserva assento. Pausa protegida consome orçamento cumulativo, sem 
 Após proteção, aplique fallbacks. Três decisões exigidas do mesmo jogador expiradas consecutivamente causam abandono; ação válida dele zera a sequência. No 2v2, abandono derrota a equipe. Ambas as equipes inteiramente ausentes: expire sem vencedor, sem autojogadas ilimitadas.
 
 Casual pode desligar relógio de cartas, não expiração de salas vazias/desconectadas. Distinga desistência, abandono e falha técnica. Queda do processo com estado em memória é falha técnica, não derrota: documente que o MVP não recupera partidas após reinício sem persistência implementada.
+
+## Treino solo e cenários de desenvolvimento
+
+Por autorização de 19/10/2026, “Jogar” pode iniciar treino 1v1 contra bot simples, sem alterar regras, poderes ou pontuação. O bot usa somente informação autorizada de seu assento. A criação depende de flag independente. Revanche solo é imediata; não exige confirmação de um segundo humano.
+
+Somente em development e em mesa solo do dono, um comando de ferramentas reinicia a mão com cartas/poder/energia escolhidos. Mantém placar, unicidade das cartas e restrições de onze/11×11. É ferramenta de teste, indisponível em partidas multiplayer e produção. Veja [ADR 009](adr/009-solo-training-and-development-tools.md).

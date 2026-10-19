@@ -1,3 +1,4 @@
+import { t } from '../../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 
 export type ResultWinner = 'A' | 'B' | 'tie' | null;
@@ -9,13 +10,13 @@ export function resultPerspective(room: RoomView, winner: ResultWinner): 'win' |
 }
 
 export function resultTitle(room: RoomView, winner: ResultWinner, completed = false): string {
-  if (winner === null) return 'PARTIDA ENCERRADA';
-  if (winner === 'tie') return 'EMPATE!';
+  if (winner === null) return t('PARTIDA ENCERRADA');
+  if (winner === 'tie') return t('EMPATE!');
 
-  const subject = room.match?.playerCount === 4 ? 'SEU TIME' : 'VOCÊ';
+  const subject = room.match?.playerCount === 4 ? t('SEU TIME') : t('VOCÊ');
   return resultPerspective(room, winner) === 'win'
-    ? `${subject} VENCEU${completed ? '!!' : '!'}`
-    : `${subject} PERDEU`;
+    ? t('{0} VENCEU{1}', [subject, completed ? '!!' : '!'])
+    : t('{0} PERDEU', [subject]);
 }
 
 /** Score is only a presentation gate; the authoritative winner comes from outcome. */
@@ -40,7 +41,11 @@ export function roundResult(room: RoomView) {
     return {
       key: transition.id,
       winner: match.phase.winner,
-      caption: `MÃO ${match.hand.number} · ${match.phase.reward} ${match.phase.reward === 1 ? 'PONTO' : 'PONTOS'}`,
+      caption: t('MÃO {0} · {1} {2}', [
+        match.hand.number,
+        match.phase.reward,
+        match.phase.reward === 1 ? t('PONTO') : t('PONTOS'),
+      ]),
     };
   }
 
@@ -49,7 +54,7 @@ export function roundResult(room: RoomView) {
     ? {
         key: transition.id,
         winner: trick.result.winner,
-        caption: `VAZA ${match.hand.completedTricks.length}`,
+        caption: t('VAZA {0}', [match.hand.completedTricks.length]),
       }
     : null;
 }

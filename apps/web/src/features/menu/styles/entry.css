@@ -4,7 +4,7 @@
   font-display: swap;
 }
 
-/* Coordinates follow the approved 1567 × 882 reference composition. */
+/* Functional navigation; independent scene layers provide the decorative surface. */
 main.entry-shell {
   position: relative;
   max-width: none;
@@ -13,7 +13,6 @@ main.entry-shell {
   width: 100%;
   padding: 0;
   overflow: hidden;
-  background: #053c2c url("/art/menu-reference-plate.png") center / 100% 100% no-repeat;
 }
 
 .entry-shell .app-header {

@@ -1,3 +1,4 @@
+import { t } from '../../../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -20,6 +21,7 @@ export function MatchResult({
     matchId: room.matchId,
     status: room.status,
     celebrating: false,
+    reading: false,
   });
   const heading = useRef<HTMLHeadingElement>(null);
 
@@ -28,6 +30,12 @@ export function MatchResult({
     setPresentation({
       matchId: room.matchId,
       status: room.status,
+      reading:
+        presentation.matchId === room.matchId &&
+        presentation.status === 'playing' &&
+        room.status === 'finished' &&
+        room.outcome?.reason === 'completed' &&
+        (room.match?.hand.completedTricks.at(-1)?.plays.length ?? 0) > 0,
       celebrating:
         room.matchId !== null &&
         presentation.matchId === room.matchId &&
@@ -38,31 +46,50 @@ export function MatchResult({
 
   const celebrating = presentation.celebrating && room.status === 'finished';
   const celebrationId = celebrating ? room.matchId : null;
+  const reading = celebrating && presentation.reading;
   useEffect(() => {
     if (!celebrationId) return;
 
-    const timer = window.setTimeout(() => {
-      setPresentation((current) =>
-        current.matchId === celebrationId ? { ...current, celebrating: false } : current,
-      );
-    }, 5000);
+    const timer = window.setTimeout(
+      () => {
+        setPresentation((current) =>
+          current.matchId === celebrationId && current.reading === reading
+            ? { ...current, reading: false, celebrating: reading }
+            : current,
+        );
+      },
+      reading ? 1800 : 5000,
+    );
 
     return () => window.clearTimeout(timer);
-  }, [celebrationId]);
+  }, [celebrationId, reading]);
 
   useEffect(() => {
-    if (room.status === 'finished') heading.current?.focus();
-  }, [room.status]);
+    if (room.status === 'finished' && !reading) heading.current?.focus();
+  }, [room.status, reading]);
 
   const { match, outcome } = room;
   if (!outcome || room.status !== 'finished') return null;
 
+  if (reading) {
+    return createPortal(
+      <div className="match-end-layer" data-stage="reading">
+        <p className="match-reading-caption" role="status">
+          {t('Última vaza · partida encerrada')}
+        </p>
+      </div>,
+      document.body,
+    );
+  }
+
   const victory = completedVictory(room);
+  const defeat =
+    room.outcome?.reason === 'completed' && resultPerspective(room, outcome.winner) === 'lose';
   const host = room.selfSeat === room.hostSeat;
   const hostReason = !connected
-    ? 'Aguarde reconectar para continuar.'
+    ? t('Aguarde reconectar para continuar.')
     : !host
-      ? 'Somente o anfitrião pode preparar a revanche ou voltar ao lobby.'
+      ? t('Somente o anfitrião pode preparar a revanche ou voltar ao lobby.')
       : null;
 
   return createPortal(
@@ -86,13 +113,31 @@ export function MatchResult({
           })}
         </div>
       )}
+      {defeat && celebrating && (
+        <div className="pixel-burst-layer" aria-hidden="true">
+          {Array.from({ length: 24 }, (_, index) => (
+            <i
+              className="pixel-burst"
+              // biome-ignore lint/suspicious/noArrayIndexKey: Fixed decorative particles.
+              key={index}
+              style={
+                {
+                  '--burst-angle': `${index * 15}deg`,
+                  '--burst-distance': `${100 + (index % 4) * 35}px`,
+                  '--burst-color': confettiColors[index % 2],
+                } as CSSProperties
+              }
+            />
+          ))}
+        </div>
+      )}
       <section
         className="match-result-panel"
         data-result={resultPerspective(room, outcome.winner)}
         {...(celebrating
           ? ({ role: 'status' } as const)
           : ({ role: 'dialog', 'aria-modal': true } as const))}
-        aria-label="Resultado da partida"
+        aria-label={t('Resultado da partida')}
         onKeyDown={(event) => {
           if (celebrating || event.key !== 'Tab') return;
 
@@ -121,25 +166,27 @@ export function MatchResult({
         </h2>
         {match && (
           <p className="match-final-score">
-            PLACAR FINAL · A {match.score.A} × {match.score.B} B
+            {t('PLACAR FINAL · A')} {match.score.A} × {match.score.B} B
           </p>
         )}
         <p className="room-result">
-          {outcome.winner ? `Equipe ${outcome.winner} venceu a partida.` : 'Partida sem vencedor.'}
+          {outcome.winner
+            ? t('Equipe {0} venceu a partida.', [outcome.winner])
+            : t('Partida sem vencedor.')}
         </p>
         <p className="match-result-reason">
           {
             {
-              completed: 'Partida concluída por pontos',
-              surrender: 'Partida encerrada por desistência',
-              abandonment: 'Partida encerrada por abandono',
-              expired: 'Sala expirada',
-              technical: 'Partida encerrada por falha técnica',
+              completed: t('Partida concluída por pontos'),
+              surrender: t('Partida encerrada por desistência'),
+              abandonment: t('Partida encerrada por abandono'),
+              expired: t('Sala expirada'),
+              technical: t('Partida encerrada por falha técnica'),
             }[outcome.reason]
           }
         </p>
         {celebrating ? (
-          <p className="match-end-hint">Um momento para o resultado…</p>
+          <p className="match-end-hint">{t('Um momento para o resultado…')}</p>
         ) : (
           <>
             <div className="match-end-actions">
@@ -150,32 +197,34 @@ export function MatchResult({
                 {...disabledHint(hostReason)}
                 onClick={() => send({ type: 'REMATCH' })}
               >
-                Revanche
+                {t('Revanche')}
               </button>
               <button
                 type="button"
                 disabled={!connected || !host}
                 {...disabledHint(hostReason)}
-                onClick={() => send({ type: 'REMATCH' })}
+                onClick={() => send({ type: room.solo ? 'LEAVE' : 'REMATCH' })}
               >
-                Voltar ao lobby
+                {room.solo ? t('Voltar ao menu') : t('Voltar ao lobby')}
               </button>
               <button
                 type="button"
                 className="button-quiet"
                 disabled={!connected}
-                {...disabledHint(!connected ? 'Aguarde reconectar para sair da sala.' : null)}
+                {...disabledHint(!connected ? t('Aguarde reconectar para sair da sala.') : null)}
                 onClick={() => send({ type: 'LEAVE' })}
               >
-                Sair da sala
+                {t('Sair da sala')}
               </button>
             </div>
             <p className="match-end-hint" role="status">
               {!connected
-                ? 'Reconectando… Ações aguardam conexão.'
-                : host
-                  ? 'Revanche e retorno ao lobby aguardam todos confirmarem pronto novamente.'
-                  : 'Aguarde o anfitrião para voltar ao lobby ou preparar a revanche.'}
+                ? t('Reconectando… Ações aguardam conexão.')
+                : room.solo
+                  ? t('Revanche inicia outra partida contra o bot.')
+                  : host
+                    ? t('Revanche e retorno ao lobby aguardam todos confirmarem pronto novamente.')
+                    : t('Aguarde o anfitrião para voltar ao lobby ou preparar a revanche.')}
             </p>
           </>
         )}

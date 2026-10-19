@@ -1,3 +1,4 @@
+import { t } from '../../../../../shared/i18n';
 import type { MatchView, RoomView } from '@truco/game-protocol';
 import { SeatCards } from './Cards';
 
@@ -51,11 +52,11 @@ export function TableSeats({
               key={hand.seat}
               className={`player-seat seat-relative-${relative}${active ? ' seat-active' : ''}`}
               data-spy-target={spying && !teammate}
-              aria-label={`${member?.nickname ?? 'Jogador'}${teammate ? ', sua dupla' : ', adversário'}`}
+              aria-label={`${member?.nickname ?? t('Jogador')}${teammate ? t(', sua dupla') : t(', adversário')}`}
             >
               <SeatCards
                 hand={hand}
-                name={member?.nickname ?? 'Jogador'}
+                name={member?.nickname ?? t('Jogador')}
                 spying={spying && !teammate}
                 spy={(index) => spy(hand.seat, index)}
                 intel={observedPlayed || hand.count === 0 ? null : intel}
@@ -64,10 +65,10 @@ export function TableSeats({
               />
               <span className={`seat-avatar avatar-${hand.seat}`} aria-hidden="true" />
               <div className="seat-info">
-                <strong className="seat-name">{member?.nickname ?? 'Jogador'}</strong>
+                <strong className="seat-name">{member?.nickname ?? t('Jogador')}</strong>
                 <span className="seat-team">
-                  {teammate ? 'Sua dupla' : 'Adversário'} ·{' '}
-                  {member?.connected ? 'Conectado' : 'Reconectando'}
+                  {teammate ? t('Sua dupla') : t('Adversário')} ·{' '}
+                  {member?.connected ? t('Conectado') : t('Reconectando')}
                 </span>
               </div>
             </section>

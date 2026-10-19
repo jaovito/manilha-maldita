@@ -1,7 +1,6 @@
 @media (max-width: 600px) and (orientation: portrait) {
   main.entry-shell {
     height: auto;
-    background: #053c2c url("/art/menu-tabletop.png") center / auto 100% no-repeat;
   }
   .main-menu {
     height: auto;

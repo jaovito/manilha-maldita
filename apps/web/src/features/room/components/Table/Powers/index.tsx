@@ -1,20 +1,22 @@
+import { t, localized } from '../../../../../shared/i18n';
+import { EnergyIcon } from '../../../../../shared/EnergyIcon';
 import type { MatchView, RoomView } from '@truco/game-protocol';
 import { useId, useState, type RefObject } from 'react';
 import { PowerCard } from './Card';
 import { availablePower } from './selection';
 
-export const powerNames = {
+export const powerNames = localized({
   spy: 'Espião',
   exchange: 'Segunda Chance',
   boost: 'Impulso',
   mask: 'Máscara',
-};
-const descriptions = {
+});
+const descriptions = localized({
   spy: 'Custo 1 · Descubra uma carta aleatória de um adversário após as trocas.',
   exchange: 'Custo 2 · Troque uma carta própria pelo monte. A escolha é definitiva.',
   boost: 'Custo 2 · Na sua jogada, uma carta comum sobe um nível. Não aceita manilha nem 3.',
   mask: 'Custo 1 · Na sua jogada, esconda uma carta até a resolução da vaza. Mantém a força.',
-};
+});
 
 export function TablePowers({
   room,
@@ -50,7 +52,7 @@ export function TablePowers({
   return (
     <section
       className="power-dock"
-      aria-label="Poderes e energia"
+      aria-label={t('Poderes e energia')}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
           close();
@@ -65,36 +67,36 @@ export function TablePowers({
           cost={power === 'spy' || power === 'mask' ? 1 : 2}
           hint={
             {
-              spy: 'Veja uma carta do adversário.',
-              exchange: 'Troque uma carta da mão.',
-              boost: 'Uma carta comum sobe um nível.',
-              mask: 'Oculte sua próxima jogada.',
+              spy: t('Veja uma carta aleatória do adversário.'),
+              exchange: t('Troque uma carta da mão antes da 1ª vaza.'),
+              boost: t('Sua próxima carta comum sobe 1 nível.'),
+              mask: t('Sua próxima carta fica oculta até a resolução.'),
             }[power]
           }
           state={
             !affordable
-              ? 'Sem energia'
+              ? t('Sem energia')
               : room.status !== 'playing'
-                ? 'Partida encerrada'
+                ? t('Partida encerrada')
                 : room.paused
-                  ? 'Pausado'
+                  ? t('Pausado')
                   : room.transition
-                    ? 'Aguarde a mesa'
+                    ? t('Aguarde a mesa')
                     : selected
                       ? power === 'spy'
-                        ? 'Escolha um verso'
-                        : 'Escolha sua carta'
+                        ? t('Escolha um verso')
+                        : t('Escolha sua carta')
                       : preparing
                         ? own?.ready
-                          ? 'Pronto'
+                          ? t('Pronto')
                           : turnPower
-                            ? 'Na sua vez'
-                            : 'Preparar'
+                            ? t('Na sua vez')
+                            : t('Preparar')
                         : turn && turnPower
-                          ? 'Clique para usar'
+                          ? t('Clique para usar')
                           : turnPower
-                            ? 'Aguarde sua vez'
-                            : 'Expirou'
+                            ? t('Aguarde sua vez')
+                            : t('Expirou')
           }
           expanded={open}
           selected={selected}
@@ -109,8 +111,8 @@ export function TablePowers({
           }}
         />
       )}
-      <section className="power-energy" aria-label={`Energia ${own?.energy ?? 0} de 3`}>
-        <span aria-hidden="true">ϟ</span>
+      <section className="power-energy" aria-label={t('Energia {0} de 3', [own?.energy ?? 0])}>
+        <EnergyIcon />
         <span className="energy-gems" aria-hidden="true">
           {[1, 2, 3].map((level) => (
             <i key={level} data-filled={level <= (own?.energy ?? 0)} />
@@ -118,40 +120,44 @@ export function TablePowers({
         </span>
         <strong>{own?.energy ?? 0}/3</strong>
       </section>
-      {!power && <p className="power-note">Sem poderes nesta mão</p>}
+      {!power && <p className="power-note">{t('Sem poderes nesta mão')}</p>}
       {open && !own?.used && (
-        <section className="power-panel" id={panelId} aria-label="Detalhes do poder">
+        <section className="power-panel" id={panelId} aria-label={t('Detalhes do poder')}>
           <button
             type="button"
             className="power-close"
-            aria-label="Fechar detalhes do poder"
+            aria-label={t('Fechar detalhes do poder')}
             onClick={close}
           >
             ×
           </button>
-          <strong>{power ? powerNames[power] : 'Poderes desativados'}</strong>
+          <strong>{power ? powerNames[power] : t('Poderes desativados')}</strong>
           {power && <p>{descriptions[power]}</p>}
           {preparing ? (
             <>
               <p>
-                Preparação selada · {powers.players.filter((player) => player.ready).length}/
-                {match.playerCount} prontos
+                {t('Preparação selada · {0}/{1} prontos', [
+                  powers.players.filter((player) => player.ready).length,
+                  match.playerCount,
+                ])}
               </p>
               <p>
                 {own?.ready
-                  ? 'Seu compromisso está selado.'
-                  : 'Clique no poder e escolha diretamente na mesa.'}
+                  ? t('Seu compromisso está selado.')
+                  : t('Clique no poder e escolha diretamente na mesa.')}
               </p>
             </>
           ) : (
             <p>
               {turnPower
-                ? 'Clique na carta de poder na sua vez e depois escolha uma carta da mão. Clique novamente para cancelar.'
-                : 'Este poder só pode ser usado na preparação.'}
+                ? t(
+                    'Clique na carta de poder na sua vez e depois escolha uma carta da mão. Clique novamente para cancelar.',
+                  )
+                : t('Este poder só pode ser usado na preparação.')}
             </p>
           )}
           <details>
-            <summary>Poderes revelados</summary>
+            <summary>{t('Poderes revelados')}</summary>
             <ul>
               {powers.players.map((player) => (
                 <li key={player.seat}>
@@ -159,16 +165,19 @@ export function TablePowers({
                   {player.power
                     ? powerNames[player.power]
                     : match.hand.kind === 'normal'
-                      ? 'Poder oculto'
-                      : 'Sem poder'}{' '}
+                      ? t('Poder oculto')
+                      : t('Sem poder')}{' '}
                   · {player.energy}/3
-                  {player.used ? ' · usado' : ''}
+                  {player.used ? t(' · usado') : ''}
                 </li>
               ))}
               {powers.activations.map((activation) => (
                 <li key={`use:${activation.seat}`}>
-                  {room.seats[activation.seat]?.nickname} ativou {powerNames[activation.power]} em{' '}
-                  {room.seats[activation.target]?.nickname}.
+                  {t('{0} ativou {1} em {2}.', [
+                    room.seats[activation.seat]?.nickname ?? t('Jogador'),
+                    powerNames[activation.power],
+                    room.seats[activation.target]?.nickname ?? t('Jogador'),
+                  ])}
                 </li>
               ))}
             </ul>

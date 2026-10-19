@@ -136,7 +136,7 @@ test('the active game keeps the audio menu collapsed and omits frozen room setti
   expect(view.container.querySelector('main')?.classList.contains('game-shell')).toBe(true);
   expect(view.menu.open).toBe(false);
   expect(view.menu.hasAttribute('open')).toBe(false);
-  expect(screen.getByText('Sala · ABC123')).toBeDefined();
+  expect(view.menu.querySelector('summary')?.textContent).toBe('Sala · ABC123');
   expect(screen.queryByRole('button', { name: 'Revanche' })).toBeNull();
   expect(screen.queryByLabelText('Tempo de carta')).toBeNull();
   expect(view.container.querySelector('.room-lobby')).toBeNull();

@@ -30,3 +30,15 @@ test('limits activity, memory and windows deterministically', () => {
   limiter.clear();
   expect(limiter.allow('c', 2, 100)).toBe(true);
 });
+
+test('renaming preserves identity and expiry and cannot revive an expired session', () => {
+  let now = 0;
+  const sessions = createSessions(() => now, 1, 100);
+  const original = sessions.issue('Ana');
+  expect(sessions.rename(original.token, 'Bia')).toEqual({ ...original.session, nickname: 'Bia' });
+  expect(sessions.find(original.token)?.nickname).toBe('Bia');
+  expect(sessions.rename('unknown', 'Bia')).toBeUndefined();
+  now = 100;
+  expect(sessions.rename(original.token, 'Caio')).toBeUndefined();
+  expect(sessions.find(original.token)).toBeUndefined();
+});

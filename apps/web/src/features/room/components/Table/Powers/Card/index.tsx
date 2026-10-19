@@ -1,3 +1,5 @@
+import { t } from '../../../../../../shared/i18n';
+import { EnergyIcon } from '../../../../../../shared/EnergyIcon';
 import type { Ref } from 'react';
 import { disabledHint } from '../../../../../../shared/DisabledTooltip';
 
@@ -26,14 +28,16 @@ export function PowerCard({
   buttonRef: Ref<HTMLButtonElement>;
   canActivate: boolean;
 }) {
-  const reason = canActivate ? null : `${state}. Clique para consultar os detalhes do poder.`;
+  const reason = canActivate
+    ? null
+    : t('{0}. Clique para consultar os detalhes do poder.', [state]);
 
   return (
     <div className="power-card-pocket">
       <button
         type="button"
         className={`power-card power-${power}`}
-        aria-label={`Poder ${name}`}
+        aria-label={t('Poder {0}', [name])}
         {...disabledHint(reason)}
         aria-description={reason ?? state}
         aria-expanded={expanded}
@@ -47,13 +51,17 @@ export function PowerCard({
         <span className="power-card-title">{name}</span>
         <span className="power-card-illustration">
           <span className="power-card-art" aria-hidden="true" />
-          <span className="power-card-cost" role="img" aria-label={`Custo ${cost} de energia`}>
-            <span aria-hidden="true">ϟ</span> {cost}
+          <span
+            className="power-card-cost"
+            role="img"
+            aria-label={t('Custo {0} de energia', [cost])}
+          >
+            <EnergyIcon /> {cost}
           </span>
         </span>
         <span className="power-card-hint">{hint}</span>
-        <span className="power-card-state">{state}</span>
       </button>
+      <span className="power-card-state">{state}</span>
     </div>
   );
 }

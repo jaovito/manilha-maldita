@@ -50,13 +50,6 @@
   cursor: pointer;
   min-width: 0;
 }
-.pixel-switch input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  clip-path: inset(50%);
-  overflow: hidden;
-}
 .pixel-options input {
   position: absolute;
   inset: 0;
@@ -88,42 +81,6 @@
     0 8px
   );
   font-size: 23px;
-}
-.pixel-switch {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  color: var(--lobby-ink);
-}
-.pixel-switch > span {
-  display: block;
-  width: 62px;
-  height: 32px;
-  padding: 3px;
-  border: 2px solid #84958a;
-  background: #12232c;
-  clip-path: polygon(8px 0, 54px 0, 62px 8px, 62px 24px, 54px 32px, 8px 32px, 0 24px, 0 8px);
-}
-.pixel-switch > span::after {
-  content: "";
-  display: block;
-  width: 22px;
-  height: 22px;
-  background: #85969c;
-  box-shadow: inset -3px -3px #44535d;
-}
-.pixel-switch input:checked + span {
-  background: #07552f;
-  border-color: #91db80;
-}
-.pixel-switch input:checked + span::after {
-  margin-left: 29px;
-  background: #a4ed87;
-  box-shadow: inset -3px -3px #589c43;
-}
-.pixel-switch small {
-  font-size: 16px;
-  color: var(--lobby-ink);
 }
 .pixel-options input:checked + span {
   background: #ffc762;
@@ -220,10 +177,6 @@
 }
 .invite-feedback:not(:empty) {
   margin-top: 7px;
-}
-.room-privacy {
-  border-top: 0;
-  border-bottom: 0;
 }
 .room-link-panel .invite-field {
   width: clamp(210px, 24vw, 355px);

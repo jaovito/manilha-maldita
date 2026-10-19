@@ -36,10 +36,11 @@
     "db:migrate:test": "bun apps/server/database/cli.ts migrate --test",
     "db:seed": "bun apps/server/database/cli.ts seed",
     "test:database": "bun run db:test:up && bun test --coverage --coverage-dir=coverage/database ./apps/server/tests/database",
-    "dev:server": "bun --watch apps/server/src/bootstrap/main.ts",
+    "dev:server": "NODE_ENV=development ENABLE_SOLO=${ENABLE_SOLO:-true} ENABLE_DEV_TOOLS=${ENABLE_DEV_TOOLS:-true} bun --watch apps/server/src/bootstrap/main.ts",
     "dev:web": "bun run --filter @truco/web dev",
     "start:server": "bun apps/server/src/bootstrap/main.ts",
-    "simulate": "bun packages/game-sim/cli.ts"
+    "simulate": "bun packages/game-sim/cli.ts",
+    "test:e2e:solo": "bun run test:e2e --config=playwright.solo.config.ts"
   },
   "devDependencies": {
     "typescript": "7.0.2",

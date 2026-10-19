@@ -279,3 +279,40 @@ test('React effect replay preserves the pending celebration and cancels retired 
   expect(timers.size).toBe(0);
   view.unmount();
 });
+
+test('last trick remains unobscured before effects and sync never restarts either stage', () => {
+  const timers = clock();
+  const base = playing();
+  const ended = finalRoom(base, 'B');
+  if (!ended.match) throw new Error('MISSING_MATCH');
+  ended.match.hand.plays = [];
+  ended.match.hand.completedTricks = [
+    {
+      leader: 0,
+      plays: [{ seat: 1, covered: true }],
+      result: { winner: 'B', nextLeader: 1 },
+    },
+  ];
+  const view = render(<MatchResult room={base} send={send} />);
+  view.rerender(<MatchResult room={ended} send={send} />);
+  expect(document.querySelector('.match-end-layer')?.getAttribute('data-stage')).toBe('reading');
+  expect(screen.queryByRole('heading')).toBeNull();
+  expect(screen.queryByRole('button')).toBeNull();
+  expect(document.querySelector('.pixel-burst-layer')).toBeNull();
+  const reading = [...timers.values()][0];
+  expect(reading?.delay).toBe(1800);
+  view.rerender(<MatchResult room={{ ...ended, sequence: 99 }} send={send} connected={false} />);
+  expect([...timers.values()][0]).toBe(reading);
+  act(() => reading?.run());
+  expect(document.querySelectorAll('.pixel-burst')).toHaveLength(24);
+  expect(document.querySelector('.pixel-confetti')).toBeNull();
+  expect(document.activeElement).toBe(screen.getByRole('heading'));
+  expect(screen.queryByRole('dialog')).toBeNull();
+  const effects = [...timers.values()][0];
+  expect(effects?.delay).toBe(5000);
+  act(() => reading?.run());
+  expect(document.querySelectorAll('.pixel-burst')).toHaveLength(24);
+  act(() => effects?.run());
+  expect(screen.getByRole('dialog')).toBeDefined();
+  expect(document.querySelector('.pixel-burst-layer')).toBeNull();
+});

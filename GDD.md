@@ -1,4 +1,4 @@
-# Truco Caótico — Game Design Document
+# Manilha Maldita — Game Design Document
 
 **Versão:** 0.1 — Proposta de pré-produção  
 **Estado:** Design inicial, pendente de playtests  
@@ -14,7 +14,7 @@
 
 ## 1. Visão do produto
 
-Truco Caótico é um jogo de cartas multiplayer baseado no Truco Paulista. O jogo preserva as regras fundamentais do Truco, incorporando poderes sorteados que alteram informações, força de cartas e possibilidades estratégicas.
+Manilha Maldita é um jogo de cartas multiplayer baseado no Truco Paulista. O jogo preserva as regras fundamentais do Truco, incorporando poderes sorteados que alteram informações, força de cartas e possibilidades estratégicas.
 
 O objetivo é oferecer partidas rápidas, sociais, competitivas e com alto potencial de rejogabilidade.
 
@@ -434,3 +434,7 @@ As seguintes escolhas não são consideradas balanceadas ou definitivas apenas p
 - Impacto de habilidades na duração das partidas.
 
 Esses elementos precisarão ser ajustados a partir de partidas simuladas e testes reais com jogadores.
+
+### Extensão autorizada — treino solo (19/10/2026)
+
+O botão Jogar pode abrir uma partida 1v1 contra um bot simples de treino, habilitada por flag independente. Não inclui bots sofisticados, ranking, progressão nem matchmaking. Ferramentas para montar mãos/poderes e reiniciar mão são exclusivas de development e de mesas solo do próprio jogador, nunca de produção. Contrato detalhado no ADR 009.

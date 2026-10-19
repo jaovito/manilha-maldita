@@ -48,7 +48,12 @@
     card-arrival 180ms ease-out both,
     mask-flare 650ms ease-out;
 }
+.played-card[data-winner="true"] {
+  z-index: 3;
+}
 .played-card[data-winner="true"] > span {
+  animation: winning-card 900ms ease-out both;
+  transform-origin: center;
   outline: 3px solid #ffe09b;
   outline-offset: 4px;
   box-shadow: 0 0 24px #ffdc755c;
@@ -70,6 +75,30 @@
 }
 .table-status > p[role="status"] {
   animation: turn-arrival 750ms ease-out;
+}
+/* Finishes inside the server's 1800ms trick presentation, before the next turn. */
+@keyframes winning-card {
+  0% {
+    transform: scale(1) rotate(0deg);
+  }
+  22% {
+    transform: scale(1.2) rotate(-5deg);
+  }
+  34% {
+    transform: scale(1.2) rotate(5deg);
+  }
+  46% {
+    transform: scale(1.2) rotate(-4deg);
+  }
+  58% {
+    transform: scale(1.2) rotate(3deg);
+  }
+  72% {
+    transform: scale(1.18) rotate(0deg);
+  }
+  100% {
+    transform: scale(1.12) rotate(0deg);
+  }
 }
 @keyframes card-arrival {
   from {
@@ -165,10 +194,38 @@
 @media (prefers-reduced-motion: reduce) {
   .played-card > span,
   .played-card[data-power] > span,
+  .played-card[data-winner="true"] > span,
   .spy-observation,
   .power-reveal,
   .turn-badge,
   .table-status > p[role="status"] {
     animation: none;
   }
+}
+
+/* Keep result text in the HUD so the winning face remains unobstructed. */
+.table-status .round-announcement {
+  position: static;
+  width: 100%;
+  translate: none;
+}
+.table-status .round-announcement-ribbon {
+  gap: 3px;
+  padding: 0 0 6px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.table-status .round-announcement-title {
+  font-size: clamp(16px, 2vw, 26px);
+}
+.table-status .round-announcement-caption {
+  font-size: 12px;
+}
+.table-status:has(.round-announcement) .resolution-feedback > strong {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }

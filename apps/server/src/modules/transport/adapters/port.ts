@@ -1,6 +1,11 @@
 import type { ClientMessage, CommandReply, RoomConfig, ServerMessage } from '@truco/game-protocol';
 export interface RoomPort {
-  create(sessionId: string, nickname: string, config: RoomConfig): Promise<{ code: string }>;
+  create(
+    sessionId: string,
+    nickname: string,
+    config: RoomConfig,
+    solo?: boolean,
+  ): Promise<{ code: string }>;
   join(code: string, sessionId: string, nickname: string): Promise<void>;
   connect(
     code: string,

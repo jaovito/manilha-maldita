@@ -36,7 +36,7 @@
 .power-card {
   position: relative;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto 1fr auto auto;
   gap: 0;
   width: 100%;
   height: auto;
@@ -112,7 +112,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  background-image: url("/art/power-illustrations.png");
+  background-image: url("/art/layers/powers.png");
   background-size: 200% 200%;
   background-position: 0 0;
   background-repeat: no-repeat;
@@ -129,8 +129,10 @@
 }
 .power-card-cost {
   position: absolute;
-  right: 4px;
-  bottom: 4px;
+  left: 4px;
+  top: 4px;
+  right: auto;
+  bottom: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -139,8 +141,9 @@
   min-height: 30px;
   padding: 2px 5px;
   border: 2px solid #e6bd68;
+  border-radius: 40%;
   color: #fff1c4;
-  background: #12374a;
+  background: #081923;
   box-shadow: 0 2px #050f18;
   font-family: "Jersey 25", sans-serif;
   font-size: 24px;

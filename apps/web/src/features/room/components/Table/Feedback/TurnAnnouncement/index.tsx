@@ -1,3 +1,4 @@
+import { t } from '../../../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 import { useEffect, useRef, useState } from 'react';
 
@@ -41,8 +42,8 @@ export function TurnAnnouncement({ room }: { room: RoomView }) {
   return (
     <div className="turn-announcement" role="status" aria-live="polite" aria-atomic="true">
       <div className="turn-announcement-ribbon" key={context}>
-        <span className="turn-announcement-title">SUA VEZ!</span>
-        <span className="turn-announcement-caption">A mesa é sua. Jogue uma carta.</span>
+        <span className="turn-announcement-title">{t('SUA VEZ!')}</span>
+        <span className="turn-announcement-caption">{t('A mesa é sua. Jogue uma carta.')}</span>
       </div>
     </div>
   );

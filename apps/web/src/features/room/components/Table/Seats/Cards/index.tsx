@@ -1,3 +1,4 @@
+import { t } from '../../../../../../shared/i18n';
 import type { MatchView } from '@truco/game-protocol';
 import { cardLabel } from '../../../../utils/cards';
 import { CardBack, CardFace } from '../../Card';
@@ -9,11 +10,11 @@ function Observation({ intel, memory }: { intel: Intel; memory: boolean }) {
     <span
       className={`mini-card spy-observation${memory ? ' spy-memory' : ''}`}
       role="img"
-      aria-label={`Espião · Só você: ${cardLabel(intel.card)}. Vista na preparação.`}
-      title="Vista na preparação; pode já ter sido jogada."
+      aria-label={t('Espião · Só você: {0}. Vista na preparação.', [cardLabel(intel.card)])}
+      title={t('Vista na preparação; pode já ter sido jogada.')}
     >
       <CardFace card={intel.card} />
-      <i aria-hidden="true">VISTO</i>
+      <i aria-hidden="true">{t('VISTO')} </i>
     </span>
   );
 }
@@ -36,7 +37,7 @@ export function SeatCards({
   played: boolean;
 }) {
   return (
-    <section className="seat-cards" aria-label={`${hand.count} cartas na mão`}>
+    <section className="seat-cards" aria-label={t('{0} cartas na mão', [hand.count])}>
       {hand.visibility === 'visible'
         ? hand.cards.map((card) => (
             <span
@@ -67,7 +68,7 @@ export function SeatCards({
               className="spy-target-card"
               // biome-ignore lint/suspicious/noArrayIndexKey: A click selects an anonymous back, not a physical card identity.
               key={index}
-              aria-label={`Espionar carta ${index + 1} de ${name}`}
+              aria-label={t('Espionar carta {0} de {1}', [index + 1, name])}
               onClick={() => spy(index)}
             >
               <CardBack />

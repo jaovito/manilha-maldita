@@ -4,6 +4,9 @@ import { DEFAULT_ORIGINS } from './runtime';
 
 test('environment uses local defaults and validates explicit deployment origins', () => {
   expect(parseServerOptions({})).toEqual({
+    environment: 'production',
+    soloEnabled: false,
+    devTools: false,
     hostname: '127.0.0.1',
     port: 3001,
     allowedOrigins: [...DEFAULT_ORIGINS],
@@ -17,6 +20,9 @@ test('environment uses local defaults and validates explicit deployment origins'
       ALLOWED_ORIGINS: 'https://truco.example, https://truco.example/,http://localhost:5173',
     }),
   ).toEqual({
+    environment: 'production',
+    soloEnabled: false,
+    devTools: false,
     hostname: '0.0.0.0',
     port: 8080,
     secureCookies: true,
@@ -52,4 +58,17 @@ test('main starts a real listener from explicit environment without exposing con
   } finally {
     await runtime.stop();
   }
+});
+
+test('solo flag is independent and development tooling fails closed outside explicit development', () => {
+  expect(
+    parseServerOptions({ ENABLE_SOLO: 'true', ENABLE_DEV_TOOLS: 'true', NODE_ENV: 'production' }),
+  ).toMatchObject({ soloEnabled: true, devTools: false });
+  expect(parseServerOptions({ ENABLE_DEV_TOOLS: 'true', NODE_ENV: 'development' })).toMatchObject({
+    soloEnabled: false,
+    devTools: true,
+  });
+  expect(parseServerOptions({ ENABLE_DEV_TOOLS: 'true' }).devTools).toBe(false);
+  for (const key of ['ENABLE_SOLO', 'ENABLE_DEV_TOOLS'])
+    expect(() => parseServerOptions({ [key]: 'yes' })).toThrow('INVALID_FEATURE_FLAG');
 });

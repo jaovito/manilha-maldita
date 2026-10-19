@@ -77,6 +77,8 @@ test('deal, resolved trick, hand result and reopened own turn follow confirmed s
   view.decisionId = null;
   view.match.phase = { type: 'TURN', seat: 0 };
   expect(events.observe(view)).toEqual(['win']);
+  view = next(view);
+  expect(events.observe(view)).toEqual([]);
   view = next(view, { transition: undefined, decisionId: 'decision_two' });
   expect(events.observe(view)).toEqual(['turn']);
   view = next(view);

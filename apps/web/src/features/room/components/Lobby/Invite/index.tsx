@@ -1,3 +1,4 @@
+import { t } from '../../../../../shared/i18n';
 import { useId, useState } from 'react';
 import { LobbyIcon } from '../Icon';
 
@@ -5,7 +6,7 @@ const COPY_FAILED = 'Não foi possível copiar. Selecione e copie o link acima.'
 
 export function RoomInvite({ code }: { code: string }) {
   const inputId = useId();
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState<'' | typeof COPY_FAILED | 'Link copiado!'>('');
   const value = `${location.origin}/?room=${code}`;
 
   async function copyLink() {
@@ -25,7 +26,7 @@ export function RoomInvite({ code }: { code: string }) {
 
   return (
     <div className="invite-field">
-      <label htmlFor={inputId}>Link de convite</label>
+      <label htmlFor={inputId}>{t('Link de convite')}</label>
       <div className="invite-control">
         <input
           id={inputId}
@@ -35,15 +36,15 @@ export function RoomInvite({ code }: { code: string }) {
         />
         <button
           type="button"
-          aria-label="Copiar link da sala"
-          title="Copiar link da sala"
+          aria-label={t('Copiar link da sala')}
+          title={t('Copiar link da sala')}
           onClick={copyLink}
         >
           <LobbyIcon name="cards" />
         </button>
       </div>
       <p className="invite-feedback" role="status" aria-live="polite">
-        {feedback}
+        {feedback && t(feedback)}
       </p>
     </div>
   );

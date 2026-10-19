@@ -19,6 +19,7 @@ export type { RoomPort } from '../modules/transport/adapters/port';
 const COOKIE = 'truco_session';
 const MAX_BYTES = 8192;
 const publicErrors = new Set([
+  'SOLO_DISABLED',
   'ROOM_NOT_FOUND',
   'ROOM_FULL',
   'ROOM_CLOSED',
@@ -44,6 +45,7 @@ export function createTransport(options: {
   rooms: RoomPort;
   allowedOrigins: readonly string[];
   secureCookies?: boolean;
+  soloEnabled?: boolean;
   now?: () => number;
 }) {
   const now = options.now ?? Date.now;
@@ -96,6 +98,8 @@ export function createTransport(options: {
     await next();
   });
 
+  app.get('/api/features', (context) => context.json({ solo: options.soloEnabled === true }));
+
   app.post('/api/guest', async (context) => {
     const text = await context.req.text();
     if (new TextEncoder().encode(text).length > MAX_BYTES)
@@ -109,7 +113,8 @@ export function createTransport(options: {
 
     const parsed = guestRequestSchema.safeParse(input);
     if (!parsed.success) return context.json({ code: 'INVALID_MESSAGE' }, 400);
-    const existing = sessions.find(getCookie(context, COOKIE));
+    const tokenCookie = getCookie(context, COOKIE);
+    const existing = tokenCookie ? sessions.rename(tokenCookie, parsed.data.nickname) : undefined;
     if (existing) return context.json({ nickname: existing.nickname });
     const { token, session } = sessions.issue(parsed.data.nickname);
     setCookie(context, COOKIE, token, {
@@ -152,7 +157,12 @@ export function createTransport(options: {
     const session = sessions.find(getCookie(context, COOKIE));
     if (!session) return context.json({ code: 'UNAUTHENTICATED' }, 401);
     return context.json(
-      await options.rooms.create(session.id, session.nickname, normalizeConfig(parsed.data.config)),
+      await options.rooms.create(
+        session.id,
+        session.nickname,
+        normalizeConfig(parsed.data.config),
+        parsed.data.solo,
+      ),
       201,
     );
   });

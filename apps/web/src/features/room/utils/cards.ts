@@ -1,15 +1,16 @@
+import { t, localized } from '../../../shared/i18n';
 import type { MatchView } from '@truco/game-protocol';
 
 export type Card = MatchView['hand']['vira'];
-export const suits = {
+export const suits = localized({
   diamonds: 'Ouros ♦',
   spades: 'Espadas ♠',
   hearts: 'Copas ♥',
   clubs: 'Paus ♣',
-};
+});
 
 export function cardLabel(card: Card): string {
-  return `${card.rank} de ${suits[card.suit]}`;
+  return t('{0} de {1}', [card.rank, suits[card.suit]]);
 }
 
 export const manilhaRanks = {

@@ -1,0 +1,172 @@
+@media (max-width: 1000px) and (min-height: 501px) {
+  .entry-shell .app-header {
+    left: 3%;
+    width: 26%;
+  }
+  .entry-shell .guest-profile {
+    width: 235px;
+  }
+  .scene-power-card {
+    right: 5%;
+  }
+  .scene-card-one {
+    left: 2%;
+  }
+  .scene-card-two {
+    left: 10%;
+  }
+}
+@media (max-width: 700px) and (orientation: portrait) {
+  main.entry-shell {
+    height: auto;
+    min-height: 100dvh;
+  }
+  .entry-shell .app-header {
+    top: 8px;
+    left: 50%;
+    translate: -50% 0;
+    width: 210px;
+    height: 125px;
+  }
+  .entry-shell .brand,
+  .entry-shell .brand h1 {
+    height: 100%;
+  }
+  .main-menu {
+    height: auto;
+    min-height: 100dvh;
+    padding: 262px 24px 80px;
+  }
+  .entry-shell .guest-profile {
+    top: 140px;
+    left: 24px;
+    right: 24px;
+    width: auto;
+    height: 100px;
+    padding: 10px 14px;
+  }
+  .entry-shell .guest-profile .avatar {
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    align-self: center;
+  }
+  .entry-shell .profile-info {
+    height: auto;
+  }
+  .entry-shell .profile-economy,
+  .entry-shell .profile-progress {
+    display: none;
+  }
+  .entry-shell .menu-navigation {
+    position: relative;
+    inset: auto;
+    translate: none;
+    width: 100%;
+    height: auto;
+    gap: 10px;
+  }
+  .entry-shell .menu-navigation .menu-button {
+    height: 60px;
+    min-height: 60px;
+    font-size: 29px;
+  }
+  .scene-cards {
+    display: none;
+  }
+  .scene-prop {
+    width: 85px;
+  }
+  .prop-mate {
+    top: auto;
+    bottom: 60px;
+    right: -30px;
+  }
+  .crest-left {
+    right: auto;
+    left: -40px;
+  }
+  .crest-right {
+    left: auto;
+    right: -40px;
+  }
+  .crest-top,
+  .crest-bottom {
+    width: 240px;
+  }
+  .join-panel {
+    position: relative;
+    inset: auto;
+    translate: none;
+    width: 100%;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .entry-shell .app-header {
+    left: 3%;
+    width: 24%;
+  }
+  .entry-shell .guest-profile {
+    top: 3%;
+    right: 2%;
+    width: 26%;
+    min-width: 0;
+    height: 118px;
+    padding: 8px;
+    gap: 8px;
+  }
+  .entry-shell .guest-profile .avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .entry-shell .profile-info input {
+    font-size: 18px;
+  }
+  .entry-shell .profile-level {
+    font-size: 12px;
+  }
+  .entry-shell .profile-economy {
+    display: none;
+  }
+  .entry-shell .menu-navigation {
+    top: 8%;
+    height: 79%;
+    width: 34%;
+  }
+  .scene-power-card {
+    width: 100px;
+    right: 10%;
+    top: 41%;
+  }
+  .scene-power-card .power-card-hint {
+    display: none;
+  }
+  .scene-playing-card {
+    width: 75px;
+  }
+  .entry-shell .menu-navigation .menu-button {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 360px) and (orientation: portrait) {
+  .entry-shell .menu-navigation .menu-button {
+    font-size: 24px;
+    padding-inline: 18px;
+    gap: 8px;
+  }
+  .entry-shell .menu-navigation .menu-icon {
+    height: 34px;
+  }
+  .prop-candle {
+    width: 60px;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .prop-candle {
+    width: 55px;
+    top: 30%;
+    left: 1%;
+  }
+}

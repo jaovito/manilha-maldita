@@ -80,15 +80,14 @@ test('start explains missing players, readiness and reconnection without bypassi
 
   expect(start.hasAttribute('disabled')).toBe(true);
   expect(screen.getByText(/Falta 1 jogador para completar a sala 1v1/)).toBeTruthy();
-  expect(screen.getByText(/Você ainda precisa clicar em “Estou pronto”/)).toBeTruthy();
-  expect(screen.getByText(/Abas da mesma sessão controlam o mesmo assento/)).toBeTruthy();
+  expect(screen.queryByText('Convide seus amigos para entrar na sala!')).toBeNull();
 
   const selfReady = { seat: 0, nickname: 'Ana', connected: true, ready: true };
   const guest = { seat: 1, nickname: 'Beto', connected: true, ready: false };
   view.rerender(<Lobby room={{ ...state, seats: [selfReady, guest] }} send={send} />);
 
   expect(screen.queryByText(/Falta 1 jogador/)).toBeNull();
-  expect(screen.getByText(/Beto ainda precisa clicar em “Estou pronto”/)).toBeTruthy();
+  expect(screen.getByText('Todos os jogadores precisam confirmar Estou pronto.')).toBeTruthy();
   expect(start.hasAttribute('disabled')).toBe(true);
 
   view.rerender(
@@ -98,7 +97,7 @@ test('start explains missing players, readiness and reconnection without bypassi
     />,
   );
 
-  expect(screen.getByText('Aguardando a reconexão de Beto.')).toBeTruthy();
+  expect(screen.getByText('Aguarde todos os jogadores reconectarem.')).toBeTruthy();
   expect(start.hasAttribute('disabled')).toBe(true);
 
   view.rerender(
@@ -171,7 +170,7 @@ test('the lobby workbench groups alternating seats relative to the viewer and ex
   expect(screen.getByLabelText<HTMLInputElement>('Link de convite').readOnly).toBe(true);
   expect(view.container.querySelector('.lobby-players-column .lobby-team')).toBe(own);
   expect(screen.getByRole('button', { name: 'Copiar link da sala' })).toBeDefined();
-  expect(screen.getByRole('switch', { name: 'Sala privada' }).hasAttribute('disabled')).toBe(true);
+  expect(screen.queryByRole('switch', { name: 'Sala privada' })).toBeNull();
   const powers = screen.getByText('Ver poderes');
   fireEvent.click(powers);
   expect(screen.getByText(/Espião · 1 energia/)).toBeDefined();
@@ -217,18 +216,14 @@ test('competitive settings preserve fixed clocks and finished lobbies retain rem
   expect(send).toHaveBeenCalledWith({ type: 'LEAVE' });
 });
 
-test('pixel controls reflect server selection and keep privacy and powers fixed', () => {
+test('pixel controls reflect server selection and omit fixed privacy and power controls', () => {
   const state = room();
   const send = mock(() => {});
   const view = render(<Lobby room={state} send={send} />);
   expect(screen.queryByText('Somente leitura')).toBeNull();
   expect((screen.getByRole('radio', { name: '1v1' }) as HTMLInputElement).checked).toBe(true);
   expect((screen.getByRole('radio', { name: 'Casual' }) as HTMLInputElement).checked).toBe(true);
-  const privacy = screen.getByRole('switch', { name: 'Sala privada' }) as HTMLInputElement;
-  const powers = screen.getByRole('switch', { name: 'Poderes aleatórios' }) as HTMLInputElement;
-  expect(privacy.checked && privacy.disabled).toBe(true);
-  expect(powers.checked).toBe(true);
-  expect(powers.disabled).toBe(true);
+  expect(screen.queryByRole('switch')).toBeNull();
   expect(send).not.toHaveBeenCalled();
 
   view.rerender(

@@ -1,14 +1,38 @@
+import { GameSettings, LanguageSelect } from '../../shared/Settings';
+import { t, useLocale } from '../../shared/i18n';
 import { defaultRoomConfig, nicknameSchema, type RoomView } from '@truco/game-protocol';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { EntryMenu, Welcome } from '../../features/menu';
 import { Lobby, Table, MatchResult } from '../../features/room';
-import { Candlelight } from '../../shared/Candlelight';
+import { RoomMenu } from '../../features/room/components/RoomMenu';
+import { MenuScenery } from '../../shared/MenuScenery';
 import { DisabledTooltip, disabledHint } from '../../shared/DisabledTooltip';
 import { AudioControls, useGameFeedback } from '../../shared/feedback';
 import { loadNickname, saveNickname } from '../../shared/preferences/nickname';
 import { type Action, connectRoom, envelope, request } from '../../shared/transport/client';
 
+const DevTools = import.meta.env?.DEV
+  ? lazy(() => import('../../features/room/components/DevTools'))
+  : null;
+
 export function App() {
+  const { locale } = useLocale();
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+  const [soloEnabled, setSoloEnabled] = useState(false);
+  useEffect(() => {
+    let active = true;
+    request<{ solo?: unknown }>('/features')
+      .then((features) => {
+        if (active) setSoloEnabled(features.solo === true);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
   const { preferences, changePreferences, observe, reset } = useGameFeedback();
   const [nickname, setNickname] = useState(loadNickname);
   const [nicknameConfirmed, setNicknameConfirmed] = useState(() => Boolean(loadNickname()));
@@ -92,7 +116,7 @@ export function App() {
     };
   }, [join]);
 
-  const enter = async (create: boolean) => {
+  const enter = async (create: boolean, solo = false) => {
     setBusy(true);
     setError('');
 
@@ -105,11 +129,14 @@ export function App() {
       }
 
       const next = create
-        ? await request<{ code: string }>('/rooms', { config: defaultRoomConfig })
+        ? await request<{ code: string }>('/rooms', {
+            config: defaultRoomConfig,
+            ...(solo ? { solo: true } : {}),
+          })
         : { code: code.trim().toUpperCase() };
       await join(next.code);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Falha ao entrar na sala.');
+      setError(cause instanceof Error ? cause.message : t('Falha ao entrar na sala.'));
     } finally {
       setBusy(false);
     }
@@ -137,30 +164,42 @@ export function App() {
       className={`app-shell ${!room ? 'entry-shell' : room.match ? 'game-shell' : 'lobby-shell'}`}
     >
       <DisabledTooltip />
-      {!room?.match && <Candlelight variant={room ? 'lobby' : 'menu'} />}
+      {settingsOpen && (
+        <GameSettings onClose={() => setSettingsOpen(false)}>
+          <AudioControls preferences={preferences} onChange={changePreferences} />
+        </GameSettings>
+      )}
+      {((!room && !nicknameConfirmed) || (room && room.status !== 'playing')) && (
+        <button
+          className="game-settings-trigger"
+          type="button"
+          onClick={() => setSettingsOpen(true)}
+        >
+          {t('Configurações')}
+        </button>
+      )}
+      {!room?.match && <MenuScenery lobby={Boolean(room)} />}
       {!room?.match && <AudioControls preferences={preferences} onChange={changePreferences} />}
       <header className="app-header">
         <div className="brand">
-          <span className="brand-suits" aria-hidden="true">
-            ♥ ♠ ♦ ♣
-          </span>
-          <h1 aria-label="Truco Caótico">
-            <span className="brand-main">TRUCO</span>
-            <span className="brand-ribbon">CAÓTICO</span>
+          <h1 aria-label="Manilha Maldita">
+            <img className="brand-logo" src="/art/layers/logo.png" alt="Manilha Maldita" />
           </h1>
         </div>
         <div className="header-meta">
-          <p className="eyebrow">SALA PRIVADA · {room ? room.config.format : '1v1 / 2v2'}</p>
+          <p className="eyebrow">
+            {t('SALA PRIVADA ·')} {room ? room.config.format : '1v1 / 2v2'}
+          </p>
           {room ? (
             <p
               className={`connection-chip ${connected ? 'is-connected' : 'is-reconnecting'}`}
               role="status"
             >
               <span aria-hidden="true" className="connection-dot" />
-              {connected ? 'Conectado' : 'Reconectando… Ações aguardam conexão.'}
+              {connected ? t('Conectado') : t('Reconectando… Ações aguardam conexão.')}
             </p>
           ) : (
-            <span className="status-chip">Jogue com seus amigos</span>
+            <span className="status-chip">{t('Jogue com seus amigos')}</span>
           )}
         </div>
       </header>
@@ -184,12 +223,15 @@ export function App() {
           onNicknameChange={changeNickname}
           onCodeChange={setCode}
           onEnter={enter}
+          soloEnabled={soloEnabled}
+          onPlay={() => void enter(true, true)}
+          onSettings={() => setSettingsOpen(true)}
         />
       ) : (
         <div
           data-sequence={room.sequence}
           aria-disabled={!connected}
-          {...disabledHint(!connected ? 'Aguarde reconectar para usar as ações da sala.' : null)}
+          {...disabledHint(!connected ? t('Aguarde reconectar para usar as ações da sala.') : null)}
           className={`room-stage ${!connected ? 'disconnected' : ''}`}
         >
           {room.match && (
@@ -200,11 +242,20 @@ export function App() {
           <MatchResult room={room} send={send} connected={connected} />
           {room.match ? (
             room.status === 'playing' && (
-              <details className="room-menu">
-                <summary>Sala · {room.code}</summary>
-                <p>As regras e equipes ficam fixas durante a partida.</p>
+              <RoomMenu room={room} connected={connected} send={send}>
+                <LanguageSelect />
                 <AudioControls preferences={preferences} onChange={changePreferences} />
-              </details>
+                {DevTools && room.devTools && room.solo && (
+                  <Suspense fallback={<p>{t('Carregando ferramentas…')}</p>}>
+                    <DevTools
+                      key={`${room.matchId}:${room.match?.hand.number}`}
+                      room={room}
+                      send={send}
+                      connected={connected}
+                    />
+                  </Suspense>
+                )}
+              </RoomMenu>
             )
           ) : (
             <Lobby room={room} send={send} />

@@ -1,0 +1,234 @@
+/* Restore the reference's dense diagonal table edges with independent anchors. */
+.scene-corner {
+  width: clamp(220px, 38vw, 740px);
+  aspect-ratio: 1;
+}
+.corner-nw,
+.corner-ne {
+  top: -5%;
+}
+.corner-sw,
+.corner-se {
+  bottom: 1%;
+}
+.scene-crest {
+  opacity: 0.9;
+}
+.crest-left,
+.crest-right {
+  width: clamp(145px, 15vw, 290px);
+  height: 89%;
+  top: 52%;
+}
+.crest-left {
+  right: calc(50% + 13vw);
+}
+.crest-right {
+  left: calc(50% + 13vw);
+}
+.crest-top,
+.crest-bottom {
+  width: 40%;
+  height: 23%;
+}
+.crest-top {
+  top: 8%;
+}
+.crest-bottom {
+  bottom: 3%;
+}
+.prop-candle {
+  width: clamp(100px, 16vw, 270px);
+  top: 6%;
+  left: -3%;
+}
+.prop-mate {
+  width: clamp(120px, 19vw, 330px);
+  top: 29%;
+  right: -5%;
+  rotate: 0deg;
+}
+.prop-coins {
+  width: clamp(100px, 15vw, 260px);
+  left: 0;
+  bottom: 25%;
+  rotate: -16deg;
+}
+.prop-deck {
+  width: clamp(150px, 24vw, 420px);
+  right: -4%;
+  bottom: -9%;
+  rotate: 22deg;
+}
+.scene-edge-props img {
+  width: clamp(110px, 20vw, 350px);
+}
+.edge-deck-left {
+  left: -7%;
+  top: 30%;
+  rotate: -25deg;
+}
+.edge-deck-bottom {
+  left: -8%;
+  bottom: -7%;
+  rotate: -22deg;
+}
+.edge-deck-top {
+  left: 34%;
+  top: -19%;
+  rotate: -16deg;
+}
+.scene-edge-props .edge-coins-right {
+  width: clamp(100px, 17vw, 290px);
+  right: 3%;
+  bottom: 10%;
+  rotate: 18deg;
+}
+.scene-playing-card {
+  width: clamp(90px, 14vw, 250px);
+}
+.scene-card-one {
+  left: 13%;
+  top: 48%;
+  rotate: -14deg;
+}
+.scene-card-two {
+  left: 20%;
+  top: 55%;
+  rotate: 13deg;
+}
+.scene-power-card {
+  right: 12%;
+  top: 47%;
+  width: clamp(120px, 15vw, 260px);
+}
+.entry-shell .guest-profile {
+  right: 1.8%;
+  top: 5%;
+  width: clamp(270px, 32vw, 600px);
+  height: clamp(150px, 23dvh, 230px);
+  border: 10px solid transparent;
+  border-image: url("/art/lobby-frame.svg") 30 / 12px / 2px stretch;
+  padding: 12px;
+}
+.entry-shell .guest-profile .avatar {
+  width: clamp(65px, 8vw, 130px);
+  height: clamp(65px, 8vw, 130px);
+}
+.entry-shell .menu-navigation {
+  width: clamp(280px, 29vw, 600px);
+}
+.entry-shell .menu-footer {
+  border: 8px solid transparent;
+  border-image: url("/art/lobby-frame.svg") 30 / 10px / 0 stretch;
+}
+@media (max-width: 700px) and (orientation: portrait) {
+  .scene-corner {
+    width: 53vw;
+  }
+  .corner-nw,
+  .corner-ne {
+    top: -2%;
+  }
+  .corner-sw,
+  .corner-se {
+    bottom: 4%;
+  }
+  .scene-edge-props img {
+    width: 100px;
+  }
+  .edge-deck-left {
+    top: 39%;
+    left: -70px;
+  }
+  .edge-deck-bottom {
+    bottom: 5%;
+    left: -50px;
+  }
+  .edge-deck-top {
+    display: none;
+  }
+  .scene-edge-props .edge-coins-right {
+    width: 80px;
+    right: -35px;
+    bottom: 14%;
+  }
+  .entry-shell .guest-profile .avatar {
+    width: 48px;
+    height: 48px;
+  }
+  .crest-left,
+  .crest-right {
+    height: 76%;
+    opacity: 0.55;
+  }
+  .prop-coins {
+    bottom: 5%;
+    left: -25px;
+  }
+  .prop-deck {
+    width: 130px;
+    bottom: -1%;
+    right: -45px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .scene-corner {
+    width: 32vw;
+  }
+  .edge-deck-left {
+    width: 130px;
+    left: -5%;
+  }
+  .edge-deck-bottom,
+  .edge-deck-top {
+    display: none;
+  }
+  .prop-deck {
+    width: 150px;
+  }
+  .prop-mate {
+    width: 110px;
+  }
+  .prop-coins {
+    width: 90px;
+    bottom: 14%;
+  }
+  .entry-shell .guest-profile .avatar {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.corner-nw,
+.corner-sw {
+  left: -0.8%;
+}
+.corner-ne,
+.corner-se {
+  right: -0.8%;
+}
+@media (min-width: 701px) and (min-height: 501px) {
+  .entry-shell .profile-info input {
+    font-size: clamp(23px, 2vw, 34px);
+  }
+  .entry-shell .profile-level {
+    font-size: clamp(15px, 1.4vw, 22px);
+  }
+  .entry-shell .guest-caption {
+    display: block;
+    font-size: 12px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .edge-deck-left {
+    top: 46%;
+  }
+}
+
+.scene-power-card .power-card-title {
+  font-size: 8cqw;
+}
+.scene-power-card .power-card-hint {
+  font-size: 6.3cqw;
+}

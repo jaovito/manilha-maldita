@@ -19,7 +19,7 @@ test('browser entry mounts the guest screen into the document root', async () =>
     expect(screen.queryByRole('navigation', { name: 'Menu principal' })).toBeNull();
     fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Ana' } });
     fireEvent.click(screen.getByRole('button', { name: 'Continuar' }));
-    expect(screen.getByRole('heading', { name: 'Truco Caótico', level: 1 })).toBeDefined();
+    expect(screen.getByRole('heading', { name: 'Manilha Maldita', level: 1 })).toBeDefined();
     expect(screen.getByRole('navigation', { name: 'Menu principal' })).toBeDefined();
     expect(screen.getByRole('region', { name: 'Seu perfil' })).toBeDefined();
     expect(screen.getByRole('button', { name: 'Criar sala' })).toBeDefined();

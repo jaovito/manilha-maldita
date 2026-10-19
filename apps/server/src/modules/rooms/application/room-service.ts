@@ -1,85 +1,43 @@
 import {
   clientMessageSchema,
   nicknameSchema,
-  normalizeConfig,
   type ClientMessage,
   type CommandReply,
   type RoomConfig,
 } from '@truco/game-protocol';
 import { nextWakeAt, updateConnectivity } from '../../matches';
-import { advanceClock, applyGameplay, closeAbnormally } from './gameplay';
-import { applyLobby } from './lobby';
-import { commandError } from './command-error';
-import { roomView } from './room-view';
-import { serializeRoom } from './room-queue';
-import {
-  type Room,
-  type Ports,
-  type Sink,
-  cacheKey,
-  connected,
-  memberSeat,
-  protectionMs,
-} from './types';
-
-const LOBBY_ACTIONS = new Set([
-  'READY',
-  'SET_SEAT',
-  'CONFIGURE',
-  'START_MATCH',
-  'REMATCH',
-  'LEAVE',
-]);
+import { advanceBot, botWakeAt } from './solo/bot';
+import { advanceClock, beginMatch, closeAbnormally } from './match/gameplay';
+import { dispatchCommand } from './messaging/dispatch';
+import { commandError } from './messaging/command-error';
+import { roomView } from './messaging/room-view';
+import { serializeRoom, cacheKey } from './room-queue';
+import { createRoom, assertSessionCapacity } from './lobby/creation';
+import type { Room, Ports, Sink, RoomOptions } from './state/types';
+import { connected, humanConnected, memberSeat, protectionMs } from './state/presence';
 
 /** One queue owns lobby, presence, gameplay, timers and rematches in each room. */
 export class RoomService {
   private readonly rooms = new Map<string, Room>();
 
-  constructor(private readonly ports: Ports) {}
+  constructor(
+    private readonly ports: Ports,
+    private readonly options: RoomOptions = {},
+  ) {}
 
-  async create(sessionId: string, nickname: string, input: RoomConfig): Promise<{ code: string }> {
-    if (this.rooms.size >= 256) throw new Error('ROOM_CAPACITY');
-    if (
-      [...this.rooms.values()].filter((room) =>
-        room.seats.some((member) => member?.sessionId === sessionId),
-      ).length >= 3
-    )
-      throw new Error('SESSION_CAPACITY');
-
-    nicknameSchema.parse(nickname);
-    const config = normalizeConfig(input);
-    let code = '';
-    for (let attempt = 0; attempt < 16; attempt++) {
-      code = Array.from(
-        { length: 6 },
-        () => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[this.ports.randomInt(32)],
-      ).join('');
-      if (!this.rooms.has(code)) break;
-    }
-    if (this.rooms.has(code)) throw new Error('ROOM_CAPACITY');
-
-    const room: Room = {
-      code,
-      config,
-      sequence: 0,
-      revision: 0,
-      hostSeat: 0,
-      seats: Array.from({ length: config.format === '1v1' ? 2 : 4 }, (_, seat) =>
-        seat === 0 ? { sessionId, nickname, ready: false, connection: null, strikes: 0 } : null,
-      ),
-      status: 'lobby',
-      match: null,
-      matchId: null,
-      outcome: null,
-      clock: null,
-      transition: null,
-      budgets: [],
-      emptySince: this.ports.now(),
-      cache: new Map(),
-      chain: Promise.resolve(),
-      pending: 0,
-      cancel: null,
-    };
+  async create(
+    sessionId: string,
+    nickname: string,
+    input: RoomConfig,
+    solo = false,
+  ): Promise<{ code: string }> {
+    const room = createRoom(
+      { sessionId, nickname, config: input, solo },
+      this.rooms,
+      this.ports,
+      this.options,
+    );
+    const { code } = room;
 
     this.rooms.set(code, room);
     this.schedule(room);
@@ -92,21 +50,20 @@ export class RoomService {
 
     await this.enqueue(room, () => {
       this.tick(room);
+
       if (this.rooms.get(code) !== room) throw new Error('ROOM_NOT_FOUND');
       if (room.seats.some((entry) => entry?.sessionId === sessionId)) return;
-      if (room.status !== 'lobby') throw new Error('ROOM_CLOSED');
-      if (
-        [...this.rooms.values()].filter((entry) =>
-          entry.seats.some((member) => member?.sessionId === sessionId),
-        ).length >= 3
-      )
-        throw new Error('SESSION_CAPACITY');
+      if (room.solo || room.status !== 'lobby') throw new Error('ROOM_CLOSED');
+      assertSessionCapacity(this.rooms, sessionId);
 
       nicknameSchema.parse(nickname);
       const seat = room.seats.indexOf(null);
       if (seat < 0) throw new Error('ROOM_FULL');
+
       room.seats[seat] = { sessionId, nickname, ready: false, connection: null, strikes: 0 };
-      for (const member of room.seats) if (member) member.ready = false;
+      for (const member of room.seats) {
+        if (member) member.ready = false;
+      }
       room.revision++;
       this.publish(room);
     });
@@ -117,7 +74,9 @@ export class RoomService {
 
     return this.enqueue(room, () => {
       this.tick(room);
+
       if (this.rooms.get(code) !== room) throw new Error('ROOM_NOT_FOUND');
+
       const seat = memberSeat(room, sessionId);
       const member = room.seats[seat];
       if (!member) throw new Error('NOT_MEMBER');
@@ -125,6 +84,7 @@ export class RoomService {
       const previous = member.connection;
       const id = this.ports.id();
       member.connection = { id, sink };
+
       if (previous) {
         // The retired socket cannot prevent the new authority receiving its snapshot.
         try {
@@ -136,6 +96,7 @@ export class RoomService {
       }
 
       room.emptySince = null;
+      if (room.solo && room.status === 'lobby') beginMatch(room, this.ports);
       this.refreshPresence(room);
       this.publish(room);
 
@@ -150,9 +111,10 @@ export class RoomService {
     await this.enqueue(room, () => {
       const member = room.seats.find((entry) => entry?.sessionId === sessionId);
       if (member?.connection?.id !== connectionId) return;
+
       this.tick(room);
       member.connection = null;
-      if (!connected(room).some(Boolean)) room.emptySince ??= this.ports.now();
+      if (!humanConnected(room)) room.emptySince ??= this.ports.now();
       this.refreshPresence(room);
       this.publish(room);
     });
@@ -181,20 +143,16 @@ export class RoomService {
         return cached.fingerprint === fingerprint
           ? cached.reply
           : { type: 'ERROR', commandId: message.commandId, code: 'COMMAND_ID_REUSED' };
+
       this.tick(room);
+
       if (this.rooms.get(code) !== room) throw new Error('ROOM_NOT_FOUND');
 
       let reply: CommandReply;
       try {
-        if (message.action.type === 'SYNC') {
-          room.seats[seat]?.connection?.sink.send({ type: 'SNAPSHOT', room: roomView(room, seat) });
-        } else if (LOBBY_ACTIONS.has(message.action.type)) {
-          applyLobby(room, seat, message, this.ports);
-          this.publish(room);
-        } else {
-          applyGameplay(room, seat, message, this.ports);
-          this.publish(room);
-        }
+        const result = dispatchCommand(room, seat, message, this.ports);
+        if (result === 'changed') this.publish(room);
+
         reply = { type: 'ACK', commandId: message.commandId, ok: true, sequence: room.sequence };
       } catch (error) {
         reply = {
@@ -218,6 +176,7 @@ export class RoomService {
   close(): void {
     const rooms = [...this.rooms.values()];
     this.rooms.clear();
+
     for (const room of rooms) {
       room.cancel?.();
       for (const member of room.seats) {
@@ -231,6 +190,7 @@ export class RoomService {
   private getRoom(code: string): Room {
     const room = this.rooms.get(code);
     if (!room) throw new Error('ROOM_NOT_FOUND');
+
     return room;
   }
 
@@ -250,11 +210,12 @@ export class RoomService {
       if (room.status === 'playing') closeAbnormally(room, null, 'expired');
       room.cancel?.();
       this.rooms.delete(room.code);
+
       return;
     }
 
     const previousClock = room.clock;
-    const advanced = advanceClock(room, this.ports);
+    const advanced = advanceClock(room, this.ports) || advanceBot(room, this.ports);
     if (
       advanced ||
       previousClock?.pausedAt !== room.clock?.pausedAt ||
@@ -265,7 +226,7 @@ export class RoomService {
   }
 
   private publish(room: Room): void {
-    room.emptySince = connected(room).some(Boolean) ? null : (room.emptySince ?? this.ports.now());
+    room.emptySince = humanConnected(room) ? null : (room.emptySince ?? this.ports.now());
     room.sequence++;
 
     for (const [seat, member] of room.seats.entries()) {
@@ -279,7 +240,8 @@ export class RoomService {
         }
       }
     }
-    room.emptySince = connected(room).some(Boolean) ? null : (room.emptySince ?? this.ports.now());
+
+    room.emptySince = humanConnected(room) ? null : (room.emptySince ?? this.ports.now());
     this.refreshPresence(room);
     this.schedule(room);
   }
@@ -287,7 +249,9 @@ export class RoomService {
   private schedule(room: Room): void {
     room.cancel?.();
     room.cancel = null;
+
     const times = [
+      botWakeAt(room, this.ports),
       room.clock === null ? null : room.clock.expired ? this.ports.now() : nextWakeAt(room.clock),
       room.transition?.until ?? null,
       room.emptySince === null ? null : room.emptySince + protectionMs(room),

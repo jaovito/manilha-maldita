@@ -2,6 +2,36 @@
 
 Leia ao alterar comportamento, criar testes ou configurar ferramentas e CI. Selecione as regressões pertinentes à mudança; os comandos abaixo existem no bootstrap. Os testes atuais validam o ambiente e o motor de regras-base completo do M1 (cartas, distribuição, vazas, empates, apostas, onze, pontuação e projeções); o M2 acrescenta multiplayer real, sessões, timers e reconexão; o M3 acrescenta poderes e simulações.
 
+## Organização dos testes E2E
+
+Todos os cenários ficam em `tests/e2e/`, organizados por funcionalidade para navegação na IDE. Arquivos `*.e2e.ts` são testes executáveis; `support/` contém apenas helpers compartilhados.
+
+| Pasta | Cobertura |
+|---|---|
+| `profile/` | Primeiro acesso, validação, persistência e edição do apelido; sessão de convidado e convite |
+| `menu/` | Composição visual, assets, perfil e responsividade do menu |
+| `lobby/` | Layout da sala, assentos, pronto e configurações |
+| `match/` | Partidas multiplayer, poderes, reconexão, revanche, aumentos e feedback audiovisual |
+| `tutorial/` | Como jogar, prática, navegação e layout das lições |
+| `settings/` | Idioma global e persistência da preferência |
+| `solo/` | Treino contra bot, ferramentas dev e ausência do painel no build de produção |
+| `accessibility/` | Controles desabilitados, dicas e interação por mouse/toque |
+| `infrastructure/` | HTML de produção e acesso pela origem localhost |
+| `support/` | Entrada, sincronização multiplayer, poderes, resultados e verificações de geometria/contraste |
+
+O projeto não tem login por senha: os fluxos de identidade atual estão em `profile/`. Adicione novos cenários na área correspondente, sem criar outra árvore por ambiente. Os ambientes são selecionados pelas configurações Playwright:
+
+```sh
+bun run test:e2e profile                  # apenas entrada e apelido
+bun run test:e2e lobby                    # apenas lobby
+bun run test:e2e menu --project=chromium  # menu desktop
+bun run test:e2e --list                   # inventário padrão
+bun run test:e2e:solo                     # solo em dev e produção
+bun run test:e2e --config=playwright.i18n.config.ts  # idioma e tutorial
+```
+
+A configuração padrão exclui `solo/` e `settings/i18n.e2e.ts`, pois dependem dos servidores isolados de desenvolvimento. As configurações dedicadas removem essa exclusão e selecionam seus arquivos explicitamente. A suíte de idioma também executa o tutorial; essa sobreposição é intencional. Os três comandos `--list` devem preservar o inventário ao reorganizar arquivos.
+
 ## Testes obrigatórios
 
 Use testes determinísticos e relógio falso; não escreva testes baseados em esperar segundos reais. Não substitua casos de regra por snapshots extensos de objetos.
@@ -172,3 +202,47 @@ A regressão de descarte visual do Espião reproduz K de Espadas em 1v1/2v2: sai
 DOM verifica boas-vindas sem apelido válido, foco inicial, validação pelo schema (vazio, espaços, caracteres inválidos e limite), confirmação por formulário, trim e gravação somente depois de confirmar. Apelido salvo e sessão válida dispensam a etapa; edições posteriores e exclusão da preferência preservam o menu atual. Resposta atrasada não sobrescreve o rascunho nem entra em convite com apelido antigo; código do convite continua disponível após confirmar. Storage bloqueado permite continuar na visita sem autenticar localmente. Confirmar o apelido não faz POST de convidado: identidade continua sendo responsabilidade do servidor.
 
 Os E2E de entrada usam o fluxo real de confirmação, com reload, perda/retomada de cookie e convite em contextos distintos. Botões de ação indisponíveis devem ter opacidade reduzida, sem brilho/ampliação; tooltips opacos preservam contraste e explicam o motivo atual sem disparar comandos. Cartas continuam legíveis fora da vez. A opacidade proposital dos botões desabilitados não dispensa contraste de texto normal, controles ativos e tooltips. Inspeção por `playwright-cli` deve incluir primeiro acesso, menu e tooltip no desktop e no celular.
+
+## Cenário em camadas e marca Manilha Maldita
+
+DOM verifica que `MenuScenery` não cria ações, imagens acessíveis ou estado de jogo e que o lobby omite as cartas decorativas. `menu-layers.e2e.ts` verifica carregamento real dos PNGs, leitura do texto dos botões, ausência de overflow horizontal, entrada/retorno por código e movimento reduzido em 1440×900, 390×844, 320×568 e 844×390. O helper de mesa exige logo compacta à esquerda do placar; o helper do menu valida coluna central com largura limitada, substituindo a proporção rígida do fundo antigo. A conclusão de partidas fecha com Escape a dica que pode aparecer ao atingir o teto de contra-aumento antes de clicar em Aceitar; não usa clique forçado nem altera o estado do servidor.
+
+A verificação visual com `playwright-cli` complementa esses testes: menu desktop/retrato/paisagem, lobby desktop/mobile e carta real de poder na mesa. Conferir recortes com alpha, carregamento de imagens, logo no HUD e texto dentro dos botões; geometria sozinha não detecta todos os problemas de arte.
+
+### Leitura da carta vencedora
+
+A regressão de feedback mantém a face vencedora no mesmo nó durante SYNC e só libera “Sua vez” depois da transição autoritativa. O observador toca o resultado uma vez e mantém silêncio em snapshots intermediários, emitindo o som de turno somente após a liberação. O E2E de feedback verifica a animação de 900 ms, ausência de movimento no cliente com preferência reduzida, faixa de turno limitada a 507 px e resultado acima das cartas, em desktop e celular. Empate não marca uma carta vencedora.
+
+A vela em camadas tem regressão DOM para reuso do asset original, imagem única sem fragmentos, filtro de deslocamento e halo e ausência de controles acessíveis. O E2E de menu confere carregamento efetivo das imagens, imagem sem clip-path, filtro ativo e halo animado, responsividade em quatro viewports e restauração estática com movimento reduzido. A inspeção com `playwright-cli` inclui quadros pausados em diferentes instantes e capturas desktop/mobile para conferir ausência de emendas e estabilidade do pavio.
+
+A regressão da chama compara capturas em dois instantes fixos da linha de tempo SVG, com animações CSS pausadas: os pixels da ponta devem mudar e os da cera devem permanecer iguais. Capturas usam resolução CSS para evitar diferenças de reamostragem entre escalas de dispositivo. Verificar somente presença de filter/animate não comprova movimento visível.
+
+A verificação de poderes no E2E multiplayer exige proporção 2:3, custo contido na carta, título sem transbordamento e dock sem sobreposição aos controles. Revisões das artes completas devem inspecionar os quatro poderes ampliados e as miniaturas em partida, em desktop e celular.
+
+`lobby-layout.e2e.ts` verifica 1v1/2v2 sem scroll horizontal ou vertical em 1280×640, 1280×720, 1024×768, 1440×900 e 1920×1080, incluindo tempos abertos e catálogo. Confirma ausência dos switches fixos, cópia disponível e pronto/saída em mobile.
+
+`Table/Card/hidden.test.tsx` exige versos distintos para Máscara/coberta, sem rank/naipe no estado mascarado oculto, descrição de força preservada e retorno à face quando a projeção autoriza. A alteração visual não modifica resolução ou projeções do servidor.
+
+Regressões de apelido verificam renomear sem trocar cookie/identidade ou estender expiração, rejeitar valores inválidos e não reativar sessões vencidas; E2E cobre edição com cookie existente, criação de sala e reload. O menu de sala testa cancelamento/confirmação de desistência, desconexão, Escape e ciclo de foco em Chromium desktop/mobile.
+
+O encerramento tem regressão DOM para leitura de 1800 ms antes dos efeitos, explosão exclusiva da perspectiva perdedora, ausência de botões até terminar, foco após leitura, SYNC/desconexão sem reinício e callback duplicado obsoleto. A mesa testa o destaque da última vaza no snapshot final sem transição, e não atribui esse destaque a desistência. E2E de partida completa confere efeitos por perspectiva e só depois as ações de revanche.
+
+O E2E de apelido usa uma sessão já existente: cria/sai de uma sala com o nome antigo, aciona o lápis do perfil, verifica foco, edita o campo e clica imediatamente em Criar sala. Exige o novo nome no lobby e ausência do antigo, preservando a verificação após reload e retorno ao menu, em Chromium desktop/mobile, sem mocks de sessão ou transporte.
+
+O tutorial tem regressões DOM para todas as etapas, respostas certas/erradas com explicação, custos dos quatro poderes, paridade dos catálogos, ciclo 3→4, tradução, armazenamento bloqueado, foco, Escape e restauração do menu sem ingresso. O E2E usa o menu real para praticar, alterar a vira, selecionar inglês, visitar poderes e reabrir após reload, verificando ausência de criação de sala. Geometria cobre 1440×900, 390×844, 320×568 e 844×390, complementada por inspeção com playwright-cli.
+
+Aumentos: DOM cobre substituição dos quatro gritos, SYNC sem reinício, snapshot restaurado silencioso, pausa/aceitação/gap/rematch e callbacks obsoletos. Testes de áudio distinguem os quatro motivos e seus envelopes. O E2E `raises.e2e.ts` negocia 3→6→9→12 entre dois clientes reais, confere som sintetizado por instrumentação que mantém AudioContext real, movimento reduzido, texto dentro da tela, teto e aceitação sem bloqueio pela animação; reload não repete o áudio. Inspeção com playwright-cli complementa os testes desktop/mobile.
+
+O grito DEEESCE!! tem regressões de aceite nos quatro valores, substituição do pedido, expiração, SYNC/reconexão, corrida e contra-aumento sem falso aceite. O E2E de aumentos verifica texto, pontos aceitos e o quinto motivo de áudio em ambos os clientes.
+
+O E2E de composição do menu verifica também que o conteúdo do perfil fica dentro da moldura e a linha de moedas não sobrepõe a legenda de convidado nas cinco resoluções exercitadas.
+
+## Treino solo e ferramentas dev
+
+`bun run test:e2e:solo` usa `playwright.solo.config.ts`, portas isoladas 3002/5174/4174 e testes em `tests/e2e/solo`. Exercita Jogar, bot real, montagem das três cartas e dos quatro poderes, reconexão e revanche, em Chromium desktop/mobile. O build de produção é testado contra backend que anuncia devTools para comprovar que a UI não inclui o painel; a integração HTTP/WS separada inicia o backend como production/test e comprova recusa do comando forjado. Não confundir ocultação de UI com segurança autoritativa.
+
+Regressões da aplicação verificam partida completa por pontos, relógios/timers aposentados, bot pausado sem humano, expiração, rejeição de terceiros, idempotência, unicidade das 40 cartas, placar preservado e regras de mão de onze. Política do bot continua recebendo somente PlayerView. O E2E padrão de salas multiplayer permanece separado; a configuração solo sobe e encerra seus próprios servidores.
+
+### Idioma global
+
+`bun run test:e2e --config=playwright.i18n.config.ts` sobe backend de desenvolvimento e Vite isolados (3002/5174). Em desktop/mobile valida idioma persistido, troca no lobby e durante partida real contra bot, ausência de comandos causados pela tradução, preservação do cenário em edição, resultados, erros e tutorial. Testes DOM verificam catálogo/placeholder, sincronização entre assinantes/abas, foco do painel e storage bloqueado. A preferência é local ao navegador, independente das regras da sala.

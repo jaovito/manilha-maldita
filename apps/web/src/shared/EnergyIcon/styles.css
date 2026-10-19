@@ -1,0 +1,22 @@
+.energy-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 0.7em;
+  height: 1em;
+  vertical-align: -0.12em;
+  shape-rendering: crispEdges;
+}
+.power-card-cost .energy-icon {
+  width: 0.72em;
+  height: 1.1em;
+  margin-right: 0.08em;
+}
+.power-energy .energy-icon {
+  width: 12px;
+  height: 18px;
+}
+@media (max-width: 600px) {
+  .power-energy .energy-icon {
+    display: none;
+  }
+}

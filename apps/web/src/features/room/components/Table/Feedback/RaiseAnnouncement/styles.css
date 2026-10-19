@@ -1,0 +1,120 @@
+.raise-announcement {
+  position: absolute;
+  top: 39%;
+  left: 50%;
+  width: min(94%, 950px);
+  transform: translate(-50%, -50%);
+  z-index: 8;
+  pointer-events: none;
+  text-align: center;
+  color: #ffe8a3;
+  isolation: isolate;
+  animation: raise-arrival 1800ms steps(12, end) both;
+}
+.raise-impact {
+  position: absolute;
+  inset: -35% -2%;
+  z-index: -1;
+  background: #621e2df0;
+  clip-path: polygon(
+    0 35%,
+    14% 30%,
+    8% 0,
+    30% 19%,
+    38% 2%,
+    50% 17%,
+    64% 0,
+    72% 22%,
+    94% 8%,
+    86% 35%,
+    100% 45%,
+    88% 65%,
+    96% 94%,
+    71% 80%,
+    60% 100%,
+    48% 83%,
+    30% 100%,
+    24% 78%,
+    3% 91%,
+    12% 60%
+  );
+}
+.raise-shout {
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+  font-family: "Jersey 25", sans-serif;
+  font-size: clamp(27px, 7vw, 100px);
+  line-height: 1.1;
+  letter-spacing: 0.015em;
+  text-shadow:
+    3px 3px #ab542b,
+    6px 6px #07131b;
+}
+.raise-shout span {
+  display: inline-block;
+  animation: raise-letter 180ms steps(2, end) calc(var(--letter) * -35ms) 6;
+}
+.raise-caption {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 5px 18px;
+  background: #071b23;
+  border: 2px solid #e1b45b;
+  color: #ffe9ad;
+  font-family: "Jersey 25", sans-serif;
+  font-size: clamp(16px, 2vw, 25px);
+}
+.raise-announcement[data-stake="12"] .raise-impact {
+  background: #86252af5;
+}
+@keyframes raise-letter {
+  0%,
+  100% {
+    transform: translateY(-4px) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(4px) rotate(5deg);
+  }
+}
+@keyframes raise-arrival {
+  0% {
+    opacity: 0;
+    scale: 0.55;
+  }
+  12% {
+    opacity: 1;
+    scale: 1.08;
+  }
+  22%,
+  78% {
+    opacity: 1;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 1.06;
+  }
+}
+@media (max-width: 600px) {
+  .raise-shout {
+    font-size: clamp(25px, 8vw, 45px);
+    text-shadow:
+      2px 2px #ab542b,
+      3px 3px #07131b;
+  }
+  .raise-caption {
+    margin-top: 8px;
+  }
+}
+@media (max-height: 500px) {
+  .raise-announcement {
+    top: 35%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .raise-announcement,
+  .raise-shout span {
+    animation: none;
+  }
+}

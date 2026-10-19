@@ -1,0 +1,411 @@
+.tutorial-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  color: #f7e5b9;
+  background: #06251e url("/art/layers/felt.png") repeat;
+  padding: clamp(14px, 2vw, 30px);
+  gap: 18px;
+  font-family: "Jersey 25", sans-serif;
+}
+.tutorial-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 2px solid #b98b43;
+  padding-bottom: 14px;
+}
+.tutorial-brand,
+.tutorial-kicker,
+.tutorial-counter {
+  color: #e4b75f;
+  letter-spacing: 0.12em;
+  font-size: 15px;
+}
+.tutorial-header h1 {
+  margin: 3px 0;
+  font-size: clamp(28px, 3vw, 42px);
+}
+.tutorial-header p {
+  margin: 0;
+  color: #d9d1bc;
+  font-size: 19px;
+}
+.tutorial-tools {
+  display: flex;
+  align-items: end;
+  gap: 18px;
+}
+.tutorial-tools label {
+  display: grid;
+  gap: 5px;
+  font-size: 16px;
+}
+.tutorial-shell button,
+.tutorial-shell select {
+  min-height: 44px;
+  padding: 9px 15px;
+  font: inherit;
+  font-size: 19px;
+  line-height: 1.1;
+  color: #ffe3a0;
+  background: #081e29;
+  border: 2px solid #a77c3b;
+  border-radius: 0;
+  box-shadow: 2px 3px #02110f;
+}
+.tutorial-shell button:hover:enabled {
+  background: #163e40;
+}
+.tutorial-shell button:focus-visible,
+.tutorial-shell select:focus-visible {
+  outline: 3px solid #ffdf8a;
+  outline-offset: 3px;
+}
+.tutorial-layout {
+  display: grid;
+  grid-template-columns: 245px minmax(0, 1fr);
+  min-height: 0;
+  gap: 24px;
+}
+.tutorial-contents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding: 4px;
+}
+.tutorial-contents button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  min-height: 62px;
+}
+.tutorial-contents button span {
+  color: #bba66c;
+  font-size: 17px;
+}
+.tutorial-contents button[aria-current="step"] {
+  background: #6b202e;
+  border-color: #ffda85;
+}
+.tutorial-page {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(18px, 3vw, 40px);
+  background: #071b23;
+  border: 12px solid transparent;
+  border-image: url("/art/profile-frame.svg") 40 / 22px stretch;
+  scrollbar-color: #c99c52 #071b23;
+}
+.tutorial-counter {
+  margin: 0 0 8px;
+}
+.tutorial-page h2 {
+  font-size: clamp(28px, 3vw, 42px);
+  margin: 0 0 10px;
+  line-height: 1.1;
+}
+.tutorial-page h2:focus {
+  outline: none;
+}
+.tutorial-page h3 {
+  font-size: 23px;
+  margin: 0 0 8px;
+  color: #ffe3a0;
+}
+.tutorial-page p {
+  font-size: 20px;
+  line-height: 1.4;
+}
+.tutorial-lead {
+  margin: 0 0 26px;
+  color: #d9d3bd;
+  max-width: 75ch;
+}
+.tutorial-blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
+  gap: 22px;
+  margin: 26px 0;
+}
+.tutorial-blocks section {
+  border-top: 2px solid #675432;
+  padding-top: 16px;
+}
+.tutorial-blocks p {
+  margin: 0;
+  color: #e1dccb;
+}
+.tutorial-score {
+  font-size: 72px;
+  color: #ffda85;
+  text-align: center;
+  padding: 16px;
+  background: #113a32;
+}
+.tutorial-score span {
+  font-size: 30px;
+  margin: 0 20px;
+}
+.tutorial-demo {
+  background: #103b32;
+  padding: 18px;
+  border: 1px solid #8d713e;
+}
+.tutorial-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+.tutorial-ranks {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lesson-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  aspect-ratio: 2 / 3;
+  padding: 6px;
+  color: #102638;
+  background: #f9e4b4;
+  border: 3px double #b9853e;
+  border-radius: 4px;
+  box-shadow: 2px 3px #031817;
+  font-size: clamp(20px, 2.6vw, 36px);
+}
+.lesson-card > span {
+  align-self: center;
+  font-size: 1.4em;
+}
+.lesson-red {
+  color: #a51f32;
+}
+.tutorial-vira {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 22px;
+  margin: 24px 0;
+}
+.tutorial-trumps {
+  text-align: center;
+}
+.tutorial-suits {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 100px));
+  justify-content: center;
+  gap: 20px;
+}
+.tutorial-suits > div {
+  display: grid;
+  gap: 8px;
+  font-size: 18px;
+}
+.tutorial-powers {
+  display: grid;
+  gap: 24px;
+}
+.tutorial-powers > section {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 22px;
+  padding: 18px;
+  background: #102e32;
+  border: 1px solid #a88148;
+}
+.tutorial-power-art {
+  aspect-ratio: 2 / 3;
+
+  image-rendering: pixelated;
+}
+.tutorial-power-cost {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffda85;
+  margin: 0;
+}
+.tutorial-power-cost svg {
+  width: 18px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.tutorial-page .tutorial-power-tip {
+  color: #c3d1c7;
+  font-size: 18px;
+}
+.tutorial-practice {
+  margin-top: 30px;
+  padding: 24px;
+  border: 2px solid #b58e4f;
+  background: #162d30;
+}
+.tutorial-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 20px 0 0;
+}
+.tutorial-choices [aria-pressed="true"] {
+  border-color: #ffe19a;
+  background: #654028;
+}
+.tutorial-explanation {
+  margin-bottom: 0;
+  padding: 14px;
+  border-left: 4px solid #e1af62;
+  background: #09222a;
+}
+.tutorial-explanation[data-correct="true"] {
+  border-color: #91d4a9;
+}
+.tutorial-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.tutorial-footer > span {
+  color: #e8c786;
+  font-size: 20px;
+}
+@media (max-width: 760px) {
+  .tutorial-shell {
+    padding: 12px;
+    gap: 10px;
+  }
+  .tutorial-header {
+    gap: 8px;
+    align-items: start;
+  }
+  .tutorial-header p,
+  .tutorial-brand {
+    display: none;
+  }
+  .tutorial-header h1 {
+    font-size: 27px;
+  }
+  .tutorial-tools {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .tutorial-tools label {
+    font-size: 14px;
+  }
+  .tutorial-shell button,
+  .tutorial-shell select {
+    font-size: 17px;
+    padding: 8px;
+  }
+  .tutorial-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 8px;
+  }
+  .tutorial-contents {
+    flex-direction: row;
+    overflow: auto;
+  }
+  .tutorial-contents button {
+    flex: 0 0 170px;
+    min-height: 52px;
+  }
+  .tutorial-page {
+    padding: 14px;
+    border-width: 8px;
+  }
+  .tutorial-page p {
+    font-size: 18px;
+  }
+  .tutorial-page h3 {
+    font-size: 21px;
+  }
+  .tutorial-ranks {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .lesson-card {
+    font-size: 24px;
+  }
+  .tutorial-scale {
+    font-size: 15px;
+  }
+  .tutorial-demo {
+    padding: 12px;
+  }
+  .tutorial-suits {
+    gap: 8px;
+  }
+  .tutorial-suits > div {
+    font-size: 15px;
+  }
+  .tutorial-powers > section {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+  }
+  .tutorial-power-art {
+    width: 110px;
+    justify-self: center;
+  }
+  .tutorial-practice {
+    padding: 14px;
+  }
+  .tutorial-footer > span {
+    font-size: 16px;
+    white-space: nowrap;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .tutorial-header {
+    padding-bottom: 4px;
+  }
+  .tutorial-header p,
+  .tutorial-brand {
+    display: none;
+  }
+  .tutorial-layout {
+    grid-template-columns: 190px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .tutorial-contents {
+    flex-direction: column;
+  }
+  .tutorial-contents button {
+    flex: none;
+  }
+  .tutorial-tools {
+    flex-direction: row;
+  }
+  .tutorial-shell {
+    gap: 6px;
+    padding: 10px;
+  }
+}
+
+.tutorial-power-art .power-card-hint {
+  display: grid;
+  font-size: 6cqw;
+}
+
+/* Keep the native picker, with a consistently inset pixel-art indicator. */
+.tutorial-shell select {
+  appearance: none;
+  padding-inline-end: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 10'%3E%3Cpath fill='%23ffe3a0' d='M0 0h2v2h2v2h2v2h2V4h2V2h2V0h2v4h-2v2h-2v2H8v2H6V8H4V6H2V4H0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px 10px;
+}

@@ -10,7 +10,8 @@
     "@truco/game-core": "workspace:*",
     "@truco/game-protocol": "workspace:*",
     "hono": "4.13.13",
-    "drizzle-orm": "0.45.4"
+    "drizzle-orm": "0.45.4",
+    "@truco/game-sim": "workspace:*"
   },
   "devDependencies": {
     "drizzle-kit": "0.31.11"

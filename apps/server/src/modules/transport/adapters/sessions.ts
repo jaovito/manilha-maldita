@@ -22,6 +22,14 @@ export function createSessions(now: () => number, maximum = 10000, ttlMs = 86400
       sessions.delete(token);
       return undefined;
     },
+    rename(token: string, nickname: string) {
+      const session = sessions.get(token);
+      if (!session || session.expiresAt <= now()) return undefined;
+
+      const renamed = { ...session, nickname };
+      sessions.set(token, renamed);
+      return renamed;
+    },
     clear() {
       sessions.clear();
     },

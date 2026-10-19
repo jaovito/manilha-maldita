@@ -1,0 +1,93 @@
+.game-shell .room-menu {
+  pointer-events: auto;
+}
+.game-shell .room-menu[open] {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  translate: -50% -50%;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100dvh - 24px);
+  padding: 0;
+  border: 12px solid transparent;
+  border-image: url("/art/lobby-frame.svg") 32 stretch;
+  background: #071d24;
+  overflow: auto;
+  z-index: 50;
+}
+.game-shell .room-menu[open] > summary {
+  width: 100%;
+  font-size: 14px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 0;
+  border-bottom: 1px solid #ad8243;
+}
+.room-menu-panel {
+  padding: clamp(12px, 3vw, 24px);
+  color: #fff0cd;
+  background:
+    linear-gradient(#071d24ee, #071d24f5),
+    url("/art/layers/felt.png") center / 256px;
+  font-family: "Jersey 25", sans-serif;
+}
+.room-menu-panel header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.room-menu-panel h2 {
+  font-size: 30px;
+  color: #ffe0a0;
+  margin: 4px 0;
+}
+.room-menu-panel .eyebrow {
+  font-size: 14px;
+  color: #d7bb79;
+}
+.room-menu-panel header button {
+  font-size: 28px;
+  padding: 2px 12px;
+  min-height: 44px;
+}
+.room-menu-rules {
+  margin: 16px 0;
+  font-size: 18px;
+  line-height: 1.4;
+}
+.room-menu-panel button {
+  font-family: inherit;
+  font-size: 20px;
+  min-height: 44px;
+}
+.room-menu-sound {
+  border-block: 1px solid #74603e;
+  padding: 12px 0;
+}
+.room-menu-sound .audio-controls {
+  position: static;
+  width: 100%;
+}
+.room-menu-sound .audio-controls > div {
+  position: static;
+  width: 100%;
+  max-width: none;
+}
+.room-menu-actions,
+.room-menu-exit {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.room-menu-exit p {
+  font-size: 18px;
+  line-height: 1.4;
+}
+.room-menu-exit h3 {
+  color: #ffe0a0;
+  font-size: 24px;
+}
+.room-menu-panel > [role="status"] {
+  font-size: 16px;
+  margin-top: 12px;
+}

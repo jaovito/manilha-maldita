@@ -1,3 +1,4 @@
+import { t } from '../i18n';
 import {
   type ClientMessage,
   type RoomView,
@@ -6,18 +7,24 @@ import {
 } from '@truco/game-protocol';
 import { backendUrl } from './backend-url';
 
-const httpErrors = new Map([
-  ['FORBIDDEN_ORIGIN', 'Este endereço não está autorizado pelo servidor. Confira a URL do jogo.'],
-  ['UNAUTHENTICATED', 'Sua sessão expirou. Recarregue a página e tente novamente.'],
-  ['ROOM_CAPACITY', 'O servidor está cheio. Tente novamente em alguns instantes.'],
-  ['SESSION_CAPACITY', 'Você atingiu o limite de salas. Saia de uma sala anterior para continuar.'],
-  ['ROOM_NOT_FOUND', 'Sala não encontrada. Confira o código ou peça um novo convite.'],
-  ['ROOM_FULL', 'Esta sala está cheia. Peça outro convite.'],
-  ['ROOM_CLOSED', 'Esta sala não aceita mais jogadores. Peça um novo convite.'],
-  ['RATE_LIMITED', 'Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.'],
-]);
-
 export async function request<T>(path: string, body?: unknown): Promise<T> {
+  const httpErrors = new Map([
+    ['SOLO_DISABLED', t('Partidas contra bot estão desativadas neste servidor.')],
+    [
+      'FORBIDDEN_ORIGIN',
+      t('Este endereço não está autorizado pelo servidor. Confira a URL do jogo.'),
+    ],
+    ['UNAUTHENTICATED', t('Sua sessão expirou. Recarregue a página e tente novamente.')],
+    ['ROOM_CAPACITY', t('O servidor está cheio. Tente novamente em alguns instantes.')],
+    [
+      'SESSION_CAPACITY',
+      t('Você atingiu o limite de salas. Saia de uma sala anterior para continuar.'),
+    ],
+    ['ROOM_NOT_FOUND', t('Sala não encontrada. Confira o código ou peça um novo convite.')],
+    ['ROOM_FULL', t('Esta sala está cheia. Peça outro convite.')],
+    ['ROOM_CLOSED', t('Esta sala não aceita mais jogadores. Peça um novo convite.')],
+    ['RATE_LIMITED', t('Muitas tentativas em pouco tempo. Aguarde um minuto e tente novamente.')],
+  ]);
   const url = backendUrl(path);
   let response: Response;
   try {
@@ -29,7 +36,7 @@ export async function request<T>(path: string, body?: unknown): Promise<T> {
     });
   } catch {
     throw new Error(
-      'Não foi possível conectar ao servidor. Confira sua conexão e tente novamente.',
+      t('Não foi possível conectar ao servidor. Confira sua conexão e tente novamente.'),
     );
   }
 
@@ -40,15 +47,15 @@ export async function request<T>(path: string, body?: unknown): Promise<T> {
         ? payload.code
         : undefined;
     if (path === '/guest' && code === 'SESSION_CAPACITY')
-      throw new Error('O servidor está cheio. Tente novamente em alguns instantes.');
+      throw new Error(t('O servidor está cheio. Tente novamente em alguns instantes.'));
     if (path === '/guest' && code === 'INVALID_MESSAGE')
       throw new Error(
-        'Use um apelido de até 24 caracteres com letras, números, espaços, _, . ou -.',
+        t('Use um apelido de até 24 caracteres com letras, números, espaços, _, . ou -.'),
       );
 
     const message = typeof code === 'string' ? httpErrors.get(code) : undefined;
 
-    throw new Error(message ?? 'Não foi possível concluir. Confira os dados e tente novamente.');
+    throw new Error(message ?? t('Não foi possível concluir. Confira os dados e tente novamente.'));
   }
 
   return response.json();
@@ -63,6 +70,7 @@ export function envelope(room: RoomView, action: Action): ClientMessage {
     'RESPOND_RAISE',
     'DECIDE_ELEVEN',
     'SURRENDER',
+    'DEV_RESET_HAND',
   ].includes(action.type);
   return {
     protocol: 1,
@@ -113,7 +121,7 @@ export function connectRoom(
       try {
         message = serverMessageSchema.parse(JSON.parse(String(event.data)));
       } catch {
-        error('Resposta inválida do servidor.');
+        error(t('Resposta inválida do servidor.'));
         return;
       }
       if (message.type === 'SNAPSHOT' && message.room.sequence > sequence) {
@@ -138,8 +146,8 @@ export function connectRoom(
           stopped = true;
         error(
           message.code === 'CONNECTION_REPLACED'
-            ? 'Esta mesa foi aberta em outra aba. Recarregue para retomar aqui.'
-            : `Ação recusada: ${message.code}`,
+            ? t('Esta mesa foi aberta em outra aba. Recarregue para retomar aqui.')
+            : t('Ação recusada: {0}', [message.code]),
         );
       }
     };
@@ -149,7 +157,7 @@ export function connectRoom(
       status(false);
       if (!stopped && attempts < 8) timer = setTimeout(open, Math.min(500 * 2 ** attempts++, 8000));
       else if (!stopped)
-        error('Reconexão interrompida. Recarregue a página para tentar novamente.');
+        error(t('Reconexão interrompida. Recarregue a página para tentar novamente.'));
     };
     socket.onerror = () => status(false);
   };
@@ -157,7 +165,7 @@ export function connectRoom(
   return {
     send(message: ClientMessage, accepted?: () => void) {
       if (socket.readyState !== WebSocket.OPEN) {
-        error('Sem conexão. Aguarde a reconexão.');
+        error(t('Sem conexão. Aguarde a reconexão.'));
         return;
       }
       if (accepted) pending.set(message.commandId, accepted);

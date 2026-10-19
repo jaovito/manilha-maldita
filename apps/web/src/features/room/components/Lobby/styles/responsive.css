@@ -131,9 +131,6 @@
   .option-caption small {
     font-size: 16px;
   }
-  .pixel-switch {
-    justify-content: flex-end;
-  }
   .room-link-panel .invite-field {
     width: 100%;
   }
@@ -184,5 +181,20 @@
   }
   .lobby-actions .button-primary {
     font-size: 23px;
+  }
+}
+
+.lobby-start-status {
+  margin: 0;
+  padding: 6px 10px;
+  background: var(--lobby-surface);
+  color: var(--lobby-muted);
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+@media (max-width: 900px) {
+  .lobby-start-status {
+    order: 3;
   }
 }

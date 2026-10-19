@@ -1,3 +1,4 @@
+import { t } from '../../../../../shared/i18n';
 import type { Action, MatchView, RoomView } from '@truco/game-protocol';
 import { disabledHint } from '../../../../../shared/DisabledTooltip';
 import { cardLabel, manilhaRanks } from '../../../utils/cards';
@@ -30,37 +31,41 @@ export function TableHand({
   const baseReason = gameplayDisabledReason(room);
   const waitingReason =
     phase.type === 'PREPARATION'
-      ? 'Conclua a preparação ou selecione Segunda Chance para trocar uma carta.'
+      ? t('Conclua a preparação ou selecione Segunda Chance para trocar uma carta.')
       : phase.type === 'RAISE_RESPONSE' || phase.type === 'ELEVEN_DECISION'
-        ? 'Aguarde a decisão da equipe antes de jogar uma carta.'
-        : 'Aguarde sua vez para jogar esta carta.';
+        ? t('Aguarde a decisão da equipe antes de jogar uma carta.')
+        : t('Aguarde sua vez para jogar esta carta.');
 
   return (
     <div className="own-hand" data-targeting={selected !== null}>
       <div className="own-player" data-active={turn && !disabled}>
         {turn && !disabled && (
           <span className="turn-badge" key={room.decisionId}>
-            Sua vez
+            {t('Sua vez')}
           </span>
         )}
         <span className={`seat-avatar avatar-${room.selfSeat}`} aria-hidden="true" />
         <strong>
-          {room.seats[room.selfSeat]?.nickname ?? 'Você'} <small>VOCÊ</small>
+          {room.seats[room.selfSeat]?.nickname ?? t('Você')} <small>{t('VOCÊ')}</small>
         </strong>
       </div>
       {selected && (
         <div className="hand-power-prompt" role="status">
           <span>
             {selected === 'boost' && !boostHasTarget
-              ? 'Impulso · Nenhuma carta válida: não aceita manilha nem 3.'
+              ? t('Impulso · Nenhuma carta válida: não aceita manilha nem 3.')
               : powerInstructions[selected]}
           </span>
-          <button type="button" aria-label="Cancelar seleção do poder" onClick={() => cancel(true)}>
+          <button
+            type="button"
+            aria-label={t('Cancelar seleção do poder')}
+            onClick={() => cancel(true)}
+          >
             ×
           </button>
         </div>
       )}
-      <section className="hand-cards" aria-label="Sua mão">
+      <section className="hand-cards" aria-label={t('Sua mão')}>
         {own?.visibility === 'visible' &&
           own.cards.map((card) => (
             <button
@@ -83,7 +88,7 @@ export function TableHand({
                     ? waitingReason
                     : selected === 'boost' &&
                         (card.rank === manilhaRanks[hand.vira.rank] || card.rank === '3')
-                      ? 'Impulso não aceita manilhas nem cartas de valor 3.'
+                      ? t('Impulso não aceita manilhas nem cartas de valor 3.')
                       : null),
               )}
               onClick={() => {

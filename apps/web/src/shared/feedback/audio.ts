@@ -1,6 +1,11 @@
 import type { AudioPreferences } from './preferences';
 
 export type Sound =
+  | 'acceptRaise'
+  | 'truco'
+  | 'six'
+  | 'nine'
+  | 'twelve'
   | 'click'
   | 'menu'
   | 'select'
@@ -15,6 +20,39 @@ export type Sound =
   | 'tie';
 type Note = readonly [frequency: number, offset: number, duration: number];
 const notes: Record<Sound, readonly Note[]> = {
+  acceptRaise: [
+    [523.25, 0, 0.1],
+    [392, 0.09, 0.12],
+    [261.63, 0.18, 0.24],
+    [130.81, 0.2, 0.3],
+  ],
+  truco: [
+    [110, 0, 0.16],
+    [220, 0.03, 0.12],
+    [165, 0.16, 0.22],
+    [330, 0.18, 0.3],
+  ],
+  six: [
+    [146.83, 0, 0.12],
+    [220, 0.09, 0.12],
+    [293.66, 0.18, 0.28],
+    [440, 0.2, 0.25],
+  ],
+  nine: [
+    [164.81, 0, 0.12],
+    [246.94, 0.08, 0.14],
+    [329.63, 0.16, 0.16],
+    [493.88, 0.28, 0.3],
+    [164.81, 0.28, 0.3],
+  ],
+  twelve: [
+    [130.81, 0, 0.18],
+    [196, 0.04, 0.18],
+    [261.63, 0.16, 0.18],
+    [392, 0.28, 0.18],
+    [523.25, 0.4, 0.34],
+    [130.81, 0.4, 0.34],
+  ],
   click: [[340, 0, 0.035]],
   menu: [
     [390, 0, 0.05],
@@ -106,10 +144,18 @@ export class GameAudio {
         const oscillator = context.createOscillator();
         const gain = context.createGain();
         const start = context.currentTime + offset;
-        oscillator.type = sound === 'deal' || sound === 'select' ? 'triangle' : 'sine';
+        const shout = ['truco', 'six', 'nine', 'twelve', 'acceptRaise'].includes(sound);
+        oscillator.type = shout
+          ? 'sawtooth'
+          : sound === 'deal' || sound === 'select'
+            ? 'triangle'
+            : 'sine';
         oscillator.frequency.setValueAtTime(frequency, start);
         gain.gain.setValueAtTime(0, start);
-        gain.gain.linearRampToValueAtTime(Math.min(preferences.volume, 1) * 0.13, start + 0.005);
+        gain.gain.linearRampToValueAtTime(
+          Math.min(preferences.volume, 1) * (shout ? 0.055 : 0.13),
+          start + 0.005,
+        );
         gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
         oscillator.connect(gain);
         gain.connect(context.destination);

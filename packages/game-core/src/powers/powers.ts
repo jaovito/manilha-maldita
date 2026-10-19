@@ -4,16 +4,19 @@ import type { MatchState } from '../match/types';
 export const POWER_IDS = ['spy', 'exchange', 'boost', 'mask'] as const;
 export type Power = (typeof POWER_IDS)[number];
 export type TurnPower = 'boost' | 'mask';
+
 export type PreparationIntent =
   | Readonly<{ type: 'pass' }>
   | Readonly<{ type: 'spy'; target: number }>
   | Readonly<{ type: 'exchange'; card: Card }>;
+
 export type PowerSetup = Readonly<{
   preset: 'casual' | 'competitive';
   draws: readonly number[];
   flips: readonly number[];
   spies: readonly number[];
 }>;
+
 export type Activation = Readonly<{ seat: number; power: Power; target: number }>;
 export type Powers = Readonly<{
   preset: PowerSetup['preset'];
@@ -25,6 +28,7 @@ export type Powers = Readonly<{
   intel: readonly (Readonly<{ target: number; card: Card }> | null)[];
   activations: readonly Activation[];
 }>;
+
 export const POWER_COST: Readonly<Record<Power, number>> = {
   spy: 1,
   exchange: 2,

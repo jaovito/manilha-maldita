@@ -1,0 +1,157 @@
+@media (min-width: 901px) {
+  main.lobby-shell {
+    padding-top: 16px;
+    padding-bottom: 12px;
+  }
+  .lobby-left-column,
+  .lobby-right-column {
+    gap: 10px;
+  }
+  .lobby-shell .lobby-heading {
+    margin-top: 12px;
+    min-height: 90px;
+  }
+  .lobby-right-column {
+    padding-top: 16px;
+  }
+  .lobby-shell .lobby-players-column {
+    flex: none;
+  }
+  .lobby-option-row {
+    min-height: 60px;
+    padding: 6px 0;
+  }
+  .lobby-powers {
+    min-height: 130px;
+    grid-template-columns: 130px 1fr;
+    gap: 8px;
+  }
+  .power-fan {
+    height: 100px;
+    transform: scale(0.65);
+    transform-origin: left center;
+  }
+  .lobby-powers p {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+  .clock-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .clock-fields label {
+    font-size: 16px;
+  }
+  .lobby-team .avatar {
+    width: 44px;
+    height: 44px;
+  }
+  .lobby-team .seat-grid {
+    margin-top: 6px;
+  }
+  .lobby-team .seat-actions,
+  .lobby-team .seat-actions > button {
+    min-height: 44px;
+  }
+  .lobby-team .seat-status {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 901px) {
+  .team-heading {
+    padding: 3px 0;
+  }
+  .team-heading h4 {
+    font-size: 23px;
+  }
+  .lobby-team .lobby-seat {
+    padding: 6px;
+    gap: 3px;
+  }
+  .lobby-team .seat-badges {
+    margin-top: 3px;
+  }
+  .lobby-team .seat-status {
+    margin-top: 3px;
+  }
+  .lobby-team {
+    padding-bottom: 4px;
+  }
+  .lobby-players-column > h3 {
+    font-size: 25px;
+    padding-bottom: 5px;
+    margin-bottom: 6px;
+  }
+}
+
+@media (min-width: 901px) {
+  .pixel-options {
+    min-width: 200px;
+  }
+  .lobby-powers {
+    position: relative;
+  }
+  .power-catalog[open] {
+    position: absolute;
+    z-index: 5;
+    bottom: 4px;
+    left: 140px;
+    right: 10px;
+    max-height: min(480px, 75dvh);
+    border: 1px solid var(--gold);
+    box-shadow: 0 8px 20px #0008;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 700px) {
+  .lobby-shell .lobby-heading {
+    margin-top: 0;
+    min-height: 74px;
+  }
+  .lobby-heading h2 {
+    font-size: 32px;
+  }
+  .lobby-team .avatar {
+    width: 36px;
+    height: 36px;
+  }
+  .lobby-team .lobby-seat {
+    padding: 4px;
+    gap: 2px;
+  }
+  .lobby-powers {
+    min-height: 116px;
+  }
+  .power-fan {
+    height: 86px;
+    transform: scale(0.6);
+  }
+  .lobby-actions > button {
+    min-height: 56px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 700px) {
+  main.lobby-shell {
+    padding-bottom: 6px;
+  }
+}
+
+@media (min-width: 901px) and (max-height: 700px) {
+  .lobby-right-column {
+    padding-top: 0;
+  }
+  .lobby-team .avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .lobby-team .lobby-seat {
+    gap: 0;
+  }
+  .team-heading h4 {
+    font-size: 20px;
+  }
+}

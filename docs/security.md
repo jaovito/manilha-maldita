@@ -61,3 +61,11 @@ A face revelada por Espião é renderizada somente a partir de `powers.intel` da
 `VITE_BACKEND_URL` é configuração pública de build, nunca um segredo ou token. Aceita somente uma origem HTTP(S), sem credenciais, caminho, query ou fragmento. O cliente mantém cookies HttpOnly e envia requisições com credentials=include; CORS libera leitura credenciada somente para origens exatas de `ALLOWED_ORIGINS`, sem wildcard, inclusive respostas de erro. Preflights permitem apenas GET/POST e Content-Type e não criam sessão. A validação de origem das mutações e do handshake WS continua obrigatória; middleware CORS não altera os headers de upgrade.
 
 SameSite=Strict permanece habilitado: front e backend acessados diretamente precisam compartilhar o mesmo site e esquema. Hospedagem entre sites diferentes exige proxy `/api` na origem do frontend, sem flexibilizar o cookie. A variável não comprova TLS, certificados ou configuração de hospedagem; nenhuma publicação foi feita nesta alteração.
+
+A edição de apelido por POST `/api/guest` reutiliza a credencial atual, após a mesma validação de origem e schema. Ela não altera ID, token, expiração, assentos existentes nem permissões; só o apelido em memória usado nas próximas entradas. Não acrescenta persistência de dados pessoais.
+
+`truco.locale` guarda apenas a preferência local de idioma (`pt-BR` ou `en`) do tutorial. Não é enviado ao servidor nem contém dados pessoais, cartas ou credenciais. Permanece até ser substituído ou os dados do site serem apagados; sua finalidade é reabrir o guia no idioma escolhido. Armazenamento bloqueado é tolerado. O tutorial não cria sessões nem salas.
+
+## Ferramentas de teste e bot solo
+
+Conforme [ADR 009](adr/009-solo-training-and-development-tools.md), a habilitação do bot é independente do ambiente. Ferramentas de edição exigem servidor explicitamente development, flag própria, sala solo e dono autenticado. Builds de produção não incluem o painel; requests forjados continuam sujeitos ao bloqueio autoritativo. Nunca use flags VITE, query strings, localStorage ou dados do cliente como autorização. O bot recebe somente sua projeção. Identificadores internos do assento do bot não são publicados. Salas sem humanos conectados expiram; bot não impede limpeza.

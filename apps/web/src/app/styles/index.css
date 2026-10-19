@@ -23,6 +23,7 @@
 @import "../../features/room/components/Lobby/Settings/styles.css";
 @import "../../features/room/components/Lobby/Seats/styles.css";
 @import "../../features/room/components/Lobby/styles/responsive.css";
+@import "../../features/room/components/Lobby/styles/desktop.css";
 @import "../../shared/feedback/styles.css";
 @import "../../shared/Candlelight/styles.css";
 @import "../../features/room/components/Table/Atmosphere/styles.css";
@@ -31,3 +32,20 @@
 @import "../../features/room/components/Table/Feedback/results.css";
 @import "../../features/menu/components/Welcome/styles.css";
 @import "../../shared/DisabledTooltip/styles.css";
+
+@import "../../features/room/components/Table/Powers/Card/ornaments.css";
+@import "../../shared/MenuScenery/styles.css";
+@import "../../shared/MenuScenery/layout.css";
+@import "../../shared/MenuScenery/composition.css";
+@import "../../shared/MenuScenery/responsive.css";
+
+@import "../../shared/MenuScenery/candle.css";
+
+@import "../../features/room/components/RoomMenu/styles.css";
+
+@import "../../shared/EnergyIcon/styles.css";
+
+@import "../../features/menu/components/Profile/restored.css";
+@import "../../features/room/components/Table/Feedback/MatchResult/sequence.css";
+@import "../../features/menu/components/Tutorial/styles.css";
+@import "../../features/room/components/Table/Feedback/RaiseAnnouncement/styles.css";

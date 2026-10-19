@@ -1,0 +1,146 @@
+.entry-shell .guest-profile {
+  border: 14px solid transparent;
+  border-image: url("/art/profile-frame.svg") 40 / 32px / 3px stretch;
+  background: #04151e;
+  box-shadow: 4px 6px #010b0dcc;
+}
+.entry-shell .profile-info label::before {
+  display: block;
+  top: 3px;
+  font-size: clamp(16px, 1.6vw, 26px);
+}
+.entry-shell .profile-info input {
+  padding-left: 28px;
+  padding-right: 28px;
+  font-size: clamp(22px, 2.2vw, 36px);
+}
+.profile-edit {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 28px;
+  height: 32px;
+  min-height: 0;
+  padding: 3px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #f2bf63;
+}
+.profile-edit svg {
+  width: 100%;
+  height: 100%;
+  shape-rendering: crispEdges;
+}
+.entry-shell .guest-profile .avatar {
+  border: 4px solid #f1be57;
+  outline: 2px solid #6c4a20;
+  box-shadow:
+    inset 0 0 0 2px #07121b,
+    0 0 0 4px #06121a;
+}
+@media (max-width: 700px) and (orientation: portrait) {
+  .entry-shell .guest-profile {
+    padding: 6px 10px;
+    border-width: 12px;
+  }
+  .entry-shell .profile-info input {
+    font-size: 23px;
+    padding-left: 22px;
+  }
+  .entry-shell .profile-info label::before {
+    font-size: 16px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .entry-shell .profile-info input {
+    font-size: 20px;
+    padding-left: 20px;
+  }
+  .entry-shell .profile-info label::before {
+    font-size: 14px;
+  }
+  .profile-edit {
+    width: 24px;
+  }
+}
+
+/* Content owns its height: the currency row must never cross the guest caption. */
+.entry-shell .profile-info {
+  height: auto;
+}
+.entry-shell .profile-info label {
+  height: 34px;
+}
+.entry-shell .profile-info input {
+  font-size: clamp(22px, 1.8vw, 30px);
+}
+.entry-shell .profile-level {
+  margin-top: 5px;
+  font-size: clamp(14px, 1.2vw, 20px);
+}
+.entry-shell .profile-level small,
+.entry-shell .profile-economy small {
+  flex-shrink: 0;
+}
+.entry-shell .guest-caption {
+  margin: 4px 0 0;
+}
+.entry-shell .profile-economy {
+  position: relative;
+  inset: auto;
+  margin-top: 8px;
+  padding: 8px 0 0;
+  gap: 6px;
+  min-height: 38px;
+}
+.entry-shell .profile-economy::before {
+  position: static;
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.entry-shell .profile-economy button {
+  position: static;
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  font-size: 24px;
+}
+@media (min-width: 701px) and (min-height: 501px) {
+  .entry-shell .guest-profile {
+    width: clamp(270px, 28vw, 510px);
+    height: auto;
+    padding: 10px;
+    gap: 12px;
+    border-width: 12px;
+  }
+  .entry-shell .guest-profile .avatar {
+    width: clamp(54px, 6.5vw, 104px);
+    height: clamp(54px, 6.5vw, 104px);
+  }
+}
+@media (max-width: 700px) and (orientation: portrait) {
+  .entry-shell .guest-profile {
+    height: 92px;
+    gap: 10px;
+  }
+  .entry-shell .profile-info input {
+    font-size: 22px;
+  }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .entry-shell .guest-profile {
+    height: auto;
+    gap: 6px;
+  }
+  .entry-shell .profile-info input {
+    font-size: 20px;
+  }
+  .entry-shell .profile-level {
+    flex-wrap: wrap;
+    gap: 2px 6px;
+    font-size: 12px;
+  }
+}

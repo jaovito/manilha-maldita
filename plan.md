@@ -1,4 +1,4 @@
-# Plano de desenvolvimento — Truco Caótico
+# Plano de desenvolvimento — Manilha Maldita
 
 ## Estado atual
 
@@ -317,3 +317,121 @@ A face observada deixa o assento quando uma jogada autorizada daquele alvo revel
 ## Verificação para publicação no GitHub
 
 Antes do envio autorizado, `bun run check` passou no workspace e em uma cópia limpa exportada do índice Git, com instalação por `bun install --frozen-lockfile`. A cópia limpa aprovou lint/fronteiras, formatação, tipos, **216 testes**, cobertura mínima por arquivo e inventário de **60 fontes executáveis**, além do build. `bun run test:e2e` nessa cópia aprovou **12 E2E Chromium desktop/mobile** com os comandos padrão, sem depender dos arquivos ignorados do workspace. Permanecem avisos de tamanho de arquivos, sem erros de lint. A revisão dos arquivos preparados não encontrou ambientes reais ou correspondências nos padrões de credenciais verificados. Configuração local do editor não faz parte desta entrega. Resultados remotos de CI e deploy não são presumidos por essas verificações locais.
+
+## M4 — Manilha Maldita e cenário em camadas (18/10/2026)
+
+Renomeação visual autorizada para **Manilha Maldita**. Logo, feltro, quatro cantos, quatro segmentos do símbolo, vela, cuia, moedas, baralho e duas cartas decorativas foram gerados com ImageGen integrado usando o background existente como referência direta. As primeiras gerações sem essa referência foram descartadas da integração. Os originais anteriores permanecem preservados. Assets finais e prompts em `apps/web/public/art/layers/README.md`.
+
+Menu/lobby agora compõem camadas com proporções preservadas e âncoras independentes; feltro repete nos dois eixos. Perfil e marca não estão mais presos ao fundo. Cartas decorativas flutuam via CSS e respeitam movimento reduzido. No retrato, a navegação prioriza espaço de toque e pode rolar em telas baixas. Espião, Segunda Chance, Impulso e Máscara receberam ilustrações conforme a referência anexada, molduras com cores próprias, faixa de pergaminho, custo no alto à esquerda e selo. Texto, custo e estado continuam em HTML; mecânica, privacidade e comandos não mudaram. Áudio próprio existente reaproveitado; nenhum novo som ou autoplay. O cenário da partida permanece o anterior, com logo nova em tamanho de HUD.
+
+Inspeção com `playwright-cli` encontrou e corrigiu recortes de props, corte de texto em 320 px e logo excessiva na mesa. Menu conferido em 1440×900, 390×844, 320×568 e 844×390; lobby em desktop/mobile; carta real de poder em desktop e celulares. A primeira rodada de regressão também exigiu atualizar o contrato geométrico do menu para a coluna limitada e fechar normalmente a dica de contra-aumento antes de Aceitar. Nenhum clique forçado nem enfraquecimento das regras.
+
+Verificações gerais: lint/fronteiras, formatação, tipos e build aprovados; cobertura final com **279 testes** (154 servidor/core/tooling/integração, 115 DOM, 10 PostgreSQL), **80 fontes** com pelo menos 80% por arquivo. Permanecem apenas os avisos anteriores de tamanho de testes e módulos. Sem deploy, CI remoto, Safari/iOS real ou avaliação auditiva humana. M4 continua aberto para playtests e revisão ampla de acessibilidade.
+
+E2E: **14 casos aprovados em rodadas**, incluindo carregamento dos assets, responsividade/movimento reduzido, primeiro acesso/convites e partidas completas 1v1/2v2 em Chromium desktop/mobile, com reconexão e revanche. A rodada final mobile passou após reduzir a borda das miniaturas para títulos longos e limitar a logo a 60 px em 320 px. Configuração temporária de E2E removida após a execução; servidor original preservado, com recarga de configuração para invalidar um erro de resolução de CSS que havia ficado em cache.
+
+## M4 — Carta vencedora e aviso de turno compacto (18/10/2026)
+
+A carta vencedora confirmada cresce até 20%, treme por 900 ms e mantém destaque até acabar a pausa autoritativa de 1,8 s. O som de resultado existente acompanha o mesmo snapshot; não há duplicação de áudio nem alteração de timer/regras. Empate não destaca vencedor; movimento reduzido mantém contorno/brilho estáticos. Resultado movido para o painel superior, deixando as cartas visíveis. “Sua vez” tem largura/título cerca de um terço menores, preservando a leitura da legenda.
+
+Validação: `bun run lint`, `bun run format:check`, `bun run typecheck`, `VITE_BACKEND_URL='' bun run build` e `VITE_BACKEND_URL='' bun run test:coverage` passaram: 279 testes, 80 fontes medidas com mínimo de 80% por arquivo. Permanecem avisos anteriores de tamanho. E2E de feedback aprovado em Chromium desktop/mobile (2 casos), com resultado acima das cartas, animação/movimento reduzido e sequência de próximo turno. `playwright-cli` capturou e permitiu inspecionar visualmente uma vaza real em 1280×720 e 390×844, incluindo a carta durante o efeito e a faixa menor. Scripts auxiliares de captura precisaram sincronizar entrada/pronto e cada jogada; a captura final concluiu. Áudio validado por testes do observador/sintetizador, sem avaliação auditiva humana. Sem deploy ou teste em Safari/iOS real.
+
+## M4 — Chama da vela no menu (18/10/2026)
+
+Animação CSS usando a própria arte: corpo fixo, chama recortada ancorada no pavio e halo discreto com ciclo independente. Pixel art preservada, proporção original 477:512, sem GIF, dependência ou loop JavaScript. Movimento reduzido mostra o PNG original estático. O cenário da partida mantém seu efeito de chama existente.
+
+`bun run test:coverage` passou com 279 testes e 80 fontes medidas no mínimo por arquivo; lint, formatação, tipos e build passaram. E2E de menu passou nos dois projetos Chromium, cobrindo quatro viewports e movimento reduzido. A verificação preexistente de carregamento dos assets foi corrigida para usar callback real em `evaluateAll`, pois a expressão em string retornava undefined. `playwright-cli` permitiu inspecionar quatro quadros da chama e o menu em 1440×900 e 390×844, além do modo estático. Sem deploy ou validação em Safari/iOS real.
+
+## M4 — Recuperar riqueza das bordas anteriores (18/10/2026)
+
+Quatro novos cantos diagonais de madeira/tecido foram gerados com ImageGen integrado a partir da captura anterior enviada pelo usuário. PNGs transparentes, procedência e prompt em `apps/web/public/art/layers/README.md`; originais preservados. Distribuição de baralhos, moedas, cuia e cartas refeita com camadas independentes, símbolo ampliado e molduras do perfil/rodapé recuperadas. Logo Manilha Maldita e vela animada mantidas. Feltro continua repetível e cada canto tem âncora própria.
+
+Verificações: cobertura com 279 testes, 80 fontes e mínimo de 80% por arquivo; lint, tipos, formatação e build passaram. Quatro E2E de bootstrap/menu aprovados em Chromium desktop/mobile, incluindo carregamento dos novos assets, navegação, movimento reduzido e cinco viewports (1920×1080, 1440×900, 390×844, 320×568, 844×390). `playwright-cli` usado para capturas e inspeção visual nesses tamanhos; reposicionamento do baralho em paisagem evita cobrir a vela. Sem deploy, CI remoto ou Safari/iOS real.
+
+## M4 — Corrigir emenda da chama (18/10/2026)
+
+O usuário identificou um corte na vela animada. Removidos os dois fragmentos com clip-path; a imagem original agora é renderizada uma única vez. Filtro SVG local com intensidade gradual desloca somente o topo da chama, chegando a zero acima do pavio, sem abrir lacunas na cera. IDs do filtro são próprios por instância; animação declarativa, sem timers ou loop React. Movimento reduzido desativa o filtro e mantém a imagem intacta.
+
+Cobertura passou com 279 testes e 80 fontes no mínimo por arquivo; lint, tipos e build aprovados. Inspeção com playwright-cli em quatro instantes da animação e desktop/mobile confirmou ausência da emenda visível; modo estático também capturado. Sem deploy ou verificação em Safari/iOS real.
+
+Regressão E2E final: 2 casos de menu aprovados em Chromium desktop/mobile, incluindo imagem única, ausência de recortes e filtro desativado com movimento reduzido. Formatação e diff sem erros.
+
+## M4 — Restaurar movimento perceptível da chama (18/10/2026)
+
+O usuário apontou que a correção anterior eliminou visualmente a animação. O filtro passou a operar dentro de SVG com coordenadas fixas da arte original, máscara feita com primitivas nativas e ciclo de 1,6 s com amplitude perceptível. A ponta é recomposta sobre a fonte preservada para manter cera/pavio estáveis e evitar emendas. Movimento reduzido segue desativando o efeito.
+
+A validação agora inclui comparação real dos pixels entre quadros com o halo pausado, exigindo ponta diferente e cera idêntica. Emulação mobile exigiu capturas na resolução CSS para eliminar diferenças de reamostragem por DPR. Inspeção playwright-cli de quadros desktop e captura mobile/reduced-motion realizada. Sem deploy ou validação Safari/iOS real.
+
+Verificação final: 279 testes de cobertura e 80 fontes no mínimo por arquivo, 4 E2E Chromium desktop/mobile (incluindo comparação de pixels), lint, tipos, formatação e build aprovados.
+
+## M4 — Cartas de poder fiéis à referência (18/10/2026)
+
+Substituída a composição genérica por quatro artes completas 2:3 geradas a partir da imagem enviada: molduras ornamentais nas cores azul/verde/vermelho/roxo, faixa de título, cápsula de energia, pergaminho e selos correspondentes. Nome, custo e efeito continuam HTML acessível; disponibilidade passou para fora da carta. Ajustados textos curtos e alturas de revelação no dock. A carta decorativa do menu usa a mesma arte.
+
+Inspeção com playwright-cli das quatro artes ampliadas e de partida em desktop/celular realizada. Cobertura: 279 testes aprovados e 80 arquivos executáveis atendendo ao mínimo individual; lint (dois avisos existentes de tamanho), tipos, formatação e build aprovados. Regressão de proporção 2:3 adicionada à verificação multiplayer. Sem deploy ou validação em Safari/iOS real.
+
+E2E final: 8 casos aprovados em Chromium desktop/mobile, incluindo partidas completas 1v1/2v2, reconexão, revanche, composição de menu e animação da chama.
+
+## M4 — Lobby compacto sem opções fixas (18/10/2026)
+
+Removidos o bloco “Convide seus amigos para entrar na sala!” e os switches imutáveis de privacidade/poderes. Link copiável preservado; condição de início resumida junto às ações, com descrição acessível e mesmos bloqueios. Mantidos cards de equipes e molduras. Desktop recebeu espaçamentos e avatares menores, tempos em três colunas e catálogo sobreposto com rolagem própria; mobile mantém fluxo empilhado.
+
+Inspeção playwright-cli desktop/mobile realizada. Novo E2E de lobby passou nos dois perfis Chromium, cobrindo 1v1/2v2 em 1280×640, 1280×720, 1024×768, 1440×900 e 1920×1080, inclusive tempos/catálogo abertos e ações mobile. Cobertura aprovada: 279 testes, 80 fontes no mínimo por arquivo. Lint, tipos, formatação e build aprovados. Sem deploy; Safari/iOS real não verificado.
+
+Verificação final em execução isolada: mais 4 E2E de partidas 1v1/2v2 aprovados em Chromium desktop/mobile, incluindo pronto, início, reconexão e revanche (6 E2E aprovados no total).
+
+## M4 — Distinguir Máscara de carta coberta (18/10/2026)
+
+Máscara ganhou verso roxo com ícone pixelado e “Vale força”; coberta usa ícone riscado e “Sem força”. Descrição acessível explica força preservada/perda para cartas abertas, sem mudar regras. Contorno roxo identifica também a face autorizada da Máscara. Mãos adversárias continuam usando verso genérico, sem revelar poderes ou identidades.
+
+Inspeção playwright-cli dos estados em desktop/mobile; regressão DOM verifica distinção, ausência de identidade oculta e face autorizada. Cobertura aprovada: 280 testes, 80 fontes atendendo ao mínimo por arquivo. Dois E2E de apresentação aprovados em Chromium desktop/mobile; lint, tipos, formatação e build aprovados. Sem deploy.
+
+## M4 — Apelido editável e menu da partida (18/10/2026)
+
+Corrigido POST de convidado que ignorava novo apelido em sessões existentes. Atualização validada mantém credencial, ID e expiração, sem mudar nomes de assentos já ocupados. Menu da partida ganhou painel com fundo opaco/feltro, moldura dourada, som, fechar/voltar e saída com confirmação de desistência; o resultado mantém saída reconhecida pelo servidor. Desconectado permite fechar/ler o menu, mas bloqueia desistência.
+
+Inspeção playwright-cli em partida desktop/mobile realizada. 282 testes de cobertura aprovados, 81 fontes atendendo ao mínimo individual; 6 E2E Chromium desktop/mobile aprovados para apelido, reload, apresentação, foco e desistência. Lint, tipos, formatação e build aprovados. Backend de teste isolado; sem deploy.
+
+## M4 — Raio de energia conforme referência (18/10/2026)
+
+Substituído o caractere tipográfico por SVG pixelado dourado, com luz e contorno, compartilhado entre custo dos poderes, reserva de energia e decoração do menu. Cápsula, números e rótulos acessíveis preservados. Conferência playwright-cli desktop/mobile em três tamanhos de carta. Cobertura: 282 testes e 82 fontes aprovados; lint, tipos, formatação e build aprovados. Sem deploy.
+
+- Perfil do menu revisado conforme referência anterior: moldura ornamentada em nove partes, coroa e botão de editar apelido; novo atlas de quatro avatares com pixels maiores compartilhado pelo menu, lobby e mesa. Sem mudança de progressão ou regras.
+
+- Espião revisado a partir da referência do personagem encapuzado: chapéu, cartas na mão, medalhão de olho entre arte e pergaminho e custo à direita. A mesma face decorativa é usada no menu e na carta da mesa; efeito e custo permanecem definidos pelo catálogo.
+
+- Encerramento por última jogada: 1,8 s de mesa visível com destaque autoritativo da carta vencedora; depois 5 s de apresentação com confetes/explosão pixelada conforme perspectiva; diálogo de revanche por último. Mantidos reconexão sem repetição, movimento reduzido e comandos existentes.
+
+- Reforçado E2E de edição do nick pelo lápis do perfil: nome antigo confirmado, criação imediata da sala após editar e novo nome confirmado no lobby, reload e retorno ao menu; cenário executado em desktop/mobile.
+
+- Como jogar habilitado: tutorial guiado em sete etapas com demonstração interativa de manilhas, prática com feedback, poderes completos e revisão das convenções da casa. Catálogos tipados pt-BR/en e seletor persistente, posteriormente integrado ao idioma global do jogo. Reutiliza identidade/arte existente, sem mudar gameplay.
+
+- Pedidos de aumento recebem gritos em pixel art por 1,8 s e quatro efeitos retrô sintetizados originais. Contra-aumento usa SEEEIS!/NOOVE!/DOOOZE!! conforme próximo valor; limite 12 preservado. Eventos confirmados, sem replay em SYNC/reconexão; movimento reduzido e mute respeitados.
+
+Incremento de aceite: DEEESCE!! animado e efeito sonoro descendente após confirmação autoritativa, com valor aceito explícito, textos pt-BR/en e regressões DOM/multiplayer.
+
+Perfil do menu compactado: largura desktop de 32vw para 28vw (teto 510px), avatar menor e altura guiada pelo conteúdo. Moedas e botão ficam no fluxo abaixo da divisória, sem cruzar a legenda de convidado. Validado visualmente em desktop, retrato 320/390px e paisagem; regressão geométrica no E2E do menu.
+
+## Treino solo e ferramentas dev — 19/10/2026
+
+Escopo adicional autorizado pelo usuário: Jogar inicia 1v1 contra bot conservador com visão limitada, independente de development. Flags de backend ENABLE_SOLO e ENABLE_DEV_TOOLS separadas; dev:server habilita ambas por padrão, start:server mantém ambas fechadas. Ferramentas exigem NODE_ENV=development, sala solo e dono; painel excluído do build de produção. ADR 009 registra a decisão.
+
+Menu Sala permite montar três cartas distintas, escolher Espião/Segunda Chance/Impulso/Máscara e energia 0–3, aplicar cenário reiniciando a mão ou redistribuir aleatoriamente. Preserva placar e 40 cartas únicas; limpa contexto anterior, respeita mãos de onze/11×11, idempotência e revisões. Bot compartilha fila, core e timers com jogadores; pausa sem humano e não impede expiração. Revanche solo automática e retorno ao menu sem lobby fantasma.
+
+Verificação: cobertura completa passou com 92 fontes executáveis e mínimo individual de 80%; lint, tipos e formatação passaram. Quatro E2Es solo passaram em desktop/mobile, separando Vite dev e build de produção; integração real confirmou recusa de ferramentas em production/test apesar da flag ligada. Capturas playwright-cli desktop/mobile inspecionadas, incluindo botões no painel com rolagem. Build de produção inspecionado sem textos/código do painel dev. Sem deploy ou Safari/iOS real; bot conservador de treino, sem promessa de dificuldade competitiva.
+
+Seletor do tutorial corrigido: seta pixelada com margem interna de 12px e reserva de 40px para não encostar no texto/borda, mantendo o seletor nativo. Conferência visual playwright-cli desktop/mobile; quatro E2Es do tutorial, cobertura (92 fontes), lint, formatação e build passaram.
+
+- Idioma global: menu Configurações habilitado com português/inglês persistidos, seletor disponível no lobby/partida e tutorial integrado à mesma preferência. Catálogos cobrem textos de interface, acessibilidade, poderes, resultados, áudio e transporte; troca preserva a sessão e as seleções. Regressões DOM e E2E dedicadas em `playwright.i18n.config.ts`.
+
+Validação do idioma global: `bun run test:coverage` aprovado (312 testes; 97 arquivos executáveis medidos, todos acima do mínimo); `bun run test:e2e --config=playwright.i18n.config.ts` com 8/8 cenários desktop/mobile aprovados; tipos, lint, formatação e build aprovados. Lint mantém 11 avisos existentes. Inspeção visual com playwright-cli em 1440×900 e 390×844 cobriu configurações, menu e lobby; ajustada a posição do status de conexão. Sem deploy.
+
+- Organização E2E: cenários reunidos em `tests/e2e/` por perfil, menu, lobby, partida, tutorial, configurações, solo, acessibilidade e infraestrutura; helpers em `support/`. Imports e seletores das três configurações Playwright atualizados, com todos os arquivos de configuração incluídos no typecheck. Inventários antes/depois preservados: 36 cenários padrão, 4 solo e 8 idioma/tutorial (com sobreposição intencional do tutorial).
+
+Validação da reorganização: inventários Playwright comparados antes/depois sem perder cenários; 8 E2E de idioma/tutorial e 4 de solo aprovados nos novos caminhos. Typecheck, lint (11 avisos existentes), formatação e build aprovados; cobertura com 312 testes e 97 fontes medidas aprovada. A suíte padrão de 36 cenários teve descoberta/imports verificados por `--list`, sem reexecutar seus fluxos completos nesta alteração estrutural.
+
+- Organização de `rooms/application`: subpastas `state`, `lobby`, `match`, `solo` e `messaging`, com testes junto das responsabilidades exercitadas. Criação de sala e despacho de comandos extraídos do serviço; contratos separados de presença/aleatoriedade; validação de capacidade compartilhada entre criação e entrada. Coordenação, fila, idempotência e autoridade do servidor preservadas. Revisados espaçamento entre blocos, loops compactados, imports de tipos e seleção de dependências/tempos de decisão. Estrutura documentada em `docs/architecture.md`.
+- Validação da reorganização do backend: `bun run test:coverage` aprovado (**312 testes**, **100 arquivos executáveis** medidos acima do mínimo por arquivo), incluindo transporte real HTTP/WS e PostgreSQL local. `bun run typecheck`, `bun run lint`, `bun run format:check`, `bun run build` e `git diff --check` aprovados. Permanecem os 11 avisos de lint anteriores. E2E de navegador não reexecutado nesta refatoração interna; sem deploy.
+
+- Validação antes do commit (19/10/2026): `bun run check` aprovado no workspace e em cópia limpa exportada do índice, com `bun install --frozen-lockfile`: lint, formato, tipos, 312 testes, cobertura mínima por arquivo (100 fontes executáveis) e build. Corrigida a expectativa antiga do E2E de origem local, que ainda procurava os switches fixos removidos do lobby.
+- E2E: **36 cenários padrão + 4 solo + 8 idioma/tutorial aprovados**, em Chromium desktop/mobile. A suíte padrão foi executada por área, com um worker e backend novo por lote, em portas isoladas 3002/4273: a execução concorrente atingiu o rate limit compartilhado por IP. A proteção permaneceu ativa. Também foi descartada uma execução inicial cujo build foi substituído pelo check concorrente; as execuções válidas foram sequenciais. Configuração temporária removida, build padrão restaurado e servidor de desenvolvimento existente preservado. Configuração local `.zed/settings.json` excluída do commit; sem deploy.

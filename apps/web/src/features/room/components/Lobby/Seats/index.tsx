@@ -1,3 +1,4 @@
+import { t } from '../../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 import type { Action } from '../../../../../shared/transport/client';
 
@@ -10,11 +11,13 @@ export function LobbySeats({ room, send }: { room: RoomView; send: (action: Acti
         <section
           key={parity}
           className={`lobby-team ${parity === ownParity ? 'team-own' : 'team-enemy'}`}
-          aria-label={parity === ownParity ? 'Sua equipe' : 'Adversários'}
+          aria-label={parity === ownParity ? t('Sua equipe') : t('Adversários')}
         >
           <div className="team-heading">
-            <h4>{parity === ownParity ? 'Sua equipe' : 'Adversários'}</h4>
-            <span>Equipe {parity === 0 ? 'A' : 'B'}</span>
+            <h4>{parity === ownParity ? t('Sua equipe') : t('Adversários')}</h4>
+            <span>
+              {t('Equipe')} {parity === 0 ? 'A' : 'B'}
+            </span>
           </div>
           <ol className="seat-grid">
             {Array.from({ length: room.seats.length }, (_, seat) => seat)
@@ -35,22 +38,24 @@ export function LobbySeats({ room, send }: { room: RoomView; send: (action: Acti
                     </div>
                     <div className="seat-info">
                       <strong>
-                        Equipe {seat % 2 === 0 ? 'A' : 'B'} · Assento {seat + 1}
+                        {t('Equipe')} {seat % 2 === 0 ? 'A' : 'B'} {t('· Assento')} {seat + 1}
                       </strong>
                       <p className="seat-status">
                         {player
-                          ? `${player.nickname} · ${player.connected ? 'conectado' : 'desconectado'} · ${player.ready ? 'pronto' : 'aguardando'}`
-                          : 'Livre'}
+                          ? `${player.nickname} · ${player.connected ? t('conectado') : t('desconectado')} · ${player.ready ? t('pronto') : t('aguardando')}`
+                          : t('Livre')}
                       </p>
                       {player && (
                         <div className="seat-badges">
                           {seat === room.selfSeat && (
-                            <span className="seat-badge self-badge">Você</span>
+                            <span className="seat-badge self-badge">{t('Você')}</span>
                           )}
                           {seat === room.hostSeat && (
-                            <span className="seat-badge host-badge">Anfitrião</span>
+                            <span className="seat-badge host-badge">{t('Anfitrião')}</span>
                           )}
-                          {player.ready && <span className="seat-badge ready-badge">Pronto</span>}
+                          {player.ready && (
+                            <span className="seat-badge ready-badge">{t('Pronto')}</span>
+                          )}
                         </div>
                       )}
                     </div>
@@ -62,12 +67,12 @@ export function LobbySeats({ room, send }: { room: RoomView; send: (action: Acti
                           aria-pressed={player.ready}
                           onClick={() => send({ type: 'READY', ready: !player.ready })}
                         >
-                          {player.ready ? 'Cancelar pronto' : 'Estou pronto'}
+                          {player.ready ? t('Cancelar pronto') : t('Estou pronto')}
                         </button>
                       )}
                       {room.status === 'lobby' && player === null && (
                         <button type="button" onClick={() => send({ type: 'SET_SEAT', seat })}>
-                          Sentar no assento {seat + 1}
+                          {t('Sentar no assento')} {seat + 1}
                         </button>
                       )}
                     </div>

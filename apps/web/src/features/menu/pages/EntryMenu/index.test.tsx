@@ -15,7 +15,7 @@ test('main menu keeps future features disabled, edits nickname and creates only 
   const props = { nickname: '', code: '', busy: false, ...events };
   const view = render(<EntryMenu {...props} />);
 
-  for (const name of [/^Jogar/, /^Como jogar/, /^Cosméticos/, /^Configurações/, /^Sair/]) {
+  for (const name of [/^Jogar/, /^Cosméticos/, /^Sair/]) {
     const button = screen.getByRole('button', { name });
     expect(button.hasAttribute('disabled')).toBe(true);
     expect(button.getAttribute('data-disabled-reason')).toBeTruthy();
@@ -34,6 +34,11 @@ test('main menu keeps future features disabled, edits nickname and creates only 
   fireEvent.change(screen.getByLabelText('Apelido'), { target: { value: 'Ana' } });
   expect(events.onNicknameChange).toHaveBeenCalledWith('Ana');
   view.rerender(<EntryMenu {...props} nickname="Ana" />);
+  fireEvent.click(screen.getByRole('button', { name: 'Editar nome' }));
+  const nickname = screen.getByLabelText('Apelido') as HTMLInputElement;
+  expect(document.activeElement).toBe(nickname);
+  expect(nickname.selectionStart).toBe(0);
+  expect(nickname.selectionEnd).toBe(3);
   expect(
     screen.getByRole('button', { name: 'Criar sala' }).getAttribute('data-disabled-reason'),
   ).toBeNull();
@@ -48,6 +53,7 @@ test('main menu keeps future features disabled, edits nickname and creates only 
     'true',
   );
   view.rerender(<EntryMenu {...props} nickname="Ana" busy />);
+  expect(screen.getByRole('button', { name: 'Editar nome' }).hasAttribute('disabled')).toBe(true);
   expect(screen.getByLabelText('Apelido').hasAttribute('disabled')).toBe(true);
   expect(screen.getByRole('button', { name: 'Criar sala' }).hasAttribute('disabled')).toBe(true);
   expect(screen.getByRole('status').textContent).toBe('Preparando sua mesa…');
@@ -105,4 +111,25 @@ test('invitation code opens joining immediately and busy state protects its fiel
   expect(screen.queryByRole('status')).toBeNull();
   fireEvent.click(screen.getByRole('button', { name: 'Entrar na sala' }));
   expect(events.onEnter).toHaveBeenCalledWith(false);
+});
+
+test('Jogar is independently enabled for a valid nickname and never creates a multiplayer room', () => {
+  const events = handlers();
+  const play = mock(() => {});
+  const props = {
+    nickname: 'Ana',
+    code: '',
+    busy: false,
+    ...events,
+    soloEnabled: true,
+    onPlay: play,
+  };
+  const view = render(<EntryMenu {...props} />);
+  fireEvent.click(screen.getByRole('button', { name: 'Jogar' }));
+  expect(play).toHaveBeenCalledTimes(1);
+  expect(events.onEnter).not.toHaveBeenCalled();
+  view.rerender(<EntryMenu {...props} busy />);
+  expect(screen.getByRole('button', { name: 'Jogar' }).hasAttribute('disabled')).toBe(true);
+  view.rerender(<EntryMenu {...props} soloEnabled={false} />);
+  expect(screen.getByRole('button', { name: 'Jogar' }).hasAttribute('disabled')).toBe(true);
 });

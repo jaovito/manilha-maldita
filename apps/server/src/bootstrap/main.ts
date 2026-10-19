@@ -3,6 +3,10 @@ import { DEFAULT_ORIGINS, type ServerOptions, startServer } from './runtime';
 type ServerEnvironment = Readonly<Record<string, string | undefined>>;
 
 export function parseServerOptions(env: ServerEnvironment): ServerOptions {
+  for (const key of ['ENABLE_SOLO', 'ENABLE_DEV_TOOLS']) {
+    if (env[key] !== undefined && env[key] !== 'true' && env[key] !== 'false')
+      throw new Error('INVALID_FEATURE_FLAG');
+  }
   const hostname = env.HOST ?? '127.0.0.1';
   const portText = env.PORT ?? '3001';
   if (!/^[a-zA-Z0-9.:-]+$/.test(hostname)) throw new Error('INVALID_HOST');
@@ -34,6 +38,9 @@ export function parseServerOptions(env: ServerEnvironment): ServerOptions {
   return {
     hostname,
     port,
+    environment: env.NODE_ENV ?? 'production',
+    soloEnabled: env.ENABLE_SOLO === 'true',
+    devTools: env.NODE_ENV === 'development' && env.ENABLE_DEV_TOOLS === 'true',
     allowedOrigins: [...new Set(origins)],
     secureCookies: secureText === 'true',
   };

@@ -75,6 +75,9 @@ export type ServerOptions = Readonly<{
   hostname?: string;
   allowedOrigins?: readonly string[];
   secureCookies?: boolean;
+  environment?: string;
+  soloEnabled?: boolean;
+  devTools?: boolean;
 }>;
 
 export const DEFAULT_ORIGINS = [
@@ -88,9 +91,13 @@ export const DEFAULT_ORIGINS = [
 
 export function startServer(options: ServerOptions = {}) {
   const ports = createRuntimePorts();
-  const rooms = new RoomService(ports);
+  const rooms = new RoomService(ports, {
+    soloEnabled: options.soloEnabled === true,
+    devTools: options.environment === 'development' && options.devTools === true,
+  });
   const transport = createTransport({
     rooms,
+    soloEnabled: options.soloEnabled === true,
     allowedOrigins: options.allowedOrigins ?? DEFAULT_ORIGINS,
     secureCookies: options.secureCookies ?? false,
     now: ports.now,

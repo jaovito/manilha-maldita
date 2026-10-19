@@ -55,6 +55,12 @@ export const preparationIntentSchema = z.discriminatedUnion('type', [
 ]);
 
 export const actionSchema = z.discriminatedUnion('type', [
+  z.strictObject({
+    type: z.literal('DEV_RESET_HAND'),
+    cards: z.array(cardSchema).length(3).optional(),
+    power: powerSchema.optional(),
+    energy: z.number().int().min(0).max(3).optional(),
+  }),
   z.strictObject({ type: z.literal('PREPARE'), intent: preparationIntentSchema }),
   z.strictObject({ type: z.literal('READY'), ready: z.boolean() }),
   z.strictObject({ type: z.literal('SET_SEAT'), seat }),
@@ -174,6 +180,8 @@ export const matchViewSchema = z.strictObject({
 export type MatchView = z.infer<typeof matchViewSchema>;
 
 export const roomViewSchema = z.strictObject({
+  solo: z.boolean().optional(),
+  devTools: z.boolean().optional(),
   code: roomCodeSchema,
   sequence: z.number().int().nonnegative(),
   roomRevision: z.number().int().nonnegative(),
@@ -230,6 +238,9 @@ export type CommandReply = Exclude<ServerMessage, { type: 'SNAPSHOT' }>;
 
 export const guestRequestSchema = z.strictObject({ nickname: nicknameSchema });
 
-export const createRoomRequestSchema = z.strictObject({ config: roomConfigSchema });
+export const createRoomRequestSchema = z.strictObject({
+  config: roomConfigSchema,
+  solo: z.boolean().optional(),
+});
 
 export const joinRoomRequestSchema = z.strictObject({});

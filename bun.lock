@@ -19,6 +19,7 @@
       "dependencies": {
         "@truco/game-core": "workspace:*",
         "@truco/game-protocol": "workspace:*",
+        "@truco/game-sim": "workspace:*",
         "drizzle-orm": "0.45.4",
         "hono": "4.13.13",
       },

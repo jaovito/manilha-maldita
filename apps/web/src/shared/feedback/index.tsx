@@ -1,3 +1,4 @@
+import { t, useLocale } from '../i18n';
 import type { RoomView } from '@truco/game-protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameAudio } from './audio';
@@ -67,13 +68,14 @@ export function AudioControls({
   preferences: AudioPreferences;
   onChange: (preferences: AudioPreferences) => void;
 }) {
+  useLocale();
   return (
     <details className="audio-controls" data-audio-controls>
-      <summary aria-label="Configurações de som">
+      <summary aria-label={t('Configurações de som')}>
         <span aria-hidden="true">
           {preferences.muted || preferences.volume === 0 ? '♪ ×' : '♪'}
         </span>
-        <span>Som</span>
+        <span>{t('Som')}</span>
       </summary>
       <div className="audio-settings">
         <label className="audio-toggle">
@@ -82,13 +84,13 @@ export function AudioControls({
             checked={!preferences.muted}
             onChange={(event) => onChange({ ...preferences, muted: !event.target.checked })}
           />
-          Efeitos sonoros
+          {t('Efeitos sonoros')}
         </label>
         <label className="audio-volume">
-          Volume <output>{Math.round(preferences.volume * 100)}%</output>
+          {t('Volume')} <output>{Math.round(preferences.volume * 100)}%</output>
           <input
             type="range"
-            aria-label="Volume dos efeitos sonoros"
+            aria-label={t('Volume dos efeitos sonoros')}
             min="0"
             max="100"
             step="5"
@@ -98,7 +100,7 @@ export function AudioControls({
             }
           />
         </label>
-        <p>O som começa após interagir. Todos os avisos também aparecem na tela.</p>
+        <p>{t('O som começa após interagir. Todos os avisos também aparecem na tela.')}</p>
       </div>
     </details>
   );

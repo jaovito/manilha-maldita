@@ -1,3 +1,4 @@
+import { t } from '../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 import { disabledHint } from '../../../../shared/DisabledTooltip';
 import type { Action } from '../../../../shared/transport/client';
@@ -15,11 +16,14 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
   const canStart = missing === 0 && disconnected.length === 0 && unready.length === 0;
   const startReason =
     missing > 0
-      ? 'Convide os jogadores que faltam para completar a sala.'
+      ? t('{0} para completar a sala {1}.', [
+          missing === 1 ? t('Falta 1 jogador') : t('Faltam {0} jogadores', [missing]),
+          room.config.format,
+        ])
       : disconnected.length > 0
-        ? 'Aguarde todos os jogadores reconectarem.'
+        ? t('Aguarde todos os jogadores reconectarem.')
         : unready.length > 0
-          ? 'Todos os jogadores precisam confirmar Estou pronto.'
+          ? t('Todos os jogadores precisam confirmar Estou pronto.')
           : null;
 
   return (
@@ -27,85 +31,71 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
       <div className="lobby-workbench">
         <div className="lobby-left-column">
           <div className="lobby-heading">
-            <p className="eyebrow">SALA PRIVADA · {room.code}</p>
-            <h2 aria-label={`Sala ${room.code}`}>{host ? 'Criar sala' : 'Sala privada'}</h2>
+            <p className="eyebrow">
+              {t('SALA PRIVADA ·')} {room.code}
+            </p>
+            <h2 aria-label={t('Sala {0}', [room.code])}>
+              {host ? t('Criar sala') : t('Sala privada')}
+            </h2>
           </div>
           <div className="lobby-config-column">
             <LobbySettings room={room} send={send} />
             <div className="lobby-option-row room-link-panel">
               <LobbyIcon name="key" />
               <div className="option-caption">
-                <strong>Link da sala</strong>
-                <small>Compartilhe para convidar amigos</small>
+                <strong>{t('Link da sala')}</strong>
+                <small>{t('Compartilhe para convidar amigos')}</small>
               </div>
               <RoomInvite code={room.code} />
             </div>
-            <div className="lobby-option-row room-privacy">
-              <LobbyIcon name="lock" />
-              <div className="option-caption">
-                <strong>Privada</strong>
-                <small>Quem tiver o link pode entrar</small>
-              </div>
-              <label className="pixel-switch">
-                <input
-                  type="checkbox"
-                  role="switch"
-                  aria-checked="true"
-                  aria-label="Sala privada"
-                  checked
-                  disabled
-                  {...disabledHint(
-                    'O MVP tem somente salas privadas. Compartilhe o link para convidar.',
-                  )}
-                  readOnly
-                />
-                <span aria-hidden="true" />
-                <small>Sim</small>
-              </label>
-            </div>
           </div>
-          <section className="lobby-powers" aria-label="Sistema de poderes">
+          <section className="lobby-powers" aria-label={t('Sistema de poderes')}>
             <div className="power-fan" aria-hidden="true">
               <span className="fan-card">♥</span>
               <span className="fan-card fan-spy">
                 <LobbyIcon name="eye" />
-                ESPIÃO
+                {t('ESPIÃO')}
               </span>
               <span className="fan-card">♠</span>
             </div>
             <div>
-              <h3>Sistema de poderes</h3>
-              <p>Habilidades especiais para mudar o rumo da partida.</p>
+              <h3>{t('Sistema de poderes')}</h3>
+              <p>{t('Habilidades especiais para mudar o rumo da partida.')}</p>
               <details className="power-catalog">
                 <summary className="power-preview">
-                  <LobbyIcon name="cards" /> Ver poderes
+                  <LobbyIcon name="cards" /> {t('Ver poderes')}
                 </summary>
                 <p>
-                  Energia: 2 no início, +1 por mão comum após a primeira, máximo 3. Um uso por
-                  jogador/mão. Onze e decisiva não têm poderes nem regeneração.
+                  {t(
+                    'Energia: 2 no início, +1 por mão comum após a primeira, máximo 3. Um uso por jogador/mão. Onze e decisiva não têm poderes nem regeneração.',
+                  )}
                 </p>
                 <ul>
                   <li>
-                    Espião · 1 energia · Preparação: descobre uma carta aleatória de um adversário
-                    após as trocas.
+                    {t(
+                      'Espião · 1 energia · Preparação: descobre uma carta aleatória de um adversário após as trocas.',
+                    )}
                   </li>
                   <li>
-                    Segunda Chance · 2 energias · Preparação: troca uma carta própria pelo monte,
-                    sem reposição.
+                    {t(
+                      'Segunda Chance · 2 energias · Preparação: troca uma carta própria pelo monte, sem reposição.',
+                    )}
                   </li>
                   <li>
-                    Impulso · 2 energias · Sua jogada: sobe uma carta comum um nível. Não aceita
-                    manilha, coberta ou 3.
+                    {t(
+                      'Impulso · 2 energias · Sua jogada: sobe uma carta comum um nível. Não aceita manilha, coberta ou 3.',
+                    )}
                   </li>
                   <li>
-                    Máscara · 1 energia · Sua jogada: oculta uma carta até resolver a vaza,
-                    preservando sua força. Não combina com coberta.
+                    {t(
+                      'Máscara · 1 energia · Sua jogada: oculta uma carta até resolver a vaza, preservando sua força. Não combina com coberta.',
+                    )}
                   </li>
                 </ul>
                 <p>
-                  Na preparação, confirme um poder ou passe. As escolhas ficam seladas até todos
-                  responderem; timeout passa. O passe preserva poderes de turno. Casual sorteia
-                  individualmente; competitivo espelha poderes entre equipes.
+                  {t(
+                    'Na preparação, confirme um poder ou passe. As escolhas ficam seladas até todos responderem; timeout passa. O passe preserva poderes de turno. Casual sorteia individualmente; competitivo espelha poderes entre equipes.',
+                  )}
                 </p>
               </details>
             </div>
@@ -115,61 +105,27 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
           <div className="lobby-players-column">
             <h3>
               <LobbyIcon name="players" />
-              Jogadores da sala
+              {t('Jogadores da sala')}
             </h3>
             <LobbySeats room={room} send={send} />
-            {room.status === 'lobby' && (
-              <div className="lobby-notice">
-                <h4>Convide seus amigos para entrar na sala!</h4>
-                <div
-                  className="lobby-requirements"
-                  id="start-requirements"
-                  role="status"
-                  aria-live="polite"
-                >
-                  {missing > 0 && (
-                    <p>
-                      {missing === 1 ? 'Falta 1 jogador' : `Faltam ${missing} jogadores`} para
-                      completar a sala {room.config.format}.
-                    </p>
-                  )}
-                  {disconnected.map((player) => (
-                    <p key={player.seat}>Aguardando a reconexão de {player.nickname}.</p>
-                  ))}
-                  {unready.map((player) => (
-                    <p key={player.seat}>
-                      {player.seat === room.selfSeat
-                        ? 'Você ainda precisa'
-                        : `${player.nickname} ainda precisa`}{' '}
-                      clicar em “Estou pronto”.
-                    </p>
-                  ))}
-                  {canStart && <p>Todos estão conectados e prontos.</p>}
-                  {!host && <p>Somente o anfitrião pode iniciar a partida.</p>}
-                </div>
-                {missing > 0 && (
-                  <details className="invite-help">
-                    <summary>Como convidar seus amigos?</summary>
-                    <p className="invite-hint">
-                      Compartilhe o link acima com outro jogador. Para testar na mesma máquina, use
-                      perfis de navegador diferentes ou uma janela normal e outra anônima. Abas da
-                      mesma sessão controlam o mesmo assento.
-                    </p>
-                  </details>
-                )}
-              </div>
-            )}
           </div>
+          {room.status === 'lobby' && (
+            <p className="lobby-start-status" id="start-requirements" role="status">
+              {host
+                ? (startReason ?? t('Todos estão conectados e prontos.'))
+                : t('Somente o anfitrião pode iniciar a partida.')}
+            </p>
+          )}
           <div className="actions lobby-actions">
             {room.status !== 'playing' && (
               <button
                 className="button-quiet leave-room"
                 type="button"
-                aria-label="Sair da sala"
+                aria-label={t('Sair da sala')}
                 onClick={() => send({ type: 'LEAVE' })}
               >
                 <LobbyIcon name="back" />
-                Voltar
+                {t('Voltar')}
               </button>
             )}
             {room.status === 'lobby' && host && (
@@ -182,7 +138,7 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
                 onClick={() => send({ type: 'START_MATCH' })}
               >
                 <LobbyIcon name="play" />
-                Iniciar partida
+                {t('Iniciar partida')}
               </button>
             )}
             {room.status === 'finished' && host && (
@@ -192,7 +148,7 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
                 onClick={() => send({ type: 'REMATCH' })}
               >
                 <LobbyIcon name="play" />
-                Revanche
+                {t('Revanche')}
               </button>
             )}
           </div>

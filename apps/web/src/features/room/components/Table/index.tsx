@@ -1,3 +1,4 @@
+import { t } from '../../../../shared/i18n';
 import { cardLabel, manilhaRanks } from '../../utils/cards';
 import type { RoomView } from '@truco/game-protocol';
 import { useEffect, useRef, useState } from 'react';
@@ -11,6 +12,7 @@ import { TablePowers, powerNames } from './Powers';
 import { TableSeats } from './Seats';
 import { TableFeedback } from './Feedback';
 import { TableAtmosphere } from './Atmosphere';
+import { RaiseAnnouncement } from './Feedback/RaiseAnnouncement';
 import { TurnAnnouncement } from './Feedback/TurnAnnouncement';
 import { RoundAnnouncement } from './Feedback/RoundAnnouncement';
 
@@ -62,7 +64,7 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
     hand.plays.length > 0 ? hand.plays : (hand.completedTricks.at(-1)?.plays ?? []);
   const resolvedTrick =
     room.transition?.kind !== 'deal' &&
-    room.transition &&
+    (room.transition || (room.status === 'finished' && room.outcome?.reason === 'completed')) &&
     hand.plays.length === 0 &&
     hand.betting.pendingStake === null
       ? hand.completedTricks.at(-1)
@@ -77,50 +79,54 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
     hand.completedTricks.length > 0;
   const status =
     room.status === 'finished'
-      ? 'Partida encerrada'
+      ? t('Partida encerrada')
       : room.paused
-        ? 'Partida pausada para reconexão'
+        ? t('Partida pausada para reconexão')
         : turn
-          ? 'Sua vez'
+          ? t('Sua vez')
           : phase.type === 'TURN'
-            ? `Vez de ${room.seats[phase.seat]?.nickname ?? 'jogador'}`
+            ? t('Vez de {0}', [room.seats[phase.seat]?.nickname ?? t('jogador')])
             : phase.type === 'RAISE_RESPONSE'
-              ? `Pedido de aumento para ${hand.betting.pendingStake}`
+              ? t('Pedido de aumento para {0}', [hand.betting.pendingStake ?? '—'])
               : phase.type === 'ELEVEN_DECISION'
-                ? 'Sua equipe decide a mão de onze'
+                ? t('Sua equipe decide a mão de onze')
                 : phase.type === 'PREPARATION'
-                  ? 'Preparação selada'
-                  : 'Aguardando decisão';
+                  ? t('Preparação selada')
+                  : t('Aguardando decisão');
 
   return (
     <section
       className="game-table"
       data-transition={room.transition?.kind}
-      aria-label="Mesa da partida"
+      aria-label={t('Mesa da partida')}
       onKeyDown={(event) => {
         if (event.key === 'Escape' && selectedPower) cancelSelection(true);
       }}
     >
       <section
         className="scoreboard"
-        aria-label={`Equipe A ${match.score.A} × ${match.score.B} Equipe B`}
+        aria-label={t('Equipe A {0} × {1} Equipe B', [match.score.A, match.score.B])}
       >
         <div className="team-score own">
           <span>
-            {match.playerCount === 4 ? 'SUA DUPLA' : 'VOCÊ'} · {team}
+            {match.playerCount === 4 ? t('SUA DUPLA') : t('VOCÊ')} · {team}
           </span>
           <strong>{match.score[team]}</strong>
         </div>
         <div className="stake-score">
-          <span>VALENDO</span>
+          <span>{t('VALENDO')}</span>
           <strong>{hand.betting.acceptedStake}</strong>
           <small>
-            MÃO {hand.number}
-            {hand.betting.pendingStake !== null ? ` · PEDIDO ${hand.betting.pendingStake}` : ''}
+            {t('MÃO')} {hand.number}
+            {hand.betting.pendingStake !== null
+              ? t(' · PEDIDO {0}', [hand.betting.pendingStake ?? '—'])
+              : ''}
           </small>
         </div>
         <div className="team-score enemy">
-          <span>ADVERSÁRIOS · {enemyTeam}</span>
+          <span>
+            {t('ADVERSÁRIOS ·')} {enemyTeam}
+          </span>
           <strong>{match.score[enemyTeam]}</strong>
         </div>
       </section>
@@ -128,18 +134,21 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
         <div className="arena" data-player-count={match.playerCount}>
           <TableAtmosphere room={room} />
           <TurnAnnouncement room={room} />
-          <RoundAnnouncement room={room} />
+          <RaiseAnnouncement room={room} />
           <section
             className="table-status"
-            aria-label="Status da partida"
+            aria-label={t('Status da partida')}
             data-targeting={selectedPower !== null}
             data-resolving={Boolean(room.transition)}
           >
             {selectedPower && (
               <p className="compact-power-prompt" role="status">
                 {selectedPower === 'boost' && !hasBoostTarget(match, room.selfSeat)
-                  ? 'Impulso · Sem carta válida.'
-                  : `${powerNames[selectedPower]} · Escolha ${selectedPower === 'spy' ? 'um verso' : 'sua carta'}.`}
+                  ? t('Impulso · Sem carta válida.')
+                  : t('{0} · Escolha {1}.', [
+                      powerNames[selectedPower],
+                      selectedPower === 'spy' ? t('um verso') : t('sua carta'),
+                    ])}
               </p>
             )}
             {!room.transition && !openingTrick && (
@@ -147,18 +156,21 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
                 {status}
               </p>
             )}
+            <RoundAnnouncement room={room} />
             <TableFeedback room={room} />
             {!room.transition && !openingTrick && (
               <span>
                 {hand.kind === 'normal'
-                  ? 'Mão comum'
+                  ? t('Mão comum')
                   : hand.kind === 'eleven'
-                    ? 'Mão de onze'
-                    : 'Mão decisiva'}
+                    ? t('Mão de onze')
+                    : t('Mão decisiva')}
               </span>
             )}
             {room.deadline !== null && (
-              <small>Tempo: {Math.max(0, Math.ceil((room.deadline - now) / 1000))} s</small>
+              <small>
+                {t('Tempo:')} {Math.max(0, Math.ceil((room.deadline - now) / 1000))} s
+              </small>
             )}
           </section>
           <TableSeats
@@ -173,7 +185,7 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
               send({ type: 'PREPARE', intent: { type: 'spy', target: seat } });
             }}
           />
-          <section className="center-plays" aria-label="Cartas na mesa">
+          <section className="center-plays" aria-label={t('Cartas na mesa')}>
             {tablePlays.length === 0 && (
               <span className="table-emblem" aria-hidden="true">
                 ♠ ♥<br />♦ ♣
@@ -181,14 +193,20 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
             )}
             {tablePlays.map((play) => {
               const relative = (play.seat - room.selfSeat + match.playerCount) % match.playerCount;
+              const masked = 'power' in play && play.power === 'mask';
+              const hiddenReason = masked
+                ? t('Máscara: mantém a força e revela a carta na resolução da vaza.')
+                : play.covered
+                  ? t('Coberta: perde para qualquer carta aberta ou mascarada.')
+                  : undefined;
               const label =
                 'power' in play && play.power === 'mask' && !('card' in play)
-                  ? 'Carta mascarada'
+                  ? t('Carta mascarada')
                   : play.covered
-                    ? 'Carta coberta'
+                    ? t('Carta coberta')
                     : 'card' in play
                       ? cardLabel(play.card)
-                      : 'Carta oculta';
+                      : t('Carta oculta');
 
               return (
                 <div
@@ -201,33 +219,38 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
                   }
                   data-resolved={Boolean(resolvedTrick)}
                 >
-                  <span role="img" aria-label={label}>
+                  <span
+                    role="img"
+                    aria-label={label}
+                    aria-description={hiddenReason}
+                    title={hiddenReason}
+                  >
                     {play.covered || !('card' in play) ? (
-                      <CardBack />
+                      <CardBack kind={play.covered ? 'covered' : masked ? 'masked' : undefined} />
                     ) : (
                       <CardFace card={play.card} />
                     )}
                   </span>
                   <small>
-                    {room.seats[play.seat]?.nickname ?? 'Jogador'}
+                    {room.seats[play.seat]?.nickname ?? t('Jogador')}
                     {'power' in play && play.power === 'mask'
-                      ? ' · Máscara'
+                      ? t(' · Máscara')
                       : 'power' in play && play.power === 'boost'
-                        ? ' · Impulso'
+                        ? t(' · Impulso')
                         : play.covered
-                          ? ' · Carta coberta'
+                          ? t(' · Carta coberta')
                           : ''}
                   </small>
                 </div>
               );
             })}
           </section>
-          <aside className="vira-panel" aria-label="Vira e manilhas">
-            <h3>VIRA</h3>
+          <aside className="vira-panel" aria-label={t('Vira e manilhas')}>
+            <h3>{t('VIRA')}</h3>
             <span role="img" aria-label={cardLabel(hand.vira)}>
               <CardFace card={hand.vira} />
             </span>
-            <strong>MANILHA</strong>
+            <strong>{t('MANILHA')}</strong>
             <span>{manilhaRanks[hand.vira.rank]}</span>
             <small>♦ &lt; ♠ &lt; ♥ &lt; ♣</small>
           </aside>
@@ -270,18 +293,20 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
       {room.outcome && (
         <p className="match-result" role="status">
           {room.outcome.winner === team
-            ? 'VITÓRIA!'
+            ? t('VITÓRIA!')
             : room.outcome.winner
-              ? 'FIM DE PARTIDA'
-              : 'PARTIDA ENCERRADA'}{' '}
-          · {room.outcome.winner ? `Equipe ${room.outcome.winner} venceu` : 'Sem vencedor'} ·{' '}
+              ? t('FIM DE PARTIDA')
+              : t('PARTIDA ENCERRADA')}{' '}
+          ·{' '}
+          {room.outcome.winner ? t('Equipe {0} venceu', [room.outcome.winner]) : t('Sem vencedor')}{' '}
+          ·{' '}
           {
             {
-              completed: 'pontos',
-              surrender: 'desistência',
-              abandonment: 'abandono',
-              expired: 'sala expirada',
-              technical: 'falha técnica',
+              completed: t('pontos'),
+              surrender: t('desistência'),
+              abandonment: t('abandono'),
+              expired: t('sala expirada'),
+              technical: t('falha técnica'),
             }[room.outcome.reason]
           }
         </p>

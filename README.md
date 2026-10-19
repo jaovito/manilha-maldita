@@ -1,4 +1,4 @@
-# Truco Caótico
+# Manilha Maldita
 
 Base de um jogo de Truco Paulista com poderes para navegador. O projeto usa Bun Workspaces, TypeScript e um backend autoritativo organizado em módulos.
 
@@ -10,7 +10,7 @@ No primeiro acesso sem apelido válido, uma tela de boas-vindas pede como seus a
 
 Botões indisponíveis ficam com 25% de opacidade e sem brilho de hover. Passe o mouse ou toque para ver um tooltip com o motivo do bloqueio; permissões, jogadores pendentes, fase e turno têm explicações próprias. Cartas continuam legíveis enquanto jogar está bloqueado.
 
-O menu reproduz a composição da referência fornecida, com seis ações numa coluna, logo à esquerda e perfil à direita. O perfil tem apelido editável, criação de sala e entrada por código/link. Jogar, Como jogar, Cosméticos, Configurações e Sair ficam desabilitados e descritos como “Em breve”. Nível/moedas mostram indisponibilidade, sem saldo ou progresso fictício. O lobby reúne configurações, convite com cópia do link e equipes com assentos alternados. O lobby permite consultar os quatro poderes; a carta Espião ilustrada no menu é decorativa.
+O menu usa cenário em camadas: feltro repetível, quatro cantos de madeira, quatro segmentos do símbolo, objetos independentes e cartas decorativas animadas. A marca **Manilha Maldita** e as peças foram geradas a partir da arte anterior para preservar sua identidade. O perfil é HTML independente; logo, controles e objetos mantêm suas proporções ao adaptar a composição. No celular, a navegação prioriza leitura e toque; elementos decorativos secundários cedem espaço. Jogar inicia treino contra bot quando habilitado no servidor; Cosméticos, Configurações e Sair permanecem futuros. Movimento reduzido desativa a flutuação das cartas.
 
 Durante a partida, a mesa ocupa o viewport inteiro, sem rolagem da página. O status fica no topo, junto ao placar, e um selo “Sua vez” acompanha o avatar próprio apenas quando é possível jogar. As ações da direita são compactas; jogar uma carta é feito diretamente na mão. Faces e versos mantêm a proporção 2:3 na mão, nos assentos, na mesa e na vira, variando apenas o tamanho. Placar, mão, vira, jogadores e ações se reorganizam conforme largura, altura e orientação; o menu “Sala” oferece som e identificação da sala, sem configurações congeladas. O encerramento tem apresentação e menu próprios. Histórico e painel da sala podem rolar internamente.
 
@@ -163,3 +163,22 @@ bun run simulate 100 1234  # tamanho e seed sintética local de reprodução
 ```
 
 A ferramenta produz JSON agregado por formato, preset e política conservadora/agressiva/probabilística, com incerteza aproximada e contagens separadas de atribuição/uso. Não usa sessões reais nem bots oniscientes. Veja o [relatório inicial](docs/simulation-m3.md), a [metodologia](docs/balancing.md) e a [ADR 007](docs/adr/007-sealed-powers-and-simulation.md). Os resultados não comprovam equilíbrio ou diversão.
+
+“Como jogar” abre um tutorial interativo de sete etapas, com ordem das cartas, simulador de vira/manilhas, empates, apostas, mãos especiais, quatro poderes e roteiro da primeira partida. Inclui perguntas com explicação, navegação por teclado e catálogos completos em português/inglês. O idioma vale para o jogo inteiro. Em **Configurações → Idioma do jogo**, escolha português ou inglês; a preferência fica salva neste navegador. O menu da sala permite trocar durante a partida sem reiniciar a mesa. O seletor do tutorial usa a mesma preferência global.
+
+
+## Jogar contra bot e montar cenários de teste
+
+`bun run dev` habilita, por padrão, o bot simples de treino e as ferramentas dev. Se o backend já estava rodando antes deste incremento, reinicie-o para carregar as novas flags. Clique **Jogar** para entrar direto numa mesa 1v1 contra **Bot Treino**.
+
+Na partida, abra **Sala → Ferramentas de desenvolvimento**. Escolha suas três cartas, um dos quatro poderes e energia de 0 a 3; **Aplicar cenário e reiniciar mão** limpa a mão atual e preserva o placar. **Reiniciar mão aleatória** redistribui normalmente. O jogo continua enquanto o painel está aberto. Poderes continuam desativados em mão de onze e 11×11.
+
+Flags independentes no backend:
+
+- `ENABLE_SOLO=true`: habilita Jogar contra bot, inclusive em produção se desejado.
+- `ENABLE_DEV_TOOLS=true`: habilita ferramentas **somente com `NODE_ENV=development`**, em mesas solo do dono. Não habilita nada em produção/test/ambiente ausente.
+- `ENABLE_SOLO=false bun run dev` desativa o bot; `ENABLE_DEV_TOOLS=false bun run dev` mantém o bot sem ferramentas.
+
+`bun run start:server` mantém ambas fechadas por padrão. Nenhuma configuração VITE ou parâmetro no navegador concede permissão. O build de produção exclui o painel mesmo apontando para um backend dev. O bot decide com suas próprias cartas e informações públicas, sem ler sua mão. Revanche solo inicia imediatamente; Voltar ao menu sai da sala.
+
+`bun run test:e2e:solo` abre servidores isolados nas portas 3002/5174/4174 e exercita dev e build de produção em desktop/mobile. Essas portas devem estar livres. O comando produz um build de teste apontando para 3002; rode `VITE_BACKEND_URL='' bun run build` depois para gerar novamente o build padrão, ou use a URL de backend do seu ambiente.

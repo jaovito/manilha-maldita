@@ -80,7 +80,7 @@ test('betting cap, preparation, covered cards and transitions retain native acti
   const view = render(
     <TableActions room={base} match={response} covered={false} setCovered={covered} send={send} />,
   );
-  const counter = screen.getByRole('button', { name: 'Contra-aumentar' });
+  const counter = screen.getByRole('button', { name: /SEEEIS!|NOOVE!|DOOOZE!!|Limite de 12/ });
   expect(counter.getAttribute('data-disabled-reason')).toContain('aceitar ou correr');
   fireEvent.click(counter);
   expect(send).not.toHaveBeenCalled();

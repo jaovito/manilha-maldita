@@ -43,6 +43,11 @@ test('resolved vaza highlights the authorized winning face, blocks play and expl
   expect(screen.getAllByText('Ana: 3 de Copas ♥ · maior força da vaza.').length).toBeGreaterThan(0);
   expect(view.container.querySelector('[data-winner="true"]')?.textContent).toContain('Ana');
   expect(view.container.querySelector('.own-player .turn-badge')).toBeNull();
+  expect(view.container.querySelector('.turn-announcement')).toBeNull();
+  const winningFace = view.container.querySelector('[data-winner="true"] > span');
+  view.rerender(<Table room={{ ...room, sequence: room.sequence + 1 }} send={send} />);
+  expect(view.container.querySelector('[data-winner="true"] > span')).toBe(winningFace);
+  expect(view.container.querySelector('.turn-announcement')).toBeNull();
   expect((screen.getByRole('button', { name: '3 de Copas ♥' }) as HTMLButtonElement).disabled).toBe(
     true,
   );
@@ -55,6 +60,8 @@ test('resolved vaza highlights the authorized winning face, blocks play and expl
     <Table room={{ ...room, transition: undefined, decisionId: 'next_turn' }} send={send} />,
   );
   expect(screen.queryByText('Sua equipe venceu a vaza 1')).toBeNull();
+  expect(view.container.querySelector('[data-winner="true"]')).toBeNull();
+  expect(view.container.querySelector('.turn-announcement')).not.toBeNull();
   expect(screen.getByText('Você abre a próxima vaza')).toBeDefined();
   expect(view.container.querySelector('.turn-badge')?.textContent).toBe('Sua vez');
   expect((screen.getByRole('button', { name: '3 de Copas ♥' }) as HTMLButtonElement).disabled).toBe(
@@ -162,4 +169,23 @@ test('explanations annotate confirmed manilha, boost, mask and ties without deri
   expect(resolutionFeedback({ ...room, transition: undefined })).toBeNull();
   expect(resolutionFeedback({ ...room, status: 'finished' })).toBeNull();
   expect(resolutionFeedback({ ...fresh, transition: room.transition })).toBeNull();
+});
+
+test('final snapshot keeps the last trick winner highlighted without an active transition', () => {
+  const room = resolving('trick');
+  const ended: RoomView = {
+    ...room,
+    status: 'finished',
+    transition: undefined,
+    outcome: { winner: 'A', reason: 'completed' },
+    match: { ...room.match, score: { A: 12, B: 6 }, phase: { type: 'MATCH_END', winner: 'A' } },
+  };
+  const view = render(<Table room={ended} send={() => {}} />);
+  expect(view.container.querySelectorAll('[data-winner="true"]')).toHaveLength(1);
+  expect(view.container.querySelector('[data-winner="true"]')?.textContent).toContain('Ana');
+  expect(view.container.querySelector('.turn-announcement')).toBeNull();
+  view.rerender(
+    <Table room={{ ...ended, outcome: { winner: 'A', reason: 'surrender' } }} send={() => {}} />,
+  );
+  expect(view.container.querySelectorAll('[data-winner="true"]')).toHaveLength(0);
 });

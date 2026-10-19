@@ -93,7 +93,7 @@ test('table sends only explicit card actions, distinguishes covered plays and ha
       send={send}
     />,
   );
-  for (const name of ['Aceitar', 'Contra-aumentar', 'Correr'])
+  for (const name of ['Aceitar', 'SEEEIS!', 'Correr'])
     fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${name}$`) }));
   view.rerender(
     <Table
@@ -206,7 +206,11 @@ test('negotiation limit, finished games and decisive hands keep illegal actions 
   };
   const view = render(<Table room={fullRaise} send={send} />);
   expect(
-    (screen.getByRole('button', { name: 'Contra-aumentar' }) as HTMLButtonElement).disabled,
+    (
+      screen.getByRole('button', {
+        name: /SEEEIS!|NOOVE!|DOOOZE!!|Limite de 12/,
+      }) as HTMLButtonElement
+    ).disabled,
   ).toBe(true);
   expect((screen.getByRole('button', { name: '3 de Copas ♥' }) as HTMLButtonElement).disabled).toBe(
     true,

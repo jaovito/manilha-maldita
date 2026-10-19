@@ -8,5 +8,8 @@
   },
   "scripts": {
     "typecheck": "bun --bun ../../node_modules/typescript/bin/tsc --noEmit -p tsconfig.json"
+  },
+  "exports": {
+    ".": "./src/policy.ts"
   }
 }

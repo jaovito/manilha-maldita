@@ -1,4 +1,5 @@
 import type { RoomView } from '@truco/game-protocol';
+import { confirmedAcceptance, confirmedRaise } from './raises';
 import type { Sound } from './audio';
 
 function resultSound(
@@ -39,6 +40,10 @@ export class RoomAudioEvents {
     if (room.matchId !== previous.matchId || match.revision < before.revision) return [];
 
     const sounds: Sound[] = [];
+    const raised = confirmedRaise(previous, room);
+    if (raised) sounds.push(({ 3: 'truco', 6: 'six', 9: 'nine', 12: 'twelve' } as const)[raised]);
+    const accepted = confirmedAcceptance(previous, room);
+    if (accepted) sounds.push('acceptRaise');
     const newHand = match.hand.number !== before.hand.number;
     if (
       newHand ||
@@ -78,6 +83,7 @@ export class RoomAudioEvents {
     if (result) sounds.push(result);
     if (
       !result &&
+      !accepted &&
       !room.transition &&
       !room.paused &&
       room.status === 'playing' &&

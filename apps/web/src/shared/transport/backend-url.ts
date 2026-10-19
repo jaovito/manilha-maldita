@@ -1,4 +1,4 @@
-/** Vite exposes this public URL at build time; never put credentials in it. */
+import { t } from '../i18n';
 export function backendUrl(
   path: string,
   websocket = false,
@@ -22,7 +22,9 @@ export function backendUrl(
       }
       origin = url.origin;
     } catch {
-      throw new Error('VITE_BACKEND_URL deve ser uma origem HTTP(S), sem caminho ou credenciais.');
+      throw new Error(
+        t('VITE_BACKEND_URL deve ser uma origem HTTP(S), sem caminho ou credenciais.'),
+      );
     }
   }
 

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" shape-rendering="crispEdges">
+<title>Moldura ornamentada do perfil</title>
+
+<path d="M12 4H148V12H156V148H148V156H12V148H4V12H12Z" fill="#06161e" stroke="#020e13" stroke-width="8"/>
+<path d="M12 4H148V12H156V148H148V156H12V148H4V12H12Z" fill="none" stroke="#c68a2f" stroke-width="4"/>
+<path d="M16 8H144V16H152V144H144V152H16V144H8V16H16Z" fill="none" stroke="#ffe29a" stroke-width="2"/>
+<path d="M24 16H136V24H144V136H136V144H24V136H16V24H24Z" fill="none" stroke="#765327" stroke-width="2"/>
+<defs><g id="flourish" fill="#efb94f"><path d="M10 34V18H14V10H34V14H22V18H18V22H14V34ZM22 18H30V22H34V30H30V34H26V30H22V26H18V22H22ZM26 22V26H30V22ZM18 34H22V38H18ZM34 18H38V22H34Z"/><path fill="#ffe9ac" d="M12 12H16V16H12ZM22 18H26V22H22ZM30 30H34V34H30Z"/></g></defs>
+<use href="#flourish"/><use href="#flourish" transform="translate(160 0) rotate(90)"/><use href="#flourish" transform="translate(160 160) rotate(180)"/><use href="#flourish" transform="translate(0 160) rotate(270)"/>
+</svg>

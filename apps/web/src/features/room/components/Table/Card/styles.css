@@ -162,3 +162,45 @@
     right: 5px;
   }
 }
+
+/* Public play state only; the concealed card never contributes styling or labels. */
+.card-back-masked,
+.card-back-covered {
+  container-type: inline-size;
+  display: grid;
+  place-items: center;
+  border: 3px double #e8c173;
+}
+.card-back-masked {
+  background: repeating-linear-gradient(45deg, #451a68 0 7px, #32134e 7px 14px);
+  box-shadow:
+    inset 0 0 0 3px #170b2c,
+    0 0 8px #bb71e077;
+  color: #ffe2a1;
+}
+.card-back-covered {
+  background: #162b34;
+  color: #c6d1d6;
+  border-color: #71838a;
+}
+.hidden-card-mark {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  gap: 4px;
+  font-family: "Jersey 25", sans-serif;
+  font-size: clamp(8px, 18cqw, 20px);
+  line-height: 1;
+}
+.hidden-card-mark svg {
+  width: 80%;
+  fill: currentColor;
+  shape-rendering: crispEdges;
+}
+.hidden-card-mark > span:last-child {
+  font-size: clamp(8px, 15cqw, 16px);
+}
+.played-card[data-power="mask"] .card-face {
+  outline: 2px solid #b778e8;
+}

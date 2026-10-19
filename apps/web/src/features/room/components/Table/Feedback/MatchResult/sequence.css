@@ -1,0 +1,63 @@
+.match-end-layer[data-stage="reading"] {
+  background: transparent;
+  pointer-events: none;
+  place-items: start center;
+}
+.match-reading-caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.match-result-title:focus {
+  outline: none;
+}
+
+.pixel-burst-layer {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+.pixel-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--burst-color);
+  box-shadow: 4px 4px #873c31;
+  animation: pixel-defeat-burst 1100ms steps(12, end) both;
+}
+@keyframes pixel-defeat-burst {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--burst-angle)) translateX(16px) scale(0.5);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--burst-angle)) translateX(var(--burst-distance)) scale(0.3);
+  }
+}
+.match-end-layer[data-stage="celebration"] .match-result-panel {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.match-end-layer[data-stage="celebration"] .room-result,
+.match-end-layer[data-stage="celebration"] .match-end-hint {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pixel-burst-layer {
+    display: none;
+  }
+  .pixel-burst {
+    animation: none;
+  }
+}

@@ -1,3 +1,4 @@
+import { t } from '../../../../shared/i18n';
 import { nicknameSchema } from '@truco/game-protocol';
 import { useEffect, useRef } from 'react';
 import { disabledHint } from '../../../../shared/DisabledTooltip';
@@ -16,7 +17,7 @@ export function Welcome({ nickname, invitation, onChange, onContinue }: Props) {
   useEffect(() => input.current?.focus(), []);
 
   return (
-    <section className="welcome-scene" aria-label="Boas-vindas">
+    <section className="welcome-scene" aria-label={t('Boas-vindas')}>
       <form
         className="welcome-panel"
         onSubmit={(event) => {
@@ -27,17 +28,17 @@ export function Welcome({ nickname, invitation, onChange, onContinue }: Props) {
         <span className="welcome-suits" aria-hidden="true">
           ♦ ♠ ♥ ♣
         </span>
-        <p className="eyebrow">BEM-VINDO AO TRUCO CAÓTICO</p>
-        <h2>Como vamos chamar você?</h2>
-        <p>Escolha o apelido que seus amigos vão ver na mesa.</p>
+        <p className="eyebrow">{t('BEM-VINDO À MANILHA MALDITA')}</p>
+        <h2>{t('Como vamos chamar você?')}</h2>
+        <p>{t('Escolha o apelido que seus amigos vão ver na mesa.')}</p>
         <label>
-          Apelido
+          {t('Apelido')}
           <input
             ref={input}
             autoComplete="nickname"
             maxLength={24}
             spellCheck={false}
-            placeholder="Seu nome na mesa"
+            placeholder={t('Seu nome na mesa')}
             value={nickname}
             aria-describedby="welcome-nickname-help"
             aria-invalid={nickname.length > 0 && !valid}
@@ -45,20 +46,20 @@ export function Welcome({ nickname, invitation, onChange, onContinue }: Props) {
           />
         </label>
         <p id="welcome-nickname-help" className="welcome-help">
-          De 1 a 24 caracteres. Use letras, números, espaços, ponto, hífen ou sublinhado.
+          {t('De 1 a 24 caracteres. Use letras, números, espaços, ponto, hífen ou sublinhado.')}
         </p>
         <button
           type="submit"
           className="button-primary"
           disabled={!valid}
-          {...disabledHint(!valid ? 'Escolha um apelido válido para continuar.' : null)}
+          {...disabledHint(!valid ? t('Escolha um apelido válido para continuar.') : null)}
         >
-          Continuar
+          {t('Continuar')}
         </button>
         <p className="welcome-note">
           {invitation
-            ? 'Seu convite está guardado. Vamos entrar na sala depois.'
-            : 'Sem cadastro. Você pode mudar o apelido no menu.'}
+            ? t('Seu convite está guardado. Vamos entrar na sala depois.')
+            : t('Sem cadastro. Você pode mudar o apelido no menu.')}
         </p>
       </form>
     </section>

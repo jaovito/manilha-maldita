@@ -159,7 +159,17 @@ test('real HTTP sessions require origin and auth, protect cookies and sanitize f
     expect(await (await f.request('/api/guest', undefined, cookie)).json()).toEqual({
       nickname: 'Ana',
     });
-    expect((await f.request('/api/guest', { nickname: 'Beto' }, cookie)).status).toBe(200);
+    const renamed = await f.request('/api/guest', { nickname: 'Beto' }, cookie);
+    expect(renamed.status).toBe(200);
+    expect(renamed.headers.get('set-cookie')).toBeNull();
+    expect(await renamed.json()).toEqual({ nickname: 'Beto' });
+    expect(await (await f.request('/api/guest', undefined, cookie)).json()).toEqual({
+      nickname: 'Beto',
+    });
+    expect((await f.request('/api/guest', { nickname: '<script>' }, cookie)).status).toBe(400);
+    expect(await (await f.request('/api/guest', undefined, cookie)).json()).toEqual({
+      nickname: 'Beto',
+    });
     expect(
       await (await f.request('/api/rooms', { config: defaultRoomConfig }, cookie)).json(),
     ).toEqual({ code: 'ABC123' });

@@ -14,7 +14,9 @@ function respond(response: Response | Promise<Response>) {
   Object.defineProperty(globalThis, 'fetch', {
     configurable: true,
     writable: true,
-    value: mock(async () => response),
+    value: mock(async (url: string | URL | Request) =>
+      String(url).endsWith('/features') ? Response.json({ solo: false }) : response,
+    ),
   });
 }
 
@@ -97,7 +99,7 @@ test('first access preserves the invitation and confirms a trimmed nickname with
   expect(screen.getByLabelText<HTMLInputElement>('Apelido').value).toBe('João');
   expect(localStorage.getItem(NICKNAME_KEY)).toBe('João');
   await act(async () => {});
-  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(fetcher).toHaveBeenCalledTimes(2);
   expect(location.search).toBe('?room=ABC123');
 });
 
@@ -120,7 +122,7 @@ test('a late cookie response never joins an invitation after the player begins c
   await act(async () => resolveGuest(new Response(JSON.stringify({ nickname: 'Antigo' }))));
   expect(screen.getByRole('region', { name: 'Boas-vindas' })).toBeDefined();
   expect(screen.getByLabelText<HTMLInputElement>('Apelido').value).toBe('Novo');
-  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(fetcher).toHaveBeenCalledTimes(2);
 });
 
 test('choosing a nickname still reaches the menu when browser storage is blocked', () => {
