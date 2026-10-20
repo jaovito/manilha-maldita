@@ -50,3 +50,49 @@
     --played-width: 38px;
   }
 }
+
+/* Give both vertical 2v2 plays room for the full face and player caption. */
+@media (max-width: 600px) and (orientation: portrait) {
+  .game-shell .arena[data-player-count="4"] .center-plays {
+    height: calc(22dvh + 16px);
+  }
+}
+
+@media (max-width: 600px) and (max-height: 720px) and (orientation: portrait) {
+  .game-shell .arena[data-player-count="4"] .center-plays {
+    top: calc(42% - 40px);
+    height: calc(16dvh + 52px);
+  }
+}
+
+@media (max-width: 600px) and (max-height: 600px) and (orientation: portrait) {
+  .game-shell .arena[data-player-count="4"] .center-plays {
+    top: 208px;
+    height: 128px;
+  }
+
+  .game-shell .arena[data-player-count="4"] .played-card {
+    width: 26px;
+  }
+
+  .game-shell .arena[data-player-count="4"] .seat-relative-2 {
+    top: 156px;
+  }
+
+  .game-shell .arena[data-player-count="4"] .seat-relative-2 .seat-cards {
+    position: absolute;
+    left: calc(100% + 8px);
+    top: 0;
+  }
+
+  .game-shell .arena[data-player-count="4"] .seat-relative-2 :is(.seat-avatar, .seat-info) {
+    grid-row: 1;
+  }
+}
+
+@media (min-width: 601px) and (min-height: 501px) {
+  .game-shell .arena[data-player-count="4"] .center-plays {
+    top: calc(36% - 48px);
+    height: calc(29dvh + 48px);
+  }
+}

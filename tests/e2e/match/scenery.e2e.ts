@@ -83,6 +83,8 @@ test('table composes independent artwork at every viewport without intercepting 
       const expectedGap = viewport.width > 600 && viewport.height > 500 ? 12 : 8;
       expect(Math.abs(nameplate.x - avatar.x - avatar.width - expectedGap)).toBeLessThan(1);
 
+      const compact = viewport.width <= 600 || viewport.height <= 500;
+      if (compact) await page.getByRole('button', { name: 'Expandir histórico' }).click();
       const paper = await page.locator('.table-history').boundingBox();
       const entries = await page.locator('.history-list').boundingBox();
       if (!paper || !entries) throw new Error('Pergaminho do histórico ausente');
@@ -90,6 +92,7 @@ test('table composes independent artwork at every viewport without intercepting 
       expect(paper.x + paper.width - entries.x - entries.width).toBeGreaterThanOrEqual(
         paper.width * 0.13,
       );
+      if (compact) await page.getByRole('button', { name: 'Recolher histórico' }).click();
       const coin = await page.locator('.stake-score').boundingBox();
       const stakeTitle = await page.locator('.stake-score > span').boundingBox();
       const stakeValue = await page.locator('.stake-score > strong').boundingBox();

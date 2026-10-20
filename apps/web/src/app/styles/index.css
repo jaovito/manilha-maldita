@@ -63,5 +63,6 @@
 @import "../../features/room/components/Table/Theme/history-frame.css";
 @import "../../features/room/components/Table/Theme/truco-button.css";
 @import "../../features/room/components/Table/Theme/vertical-plays.css";
+@import "../../features/room/components/Table/History/styles.css";
 
 @import "../../features/room/components/Table/Card/proportions.css";

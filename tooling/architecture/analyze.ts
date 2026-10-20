@@ -78,7 +78,7 @@ export function analyzeSource(filePath: string, code: string): string[] {
     }
     if (origin === 'apps/server' && filename.includes('/domain/')) {
       if (
-        (!local && specifier !== '@truco/game-core') ||
+        (!local && specifier !== '@truco/game-core' && !exportedCoreEntry) ||
         /\/(?:application|adapters|bootstrap)\//.test(target)
       ) {
         report('Domain code depends only on pure domain code.');
@@ -88,7 +88,9 @@ export function analyzeSource(filePath: string, code: string): string[] {
     if (origin === 'apps/server' && filename.includes('/application/')) {
       if (
         (!local &&
-          (/^(?:bun(?::|$)|node:|hono(?:\/|$))/.test(specifier) || builtins.has(specifier))) ||
+          (specifier === '@truco/game-protocol' ||
+            /^(?:bun(?::|$)|node:|hono(?:\/|$))/.test(specifier) ||
+            builtins.has(specifier))) ||
         (local && /\/(?:adapters|bootstrap)\//.test(target))
       ) {
         report('Application code uses ports rather than concrete adapters or runtime I/O.');
@@ -112,7 +114,9 @@ export function analyzeSource(filePath: string, code: string): string[] {
     }
   }
 
-  const pure = origin === 'packages/game-core' || filename.includes('/domain/');
+  const pure =
+    origin === 'packages/game-core' ||
+    (origin === 'apps/server' && /\/(?:domain|application)\//.test(filename));
   const { program, errors } = parseSync(filename, code);
   for (const error of errors) issues.push(`Unable to analyze source: ${error.message}`);
   const visitor = new Visitor({
@@ -140,10 +144,21 @@ export function analyzeSource(filePath: string, code: string): string[] {
           object.type === 'Identifier' &&
           property.type === 'Identifier' &&
           ((object.name === 'Math' && property.name === 'random') ||
-            (object.name === 'Date' && property.name === 'now'))
+            (object.name === 'Date' && property.name === 'now') ||
+            object.name === 'crypto' ||
+            object.name === 'Bun')
         ) {
-          issues.push('Inject time and entropy into the domain.');
+          issues.push('Inject runtime effects through application ports.');
         }
+      }
+      if (
+        pure &&
+        node.callee.type === 'Identifier' &&
+        ['fetch', 'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval'].includes(
+          node.callee.name,
+        )
+      ) {
+        issues.push('Inject runtime effects through application ports.');
       }
     },
     NewExpression(node) {

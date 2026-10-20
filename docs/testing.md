@@ -279,3 +279,9 @@ A regressão do histórico expandido exige 48 px entre o fim da lista rolável e
 O E2E de aumentos verifica a proporção máxima 4,1:1 e altura mínima de 58 px do botão principal nos viewports desktop/mobile padrão, além do fundo com altura automática. Os cenários multiplayer mantêm a verificação de que ações não cobrem a mão durante seleção de poderes em celulares pequenos.
 
 A ampliação da observação do Espião tem regressões DOM para abertura, foco, fechamento por botão/Escape/fundo, troca e remoção do intel e descarte da face após jogada opaca. O E2E solo usa a preparação real do Espião e verifica o diálogo, proporção 2:3 e restauração de foco em desktop/mobile.
+
+## Regressões de Clean Architecture
+
+`tooling/tests/architecture.test.ts` verifica dependências de domínio/aplicação e efeitos de runtime proibidos. `architecture-graph.test.ts` verifica dependências indiretas por barrels e ciclos do servidor; o checker roda sobre os arquivos reais em `bun run check:architecture`. `tooling/architecture/graph.ts` participa do inventário obrigatório de cobertura.
+
+Os casos de uso de sessões têm testes com repositório, relógio e credenciais falsos. Os de salas preservam as regressões de idempotência, contexto, privacidade e timers, além de testar ordem de validação e um decoder alternativo independente do envelope de rede. A integração exercita os mesmos contratos HTTP/WS após a separação de controllers, handlers e composição. Não reduza cobertura ou substitua integração real por mocks para aprovar uma reorganização.

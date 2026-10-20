@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 import { WSContext } from 'hono/ws';
-import { sendSocketMessage } from '../../src/modules/transport/adapters/outbound';
+import { sendSocketMessage } from '../../src/modules/transport/adapters/outbound/socket-publisher';
+
 const message = { type: 'ACK', commandId: 'test', ok: true, sequence: 1 } as const;
 test('output authenticates expiry, validates the envelope and bounds native output', () => {
   const sent: string[] = [];

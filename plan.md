@@ -481,3 +481,31 @@ Validação da reorganização: inventários Playwright comparados antes/depois 
 ## Verificação para envio — 19/10/2026
 
 `bun run check` aprovado: lint (20 avisos existentes), formatação, tipagem, 328 testes, cobertura de 104 fontes e build. E2E aprovado em grupos isolados: 40 cenários padrão desktop/mobile, 6 solo dev/produção e 8 de idiomas/tutorial (54 execuções). A primeira execução conjunta com dois workers encontrou rate limit HTTP e perdeu a janela de distribuição; os mesmos cenários passaram com um worker e servidores novos por grupo, sem alterar limites ou afrouxar asserções. Build padrão restaurado com `VITE_BACKEND_URL='' bun run build`. Configuração pessoal `.zed/settings.json` mantida fora do commit. Push autorizado pelo usuário; sem deploy solicitado.
+
+- Textos dos poderes no mobile: removidas as três regras que ocultavam descrições; tipografia e área de pergaminho ajustadas para os quatro poderes, incluindo Espião e o título longo de Segunda Chance. Regressão E2E verifica visibilidade e ausência de transbordamento em 390×844, 320×568 e 844×390. Inspeção visual via playwright-cli com interação touch e conferência desktop.
+Validação desta correção: check completo aprovado (328 testes, cobertura de 104 fontes), E2E focado aprovado em Chromium desktop/mobile (2 casos cobrindo quatro poderes e três resoluções), capturas touch e desktop inspecionadas. Sem commit ou push nesta etapa.
+
+- Recorte mobile da carta especial: removida a energia absoluta que cobria a base nas telas até 720 px de altura. Estado oculto não reserva uma linha vazia. Teste E2E exige ao menos 3 px entre a carta completa e a barra nos quatro poderes e três resoluções. Inspeção visual via playwright-cli confirmou a base e o selo inteiros em retrato, paisagem e desktop touch.
+Check completo aprovado (328 testes, cobertura de 104 fontes) e dois E2E focados aprovados. Sem commit ou push nesta etapa.
+
+- Espaçamento das jogadas no 2v2: ampliado o intervalo vertical incluindo as legendas em desktop e mobile. Retrato muito baixo adapta a escala e a posição da mão da dupla. Regressão focada aprovada em cinco resoluções (320×568, 375×667, 390×844, 1280×720 e 1440×1000), verificando proporção, intervalo mínimo de 8 px e distância dos jogadores. Check completo aprovado (328 testes e 104 fontes cobertas). Inspeção via playwright-cli em desktop e três celulares. O E2E amplo de 1v1 passou; o de 2v2 não concluiu nesta execução (timeouts e alvo do Espião desaparecendo durante preparação). A checagem ampla também detectou sobreposição entre o dock de poderes e um assento lateral em tela compacta; não considerada validada por esta correção focada. Sem commit ou push.
+
+## Migração do backend para Clean Architecture — 20/10/2026
+
+Migração autorizada e implementada com divisão de trabalho por módulos; decisão registrada na ADR 010. `rooms` separa estado de domínio e envelope operacional, com casos de uso explícitos, ports, repository em memória e executor serializado compartilhado. `matches` mantém política pura de relógio. `sessions` separa entidade, emissão/consulta/renomeação, repository e credenciais. HTTP/WS saíram de bootstrap para adaptadores de `transport`; composition roots e entradas públicas montam as dependências sem fachadas vazias.
+
+Regressões preservam autenticação antes de decodificação, deduplicação antes de avanço do tempo, filas recuperáveis, timers obsoletos e desconexão atrasada após reingresso. Verificador ampliado cobre dependências indiretas por barrels e ciclos no servidor. Nenhuma mudança de regras, protocolo público, persistência, infraestrutura ou dependências.
+
+`bun run check` aprovado: lint (20 avisos existentes), formatação, tipagem, 351 testes, cobertura de 140 fontes executáveis e build. Integração isolada também aprovada (28 testes). E2E aprovado em 26 cenários selecionados: perfil/lobby (14), partidas completas 1v1/2v2 desktop/mobile (4), solo/dev/produção (8). O lote inicial de perfil atingiu HTTP 429; os casos passaram em servidor novo, sem alterar limites. Um helper de geometria anterior aguardava cartas inexistentes na preparação do 2v2; corrigida a condição de existência, preservando a asserção após jogadas, e o fluxo passou. Sem commit ou push solicitado nesta etapa. Alterações visuais anteriores e configuração pessoal do Zed preservadas.
+
+## Histórico lateral no mobile — 20/10/2026
+
+Histórico recolhido por padrão numa aba com seta na lateral direita em celulares e paisagem baixa. Ao tocar, abre o pergaminho com altura limitada e rolagem interna; o mesmo botão ou Escape recolhe. Conteúdo fechado fica oculto para leitores de tela. Desktop mantém o painel visível; acompanhamento da última ação e pausa ao rolar manualmente preservados.
+
+`bun run check` aprovado (351 testes, cobertura de 140 fontes, 20 avisos existentes de lint). Quatro E2E de histórico/cenário aprovados em desktop/mobile, incluindo abertura, fechamento, Escape e três tamanhos compactos. A primeira execução encontrou uma asserção inadequada para uma lista vazia de altura zero; corrigida para verificar o aviso de histórico vazio e a visibilidade CSS da lista. Inspeção visual via playwright-cli em 320×568, 375×667, 844×390 e 1440×900, aberto e recolhido. Sem commit ou push.
+
+## Organização interna da aplicação de salas — 20/10/2026
+
+Primeiro nível de `rooms/application` padronizado por responsabilidade: `use-cases`, `services`, `ports`, `dto` e `state`, além da entrada `room-application` e seu teste. Coordenação de lobby/partida/bot/despacho agrupada em `services`; fila, presença e preparação de entropia também são serviços. Mapeadores de projeção e erros seguros ficam em `dto/mappers`; reset de desenvolvimento fica em `use-cases/solo`. Imports e testes realocados; regras, funções e fronteiras preservadas. Documentação de arquitetura e ADR 010 atualizadas.
+
+`bun run check` aprovado: lint (20 avisos existentes), formatação, typecheck, 351 testes, cobertura de 140 fontes e build. Integração HTTP/WS isolada aprovada (21 testes). Não repetido E2E de navegador nesta reorganização sem mudança de comportamento ou interface. Sem commit ou push.

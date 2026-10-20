@@ -22,6 +22,7 @@ export async function verifyCoverageInventory(root: string, reports: CoverageRep
     'apps/*/src/**/*.{ts,tsx,js,jsx,mts,cts,mjs,cjs}',
     'packages/*/src/**/*.{ts,tsx,js,jsx,mts,cts,mjs,cjs}',
     'tooling/architecture/analyze.ts',
+    'tooling/architecture/graph.ts',
     'apps/server/database/**/*.ts',
   ]) {
     for await (const source of new Bun.Glob(pattern).scan({ cwd: root, onlyFiles: true })) {

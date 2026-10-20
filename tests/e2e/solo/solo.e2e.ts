@@ -76,3 +76,44 @@ test('Spy observation opens a proportional card preview and restores focus', asy
   await preview.getByRole('button', { name: 'Fechar carta' }).click();
   await expect(preview).toHaveCount(0);
 });
+
+test('all power descriptions remain visible inside their parchment on small screens', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await enterNickname(page, 'Leitor');
+  await page.getByRole('button', { name: 'Jogar', exact: true }).click();
+  for (const power of ['spy', 'exchange', 'boost', 'mask']) {
+    await page.locator('.room-menu > summary').click();
+    await page.getByText('Ferramentas de desenvolvimento', { exact: true }).click();
+    await page.getByLabel('Poder de teste').selectOption(power);
+    await page.getByRole('button', { name: 'Aplicar cenário e reiniciar mão' }).click();
+    await page.getByRole('button', { name: 'Fechar menu da sala' }).click();
+    await expect(page.locator('.game-table[data-transition]')).toHaveCount(0);
+    for (const viewport of [
+      { width: 390, height: 844 },
+      { width: 320, height: 568 },
+      { width: 844, height: 390 },
+    ]) {
+      await page.setViewportSize(viewport);
+      const card = page.locator(`.power-${power}`);
+      await card.focus();
+      const cardBox = await card.boundingBox();
+      const energyBox = await page.locator('.power-energy').boundingBox();
+      if (!cardBox || !energyBox) throw new Error('Power card or energy is missing');
+      expect(energyBox.y - cardBox.y - cardBox.height).toBeGreaterThanOrEqual(3);
+      const hint = card.locator('.power-card-hint');
+      await expect(hint).toBeVisible();
+      await expect(hint).not.toBeEmpty();
+      expect(
+        await hint.evaluate(
+          (element) =>
+            element.scrollHeight <= element.clientHeight &&
+            element.scrollWidth <= element.clientWidth,
+        ),
+        `${power} at ${viewport.width}×${viewport.height}: ${await hint.evaluate((e) => JSON.stringify({ width: e.clientWidth, height: e.clientHeight, scrollWidth: e.scrollWidth, scrollHeight: e.scrollHeight }))}`,
+      ).toBe(true);
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+  }
+});

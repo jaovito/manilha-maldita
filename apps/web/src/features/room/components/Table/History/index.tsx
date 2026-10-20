@@ -46,7 +46,10 @@ export function TableHistory({ room, match }: { room: RoomView; match: MatchView
           aria-label={expanded ? t('Recolher histórico') : t('Expandir histórico')}
           onClick={() => setExpanded(!expanded)}
         >
-          <span aria-hidden="true">{expanded ? '−' : '+'}</span>
+          <span className="history-toggle-desktop" aria-hidden="true">
+            {expanded ? '−' : '+'}
+          </span>
+          <span className="history-toggle-arrow" aria-hidden="true" />
         </button>
       </header>
       <ol

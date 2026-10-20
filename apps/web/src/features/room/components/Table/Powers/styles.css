@@ -215,17 +215,6 @@
     width: 64px;
     bottom: 164px;
   }
-  .power-dock:has(.power-card) .power-energy {
-    position: absolute;
-    left: 1px;
-    bottom: 2px;
-    width: calc(100% - 2px);
-    height: 20px;
-    padding: 2px;
-    margin: 0;
-    border: 0;
-    background: #0a2028;
-  }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {

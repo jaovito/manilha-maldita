@@ -53,21 +53,40 @@ Organize primeiro por funcionalidade; dentro de cada módulo, separe domínio, a
 
 ```text
 apps/server/src/
-  bootstrap/                 # configuração e montagem das dependências
+  bootstrap/                 # configuração e montagem do processo
   modules/
     rooms/
-      domain/                # lobby, assentos e pronto
-      application/           # criar sala, entrar e iniciar partida
-      adapters/              # transporte e armazenamento em memória
-    matches/
-      application/           # comandos, serialização e coordenação de timers
-      adapters/              # transporte, agendamento e entropia de produção
+      domain/                # estado da sala, membros e configuração
+      application/
+        use-cases/           # membership, lobby, match e solo
+        services/            # fila e ciclo de vida; lobby, match, membership, solo e messaging
+        ports/               # entrada, repositório, publicação e runtime
+        dto/                 # comandos, projeções internos e mappers de saída
+        state/               # envelope operacional da sala
+      adapters/
+        inbound/             # validação dos contratos públicos
+        outbound/            # repositório em memória e runtime
+      composition.ts         # montagem das dependências do módulo
     sessions/
-      application/           # identidade convidada e retomada
-      adapters/              # cookies, tokens e armazenamento
+      domain/entities/       # identidade convidada e validade
+      application/
+        use-cases/           # emitir, consultar e renomear sessão
+        ports/               # armazenamento, relógio e credenciais
+      adapters/outbound/     # memória e geração criptográfica
+      composition.ts
+    matches/
+      domain/                # política pura de tempo/reconexão
+    transport/
+      adapters/
+        inbound/http/        # controllers e middleware de segurança
+        inbound/websocket/   # handler de conexão e mensagens
+        outbound/            # serialização e limites de saída
+      composition.ts         # montagem dos handlers Hono
 ```
 
-Crie somente módulos e camadas exercitados pelo incremento atual. `matches` usa o domínio de `packages/game-core`; não duplique esse domínio em `apps/server`. A autoridade da sala coordena lobby e partida pela mesma fila, inclusive início e revanche; não crie escritores independentes para o mesmo estado.
+Crie somente módulos e camadas exercitados pelo incremento atual. `matches` usa o domínio de `packages/game-core`; não duplique esse domínio em `apps/server`. A autoridade da sala coordena lobby e partida pela mesma fila, inclusive início e revanche; não crie escritores independentes para o mesmo estado. A separação implementada e os limites do repositório em memória estão registrados na [ADR 010](adr/010-explicit-clean-architecture.md).
+
+Dentro de `application`, o primeiro nível expressa responsabilidade arquitetural; funcionalidades agrupam arquivos dentro de `use-cases` e `services`. Não mantenha `lobby`, `match` ou `solo` como pastas irmãs dessas responsabilidades. `services` contém coordenação compartilhada, consultas de presença e preparação da entropia recebida por port; `state` contém apenas a estrutura operacional. `dto/mappers` constrói projeções autorizadas e traduz erros seguros para saída. A operação de desenvolvimento que reinicia a mão é um caso de uso em `use-cases/solo`, com suas restrições de ambiente e autorização preservadas.
 
 A aplicação conhece o domínio e define os contratos de que precisa para efeitos externos. Adaptadores implementam esses contratos e dependem da aplicação/domínio, nunca o inverso. `bootstrap` conecta as implementações concretas por parâmetros ou construtores, sem container de DI obrigatório. Hono e APIs de Bun ficam nas bordas.
 
@@ -203,6 +222,8 @@ Snapshots completos filtrados são aceitáveis no MVP; diffs são otimização p
 
 ## Interface e experiência de jogo
 
+Em celulares (até 600 px) e paisagem baixa (até 500 px de altura), o histórico começa recolhido numa aba lateral de 44 px com seta. O botão abre/fecha o pergaminho; Escape recolhe mantendo foco no mesmo controle. O conteúdo fechado fica oculto também para tecnologias assistivas. O painel aberto limita sua altura à tela e mantém rolagem interna, acompanhando novas ações somente enquanto o leitor estiver no final. Desktop mantém o histórico visível.
+
 Jogadas confirmadas animam a face autorizada da origem na mão até o slot da mesa por 380 ms, usando Web Animations. O clique local apenas registra geometria; rejeição não inicia movimento. Adversários partem de um verso anônimo, sem identificar a carta privada. Cobertas e máscaras preservam a representação já autorizada. Primeira carga, troca de mão/partida e retomada após pausa não reproduzem jogadas antigas; SYNC repetido não duplica o voo. Movimento reduzido desativa o deslocamento. O destaque de vencedor e os efeitos do poder iniciam ao pousar, dentro da pausa autoritativa existente.
 
 O título e o valor da aposta ocupam áreas proporcionais dentro do medalhão, com folga para sua borda circular também em telas compactas.
@@ -311,12 +332,12 @@ O M1 foi entregue sem campos ou execução de poderes/energia. O M3 acrescentou 
 
 ## Autoridade e transporte implementados no M2
 
-`RoomService` em `modules/rooms/application` é o escritor único do lobby, presença, partida, timers e revanche. `serializeRoom` mantém a fila limitada e recupera após rejeições. Um comando recebido no deadline primeiro resolve a expiração e depois valida seu contexto; callbacks de timer carregam a decisão e não atingem mãos/revanches seguintes. A identidade da sala na fila é verificada também após remoção, impedindo callbacks de uma sala antiga de escrever em outra com o mesmo código.
+A entrada de salas delega à `RoomApplication`; os casos de uso, o executor de comandos e o serviço de ciclo de vida compartilham a mesma autoridade operacional. `serializeRoom` mantém a fila limitada e recupera após rejeições. Um comando recebido no deadline primeiro resolve a expiração e depois valida seu contexto; callbacks de timer carregam a decisão e não atingem mãos/revanches seguintes. A identidade da sala na fila é verificada também após remoção, impedindo callbacks de uma sala antiga de escrever em outra com o mesmo código.
 
-A aplicação de salas é agrupada por responsabilidade: `state/` contém contratos, presença e entradas de aleatoriedade; `lobby/` reúne criação e comandos de configuração; `match/` coordena jogadas, decisões e transições; `solo/` contém o bot e as ferramentas de desenvolvimento; `messaging/` concentra projeções, despacho e erros de comandos. `room-service.ts` e `room-queue.ts` permanecem na raiz como pontos de coordenação e serialização. Os testes de cada área ficam junto de seus módulos; o serviço mantém seus testes de ciclo de vida na raiz. Os consumidores externos continuam usando `modules/rooms/index.ts`.
+A aplicação de salas expõe casos de uso em `use-cases/membership`, `use-cases/lobby` e `use-cases/match`. `services/` coordena execução, publicação e agendamento; `state/` descreve o envelope operacional, separado do estado de domínio; `ports/` declara os contratos de efeitos e acesso à autoridade. `solo/` preserva a política de bot com visão limitada e ferramentas de desenvolvimento. `messaging/` constrói projeções internas e despacha comandos. Os consumidores externos usam as entradas públicas dos módulos. O repositório de salas retém a instância viva com sua fila; uma futura implementação durável exige novo desenho de consistência, não apenas trocar `Map` por SQL.
 
 
-A entrada `@truco/game-protocol` contém schemas estritos de envelope, ações, configurações e snapshots, sem dependência do estado secreto. Os subpaths públicos do core são os declarados no manifesto; a checagem de arquitetura admite somente essas entradas e mantém o core inteiro proibido ao navegador. O domínio continua puro. A aplicação recebe relógio, entropia e agendamento por `Ports`; `bootstrap/runtime` implementa UUIDs, rejection sampling criptográfico sem viés e timers canceláveis sobre tempo epoch monotônico.
+A entrada `@truco/game-protocol` contém schemas estritos de envelope, ações, configurações e snapshots, sem dependência do estado secreto. Os subpaths públicos do core são os declarados no manifesto; a checagem de arquitetura admite somente essas entradas e mantém o core inteiro proibido ao navegador. O domínio continua puro. A aplicação recebe relógio, entropia e agendamento por `Ports`; `rooms/adapters/outbound/runtime.ts` implementa UUIDs, rejection sampling criptográfico sem viés e timers canceláveis sobre tempo epoch monotônico.
 
 `sequence` ordena snapshots completos; `roomRevision` fecha mudanças de lobby; `match.revision` e `decisionId` fecham decisões de gameplay. Presença altera sequência sem invalidar revisão de gameplay. Antes de efeitos ou rejeição de versão, uma requisição autenticada consulta o cache de `sessionId/matchId/commandId`: mesmo conteúdo recebe o ACK/erro original; conteúdo diferente é recusado. O cache guarda 512 respostas recentes por sala, e contexto/revisão protegem replay após evicção. O cliente usa UUID por comando, ignora snapshots repetidos/antigos e nunca repete automaticamente uma intenção após reconectar. Ao recuperar foco ou visibilidade, solicita um snapshot autorizado por `SYNC`, sem reaplicar intenções; os listeners são removidos ao fechar a conexão. Snapshots completos já ressincronizam lacunas; uma ação `SYNC` permite solicitá-los explicitamente.
 
@@ -412,7 +433,7 @@ O sintetizador Web Audio produz quatro efeitos originais de aumento e um motivo 
 
 ### Treino solo e ferramentas dev
 
-[ADR 009](adr/009-solo-training-and-development-tools.md) registra a extensão autorizada. RoomService agenda bot e timers na mesma fila; `solo/bot.ts` passa somente a projeção ao pacote game-sim. O bootstrap resolve flags independentes e bloqueia ferramentas fora de development. `solo/dev-tools.ts` recria uma mão consistente preservando o placar; o envelope e cache existentes impedem replay e contexto obsoleto. O frontend busca `/api/features` para habilitar Jogar e importa o painel condicionalmente apenas no Vite dev, exigindo também autorização da sala.
+[ADR 009](adr/009-solo-training-and-development-tools.md) registra a extensão autorizada. O serviço de ciclo de vida de salas agenda bot e timers na mesma fila; `solo/bot.ts` passa somente a projeção ao pacote game-sim. O bootstrap resolve flags independentes e bloqueia ferramentas fora de development. `solo/dev-tools.ts` recria uma mão consistente preservando o placar; o envelope e cache existentes impedem replay e contexto obsoleto. O frontend busca `/api/features` para habilitar Jogar e importa o painel condicionalmente apenas no Vite dev, exigindo também autorização da sala.
 
 
 ### Cenário modular da partida
@@ -440,3 +461,9 @@ No 1v1, `Table/Theme/tableau.css` reserva a altura da carta e da legenda em cada
 A face observada pelo Espião aceita clique/toque para ampliar a mesma carta autorizada em um diálogo nativo, mantendo proporção 2:3. O diálogo retém o foco, fecha por botão, Escape ou fundo e restaura o foco ao acionador quando ele ainda existe. A troca/remoção da observação desmonta a ampliação; a memória textual após jogada opaca não cria uma nova face na mão. Essa consulta local não envia comandos nem pausa os timers.
 
 O valor 5 nas faces usa Manilha Card Numerals, uma derivação de um único glifo da Pixelify Sans Bold sob SIL OFL 1.1. Mantém as métricas, baseline e espessuras originais; topo reto e haste esquerda contínua distinguem o cinco de S. O asset é reproduzível por `tooling/fonts/build-card-five.py`. Não há SVG sobreposto: o valor continua texto, herda a cor do naipe e a rotação da quina inferior. Os demais caracteres usam a fonte original.
+
+Descrições das cartas de poder permanecem visíveis também em retrato e paisagem mobile. Usam a área de pergaminho da arte, fonte Jersey 25 e tamanho proporcional à carta; Espião reserva uma área própria abaixo do medalhão. O título de Segunda Chance escala para não quebrar fora da faixa em celulares estreitos. Não altera dimensões das cartas ou interação de ativação.
+
+Em celulares baixos, energia permanece no fluxo abaixo da carta de poder, sem posicionamento absoluto sobre a arte. Quando o texto de estado é ocultado por falta de altura, ele deixa de reservar espaço; a carta e seu selo inferior continuam inteiros, com separação da barra de energia.
+
+No 2v2, a área das jogadas reserva um intervalo vertical entre a legenda superior e a face inferior. O espaço cresce por breakpoint sem distorcer as faces. Em retrato até 600 px de altura, as cartas da dupla ficam ao lado da identificação e as jogadas usam escala menor, preservando a proporção 2:3 e o espaço da mão local.

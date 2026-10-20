@@ -1,0 +1,103 @@
+.history-toggle-arrow {
+  display: none;
+}
+
+/* A side tab leaves the playing field clear on phones, including landscape. */
+@media (max-width: 600px), (max-height: 500px) and (orientation: landscape) {
+  .game-shell .table-information {
+    position: absolute;
+    top: clamp(112px, 24dvh, 180px);
+    right: env(safe-area-inset-right, 0px);
+    left: auto;
+    width: min(360px, calc(100% - 48px));
+    max-height: none;
+    pointer-events: none;
+    z-index: 12;
+  }
+
+  .game-shell .table-information .table-history {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    height: auto;
+    max-height: calc(100dvh - clamp(112px, 24dvh, 180px) - 16px);
+    overflow: visible;
+    display: flex;
+    flex-direction: column;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .game-shell .table-information .table-history[data-expanded="true"] {
+    visibility: visible;
+    pointer-events: auto;
+    padding: 8px 14%;
+  }
+
+  .game-shell .table-history .history-heading {
+    float: none;
+    margin: 0 0 8px;
+  }
+
+  .game-shell .table-history h3 {
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .game-shell .table-history .history-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 52px;
+    visibility: visible;
+    pointer-events: auto;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #183b32, #071c21);
+    border: 2px solid #d5a64c;
+    border-right: 0;
+    border-radius: 18px 0 0 18px;
+    box-shadow:
+      -3px 4px 0 #07130ec9,
+      inset 2px 0 #ffe1a3;
+  }
+
+  .game-shell .table-history[data-expanded="true"] .history-toggle {
+    right: 100%;
+  }
+
+  .game-shell .table-history .history-toggle-desktop {
+    display: none;
+  }
+
+  .game-shell .table-history .history-toggle-arrow {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-left: 3px solid currentColor;
+    border-bottom: 3px solid currentColor;
+    transform: rotate(45deg);
+  }
+
+  .game-shell .table-history[data-expanded="true"] .history-toggle-arrow {
+    transform: rotate(225deg);
+  }
+
+  .game-shell .table-history[data-expanded="true"] .history-list {
+    min-height: 0;
+    max-height: 48dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .game-shell .table-history .history-entry,
+  .game-shell .table-history .history-empty {
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .game-shell .table-history .history-empty {
+    flex: none;
+  }
+}

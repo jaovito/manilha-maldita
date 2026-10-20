@@ -72,6 +72,16 @@ No frontend, `app` reúne montagem, `App/` e estilos globais; cada feature agrup
 
 Cada workspace declara suas dependências. `game-core` expõe as entradas `./cards`, `./deal`, `./tricks`, `./hands`, `./betting`, `./match` e `./projections` para composição interna do motor; estado privado e identidades físicas não são DTOs de transporte. `game-protocol` expõe somente os schemas/tipos públicos pela entrada raiz; o frontend não importa o core. `game-sim` executa cenários sintéticos com o mesmo core; PixiJS continua previsto para quando necessário.
 
+## Arquitetura do backend
+
+O backend é um monólito modular com Clean Architecture. `rooms` coordena os casos de uso de sala e partida; `sessions` implementa emissão, consulta e alteração de identidade convidada; `matches` fornece políticas puras de tempo; `transport` contém controllers HTTP, middleware e handlers WebSocket. As regras de cartas e poderes permanecem no pacote puro `game-core`.
+
+Dentro dos módulos, `domain` contém entidades/políticas, `application/use-cases` contém operações, `application/ports` define contratos e `adapters` implementa integrações. Arquivos `composition.ts` montam dependências; `bootstrap` inicia e encerra o processo. Não há container de DI nem persistência por jogada.
+
+O estado da sala é separado de seu envelope operacional. A fila continua única por sala: casos de uso, timers e bot não escrevem independentemente. O repositório em memória conserva essa autoridade viva, sem promessa de recuperação após reiniciar. Consulte a [ADR 010](docs/adr/010-explicit-clean-architecture.md) para dependências e limites da migração.
+
+`bun run check:architecture` fiscaliza imports, chamadas diretas de runtime nas camadas internas, ciclos locais do servidor e acesso indireto a adaptadores por barrels. Testes de casos de uso e integração HTTP/WS verificam o comportamento; o verificador estático não substitui essas provas.
+
 ## Banco de desenvolvimento e testes
 
 PostgreSQL 18.6 via Docker Compose, com instâncias e credenciais locais distintas para desenvolvimento e testes. Desenvolvimento usa volume persistente; testes usam armazenamento temporário.

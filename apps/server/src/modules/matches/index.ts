@@ -1,7 +1,7 @@
+export type { DecisionClock } from './domain/decision-clock';
 export {
   createClock,
-  updateConnectivity,
   expirations,
   nextWakeAt,
-} from './application/decision-clock';
-export type { DecisionClock } from './application/decision-clock';
+  updateConnectivity,
+} from './domain/decision-clock';

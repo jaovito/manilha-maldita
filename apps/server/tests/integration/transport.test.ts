@@ -1,14 +1,18 @@
 import { expect, test } from 'bun:test';
 import {
-  defaultRoomConfig,
   type ClientMessage,
+  clientMessageSchema,
+  defaultRoomConfig,
   type RoomView,
   type ServerMessage,
 } from '@truco/game-protocol';
-import { createTransport, type RoomPort } from '../../src/bootstrap/transport';
+import type { RoomPort } from '../../src/modules/rooms';
+import { createSessions } from '../../src/modules/sessions';
+import { createTransport } from '../../src/modules/transport';
+import { createLimiter } from '../../src/modules/transport/adapters/rate-limiter';
 
 const origin = 'http://truco.test';
-const room: RoomView = {
+const room = {
   code: 'ABC123',
   sequence: 1,
   roomRevision: 0,
@@ -23,7 +27,7 @@ const room: RoomView = {
   match: null,
   outcome: null,
   selfSeat: 0,
-};
+} satisfies RoomView;
 function fixture() {
   const received: ClientMessage[] = [];
   const disconnected: string[] = [];
@@ -48,12 +52,20 @@ function fixture() {
     },
     async receive(_code, _session, _connection, message) {
       if (failure) throw new Error(failure);
-      received.push(message);
-      return { type: 'ACK', ok: true, commandId: message.commandId, sequence: 1 };
+      const parsed = clientMessageSchema.parse(message);
+      received.push(parsed);
+      return { type: 'ACK', ok: true, commandId: parsed.commandId, sequence: 1 };
     },
   };
   let time = 0;
-  const transport = createTransport({ rooms, allowedOrigins: [origin], now: () => time });
+  const now = () => time;
+  const transport = createTransport({
+    rooms,
+    sessions: createSessions(now),
+    limiter: createLimiter(now),
+    allowedOrigins: [origin],
+    now,
+  });
   const server = Bun.serve({
     hostname: '127.0.0.1',
     port: 0,
@@ -338,6 +350,18 @@ test('CORS allows credentialed HTTP only for exact configured origins, including
         candidate === origin ? origin : null,
       );
     }
+  } finally {
+    await f.stop();
+  }
+});
+
+test('transport exposes health and explicit feature flags without guest authentication', async () => {
+  const f = fixture();
+  try {
+    const health = await f.request('/health');
+    expect(await health.json()).toEqual({ status: 'ok' });
+    const features = await f.request('/api/features');
+    expect(await features.json()).toEqual({ solo: false });
   } finally {
     await f.stop();
   }

@@ -25,6 +25,40 @@ test('history follows new plays unless the reader scrolls away from the end', as
     for (const client of pages) {
       await clickAndSync(pages, client, client.getByRole('button', { name: 'Passar preparação' }));
     }
+    const originalViewport = page.viewportSize();
+    for (const viewport of [
+      { width: 375, height: 667 },
+      { width: 320, height: 568 },
+      { width: 844, height: 390 },
+    ]) {
+      await page.setViewportSize(viewport);
+      const open = page.getByRole('button', { name: 'Expandir histórico' });
+      await expect(open).toBeInViewport();
+      await expect(page.locator('.history-list')).toBeHidden();
+      await expect(page.locator('.history-empty')).toBeHidden();
+      const tab = await open.boundingBox();
+      if (!tab) throw new Error('Aba do histórico ausente');
+      expect(tab.width).toBeGreaterThanOrEqual(44);
+      expect(tab.height).toBeGreaterThanOrEqual(44);
+      expect(tab.x).toBeGreaterThanOrEqual(viewport.width - 48);
+
+      await open.click();
+      await expect(page.locator('.history-empty')).toBeVisible();
+      await expect(page.locator('.history-list')).toHaveCSS('visibility', 'visible');
+      const panel = await page.locator('.table-history').boundingBox();
+      if (!panel) throw new Error('Painel do histórico ausente');
+      expect(panel.x).toBeGreaterThanOrEqual(44);
+      expect(panel.x + panel.width).toBeLessThanOrEqual(viewport.width);
+      expect(panel.y + panel.height).toBeLessThanOrEqual(viewport.height);
+      const close = page.getByRole('button', { name: 'Recolher histórico' });
+      await close.click();
+      await expect(page.locator('.history-list')).toBeHidden();
+      await open.click();
+      await close.press('Escape');
+      await expect(open).toBeFocused();
+      await expect(page.locator('.history-list')).toBeHidden();
+    }
+    if (originalViewport) await page.setViewportSize(originalViewport);
     await page.getByRole('button', { name: 'Expandir histórico' }).click();
     // A bounded reading window guarantees overflow independently of dealt ranks and fonts.
     await page.addStyleTag({ content: '.history-list { max-height: 60px !important; }' });

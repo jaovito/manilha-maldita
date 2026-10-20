@@ -52,6 +52,20 @@ export async function assertTableGeometry(page: Page, count: 2 | 4) {
       expect(Math.abs(first.x - second.x)).toBeLessThanOrEqual(1);
     }
   }
+  if (count === 4 && (page.viewportSize()?.width ?? 0) <= 600) {
+    const upperCard = page.locator('.play-relative-2');
+    const lowerCard = page.locator('.play-relative-0');
+    if ((await upperCard.count()) > 0 && (await lowerCard.count()) > 0) {
+      const upper = await upperCard.boundingBox();
+      const lower = await lowerCard.boundingBox();
+      if (!upper || !lower) throw new Error('Jogadas verticais ausentes.');
+
+      expect(
+        lower.y - upper.y - upper.height,
+        'Vertical 2v2 plays need space for captions',
+      ).toBeGreaterThanOrEqual(8);
+    }
+  }
   expect(opponent.y + opponent.height).toBeLessThanOrEqual(center.y);
   expect(center.y + center.height, JSON.stringify({ center, ownPlayer })).toBeLessThanOrEqual(
     ownPlayer.y,

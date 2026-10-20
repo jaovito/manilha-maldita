@@ -15,6 +15,12 @@ const blocked = [
   ['apps/web/src/features/lobby/fixture.ts', "import '../match/model/private';"],
   ['apps/server/src/modules/rooms/domain/fixture.ts', "import 'hono';"],
   ['apps/server/src/modules/rooms/application/fixture.ts', "import '../adapters/store';"],
+  ['apps/server/src/modules/rooms/application/fixture.ts', "import '@truco/game-protocol';"],
+  ['apps/server/src/modules/rooms/application/fixture.ts', 'Date.now();'],
+  ['apps/server/src/modules/rooms/application/fixture.ts', 'crypto.randomUUID();'],
+  ['apps/server/src/modules/rooms/application/fixture.ts', 'Bun.file("state");'],
+  ['apps/server/src/modules/rooms/application/fixture.ts', 'setTimeout(() => {}, 1);'],
+  ['apps/server/src/modules/rooms/domain/fixture.ts', 'fetch("/state");'],
   [
     'apps/server/src/modules/rooms/application/fixture.ts',
     "import '../../matches/application/private';",
@@ -34,6 +40,7 @@ for (const [filePath, code] of [
   ['apps/web/src/app/fixture.ts', "import '@truco/game-protocol';"],
   ['apps/server/src/modules/matches/application/fixture.ts', "import '@truco/game-core';"],
   ['apps/server/src/modules/matches/application/fixture.ts', "import '@truco/game-core/match';"],
+  ['apps/server/src/modules/rooms/domain/fixture.ts', "import '@truco/game-core/match';"],
   ['packages/game-core/src/cards/fixture.ts', "import './rank';"],
 ] as const) {
   test(`architecture permits the public boundary ${code}`, () => {

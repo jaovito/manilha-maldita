@@ -189,9 +189,6 @@
     font-size: 17px;
     padding: 4px 1px;
   }
-  .power-card-hint {
-    display: none;
-  }
   .power-card-state {
     min-height: 2.8em;
     font-size: 10px;
@@ -216,9 +213,6 @@
     min-width: 0;
     font-size: 13px;
     padding: 3px 1px;
-  }
-  .power-card-hint {
-    display: none;
   }
   .power-card-state {
     min-height: 2.1em;
