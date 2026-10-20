@@ -222,6 +222,8 @@ Snapshots completos filtrados são aceitáveis no MVP; diffs são otimização p
 
 ## Interface e experiência de jogo
 
+Na tela de resultado, sair é uma navegação local: fecha o socket, cancela reconexões e limpa sala, convite na URL e estado de feedback. Se houver conexão, o cliente envia `LEAVE` antes de fechar, sem aguardar ACK. Sem conexão, “Voltar ao menu” e “Sair da sala” continuam disponíveis para qualquer jogador; revanche e retorno ao lobby continuam dependendo do servidor e das permissões do anfitrião. Isso não altera abandono, pontuação ou remoção autoritativa de membros. Durante lobby/partida em andamento, a saída mantém o fluxo de confirmação existente.
+
 Em celulares (até 600 px) e paisagem baixa (até 500 px de altura), o histórico começa recolhido numa aba lateral de 44 px com seta. O botão abre/fecha o pergaminho; Escape recolhe mantendo foco no mesmo controle. O conteúdo fechado fica oculto também para tecnologias assistivas. O painel aberto limita sua altura à tela e mantém rolagem interna, acompanhando novas ações somente enquanto o leitor estiver no final. Desktop mantém o histórico visível.
 
 Jogadas confirmadas animam a face autorizada da origem na mão até o slot da mesa por 380 ms, usando Web Animations. O clique local apenas registra geometria; rejeição não inicia movimento. Adversários partem de um verso anônimo, sem identificar a carta privada. Cobertas e máscaras preservam a representação já autorizada. Primeira carga, troca de mão/partida e retomada após pausa não reproduzem jogadas antigas; SYNC repetido não duplica o voo. Movimento reduzido desativa o deslocamento. O destaque de vencedor e os efeitos do poder iniciam ao pousar, dentro da pausa autoritativa existente.

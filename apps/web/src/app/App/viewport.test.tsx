@@ -152,7 +152,7 @@ test('the active game keeps the audio menu collapsed and omits frozen room setti
   expect(view.socket.sent).toHaveLength(1);
 });
 
-test('finishing holds the celebration before a compact menu with rematch and acknowledged leave', async () => {
+test('finishing holds the celebration before a compact menu with rematch and immediate local exit', async () => {
   const view = await openGame();
   let finishCelebration: (() => void) | undefined;
   Object.defineProperty(window, 'setTimeout', {
@@ -205,12 +205,6 @@ test('finishing holds the celebration before a compact menu with rematch and ack
   fireEvent.click(screen.getByRole('button', { name: 'Sair da sala' }));
   const leave = view.socket.sent.at(-1);
   expect(leave?.action).toEqual({ type: 'LEAVE' });
-  expect(view.container.querySelector('.game-table')).not.toBeNull();
-  act(() =>
-    view.socket.onmessage?.({
-      data: JSON.stringify({ type: 'ACK', commandId: leave?.commandId, ok: true, sequence: 3 }),
-    }),
-  );
   expect(screen.queryByRole('region', { name: 'Mesa da partida' })).toBeNull();
   expect(screen.getByLabelText('Apelido')).toBeDefined();
   expect(view.socket.readyState).toBe(3);

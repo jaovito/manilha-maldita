@@ -86,6 +86,7 @@ export function MatchResult({
   const defeat =
     room.outcome?.reason === 'completed' && resultPerspective(room, outcome.winner) === 'lose';
   const host = room.selfSeat === room.hostSeat;
+  const returnToMenu = room.solo || !connected;
   const hostReason = !connected
     ? t('Aguarde reconectar para continuar.')
     : !host
@@ -201,17 +202,15 @@ export function MatchResult({
               </button>
               <button
                 type="button"
-                disabled={!connected || !host}
-                {...disabledHint(hostReason)}
-                onClick={() => send({ type: room.solo ? 'LEAVE' : 'REMATCH' })}
+                disabled={!returnToMenu && !host}
+                {...disabledHint(returnToMenu ? null : hostReason)}
+                onClick={() => send({ type: returnToMenu ? 'LEAVE' : 'REMATCH' })}
               >
-                {room.solo ? t('Voltar ao menu') : t('Voltar ao lobby')}
+                {returnToMenu ? t('Voltar ao menu') : t('Voltar ao lobby')}
               </button>
               <button
                 type="button"
                 className="button-quiet"
-                disabled={!connected}
-                {...disabledHint(!connected ? t('Aguarde reconectar para sair da sala.') : null)}
                 onClick={() => send({ type: 'LEAVE' })}
               >
                 {t('Sair da sala')}
@@ -219,7 +218,7 @@ export function MatchResult({
             </div>
             <p className="match-end-hint" role="status">
               {!connected
-                ? t('Reconectando… Ações aguardam conexão.')
+                ? t('Sem conexão. Você pode voltar ao menu ou sair da sala.')
                 : room.solo
                   ? t('Revanche inicia outra partida contra o bot.')
                   : host

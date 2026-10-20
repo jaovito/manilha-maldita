@@ -347,3 +347,41 @@ test('returning to a tab resynchronizes a missed lobby update without replaying 
     else Reflect.deleteProperty(document, 'visibilityState');
   }
 });
+
+for (const connected of [true, false]) {
+  for (const button of connected ? ['Sair da sala'] : ['Voltar ao menu', 'Sair da sala']) {
+    test(`abandonment result can ${button} with connected=${connected} without an ACK`, async () => {
+      installSocket();
+      location.href = 'http://localhost/?room=ABC123';
+      Object.defineProperty(globalThis, 'fetch', {
+        configurable: true,
+        writable: true,
+        value: mock(async () => new Response(JSON.stringify({ nickname: 'Ana' }))),
+      });
+      render(<App />);
+      await waitFor(() => expect(Socket.instances).toHaveLength(1));
+      const ws = socket();
+      act(() => {
+        if (connected) ws.onopen?.();
+        else ws.readyState = 3;
+        ws.snapshot({
+          ...playing(),
+          status: 'finished',
+          selfSeat: 1,
+          outcome: { winner: 'A', reason: 'abandonment' },
+        });
+      });
+      await screen.findByRole('dialog', { name: 'Resultado da partida' });
+      const sent = ws.sent.length;
+      fireEvent.click(screen.getByRole('button', { name: button }));
+      expect(screen.queryByRole('dialog', { name: 'Resultado da partida' })).toBeNull();
+      expect(screen.getByRole('button', { name: 'Criar sala' })).toBeDefined();
+      expect(location.search).toBe('');
+      expect(ws.readyState).toBe(3);
+      expect(ws.onmessage).toBeNull();
+      expect(ws.onclose).toBeNull();
+      expect(ws.sent).toHaveLength(sent + (connected ? 1 : 0));
+      if (connected) expect(JSON.parse(ws.sent.at(-1) ?? '{}').action.type).toBe('LEAVE');
+    });
+  }
+}

@@ -20,7 +20,7 @@ function finalRoom(base: RoomView): RoomView {
   };
 }
 
-test('final menu exposes only authorized room actions, keeps keyboard focus and waits for connection', () => {
+test('final menu keeps authorized room actions, keyboard focus and offline exit available', () => {
   const room = finalRoom(playing());
   const view = render(<MatchResult send={send} room={room} />);
   const menu = screen.getByRole('dialog', { name: 'Resultado da partida' });
@@ -59,10 +59,15 @@ test('final menu exposes only authorized room actions, keeps keyboard focus and 
   fireEvent.click(lobby);
   expect(send).toHaveBeenCalledTimes(3);
   view.rerender(<MatchResult send={send} room={room} connected={false} />);
-  expect(leave.hasAttribute('disabled')).toBe(true);
-  expect(leave.getAttribute('data-disabled-reason')).toContain('reconectar');
+  expect(leave.hasAttribute('disabled')).toBe(false);
+  expect(screen.getByRole('button', { name: 'Voltar ao menu' }).hasAttribute('disabled')).toBe(
+    false,
+  );
   expect(rematch.getAttribute('data-disabled-reason')).toContain('reconectar');
-  expect(screen.getByText(/Reconectando/)).toBeDefined();
+  expect(screen.getByText(/Sem conexão/)).toBeDefined();
+  fireEvent.click(screen.getByRole('button', { name: 'Voltar ao menu' }));
+  fireEvent.click(leave);
+  expect(send.mock.calls.slice(-2)).toEqual([[{ type: 'LEAVE' }], [{ type: 'LEAVE' }]]);
   fireEvent.keyDown(leave, { key: 'Tab' });
   fireEvent.keyDown(title, { key: 'Tab', shiftKey: true });
 });

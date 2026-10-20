@@ -133,6 +133,8 @@ export const tableEnglish = {
   'Voltar ao menu': 'Back to menu',
   'Voltar ao lobby': 'Back to lobby',
   'Aguarde reconectar para sair da sala.': 'Wait for reconnection to leave the room.',
+  'Sem conexão. Você pode voltar ao menu ou sair da sala.':
+    'Disconnected. You can return to the menu or leave the room.',
   'Revanche inicia outra partida contra o bot.': 'Rematch starts another match against the bot.',
   'Revanche e retorno ao lobby aguardam todos confirmarem pronto novamente.':
     'Rematch and return to the lobby require everyone to confirm they are ready again.',

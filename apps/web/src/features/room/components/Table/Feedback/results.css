@@ -55,7 +55,7 @@
 .match-end-layer {
   position: fixed;
   inset: 0;
-  z-index: 10;
+  z-index: 20;
   display: grid;
   place-items: center;
   padding: 16px;

@@ -150,13 +150,27 @@ export function App() {
       connection.current?.send(envelope(room, action));
       return;
     }
-    connection.current?.send(envelope(room, action), () => {
+    const leave = () => {
       connection.current?.close();
       connection.current = null;
+      reset();
       setRoom(null);
       setConnected(false);
+      setCode('');
       history.replaceState(null, '', '/');
-    });
+    };
+
+    // A finished match cannot hold navigation hostage to an unavailable ACK.
+    if (room.status === 'finished') {
+      try {
+        if (connected) connection.current?.send(envelope(room, action));
+      } finally {
+        leave();
+      }
+      return;
+    }
+
+    connection.current?.send(envelope(room, action), leave);
   };
 
   return (
