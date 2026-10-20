@@ -1,36 +1,47 @@
-/* Nine-slice framing keeps the scroll's folds outside the text at any height. */
-@media (min-width: 601px) {
-  .game-shell .table-information .table-history {
-    --paper-top: 24px;
-    --paper-bottom: 40px;
-    background: none;
-    border-style: solid;
-    border-color: transparent;
-    border-width: var(--paper-top) 0 var(--paper-bottom);
-    border-image:
-      url("/art/table-ui/parchment.png") 120 90 140 fill / var(--paper-top) 14% var(--paper-bottom)
-      / 0 stretch;
-    padding: 8px 14%;
-  }
+/* The original 614×768 artwork scales uniformly; only the inner list scrolls. */
+.game-shell .table-information {
+  width: min(23vw, calc(46dvh * 614 / 768));
+  height: auto;
+  aspect-ratio: 614 / 768;
+  max-height: none;
 }
 
+.game-shell .table-information .table-history,
 .game-shell .table-information .table-history[data-expanded="true"] {
-  --paper-top: 24px;
-  --paper-bottom: 40px;
-  background: none;
-  border-style: solid;
-  border-color: transparent;
-  border-width: var(--paper-top) 0 var(--paper-bottom);
-  border-image:
-    url("/art/table-ui/parchment.png") 120 90 140 fill / var(--paper-top) 14% var(--paper-bottom) /
-    0 stretch;
-  padding: 8px 14%;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  border: 0;
+  border-image: none;
+  padding: 18% 14% 22%;
+  background: url("/art/table-ui/parchment.png") center / contain no-repeat;
+  image-rendering: pixelated;
+  overflow: visible;
 }
 
-@media (max-height: 500px) and (orientation: landscape) {
-  .game-shell .table-information .table-history[data-expanded="false"] {
-    --paper-top: 8px;
-    --paper-bottom: 16px;
-    padding-block: 4px;
-  }
+.game-shell .table-history .history-heading {
+  min-width: 0;
+  margin: 0;
+}
+
+.game-shell .table-history h3 {
+  min-width: 0;
+}
+
+.game-shell .table-information .table-history .history-list {
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.game-shell .table-history .history-empty {
+  margin: 0;
 }

@@ -32,6 +32,14 @@ export async function preparePowers(pages: Page[]) {
   }
   for (const page of pages) {
     await expect(page.locator('.spy-observation')).toHaveCount(spies.has(page) ? 1 : 0);
+    await expect(page.locator('.history-spy-intel')).toHaveCount(spies.has(page) ? 1 : 0);
+    if (spies.has(page)) {
+      const label = await page.locator('.spy-observation').getAttribute('aria-label');
+      if (!label) throw new Error('Carta espiada sem nome acessível');
+      await expect(page.locator('.history-spy-intel')).toContainText(
+        label.replace('Ampliar carta revelada: ', ''),
+      );
+    }
     await assertPlayingCardRatios(page);
     if (consumed.has(page)) await expect(page.locator('.power-card')).toHaveCount(0);
   }

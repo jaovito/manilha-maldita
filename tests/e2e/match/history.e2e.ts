@@ -50,10 +50,12 @@ test('history follows new plays unless the reader scrolls away from the end', as
       expect(panel.x).toBeGreaterThanOrEqual(44);
       expect(panel.x + panel.width).toBeLessThanOrEqual(viewport.width);
       expect(panel.y + panel.height).toBeLessThanOrEqual(viewport.height);
+      expect(Math.abs(panel.width / panel.height - 614 / 768)).toBeLessThan(0.002);
       const close = page.getByRole('button', { name: 'Recolher histórico' });
       await close.click();
       await expect(page.locator('.history-list')).toBeHidden();
       await open.click();
+      expect(await page.locator('.table-history').boundingBox()).toEqual(panel);
       await close.press('Escape');
       await expect(open).toBeFocused();
       await expect(page.locator('.history-list')).toBeHidden();
@@ -63,9 +65,13 @@ test('history follows new plays unless the reader scrolls away from the end', as
     // A bounded reading window guarantees overflow independently of dealt ranks and fonts.
     await page.addStyleTag({ content: '.history-list { max-height: 60px !important; }' });
     const history = page.locator('.history-list');
+    const emptyFrame = await page.locator('.table-history').boundingBox();
+    if (!emptyFrame) throw new Error('Pergaminho ausente');
+    expect(Math.abs(emptyFrame.width / emptyFrame.height - 614 / 768)).toBeLessThan(0.002);
     const play = async () => {
       const actor = await findActivePlayer(pages);
       await clickAndSync(pages, actor, actor.locator('.hand-cards .card:enabled').first());
+      expect(await page.locator('.table-history').boundingBox()).toEqual(emptyFrame);
     };
 
     await play();
@@ -93,7 +99,10 @@ test('history follows new plays unless the reader scrolls away from the end', as
     const list = await history.boundingBox();
     if (!frame || !list) throw new Error('Histórico ausente');
     expect(frame.y + frame.height - list.y - list.height).toBeGreaterThanOrEqual(48);
-    await expect(page.locator('.table-history')).toHaveCSS('border-bottom-width', '40px');
+    await expect(page.locator('.table-history')).toHaveCSS('background-size', 'contain');
+    await expect(page.locator('.table-history')).toHaveCSS('image-rendering', 'pixelated');
+    await page.getByRole('button', { name: 'Recolher histórico' }).click();
+    expect(await page.locator('.table-history').boundingBox()).toEqual(emptyFrame);
   } finally {
     await context.close();
   }

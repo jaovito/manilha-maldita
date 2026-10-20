@@ -22,6 +22,8 @@ export const feedbackEnglish = {
   PONTOS: 'POINTS',
   'VAZA {0}': 'TRICK {0}',
   'Histórico público': 'Public history',
+  'Histórico da partida': 'Match history',
+  'Só você · Carta espiada: {0}.': 'Only you · Spied card: {0}.',
   '✦ ÚLTIMAS AÇÕES': '✦ LATEST ACTIONS',
   'Equipe {0}': 'Team {0}',
   jogou: 'played',

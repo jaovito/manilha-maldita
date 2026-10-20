@@ -88,6 +88,7 @@ test('table composes independent artwork at every viewport without intercepting 
       const paper = await page.locator('.table-history').boundingBox();
       const entries = await page.locator('.history-list').boundingBox();
       if (!paper || !entries) throw new Error('Pergaminho do histórico ausente');
+      expect(Math.abs(paper.width / paper.height - 614 / 768)).toBeLessThan(0.002);
       expect(entries.x - paper.x).toBeGreaterThanOrEqual(paper.width * 0.13);
       expect(paper.x + paper.width - entries.x - entries.width).toBeGreaterThanOrEqual(
         paper.width * 0.13,

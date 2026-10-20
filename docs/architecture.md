@@ -226,6 +226,10 @@ Na tela de resultado, sair é uma navegação local: fecha o socket, cancela rec
 
 Em celulares (até 600 px) e paisagem baixa (até 500 px de altura), o histórico começa recolhido numa aba lateral de 44 px com seta. O botão abre/fecha o pergaminho; Escape recolhe mantendo foco no mesmo controle. O conteúdo fechado fica oculto também para tecnologias assistivas. O painel aberto limita sua altura à tela e mantém rolagem interna, acompanhando novas ações somente enquanto o leitor estiver no final. Desktop mantém o histórico visível.
 
+O pergaminho mantém a proporção original 614:768, com `background-size: contain` e amostragem pixelada. O viewport define seu tamanho; conteúdo vazio, novas ações, textos longos e expansão dos detalhes não mudam a moldura. A lista interna rola dentro das margens reservadas às dobras, sem deformar ou fatiar a arte. O aviso de histórico vazio também pertence à área interna de leitura.
+
+O histórico combina ações públicas com a observação privada do próprio Espião, identificada por “Só você”. A carta vem exclusivamente de `match.powers.intel` da projeção autorizada e só acompanha a ativação do próprio assento com o alvo correspondente. Continua como registro do que foi visto mesmo depois da jogada; uma nova mão usa somente o novo snapshot, sem guardar cartas no navegador. Parceiro, alvo e demais jogadores recebem apenas as ativações públicas, sem essa observação privada.
+
 Jogadas confirmadas animam a face autorizada da origem na mão até o slot da mesa por 380 ms, usando Web Animations. O clique local apenas registra geometria; rejeição não inicia movimento. Adversários partem de um verso anônimo, sem identificar a carta privada. Cobertas e máscaras preservam a representação já autorizada. Primeira carga, troca de mão/partida e retomada após pausa não reproduzem jogadas antigas; SYNC repetido não duplica o voo. Movimento reduzido desativa o deslocamento. O destaque de vencedor e os efeitos do poder iniciam ao pousar, dentro da pausa autoritativa existente.
 
 O título e o valor da aposta ocupam áreas proporcionais dentro do medalhão, com folga para sua borda circular também em telas compactas.

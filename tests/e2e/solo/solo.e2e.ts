@@ -61,6 +61,12 @@ test('Spy observation opens a proportional card preview and restores focus', asy
     .first()
     .click();
   const observation = page.getByRole('button', { name: /^Ampliar carta revelada:/ });
+  const revealedLabel = await observation.getAttribute('aria-label');
+  if (!revealedLabel) throw new Error('Carta espiada sem nome acessível');
+  await expect(page.locator('.history-spy-intel')).toHaveCount(1);
+  await expect(page.locator('.history-spy-intel')).toContainText(
+    revealedLabel.replace('Ampliar carta revelada: ', ''),
+  );
   await observation.click();
   const preview = page.getByRole('dialog', { name: 'Carta revelada pelo Espião' });
   await expect(preview).toBeVisible();

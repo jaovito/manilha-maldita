@@ -7,6 +7,7 @@ import { powerNames } from '../Powers';
 
 export function TableHistory({ room, match }: { room: RoomView; match: MatchView }) {
   const { hand } = match;
+  const intel = match.powers?.intel;
   const [expanded, setExpanded] = useState(false);
   const listId = useId();
   const listRef = useRef<HTMLOListElement>(null);
@@ -31,7 +32,7 @@ export function TableHistory({ room, match }: { room: RoomView; match: MatchView
     <section
       className="table-history"
       data-expanded={expanded}
-      aria-label={t('Histórico público')}
+      aria-label={t('Histórico da partida')}
       onKeyDown={(event) => {
         if (event.key === 'Escape') setExpanded(false);
       }}
@@ -75,6 +76,13 @@ export function TableHistory({ room, match }: { room: RoomView; match: MatchView
             <p>
               {t('Alvo:')} {room.seats[activation.target]?.nickname ?? t('Jogador')}.
             </p>
+            {activation.power === 'spy' &&
+              activation.seat === room.selfSeat &&
+              intel?.target === activation.target && (
+                <p className="history-spy-intel">
+                  {t('Só você · Carta espiada: {0}.', [cardLabel(intel.card)])}
+                </p>
+              )}
           </li>
         ))}
         {hand.completedTricks.map((trick, index) => (
@@ -111,10 +119,10 @@ export function TableHistory({ room, match }: { room: RoomView; match: MatchView
             ])}
           </li>
         ))}
+        {hand.completedTricks.length === 0 && hand.plays.length === 0 && (
+          <li className="history-empty">{t('As jogadas desta mão aparecerão aqui.')}</li>
+        )}
       </ol>
-      {hand.completedTricks.length === 0 && hand.plays.length === 0 && (
-        <p className="history-empty">{t('As jogadas desta mão aparecerão aqui.')}</p>
-      )}
     </section>
   );
 }

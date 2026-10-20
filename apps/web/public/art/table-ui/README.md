@@ -13,4 +13,6 @@ Prompts de produção: peças isoladas de interface 2D em pixel art, vistas de f
 
 Uso: `Table/Theme` compõe os materiais com fundos CSS e camadas decorativas sem interceptar cliques. As cartas comuns, versos, atlas de poderes e suas proporções não foram alterados. O backend não depende destes arquivos.
 
+O pergaminho usa sua proporção original de 614×768, com escala uniforme e `image-rendering: pixelated`. Sua moldura tem tamanho definido pelo viewport e não acompanha o volume de texto; somente a lista interna rola. Não usar escala independente nos eixos nem border-image para esticar a peça.
+
 Distribuição: PNGs com alfa, redimensionados para até 768 px (brasões/pergaminho) ou 1024 px (faixas/madeira), total aproximado de 2 MB.

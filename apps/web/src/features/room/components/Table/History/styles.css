@@ -6,24 +6,18 @@
 @media (max-width: 600px), (max-height: 500px) and (orientation: landscape) {
   .game-shell .table-information {
     position: absolute;
-    top: clamp(112px, 24dvh, 180px);
+    --history-top: clamp(80px, 12dvh, 112px);
+    --history-tab-top: clamp(112px, 24dvh, 180px);
+    top: var(--history-top);
     right: env(safe-area-inset-right, 0px);
     left: auto;
-    width: min(360px, calc(100% - 48px));
+    width: min(360px, calc(100% - 48px), calc(42dvh * 614 / 768));
     max-height: none;
     pointer-events: none;
     z-index: 12;
   }
 
   .game-shell .table-information .table-history {
-    position: relative;
-    inset: auto;
-    width: 100%;
-    height: auto;
-    max-height: calc(100dvh - clamp(112px, 24dvh, 180px) - 16px);
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
     visibility: hidden;
     pointer-events: none;
   }
@@ -31,12 +25,11 @@
   .game-shell .table-information .table-history[data-expanded="true"] {
     visibility: visible;
     pointer-events: auto;
-    padding: 8px 14%;
   }
 
   .game-shell .table-history .history-heading {
     float: none;
-    margin: 0 0 8px;
+    margin: 0;
   }
 
   .game-shell .table-history h3 {
@@ -46,7 +39,7 @@
 
   .game-shell .table-history .history-toggle {
     position: absolute;
-    top: 0;
+    top: calc(var(--history-tab-top) - var(--history-top));
     right: 0;
     width: 44px;
     height: 52px;
@@ -86,7 +79,7 @@
 
   .game-shell .table-history[data-expanded="true"] .history-list {
     min-height: 0;
-    max-height: 48dvh;
+    max-height: none;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
@@ -99,5 +92,12 @@
 
   .game-shell .table-history .history-empty {
     flex: none;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .game-shell .table-information {
+    --history-top: 72px;
+    width: min(360px, calc(100% - 48px), calc((100dvh - var(--history-top) - 16px) * 614 / 768));
   }
 }
