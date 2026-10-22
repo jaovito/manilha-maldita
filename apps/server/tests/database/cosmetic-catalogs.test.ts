@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
 import { getTableConfig } from 'drizzle-orm/pg-core';
 import { avatars, deckThemes, tableThemes } from '../../database/schema';
-import { rejectsConstraint, withM5Fixture } from './m5-fixtures';
+import { rejectsConstraint, withDatabaseFixture } from './database-fixtures';
 
 test('three independent cosmetic catalogs expose only curated presentation metadata', () => {
   for (const table of [avatars, deckThemes, tableThemes]) {
@@ -13,7 +13,7 @@ test('three independent cosmetic catalogs expose only curated presentation metad
 });
 
 test('avatar URLs reject remote hosts, traversal, scripts and query fragments', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     for (const avatarUrl of [
       'https://remote.example/avatar.png',
       '//remote/avatar.png',
@@ -48,7 +48,7 @@ test('avatar URLs reject remote hosts, traversal, scripts and query fragments', 
   }));
 
 test('deck and table styles are allowlisted keys with valid unlock requirements', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     for (const table of [deckThemes, tableThemes]) {
       const name = getTableConfig(table).name;
       await rejectsConstraint(tx, `${name}_asset`, (sp) =>

@@ -5,7 +5,8 @@ import { getTableConfig } from 'drizzle-orm/pg-core';
 import { connectLocalDatabase } from '../../database/connect';
 import { jobs, matchResults } from '../../database/schema';
 import { localDatabaseUrl } from '../../database/target';
-import { ensureM5Schema, rejectsConstraint, resultValues, withM5Fixture } from './m5-fixtures';
+import { ensureDatabaseSchema, rejectsConstraint, withDatabaseFixture } from './database-fixtures';
+import { resultValues } from './match-fixtures';
 
 test('queue schema has targeted indexes, typed result references and no secret payload', () => {
   const config = getTableConfig(jobs);
@@ -19,7 +20,7 @@ test('queue schema has targeted indexes, typed result references and no secret p
 });
 
 test('jobs enforce idempotency, bounded retries, lease states and safe error codes', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     const result = resultValues();
     await tx.insert(matchResults).values(result);
     const value = { matchId: result.id, kind: 'match_rewards' as const };
@@ -83,7 +84,7 @@ test('jobs enforce idempotency, bounded retries, lease states and safe error cod
   }));
 
 test('NOTIFY wakes only after commit, rollback is silent, and a missed wake leaves durable work', async () => {
-  await ensureM5Schema();
+  await ensureDatabaseSchema();
   const writer = connectLocalDatabase('test');
   const listener = new SQL(localDatabaseUrl('test'), { max: 1 });
   const received: string[] = [];
@@ -167,7 +168,7 @@ test('NOTIFY wakes only after commit, rollback is silent, and a missed wake leav
 }, 10_000);
 
 test('two real PostgreSQL consumers skip a reserved row and rollback releases it', async () => {
-  await ensureM5Schema();
+  await ensureDatabaseSchema();
   const fixture = connectLocalDatabase('test');
   const consumers = new SQL(localDatabaseUrl('test'), { max: 2, connectionTimeout: 3 });
   const first = resultValues();

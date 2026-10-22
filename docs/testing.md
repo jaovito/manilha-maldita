@@ -34,6 +34,10 @@ A configuração padrão exclui `solo/` e `settings/i18n.e2e.ts`, pois dependem 
 
 ## Testes obrigatórios
 
+`apps/server/tests/integration/sql-injection.test.ts` sobe o `startServer` real em porta efêmera, usa duas sessões/jogadores reais e envia payloads por HTTP/WebSocket, sem substituir serviços por mocks. Exercita apelido, cookies, código de sala no path, configuração, IDs/contexto/revisão de comando, cartas, campos extras e tipos inválidos. Verifica respostas exatas sem echo/stack, perfil/sala preservados e ação válida depois do ataque. SYNC com snapshot novo serve de barreira de protocolo para verificar o estado autoritativo, sem sleeps ou leitura apenas do cache do cliente.
+
+Esses cenários são E2E do backend até a autoridade em memória. Hoje não há endpoint persistente de fila/contas/resultados: portanto eles não comprovam HTTP → PostgreSQL. `queue-injection.test.ts` cobre separadamente o adaptador/backend contra PostgreSQL real, incluindo injeção de segunda ordem. Ao integrar produtor/rotas persistentes, acrescentar percurso completo com fixtures no banco de testes e checagem de linhas de controle; não criar rota de teste ou mock que faça parecer que essa integração já existe.
+
 Use testes determinísticos e relógio falso; não escreva testes baseados em esperar segundos reais. Não substitua casos de regra por snapshots extensos de objetos.
 
 | Área | Casos mínimos de regressão |
@@ -108,7 +112,13 @@ O domínio possui código executável de regras-base, composição e projeções
 
 ## Testes de banco
 
-O setup do M5 acrescenta regressões reais em `apps/server/tests/database/m5-*.test.ts`: formato de hashes, unicidade e FKs, exclusão/anonimização, totais bigint e não negativos, catálogos locais, contexto de recompensas, unicidade de jobs, estados/tentativas/reservas e códigos de erro. Fixtures são transacionais e revertidas; casos de notificações/concorrência usam conexões independentes, commits reais e limpeza apenas dos próprios resultados.
+`queue-injection.test.ts` acrescenta entradas `unknown` malformadas, limites e payloads com aspas/comentários/separadores. Uma regressão aceita IDs válidos que coincidem com palavras SQL, sem blacklist; outra grava deliberadamente uma referência maliciosa como dado literal em fixture para provar parametrização de segunda ordem durante processamento/UPDATE. Compara também resultado de controle e incremento exato, além da rejeição do produtor. Não executar SQL destrutivo nem inferir segurança somente da ausência de erro.
+
+O incremento 2 do M5 acrescenta `queue-processing.test.ts` e `queue-concurrency.test.ts`, que exercitam o adaptador real: enqueue junto ao resultado, deduplicação sem reset de tentativas, erro SQL em savepoint, rollback de efeitos, backoff/teto, prazo futuro, reservas expiradas, consumidores concorrentes e `pg_terminate_backend` exclusivamente na conexão criada pela fixture. O último cenário comprova rollback após perda real da conexão e sucesso de outro consumidor sem crédito duplicado. Alterações de XP nesses testes são fixtures de atomicidade, não política de produto. A suíte de exclusão do setup passou a filtrar a própria conta, permitindo coexistir com outras fixtures no banco de testes.
+
+Unitários em `src/modules/jobs` usam scheduler controlado para inicialização, polling sem aviso, coalescência, limite de rodada, concorrência, falhas de storage/telemetria e shutdown aguardando trabalho ativo. Testes de banco sincronizam concorrência com promises/barreiras, sem sleeps para inferir ausência de efeito; nenhuma conexão/instância de usuário é encerrada. A suíte não afirma que produtor/handler de recompensas ou worker estejam ativados no jogo.
+
+O setup do M5 acrescenta regressões reais em `apps/server/tests/database/{accounts,cosmetic-catalogs,match-results,schema,queue-schema}.test.ts`: formato de hashes, unicidade e FKs, exclusão/anonimização, totais bigint e não negativos, catálogos locais, contexto de recompensas, unicidade de jobs, estados/tentativas/reservas e códigos de erro. Fixtures são transacionais e revertidas; casos de notificações/concorrência usam conexões independentes, commits reais e limpeza apenas dos próprios resultados.
 
 A entrega de NOTIFY é sincronizada por um canal-barreira separado: ausência antes do commit/rollback não é inferida de um sleep. A suíte verifica que um job continua consultável sem listener e que dois consumidores PostgreSQL com SKIP LOCKED não selecionam a mesma linha reservada; rollback a libera. Não há teste alegando worker, retry automático, login ou desbloqueio implementados. Testes de metadados conferem separação de credenciais/perfil/progresso e ausência de payload privado nos resumos; esses testes também exercitam callbacks do schema sem excluir arquivos da cobertura.
 
@@ -289,3 +299,5 @@ A ampliação da observação do Espião tem regressões DOM para abertura, foco
 `tooling/tests/architecture.test.ts` verifica dependências de domínio/aplicação e efeitos de runtime proibidos. `architecture-graph.test.ts` verifica dependências indiretas por barrels e ciclos do servidor; o checker roda sobre os arquivos reais em `bun run check:architecture`. `tooling/architecture/graph.ts` participa do inventário obrigatório de cobertura.
 
 Os casos de uso de sessões têm testes com repositório, relógio e credenciais falsos. Os de salas preservam as regressões de idempotência, contexto, privacidade e timers, além de testar ordem de validação e um decoder alternativo independente do envelope de rede. A integração exercita os mesmos contratos HTTP/WS após a separação de controllers, handlers e composição. Não reduza cobertura ou substitua integração real por mocks para aprovar uma reorganização.
+
+Os testes de persistência são nomeados pelo contexto, sem depender do número do milestone. `account-fixtures.ts` prepara contas e hash de senha fictícia; `match-fixtures.ts` prepara resultados e participantes; `database-fixtures.ts` centraliza migrations, rollback e verificação de constraints. `queue-fixtures.ts` isola conexões e limpeza dos cenários com commits reais.

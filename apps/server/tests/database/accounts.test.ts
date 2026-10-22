@@ -10,12 +10,8 @@ import {
   sessions,
   tableThemes,
 } from '../../database/schema';
-import {
-  fixturePasswordHash,
-  insertAccount,
-  rejectsConstraint,
-  withM5Fixture,
-} from './m5-fixtures';
+import { fixturePasswordHash, insertAccount } from './account-fixtures';
+import { rejectsConstraint, withDatabaseFixture } from './database-fixtures';
 
 test('account schema separates credentials, public profile and derived progress', () => {
   expect(getTableConfig(accounts).columns.map((column) => column.name)).toEqual([
@@ -35,7 +31,7 @@ test('account schema separates credentials, public profile and derived progress'
 });
 
 test('accounts reject plaintext passwords and duplicate or noncanonical login names', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     const accountId = await insertAccount(tx);
     const [account] = await tx.select().from(accounts).where(eq(accounts.id, accountId));
     expect(account?.status).toBe('active');
@@ -54,7 +50,7 @@ test('accounts reject plaintext passwords and duplicate or noncanonical login na
   }));
 
 test('session verifiers are unique hashes with expiration and cascade on account deletion', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     const accountId = await insertAccount(tx);
     const tokenHash = 'a'.repeat(64);
     const createdAt = new Date('2026-01-01T00:00:00Z');
@@ -80,13 +76,15 @@ test('session verifiers are unique hashes with expiration and cascade on account
     await tx.insert(playerProgress).values({ accountId });
     await tx.insert(profiles).values({ accountId, nickname: 'Jogador' });
     await tx.delete(accounts).where(eq(accounts.id, accountId));
-    expect(await tx.select().from(sessions)).toEqual([]);
-    expect(await tx.select().from(profiles)).toEqual([]);
-    expect(await tx.select().from(playerProgress)).toEqual([]);
+    expect(await tx.select().from(sessions).where(eq(sessions.accountId, accountId))).toEqual([]);
+    expect(await tx.select().from(profiles).where(eq(profiles.accountId, accountId))).toEqual([]);
+    expect(
+      await tx.select().from(playerProgress).where(eq(playerProgress.accountId, accountId)),
+    ).toEqual([]);
   }));
 
 test('progress uses nonnegative bigint totals without writable level and profiles reference curated catalogs', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     const accountId = await insertAccount(tx);
     const avatarId = `avatar-${accountId}`;
     const deckId = `deck-${accountId}`;

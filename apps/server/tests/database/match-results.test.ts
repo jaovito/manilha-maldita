@@ -2,7 +2,8 @@ import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { getTableConfig } from 'drizzle-orm/pg-core';
 import { accounts, matchParticipants, matchResults, matchRewards } from '../../database/schema';
-import { insertParticipant, rejectsConstraint, resultValues, withM5Fixture } from './m5-fixtures';
+import { rejectsConstraint, withDatabaseFixture } from './database-fixtures';
+import { insertParticipant, resultValues } from './match-fixtures';
 
 test('results and reward schema retain summaries without hands, seeds or generic payloads', () => {
   for (const table of [matchResults, matchParticipants, matchRewards]) {
@@ -16,7 +17,7 @@ test('results and reward schema retain summaries without hands, seeds or generic
 });
 
 test('results enforce unique matches, bounded scores, winner semantics and timestamps', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     const result = resultValues();
     await tx.insert(matchResults).values(result);
     await rejectsConstraint(tx, 'match_results_pkey', (sp) =>
@@ -65,7 +66,7 @@ test('results enforce unique matches, bounded scores, winner semantics and times
   }));
 
 test('participants cannot forge context, occupy two seats with one account, or exceed format capacity', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     const { id, accountId, result } = await insertParticipant(tx);
     const value = {
       matchId: result.id,
@@ -121,7 +122,7 @@ test('participants cannot forge context, occupy two seats with one account, or e
   }));
 
 test('reward uniqueness and linked context reject duplicated grants and competitive points in casual or solo', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     const competitive = await insertParticipant(tx);
     const reward = {
       participantId: competitive.id,

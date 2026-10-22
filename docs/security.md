@@ -58,6 +58,28 @@ Fila guarda apenas referência ao resumo da partida. O canal NOTIFY não contém
 
 Sem integração de runtime, não se declara proteção implementada contra fraude de ranking, combinação de vitórias, elegibilidade incorreta, seleção indevida de cosmético ou repetição de efeitos do worker. TLS, criptografia de volumes/backups e papéis de produção continuam sem verificação de ambiente. A fila não recupera partidas que nunca foram persistidas.
 
+### Segurança do consumidor PostgreSQL (M5, incremento 2)
+
+O consumidor transacional agora existe como componente explícito, ainda sem processador de recompensas ou ativação no servidor. Não expõe HTTP/WS, não recebe XP/pontos ou timestamps de cliente e não executa código/URLs do job. Enqueue recebe transação existente e FK para resultado; o produtor autoritativo ainda será integrado. Políticas de login, antifraude e desbloqueio continuam pendentes.
+
+Processador SQL e conclusão do job compartilham transação; erro reverte efeitos ao savepoint e conexões perdidas revertem todo o trabalho. Retentativas não dão garantia de exactly-once para serviços externos. Processadores são código confiável e não podem sair do handle transacional, confirmar/fechar transação ou executar I/O externo. A tipagem não substitui revisão dessas invariantes. Não misturar com outros consumidores que usem conclusão por lease/token sem revisar fencing.
+
+NOTIFY/reconexão acordam varredura, sem usar payload como comando. Scheduler coalesce avisos e limita operações por rodada; retry e polling têm limites validados. Somente códigos fixos de falha são persistidos e os eventos operacionais não incluem IDs, payload, stack ou credenciais. Falha do sink de telemetria não altera o processamento. A conexão SQL deve ser fornecida pelo futuro bootstrap com privilégios mínimos, TLS validado e limites de pool; este incremento não configura produção nem armazena senhas na fila.
+
+### SQL parametrizado e validação de entrada
+
+A revisão da fila não encontrou concatenação de valores em SQL executável: tagged templates de Bun.SQL vinculam valores como parâmetros; templates comuns, concatenação com `+`, APIs `unsafe` ou `sql.raw` com dados de entrada não têm essa garantia. SQL de migrations e expressões de schema são código versionado, não consultas montadas a partir do navegador. A parametrização deve permanecer em todas as consultas, inclusive quando o valor veio do próprio banco, para evitar injeção de segunda ordem.
+
+O produtor da fila agora recebe IDs/limites como `unknown` e valida tipo em runtime antes de gravar: ID opaco de 1 a 80 caracteres ASCII alfanuméricos, hífen ou underscore, conforme protocolo; tentativas como número inteiro entre 1 e 100, sem coerção de strings/objetos. Identificadores de schema/tabela/coluna, ORDER BY e comandos SQL ficam estáticos. Qualquer futura seleção dinâmica deve mapear enum validado para identificadores confiáveis; nunca interpolar um nome enviado pelo usuário como SQL livre.
+
+Validar o contrato de cada campo é defesa adicional. Não usar blacklist de palavras como SELECT/DROP, remoção de aspas ou regex que tente reconhecer SQL como proteção principal. Um identificador válido chamado SELECT é dado literal; senhas/textos não devem ser reescritos para “escapar SQL”. Isso não altera os contratos de apelido existentes, autorização de recursos, validações de regras nem o requisito de privilégio mínimo no deploy.
+
+Regressões reais exercitam payloads com aspas, comentários e separadores de instruções, tipos inesperados, limites e uma referência maliciosa já armazenada. A referência é tratada literalmente no processamento/UPDATE, sem atingir a linha de controle nem produzir incremento extra. Esses testes validam os caminhos exercitados, não comprovam segurança global do ambiente ou dos futuros endpoints de conta.
+
+Testes de rede adicionais sobem o bootstrap real, duas sessões e HTTP/WebSocket para injetar payloads nos contratos existentes. Rejeições mantêm perfil/estado autoritativo e não bloqueiam comandos válidos posteriores; cookies maliciosos não autenticam. Isso cobre a fronteira de rede até a autoridade em memória. Como endpoints persistentes ainda não existem, a garantia HTTP → banco permanece pendente de integração; os testes PostgreSQL são separados e não substituem esse percurso futuro.
+
+Referências: [Bun.SQL — tagged templates](https://bun.sh/docs/runtime/sql), [OWASP — SQL Injection Prevention](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html).
+
 ## Privacidade dos poderes (M3)
 
 Compromissos aceitos na preparação são privados até fechar o lote; só o indicador pronto é público. Gastos, uso e ativações aparecem juntos depois da resolução. Espião fica somente na projeção do usuário; parceiros não recebem esse resultado. O snapshot de reconexão aplica a mesma allowlist. O histórico público de ativações informa poder/autor/alvo, sem descarte, substituição ou carta investigada.

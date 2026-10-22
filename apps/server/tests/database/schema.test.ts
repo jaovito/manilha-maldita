@@ -14,10 +14,10 @@ import {
   sessions,
   tableThemes,
 } from '../../database/schema';
-import { withM5Fixture } from './m5-fixtures';
+import { withDatabaseFixture } from './database-fixtures';
 
 test('generated foreign keys preserve the schema targets and deletion policies in real PostgreSQL', () =>
-  withM5Fixture(async (tx) => {
+  withDatabaseFixture(async (tx) => {
     for (const table of [
       accounts,
       avatars,

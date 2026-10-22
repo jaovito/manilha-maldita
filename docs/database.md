@@ -102,7 +102,21 @@ Contrato do worker a implementar:
 5. Se houver trabalho fora da transação, reservar com token/prazo, confirmar reserva antes de executar e exigir o mesmo token ao concluir. Recuperar reservas expiradas, reagendar com espera crescente, limitar tentativas e inspecionar `failed`. Leases não dispensam idempotência de efeitos.
 6. Limitar workers/conexões/lotes e monitorar espera, idade das pendências, falhas, locks e crescimento da tabela. Limpeza, autovacuum e capacidade precisam ser medidos antes de considerar particionamento.
 
-O consumidor, polling, recuperação, limpeza e métricas não fazem parte deste incremento. A fila de comandos/timers por sala permanece em memória. Um resultado só é durável após commit; queda antes disso continua sendo limitação do estado vivo atual.
+No setup inicial não havia consumidor. O segundo incremento fornece `PostgresJobQueue` e `startJobWorker`, com polling/retentativas/recuperação descritos abaixo; limpeza e métricas de capacidade ainda não estão implementadas. A fila de comandos/timers por sala permanece em memória. Um resultado só é durável após commit; queda antes disso continua sendo limitação do estado vivo atual.
+
+### Consumidor transacional — incremento 2
+
+`src/modules/jobs/adapters/outbound/postgres-queue.ts` recebe um cliente Bun.SQL e um processador obrigatório. `enqueue(tx, matchId, maxAttempts)` só aceita handle transacional; o produtor deve gravar o resultado autoritativo nessa mesma transação. Repetir enqueue preserva job/estado/tentativas/prazo existentes. A fila não tem endpoint público nem processador vazio de produção.
+
+`runNext()` reserva uma linha vencida (ou reserva antiga expirada), incrementa a tentativa e chama o processador dentro de um savepoint, mantendo o lock da linha. Efeitos SQL e status `completed` compartilham o commit. Exceção reverte os efeitos ao savepoint e grava somente retry/falha; queda da conexão reverte a transação inteira e libera o job. O processador deve usar apenas o handle recebido para efeitos no mesmo banco, sem HTTP, e-mail, outros clientes, commit/close ou qualquer I/O externo. A tipagem é contrato de integração, não sandbox para código não confiável.
+
+Entradas de enqueue são `unknown` até validar tipo e domínio: IDs opacos de 1–80 caracteres `[A-Za-z0-9_-]` conforme o protocolo e tentativas numéricas inteiras de 1–100. Valores são sempre parâmetros Bun.SQL, inclusive os lidos do banco; nomes de tabelas/colunas, ordenação e SQL são estáticos. Não usar `unsafe`, `sql.raw`, strings interpoladas comuns ou blacklist de palavras SQL para processar entradas. A checagem de formato é complementar à parametrização, não seu substituto. Ver [política de segurança SQL](security.md#sql-parametrizado-e-validação-de-entrada).
+
+Retry começa em 1 s, dobra até 60 s e respeita `max_attempts`; esses parâmetros são operacionais reversíveis. Falhas não persistem exceções/payloads, apenas `JOB_PROCESSING_FAILED`. Reserva antiga expirada com tentativas esgotadas vira `failed` com `LEASE_EXPIRED`. O relógio PostgreSQL controla vencimento. Timeout por statement/inatividade é 5 s local à transação; não executar funções longas ou side effects externos. Consumidores externos com leases publicados separadamente não devem ser misturados sem revisar fencing/idempotência.
+
+`startJobWorker` recebe o port de fila, scheduler e sink de eventos seguros. Faz varredura inicial após LISTEN, acorda por NOTIFY/reconexão e consulta a cada 1 s mesmo sem aviso. Coalesce avisos, executa um job por vez e cede após 25 operações; opções têm limites validados. Falha de armazenamento encerra a rodada sem busy loop. Shutdown cancela polling/wakes, remove listener e aguarda operação em andamento; o cliente SQL continua sob responsabilidade do chamador. O adaptador usa o listener dedicado do Bun.SQL; não usar transaction pooling nesse caminho.
+
+Os componentes estão disponíveis para composição, mas `startServer` não os inicia: a concessão real de XP/pontos e o produtor de resultados precisam ser implementados primeiro. Importar o módulo não consome jobs, abre conexão nem instala timers. Para revisar o protocolo e limites, veja [ADR 012](adr/012-postgresql-job-processing.md).
 
 ## Acesso, retenção e exclusão
 
@@ -120,3 +134,5 @@ Os prazos são hipóteses reversíveis de minimização e precisam ser operacion
 Em worktrees, isolar `COMPOSE_PROJECT_NAME`, portas e URLs num `.env` ignorado, sem reutilizar volumes/banco do checkout principal. O banco de testes continua exclusivamente `truco_test`, role `truco_test`, host loopback e armazenamento temporário. Não aplicar migrations novas no banco de desenvolvimento compartilhado sem solicitação.
 
 Referências: [NOTIFY](https://www.postgresql.org/docs/18/sql-notify.html), [LISTEN](https://www.postgresql.org/docs/18/sql-listen.html), [SKIP LOCKED](https://www.postgresql.org/docs/18/sql-select.html).
+
+O worker recebe configuração explícita por `WorkerOptions`: polling padrão de 1.000 ms (limites de 10–60.000 ms) e até 25 jobs por despertar (limites de 1–100). Defaults e limites ficam em constantes nomeadas em `application/worker.ts`; opções inválidas são rejeitadas antes da inscrição. A futura composição do worker poderá ler variáveis de ambiente e passar essas opções; a camada de aplicação não acessa `process.env`.
