@@ -1,3 +1,4 @@
+import { registerAccountRoutes } from '../modules/accounts/adapters/inbound/account-http';
 import { DEFAULT_ORIGINS, SERVER_DEFAULTS, type ServerOptions } from './environment';
 import { createRoomService, createRuntimePorts } from '../modules/rooms';
 import { createSessions } from '../modules/sessions';
@@ -6,6 +7,15 @@ import { createLimiter, createTransport } from '../modules/transport';
 export { DEFAULT_ORIGINS, type ServerOptions } from './environment';
 
 export function startServer(options: ServerOptions = {}) {
+  const accounts = options.accounts;
+
+  if (
+    accounts &&
+    (options.environment ?? SERVER_DEFAULTS.environment) === 'production' &&
+    !options.secureCookies
+  )
+    throw new Error('SECURE_ACCOUNT_COOKIES_REQUIRED');
+
   const ports = createRuntimePorts();
   const rooms = createRoomService(ports, {
     soloEnabled: options.soloEnabled ?? SERVER_DEFAULTS.soloEnabled,
@@ -20,6 +30,17 @@ export function startServer(options: ServerOptions = {}) {
     allowedOrigins: options.allowedOrigins ?? DEFAULT_ORIGINS,
     secureCookies: options.secureCookies ?? SERVER_DEFAULTS.secureCookies,
     now: ports.now,
+    ...(accounts
+      ? {
+          registerAccounts: (app) =>
+            registerAccountRoutes(
+              app,
+              accounts,
+              options.allowedOrigins ?? DEFAULT_ORIGINS,
+              options.secureCookies ?? false,
+            ),
+        }
+      : {}),
   });
 
   try {

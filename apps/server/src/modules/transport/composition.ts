@@ -13,6 +13,8 @@ export function createTransport(options: TransportDependencies) {
   app.get('/health', (context) => context.json({ status: 'ok' }));
   installRequestSecurity(app, options);
   app.get('/api/features', (context) => context.json({ solo: options.soloEnabled === true }));
+  options.registerAccounts?.(app);
+  app.all('/api/accounts/*', (context) => context.json({ code: 'NOT_FOUND' }, 404));
   registerGuestEntry(app, options);
   requireSession(app, options);
   registerGuestProfile(app, options);

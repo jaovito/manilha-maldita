@@ -79,3 +79,23 @@ test('numeric environment values fail closed without coercion or secret-bearing 
       ).toThrow(/^INVALID_ACCOUNT_SECURITY_ENVIRONMENT$/);
   }
 });
+
+test('authentication policy uses typed defaults and rejects unsafe or malformed overrides', async () => {
+  const { parseAuthenticationPolicy } = await import('./environment');
+  expect(parseAuthenticationPolicy({})).toEqual({
+    sessionTtlMs: 86_400_000,
+    attemptWindowMs: 300_000,
+    loginAttempts: 5,
+    ipAttempts: 20,
+    globalAttempts: 200,
+  });
+  expect(parseAuthenticationPolicy({ AUTH_LOGIN_ATTEMPTS: '10' }).loginAttempts).toBe(10);
+  for (const env of [
+    { AUTH_LOGIN_ATTEMPTS: '5\n' },
+    { AUTH_SESSION_TTL_MS: '1' },
+    { AUTH_GLOBAL_ATTEMPTS: '1001' },
+    { AUTH_IP_ATTEMPTS: 'NaN' },
+    { AUTH_ATTEMPT_WINDOW_MS: '900001' },
+  ])
+    expect(() => parseAuthenticationPolicy(env)).toThrow('INVALID_AUTHENTICATION_POLICY');
+});

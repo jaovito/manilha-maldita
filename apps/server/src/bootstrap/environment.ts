@@ -1,4 +1,10 @@
-import { isPasswordPepper, type Argon2Policy, validateArgon2Policy } from '../modules/accounts';
+import { type AuthenticationPolicy, validateAuthenticationPolicy } from '../modules/accounts';
+import {
+  isPasswordPepper,
+  type Argon2Policy,
+  type AccountApplication,
+  validateArgon2Policy,
+} from '../modules/accounts';
 
 export const DEFAULT_ORIGINS = [
   'http://127.0.0.1:5173',
@@ -17,6 +23,7 @@ export type ServerOptions = Readonly<{
   environment?: string;
   soloEnabled?: boolean;
   devTools?: boolean;
+  accounts?: AccountApplication;
 }>;
 
 export const SERVER_DEFAULTS = {
@@ -148,4 +155,33 @@ export function parseAccountSecurityEnvironment(
     // Never return validation details containing environment values or secrets.
     throw new Error('INVALID_ACCOUNT_SECURITY_ENVIRONMENT');
   }
+}
+
+const AUTHENTICATION_DEFAULTS = {
+  AUTH_SESSION_TTL_MS: 86_400_000,
+  AUTH_ATTEMPT_WINDOW_MS: 300_000,
+  AUTH_LOGIN_ATTEMPTS: 5,
+  AUTH_IP_ATTEMPTS: 20,
+  AUTH_GLOBAL_ATTEMPTS: 200,
+} as const;
+
+export function parseAuthenticationPolicy(env: ServerEnvironment): AuthenticationPolicy {
+  const read = (name: keyof typeof AUTHENTICATION_DEFAULTS): number => {
+    const value = env[name];
+
+    if (value === undefined) return AUTHENTICATION_DEFAULTS[name];
+    if (!value || /[^0-9]/.test(value)) throw new Error('INVALID_AUTHENTICATION_POLICY');
+
+    return Number(value);
+  };
+  const policy = {
+    sessionTtlMs: read('AUTH_SESSION_TTL_MS'),
+    attemptWindowMs: read('AUTH_ATTEMPT_WINDOW_MS'),
+    loginAttempts: read('AUTH_LOGIN_ATTEMPTS'),
+    ipAttempts: read('AUTH_IP_ATTEMPTS'),
+    globalAttempts: read('AUTH_GLOBAL_ATTEMPTS'),
+  };
+  validateAuthenticationPolicy(policy);
+
+  return policy;
 }

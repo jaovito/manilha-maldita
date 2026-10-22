@@ -1,3 +1,4 @@
+import type { Hono } from 'hono';
 import type { RoomPort } from '../rooms';
 import type { SessionApplication } from '../sessions';
 import type { createLimiter } from './adapters/rate-limiter';
@@ -13,4 +14,5 @@ export type TransportDependencies = Readonly<{
   secureCookies?: boolean;
   soloEnabled?: boolean;
   now: () => number;
+  registerAccounts?: (app: Hono) => void;
 }>;
