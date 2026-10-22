@@ -1,90 +1,90 @@
 # Manilha Maldita
 
-Base de um jogo de Truco Paulista com poderes para navegador. O projeto usa Bun Workspaces, TypeScript e um backend autoritativo organizado em módulos.
+A foundation for a browser Truco Paulista game with powers. The project uses Bun Workspaces, TypeScript and an authoritative modular backend.
 
-M1, M2 e M3 implementados: motor puro testado e partidas multiplayer 1v1/2v2 com salas privadas, convidados, lobby, apostas, onze, timers, reconexão e revanche. A aplicação tem entrada, lobby e mesa responsiva com direção visual pixel art: feltro, madeira, molduras douradas, retratos e cartas de pergaminho. Energia, preparação selada e os quatro poderes funcionam nos dois presets. O M4 está em andamento, com animações, áudio e pausas para compreender resultados; revisão ampla de acessibilidade e playtests humanos continuam pendentes. A apresentação conceitual continua em `index.html`, na raiz; a aplicação web é um workspace separado.
+M1, M2 and M3 are implemented: a tested pure engine and multiplayer 1v1/2v2 matches with private rooms, guests, lobby, betting, eleven, timers, reconnection and rematches. The application has responsive entrance, lobby and table views with pixel-art direction: felt, wood, gold frames, portraits and parchment cards. Energy, sealed preparation and all four powers work in both presets. M4 is in progress, with animations, audio and pauses to understand results; broad accessibility review and human playtests remain pending. The conceptual presentation remains in root `index.html`; the web application is a separate workspace.
 
-Os [assets gerados e seus prompts](apps/web/public/art/README.md) ficam no próprio projeto. A fonte Pixelify Sans é local e acompanha sua licença OFL. Imagens são decorativas; cartas, ações e placares continuam derivados do estado autorizado pelo servidor.
+[Generated assets and their prompts](apps/web/public/art/README.md) live in the project. Pixelify Sans is local and includes its OFL license. Images are decorative; cards, actions and scores derive from server-authorized state.
 
-No primeiro acesso sem apelido válido, uma tela de boas-vindas pede como seus amigos vão chamar você. Confirme por Enter ou Continuar; o apelido só fica salvo após essa confirmação. Um convite recebido permanece preenchido para entrar na sala. Apelido já salvo ou recuperado de uma sessão válida pula essa etapa; o perfil permite editar depois. Falha de armazenamento não impede continuar nesta visita.
+On first access without a valid nickname, a welcome screen asks what friends should call you. Confirm with Enter or “Continuar”; the nickname is saved only after confirmation. Received invitations remain prefilled for joining. A saved nickname or one recovered from a valid session skips this step; profiles allow later editing. Storage failure does not prevent continuing during this visit.
 
-Botões indisponíveis ficam com 25% de opacidade e sem brilho de hover. Passe o mouse ou toque para ver um tooltip com o motivo do bloqueio; permissões, jogadores pendentes, fase e turno têm explicações próprias. Cartas continuam legíveis enquanto jogar está bloqueado.
+Unavailable buttons have 25% opacity without hover glow. Hover or tap for a tooltip explaining the restriction; permissions, pending players, phase and turn have specific explanations. Cards remain readable while playing is blocked.
 
-O menu usa cenário em camadas: feltro repetível, quatro cantos de madeira, quatro segmentos do símbolo, objetos independentes e cartas decorativas animadas. A marca **Manilha Maldita** e as peças foram geradas a partir da arte anterior para preservar sua identidade. O perfil é HTML independente; logo, controles e objetos mantêm suas proporções ao adaptar a composição. No celular, a navegação prioriza leitura e toque; elementos decorativos secundários cedem espaço. Jogar inicia treino contra bot quando habilitado no servidor; Cosméticos, Configurações e Sair permanecem futuros. Movimento reduzido desativa a flutuação das cartas.
+The menu uses layered scenery: repeating felt, four wooden corners, four crest segments, independent props and animated decorative cards. The **Manilha Maldita** brand and pieces were generated from previous artwork to preserve identity. The profile is independent HTML; logo, controls and props retain their proportions as the composition adapts. Mobile navigation prioritizes reading and touch; secondary decoration yields space. “Jogar” starts bot training when enabled on the server; “Cosméticos”, “Configurações” and “Sair” remain future work. Reduced motion disables floating cards.
 
-Durante a partida, a mesa ocupa o viewport inteiro, sem rolagem da página. O status fica no topo, junto ao placar, e um selo “Sua vez” acompanha o avatar próprio apenas quando é possível jogar. As ações da direita são compactas; jogar uma carta é feito diretamente na mão. Faces e versos mantêm a proporção 2:3 na mão, nos assentos, na mesa e na vira, variando apenas o tamanho. Placar, mão, vira, jogadores e ações se reorganizam conforme largura, altura e orientação; o menu “Sala” oferece som e identificação da sala, sem configurações congeladas. O encerramento tem apresentação e menu próprios. Histórico e painel da sala podem rolar internamente.
+During matches the table fills the viewport without page scrolling. Status appears at the top beside the score, and a “Sua vez” badge follows the player's avatar only when play is possible. Right-side actions are compact; cards are played directly from the hand. Faces/backs retain a 2:3 aspect ratio in hands, seats, table and turn-up card, changing only size. Score, hand, turn-up card, players and actions reorganize by width, height and orientation; the “Sala” menu offers sound and room identity without frozen settings. Match completion has its own presentation/menu. History and room panels can scroll internally.
 
-A distribuição tem 0,9 s de apresentação com versos animados. Resultados de vaza ficam visíveis por 1,8 s; resultados de mão, por 2,4 s antes da próxima distribuição. A região do placar mostra temporariamente o resultado e sua explicação, preservando as cartas resolvidas na mesa; a carta vencedora recebe destaque. Ao continuar, o status informa quem abre a próxima vaza. Cada novo turno próprio também apresenta **SUA VEZ!** em uma faixa grande no centro por 2,4 s; ela desaparece ao jogar ou perder a vez e não bloqueia cliques, teclado ou o timer. Atualizações da sala e retomada da mesma jogada após negociação não repetem o anúncio. O servidor controla os intervalos entre resultados e só depois inicia o tempo de decisão. Reconectar não prolonga a apresentação.
+Dealing has a 0.9 s presentation with animated backs. Trick results stay visible for 1.8 s; hand results for 2.4 s before the next deal. The score area temporarily shows the result/explanation while resolved cards remain on the table; the winning card is highlighted. When continuing, status identifies the next trick's opener. Each new own turn also shows **SUA VEZ!** in a large central banner for 2.4 s; it disappears upon playing or losing the turn and blocks neither clicks, keyboard nor timer. Room updates and resuming the same play after betting do not repeat the announcement. The server controls result intervals and starts decision time afterward. Reconnection does not extend presentation.
 
-Efeitos sonoros próprios acompanham cliques, menus, cartas, poderes confirmados, turno, distribuição e resultado. “Som” oferece volume e desligamento no menu/lobby e dentro de “Sala” durante a partida; começa após interação com a página. Preferências ficam no navegador, sem cartas ou snapshots. Movimento reduzido desativa carteado, chama animada das velas e efeitos de movimento; avisos textuais e o intervalo para ler resultados permanecem. O [roteiro de playtest do M4](docs/playtest-m4.md) registra o que ainda precisa de avaliação humana.
+Original sound effects accompany clicks, menus, cards, confirmed powers, turns, dealing and results. “Som” provides volume/muting in menu/lobby and “Sala” during matches; audio begins after page interaction. Preferences stay in the browser without cards or snapshots. Reduced motion disables dealing motion, animated candle flames and motion effects; text notifications/result-reading intervals remain. The [M4 playtest script](docs/playtest-m4.md) records what still requires human assessment.
 
-Vitória, derrota e empate têm sons diferentes para cada perspectiva. Ao resolver uma vaza ou mão, o centro informa “VOCÊ VENCEU!” / “VOCÊ PERDEU” no 1v1 e “SEU TIME VENCEU!” / “SEU TIME PERDEU” no 2v2. Ao concluir a partida, o resultado ocupa o centro da mesa por 5 s antes de mostrar ações. A vitória natural com 12 pontos destaca “VOCÊ VENCEU!!” ou “SEU TIME VENCEU!!”, com entrada animada e confetes quadrados nas cores do jogo. Depois aparece somente um menu de resultado com placar, motivo, Revanche, Voltar ao lobby e Sair da sala. Revanche e retorno ao lobby dependem do anfitrião e levam à confirmação de pronto de todos; nenhuma partida reinicia automaticamente. Configurações e convite só aparecem no lobby. Movimento reduzido conserva o resultado estático e oculta os confetes; reconexão e SYNC não repetem a celebração.
+Wins, losses and ties have different sounds for each perspective. Trick/hand resolution shows “VOCÊ VENCEU!” / “VOCÊ PERDEU” in 1v1 and “SEU TIME VENCEU!” / “SEU TIME PERDEU” in 2v2. Match completion occupies the center for 5 s before actions appear. Natural victory at 12 points highlights “VOCÊ VENCEU!!” or “SEU TIME VENCEU!!” with animated entry and square confetti in game colors. A single result menu then shows score, reason, “Revanche”, “Voltar ao lobby” and “Sair da sala”. Rematches/lobby return require the host and lead to everyone's readiness confirmation; matches never restart automatically. Settings/invitations appear only in the lobby. Reduced motion keeps static results and hides confetti; reconnection/SYNC do not repeat celebrations.
 
-## Requisitos
+## Requirements
 
-- Bun **1.4.3**, fixado em `.bun-version` e `packageManager`.
-- Biome reúne lint e formatação; `bun run check:architecture` verifica as fronteiras específicas do projeto.
+- Bun **1.4.3**, pinned in `.bun-version` and `packageManager`.
+- Biome handles lint/formatting; `bun run check:architecture` checks project-specific boundaries.
 
-As dependências diretas têm versões exatas e são reproduzidas pelo único `bun.lock`. As dependências diretas usam as versões estáveis mais recentes publicadas na revisão de 17/10/2026. Atualizações devem passar pelos mesmos checks. Bun 1.4.3 também foi validado instalando os browsers Playwright em um cache vazio, sem a antiga exceção de Node.
+Direct dependencies have exact versions reproduced by one `bun.lock`. They use the latest stable versions published at the 2026-10-17 review. Updates must pass the same checks. Bun 1.4.3 was also validated installing Playwright browsers into an empty cache without the former Node exception.
 
 ```sh
 bun install --frozen-lockfile
 bun run dev
 ```
 
-`dev` inicia o backend Bun/Hono em `http://127.0.0.1:3001` e o frontend Vite em `http://127.0.0.1:5173`. Abra o endereço do frontend, informe um apelido, crie a sala e compartilhe o link/código. O apelido fica salvo neste navegador para preencher o campo após recarregar; apagar o campo remove essa preferência. Isso não salva a sessão nem permite recuperar salas após reiniciar o servidor. No lobby, escolha formato/preset, assentos livres e pronto; o anfitrião inicia quando todos estiverem prontos e conectados.
+`dev` starts Bun/Hono at `http://127.0.0.1:3001` and Vite at `http://127.0.0.1:5173`. Open the frontend, enter a nickname, create a room and share its link/code. The nickname is saved in this browser to prefill after reload; clearing the field removes this preference. This saves no session and cannot recover rooms after server restart. In the lobby choose format/preset, free seats and readiness; the host starts when everyone is ready and connected.
 
-O início exige dois jogadores no 1v1 ou quatro no 2v2, todos conectados e com “Estou pronto” confirmado. Somente o anfitrião inicia. O lobby mostra explicitamente os jogadores/confirmações pendentes e quem precisa reconectar.
+Starting requires two players in 1v1 or four in 2v2, all connected with “Estou pronto” confirmed. Only the host starts. The lobby explicitly shows pending players/confirmations and who needs to reconnect.
 
-Para testar 1v1 ou 2v2 na mesma máquina, use sessões/perfis de navegador distintos. Abas da mesma sessão controlam o mesmo assento: a conexão nova substitui a anterior. Recarregar a página com o link da sala retoma o assento pelo cookie, sem enviar tokens pela URL. Ao fim, o anfitrião abre a revanche; todos confirmam pronto novamente.
+To test 1v1/2v2 on one machine, use distinct browser sessions/profiles. Tabs in one session control the same seat: a new connection replaces the old one. Reloading a room link resumes the seat through its cookie without tokens in URLs. At match end, the host opens a rematch; everyone confirms readiness again.
 
-O servidor não depende do PostgreSQL para jogar. `bun run dev:server` e `bun run dev:web` iniciam as partes separadamente. `bun run start:server` executa o backend sem watch. O proxy `/api` do Vite/preview mantém HTTP e WebSocket na origem do frontend. Use `/health` na porta 3001 para verificar o processo.
+Playing does not require PostgreSQL. `bun run dev:server` and `bun run dev:web` start each side separately. `bun run start:server` runs the backend without watch mode. Vite/preview's `/api` proxy keeps HTTP/WebSocket on the frontend origin. Use `/health` on port 3001 to check the process.
 
-## URL do backend no frontend
+## Frontend backend URL
 
-Copie `apps/web/.env.example` para `apps/web/.env.local` e configure a origem pública do backend, sem `/api`:
+Copy `apps/web/.env.example` to `apps/web/.env.local` and configure the public backend origin without `/api`:
 
 ```dotenv
-VITE_BACKEND_URL=https://api.seu-dominio.com
+VITE_BACKEND_URL=https://api.your-domain.com
 ```
 
-A variável configura as requisições HTTP e o WebSocket (`https` → `wss`, `http` → `ws`). Vazia, mantém `/api` na origem atual e o proxy local. Reinicie o Vite após alterar; em hospedagem, configure no serviço do **frontend antes de executar `bun run build`** e gere um novo build. Variáveis `VITE_*` são públicas no bundle: não coloque credenciais nelas. O arquivo `.env.example` da raiz configura o backend/banco; o arquivo em `apps/web` configura o Vite.
+The variable configures HTTP requests/WebSocket (`https` → `wss`, `http` → `ws`). Empty retains same-origin `/api` and the local proxy. Restart Vite after changes; on hosting, configure it in the **frontend service before running `bun run build`** and rebuild. `VITE_*` variables are public in the bundle: never put credentials there. Root `.env.example` configures backend/database; the file in `apps/web` configures Vite.
 
-No backend, inclua a origem exata do frontend em `ALLOWED_ORIGINS`; o CORS permite cookies somente para essa lista. A sessão mantém `SameSite=Strict`: para acesso direto, use o mesmo site nos dois serviços (por exemplo, `jogo.seu-dominio.com` e `api.seu-dominio.com`, ambos HTTPS). Se estiverem em sites diferentes, use um proxy `/api` na origem do frontend e deixe `VITE_BACKEND_URL` vazia. Configure `SECURE_COOKIES=true` no backend em HTTPS.
+On the backend include the exact frontend origin in `ALLOWED_ORIGINS`; CORS allows cookies only for that list. Sessions retain `SameSite=Strict`: direct access requires both services on the same site (for example, `game.your-domain.com` and `api.your-domain.com`, both HTTPS). Across different sites, use a same-origin frontend `/api` proxy and leave `VITE_BACKEND_URL` empty. Configure `SECURE_COOKIES=true` on HTTPS backends.
 
-## Estrutura
+## Structure
 
 ```text
 apps/
-  web/                 # React/Vite; lobby, mesa DOM e transporte
-  server/              # Hono/Bun; autoridade de salas, clocks e transporte
+  web/                 # React/Vite; lobby, DOM table and transport
+  server/              # Hono/Bun; room authority, clocks and transport
 packages/
-  game-core/           # motor puro completo de regras-base, apostas e projeções
-  game-protocol/       # schemas Zod dos comandos, snapshots e configurações
-  game-sim/            # simulações pareadas com políticas de visão limitada
+  game-core/           # complete pure base-rule, betting and projection engine
+  game-protocol/       # Zod command, snapshot and configuration schemas
+  game-sim/            # paired simulations with limited-view policies
 tooling/
-  architecture/        # regras de importação entre áreas, com parser Oxc
-  tests/               # regressões das configurações e do grafo de workspaces
-tests/e2e/             # smoke test do HTML servido pelo build
+  architecture/        # cross-area import rules using the Oxc parser
+  tests/               # configuration and workspace-graph regressions
+tests/e2e/             # smoke test of HTML served from the build
 ```
 
-No frontend, `app` reúne montagem, `App/` e estilos globais; cada feature agrupa `components`, `pages` e utilitários conforme necessário. `pages` contém apenas páginas e seus testes; componentes e estilos de página ficam nas pastas `components` e `styles` da feature. Componentes usam pastas com `index.tsx`, testes e estilos próximos; filhos exclusivos, como `Lobby/Icon`, ficam no componente pai. O manifesto `app/styles/index.css` preserva a ordem da cascata. Veja a árvore e as responsabilidades na [arquitetura](docs/architecture.md#frontend-funcionalidades-e-separação-de-estados).
+On the frontend, `app` contains mounting, `App/` and global styles; each feature groups `components`, `pages` and utilities as needed. `pages` contains only pages/tests; page components/styles belong in feature `components`/`styles` folders. Components use folders with `index.tsx`, tests and nearby styles; exclusive children such as `Lobby/Icon` stay within their parent component. The `app/styles/index.css` manifest preserves cascade order. See the tree/responsibilities in [architecture](docs/architecture.md#frontend-features-and-state-separation).
 
-Cada workspace declara suas dependências. `game-core` expõe as entradas `./cards`, `./deal`, `./tricks`, `./hands`, `./betting`, `./match` e `./projections` para composição interna do motor; estado privado e identidades físicas não são DTOs de transporte. `game-protocol` expõe somente os schemas/tipos públicos pela entrada raiz; o frontend não importa o core. `game-sim` executa cenários sintéticos com o mesmo core; PixiJS continua previsto para quando necessário.
+Each workspace declares its dependencies. `game-core` exposes `./cards`, `./deal`, `./tricks`, `./hands`, `./betting`, `./match` and `./projections` for internal engine composition; private state/physical identities are not transport DTOs. `game-protocol` exposes only public schemas/types through its root entrypoint; frontend never imports core. `game-sim` runs synthetic scenarios using the same core; PixiJS remains planned when needed.
 
-## Arquitetura do backend
+## Backend architecture
 
-O backend é um monólito modular com Clean Architecture. `rooms` coordena os casos de uso de sala e partida; `sessions` implementa emissão, consulta e alteração de identidade convidada; `matches` fornece políticas puras de tempo; `transport` contém controllers HTTP, middleware e handlers WebSocket. As regras de cartas e poderes permanecem no pacote puro `game-core`.
+The backend is a modular monolith with Clean Architecture. `rooms` coordinates room/match use cases; `sessions` implements guest identity issuance, lookup and changes; `matches` supplies pure timing policies; `transport` contains HTTP controllers, middleware and WebSocket handlers. Card/power rules stay in pure `game-core`.
 
-Dentro dos módulos, `domain` contém entidades/políticas, `application/use-cases` contém operações, `application/ports` define contratos e `adapters` implementa integrações. Arquivos `composition.ts` montam dependências; `bootstrap` inicia e encerra o processo. Não há container de DI nem persistência por jogada.
+Within modules, `domain` contains entities/policies, `application/use-cases` operations, `application/ports` contracts and `adapters` integrations. `composition.ts` files assemble dependencies; `bootstrap` starts/stops the process. There is no DI container or per-play persistence.
 
-O estado da sala é separado de seu envelope operacional. A fila continua única por sala: casos de uso, timers e bot não escrevem independentemente. O repositório em memória conserva essa autoridade viva, sem promessa de recuperação após reiniciar. Consulte a [ADR 010](docs/adr/010-explicit-clean-architecture.md) para dependências e limites da migração.
+Room state is separate from its operational envelope. Each room retains one queue: use cases, timers and bots never write independently. The in-memory repository retains live authority without promising restart recovery. See [ADR 010](docs/adr/010-explicit-clean-architecture.md) for dependencies/migration boundaries.
 
-`bun run check:architecture` fiscaliza imports, chamadas diretas de runtime nas camadas internas, ciclos locais do servidor e acesso indireto a adaptadores por barrels. Testes de casos de uso e integração HTTP/WS verificam o comportamento; o verificador estático não substitui essas provas.
+`bun run check:architecture` checks imports, direct runtime calls in inner layers, local server cycles and indirect adapter access through barrels. Use-case and HTTP/WS integration tests verify behavior; the static checker does not replace that evidence.
 
-## Banco de desenvolvimento e testes
+## Development and test databases
 
-PostgreSQL 18.6 via Docker Compose, com instâncias e credenciais locais distintas para desenvolvimento e testes. Desenvolvimento usa volume persistente; testes usam armazenamento temporário.
+PostgreSQL 18.6 through Docker Compose with separate local instances/credentials for development and tests. Development uses a persistent volume; tests use temporary storage.
 
 ```sh
 bun run db:up
@@ -93,106 +93,105 @@ bun run db:seed
 bun run test:database
 ```
 
-Os comandos têm defaults locais e `.env.example` para personalização. O setup do M5 acrescenta 11 tabelas para contas/sessões, cosméticos, progressão, resultados e jobs, sem integrar essas tabelas ao servidor de jogo. A fila usa tabela durável e trigger transacional `NOTIFY`; não exige Redis, `pg_partman` nem configuração global do PostgreSQL. O segundo incremento fornece consumidor transacional com polling, retry e recuperação, que exige processador explícito e não inicia automaticamente no jogo. Login, persistência de término e regra de recompensas continuam pendentes. Seeds de produto permanecem vazios. Veja modelos, limites, retenção e operação em [docs/database.md](docs/database.md).
+Commands have local defaults and `.env.example` customization. M5 setup adds 11 tables for accounts/sessions, cosmetics, progression, results and jobs without integrating them into the game server. The queue uses a durable table/transactional `NOTIFY` trigger; it needs neither Redis, `pg_partman` nor global PostgreSQL configuration. The second increment provides a transactional consumer with polling, retries and recovery, requiring an explicit processor and never starting automatically in the game. Login, match-completion persistence and reward rules remain pending. Product seeds stay empty. See models, limits, retention and operations in [docs/database.md](docs/database.md).
 
-A verificação completa (`bun run check`) agora requer Docker/Compose para a suíte de banco real. Pare os serviços quando necessário com `bun run db:down` e `bun run db:test:down`; o volume de desenvolvimento é preservado.
+Full validation (`bun run check`) now requires Docker/Compose for the real database suite. Stop services when needed using `bun run db:down` and `bun run db:test:down`; the development volume is preserved.
 
-## Comandos
+## Commands
 
-| Comando                    | Finalidade                                                               |
-| -------------------------- | ------------------------------------------------------------------------ |
-| `bun run dev`              | Backend e frontend locais, executados com Bun                                            |
-| `bun run build`            | Build do cliente React; backend executa TypeScript com Bun               |
-| `bun run lint`             | Biome, hooks e fronteiras de importação                                 |
-| `bun run format:check`     | Verificação de formatação                                                |
-| `bun run format`           | Formatação dos arquivos de implementação/configuração                    |
-| `bun run typecheck`        | TypeScript estrito por ambiente e ferramentas                            |
-| `bun run test`             | Testes unitários de tooling e testes de React/DOM em processos separados |
-| `bun run test:coverage` | Testes com mínimo de 80% e inventário de fontes sem cobertura |
-| `bun run test:integration` | HTTP/WS reais, autenticação, partidas e reconexão em porta efêmera                         |
-| `bun run test:e2e:install` | Instala Chromium para Playwright, com Bun                               |
-| `bun run test:e2e`         | Partidas 1v1/2v2, reconexão e revanche em Chromium desktop/mobile                     |
-| `bun run check`            | Lint, formato, tipos, testes com cobertura e build           |
+| Command | Purpose |
+|---|---|
+| `bun run dev` | Local backend/frontend running with Bun |
+| `bun run build` | React client build; backend runs TypeScript with Bun |
+| `bun run lint` | Biome, hooks and import boundaries |
+| `bun run format:check` | Formatting checks |
+| `bun run format` | Format implementation/configuration files |
+| `bun run typecheck` | Strict TypeScript per environment/tooling |
+| `bun run test` | Tooling unit tests and React/DOM tests in separate processes |
+| `bun run test:coverage` | Tests with an 80% minimum and uncovered-source inventory |
+| `bun run test:integration` | Real HTTP/WS, authentication, matches and reconnection on an ephemeral port |
+| `bun run test:e2e:install` | Install Chromium for Playwright using Bun |
+| `bun run test:e2e` | 1v1/2v2 matches, reconnection and rematches in desktop/mobile Chromium |
+| `bun run check` | Lint, formatting, types, coverage tests and build |
 
-E2E é separado de `check` e requer o navegador instalado. Os testes mobile usam emulação de dispositivo em Chromium; não comprova compatibilidade com Safari/iOS. Os scripts de testes não usam opção para aceitar ausência de testes.
+E2E is separate from `check` and requires browser installation. Mobile tests use Chromium device emulation; this does not establish Safari/iOS compatibility. Test scripts never accept missing tests.
 
-O Biome cobre os formatos que suporta; Markdown e YAML não recebem formatação automática por esta configuração. A apresentação `index.html` da raiz está excluída para preservar o artefato existente.
+Biome covers supported formats; Markdown/YAML receive no automatic formatting under this configuration. Root `index.html` is excluded to preserve the existing presentation artifact.
 
 ## Zed
 
-A configuração em `.zed/settings.json`, baseada no setup de `~/www/betzou`, ativa o Biome para JavaScript/JSX, TypeScript/TSX, JSON/JSONC, CSS e HTML, com formatação ao salvar. ESLint fica desativado neste projeto; os demais servidores de linguagem continuam disponíveis para tipos e navegação.
+`.zed/settings.json`, based on `~/www/betzou` setup, enables Biome for JavaScript/JSX, TypeScript/TSX, JSON/JSONC, CSS and HTML with formatting on save. ESLint is disabled; other language servers remain available for types/navigation.
 
-A extensão Biome já está instalada neste ambiente. Ela encontra a versão local declarada no `package.json` e usa o `biome.json` da raiz, obrigatório por configuração. Ao abrir este repositório em outro computador, instale a extensão Biome no Zed e execute `bun install --frozen-lockfile`.
+The Biome extension is already installed in this environment. It finds the local version declared in `package.json` and uses root `biome.json`, required by configuration. On another computer, install Zed's Biome extension and run `bun install --frozen-lockfile`.
 
-## Cobertura
+## Coverage
 
-`bun run test:coverage` exige pelo menos **80% de linhas e funções por arquivo medido** em unitários, DOM e integração. Também detecta fontes executáveis sem relatório, sem aceitar que um arquivo não importado desapareça da conta. Relatórios textuais e LCOV ficam em `coverage/{server,web,database}`.
+`bun run test:coverage` requires at least **80% lines/functions per measured file** across unit, DOM and integration tests. It also detects executable sources without reports rather than allowing unimported files to disappear. Text/LCOV reports live in `coverage/{server,web,database}`.
 
-`bun run check` já inclui essa exigência, assim como o CI. A meta é um mínimo; todos os cenários críticos continuam obrigatórios. A cobertura inclui o motor de regras-base e suas projeções, além do tooling e da infraestrutura. Veja a política e as exclusões em [docs/testing.md](docs/testing.md).
+`bun run check` and CI include this requirement. The target is a minimum; every critical scenario remains mandatory. Coverage includes the base-rule engine/projections, tooling and infrastructure. See policy/exclusions in [docs/testing.md](docs/testing.md).
 
-## Organização dos testes
+## Test organization
 
-- Importe `test` e `expect` de `bun:test`; fast-check está disponível para propriedades.
-- Unitários do domínio ficam junto ao comportamento em `packages/*/src/**/*.test.ts`. Tipos de produção dos pacotes puros excluem Bun e DOM. O `tsconfig.test.json` já inclui `types: ["bun"]` para esses testes, mantendo o ambiente de produção isolado.
-- Componentes podem ter testes em `apps/web/src/**/*.test.tsx`. O workspace web configura Happy DOM e limpeza entre testes; execute com `bun run test:dom` para carregar esse ambiente sem contaminar os testes de servidor.
-- Integração de transporte fica em `apps/server/tests/integration`. Além da fixture do runtime, exercita o servidor do produto com sessões e WebSockets independentes.
-- Playwright usa `*.e2e.ts` para evitar descoberta pelo runner do Bun. Seu servidor de teste é iniciado e encerrado pelo próprio Playwright.
-- Os arquivos `environment.typecheck.ts` são verificações negativas de tipos; não são código da aplicação nem testes executados em runtime.
+- Import `test`/`expect` from `bun:test`; fast-check is available for properties.
+- Domain unit tests live beside behavior in `packages/*/src/**/*.test.ts`. Production types for pure packages exclude Bun/DOM. Their `tsconfig.test.json` includes `types: ["bun"]`, keeping production environments isolated.
+- Components may have tests in `apps/web/src/**/*.test.tsx`. The web workspace configures Happy DOM/cleanup; run `bun run test:dom` to load it without contaminating server tests.
+- Transport integration lives in `apps/server/tests/integration`. Alongside runtime fixtures, it exercises the product server with independent sessions/WebSockets.
+- Playwright uses `*.e2e.ts` to avoid Bun discovery. Playwright starts/stops its own test server.
+- `environment.typecheck.ts` files are negative type checks, not application code or runtime tests.
 
-Os testes de domínio exercitam partidas completas 1v1/2v2, cartas, apostas, onze, pontuação e privacidade; execute `bun test packages/game-core` durante esse desenvolvimento. Os testes PostgreSQL exercitam infraestrutura de persistência. Integração agora conclui partidas no servidor com múltiplos WebSockets reais; Playwright conclui partidas no cliente com contextos de navegador isolados.
+Domain tests exercise complete 1v1/2v2 matches, cards, betting, eleven, scoring and privacy; run `bun test packages/game-core` during this work. PostgreSQL tests exercise persistence infrastructure. Integration now completes server matches with multiple real WebSockets; Playwright completes client matches with isolated browser contexts.
 
-## Documentação
+## Documentation
 
-Comece por [AGENTS.md](AGENTS.md). Consulte [arquitetura](docs/architecture.md), [regras](docs/rules.md), [segurança](docs/security.md), [testes](docs/testing.md) e [plano](plan.md) conforme a tarefa.
+Start with [AGENTS.md](AGENTS.md). Consult [architecture](docs/architecture.md), [rules](docs/rules.md), [security](docs/security.md), [testing](docs/testing.md) and [plan](plan.md) as needed.
 
-## Motor do M1
+## M1 engine
 
-A entrada interna `@truco/game-core/match` expõe `startMatch`, `executeCommand` e `dealNextHand`. A aplicação confiável fornece assento autenticado, revisão esperada, iniciador e escolhas de embaralhamento; o cliente nunca controla esses dados de autoridade. Cada transição aceita retorna estado e eventos públicos sem cartas privadas. Rejeições não alteram o estado, e revisões antigas são recusadas antes de qualquer efeito.
+Internal entrypoint `@truco/game-core/match` exposes `startMatch`, `executeCommand` and `dealNextHand`. The trusted application supplies authenticated seat, expected revision, opener and shuffle choices; clients never control authoritative inputs. Each accepted transition returns state/public events without private cards. Rejections leave state unchanged; stale revisions are rejected before any effect.
 
-Uma mão encerrada permanece em `HAND_END` até o adaptador distribuir outra. `MATCH_END` bloqueia comandos e novas distribuições. `projectPublicView` e `projectPlayerView` são as únicas visões para apresentação; nunca envie o estado interno. Cartas cobertas continuam ocultas para terceiros após o fim da mão/partida. Onze compartilha cartas somente com a equipe autorizada; 11×11 mantém apenas a mão própria.
+A completed hand remains in `HAND_END` until the adapter deals another. `MATCH_END` blocks commands/new deals. `projectPublicView`/`projectPlayerView` are the only presentation views; never send internal state. Face-down cards remain hidden to others after hand/match end. Eleven shares cards only within the authorized team; 11×11 retains only each player's hand.
 
-O M2 usa essas regras-base nas salas privadas e oferece mesa simples no navegador. Poderes e preparação selada foram acrescentados no M3; não há um preset clássico adicional. A aplicação coordena filas por sala, sessões, ACKs, timers e reconexão. Não há recuperação de partidas após queda do processo.
+M2 uses these base rules in private rooms with a simple browser table. Powers/sealed preparation arrived in M3; no additional classic preset exists. The application coordinates room queues, sessions, ACKs, timers and reconnection. Matches cannot recover after process crashes.
 
-## Operação local do M2
+## M2 local operations
 
-`.env.example` inclui `HOST`, `PORT`, `ALLOWED_ORIGINS` (lista separada por vírgula, sem wildcard) e `SECURE_COOKIES`. O servidor escuta por padrão em 127.0.0.1:3001 e permite as origens HTTP `127.0.0.1` e `localhost` nas portas 5173/4173/3001. Uma lista explícita em `ALLOWED_ORIGINS` substitui esses defaults; inclua o endereço usado no navegador e reinicie o backend ao alterar a variável. Use o mesmo endereço durante a sessão: cookies de `localhost` e `127.0.0.1` são independentes. O cookie é HttpOnly, SameSite=Strict, válido por 24 horas e restrito a `/api`; em hospedagem com HTTPS configure `SECURE_COOKIES=true` e origens exatas. Não foi realizado deploy/provisionamento.
+`.env.example` includes `HOST`, `PORT`, `ALLOWED_ORIGINS` (comma-separated without wildcards) and `SECURE_COOKIES`. The server defaults to 127.0.0.1:3001 and allows HTTP origins `127.0.0.1`/`localhost` on ports 5173/4173/3001. Explicit `ALLOWED_ORIGINS` replaces defaults; include the browser address and restart after changes. Use the same address throughout a session: `localhost`/`127.0.0.1` cookies are independent. The cookie is HttpOnly, SameSite=Strict, valid 24 hours and restricted to `/api`; for HTTPS hosting configure `SECURE_COOKIES=true` and exact origins. No deployment/provisioning was performed.
 
-O estado vivo é exclusivamente em memória: reiniciar o processo perde sessões e salas e é falha técnica, sem atribuir derrota por abandono. Reconexão protege somente ausências durante a vida do processo, com 60 s cumulativos no casual e 30 s no competitivo. Se um parceiro pode responder, a decisão de equipe continua. Esgotada a proteção, volta o tempo restante; carta sem timer, quando o ausente não tem mais proteção, recebe fallback em vez de bloquear a sala.
+Live state is exclusively in memory: process restart loses sessions/rooms and is a technical failure without an abandonment loss. Reconnection protects only absences during process lifetime, with 60 s cumulative in casual and 30 s competitive. If a partner can respond, team decisions continue. After protection is exhausted, remaining time resumes; untimed card decisions for unprotected absent players receive a fallback instead of blocking rooms.
 
-As salas vazias expiram após 60 s no casual/30 s no competitivo. Limites atuais: 256 salas, três salas por sessão, 64 comandos pendentes por sala e 512 respostas de deduplicação recentes por sala. Veja as regras de transporte, recursos e idempotência na [arquitetura](docs/architecture.md) e na [ADR 006](docs/adr/006-room-authority-and-reconnection.md). O backend não grava payloads, cartas ou tokens em logs.
+Empty rooms expire after 60 s casual/30 s competitive. Current limits: 256 rooms, three rooms per session, 64 pending commands per room and 512 recent deduplication responses per room. See transport, resource and idempotency rules in [architecture](docs/architecture.md) and [ADR 006](docs/adr/006-room-authority-and-reconnection.md). Backend logs contain no payloads, cards or tokens.
 
-## Poderes e simulação (M3)
+## Powers and simulation (M3)
 
-Toda mão comum começa em preparação selada, sem abrir um painel automaticamente: o poder aparece como uma carta ilustrada no canto da mesa. Clique no poder e depois diretamente em um verso adversário para Espião ou numa carta da sua mão para Segunda Chance; você também pode passar. O clique no alvo envia uma intenção; cartas e energia mudam quando todos responderem ou o prazo expirar. Na sua vez, clicar na carta de Impulso/Máscara seleciona o efeito; clicar novamente cancela. Depois escolha uma carta da mão: poder e jogada são enviados juntos. As cartas elegíveis são destacadas e uma orientação curta indica o próximo clique. Esc ou clicar novamente no poder cancela a seleção. Após o servidor confirmar o uso, a carta de poder desaparece até a próxima mão; a reserva de energia e o resultado privado do Espião continuam visíveis. Os detalhes abrem por clique, fecham pelo botão ou Esc e mostram poderes revelados/ativações; poderes não usados de outros assentos aparecem como “Poder oculto”, inclusive os do parceiro. A face observada pelo Espião aparece na mão adversária somente para quem o usou; depois de uma jogada do alvo, permanece como memória da preparação até a mesma carta ser revelada numa jogada ou a mão ficar vazia, sem rastrear cartas ocultas. No celular, detalhes permitem rolagem interna. A carta mascarada é distinta de coberta e só revela sua identidade aos demais ao resolver a vaza.
+Each ordinary hand begins in sealed preparation without automatically opening a panel: powers appear as illustrated cards in a table corner. Click a power, then directly an opponent's back for Espião or your own hand card for Segunda Chance; passing is also available. Target clicks submit intent; cards/energy change once everyone responds or the deadline expires. On your turn, clicking Impulso/Máscara selects the effect; clicking again cancels. Then choose a hand card: power/play are sent together. Eligible cards are highlighted and brief guidance identifies the next click. Esc or another power click cancels selection. After server-confirmed usage, the power card disappears until the next hand; energy/private Espião results remain visible. Details open on click, close by button/Esc and show revealed powers/activations; other seats' unused powers appear as “Poder oculto”, including partners'. Only its user sees the Espião-observed face in the opponent hand; after the target plays it remains preparation memory until that card is publicly revealed or the hand empties, without tracking hidden cards. Mobile details scroll internally. Masked cards differ from face-down cards and reveal identity to others only at trick resolution.
 
-Energia inicial 2, teto 3 e regeneração +1 por mão comum após a primeira. Cada jogador tem no máximo um uso por mão. Onze/decisiva não sorteiam poderes nem regeneram energia. Casual permite ajustar a preparação (default 15 s); competitivo fixa 10 s. O catálogo e custos estão em [docs/rules.md](docs/rules.md).
+Initial energy is 2, capped at 3, regenerating +1 per ordinary hand after the first. Each player has at most one use per hand. Eleven/deciding hands assign no powers and regenerate no energy. Casual allows preparation adjustment (default 15 s); competitive fixes 10 s. Catalog/costs are in [docs/rules.md](docs/rules.md).
 
 ```sh
-bun run simulate 30        # 30 cenários por estrato, com/sem poderes e troca de assentos
-bun run simulate 100 1234  # tamanho e seed sintética local de reprodução
+bun run simulate 30        # 30 scenarios per stratum, with/without powers and swapped seats
+bun run simulate 100 1234  # sample size and local synthetic reproducibility seed
 ```
 
-A ferramenta produz JSON agregado por formato, preset e política conservadora/agressiva/probabilística, com incerteza aproximada e contagens separadas de atribuição/uso. Não usa sessões reais nem bots oniscientes. Veja o [relatório inicial](docs/simulation-m3.md), a [metodologia](docs/balancing.md) e a [ADR 007](docs/adr/007-sealed-powers-and-simulation.md). Os resultados não comprovam equilíbrio ou diversão.
+The tool produces aggregate JSON by format, preset and conservative/aggressive/probabilistic policy with approximate uncertainty and separate assignment/usage counts. It uses neither real sessions nor omniscient bots. See the [initial report](docs/simulation-m3.md), [methodology](docs/balancing.md) and [ADR 007](docs/adr/007-sealed-powers-and-simulation.md). Results prove neither balance nor fun.
 
-“Como jogar” abre um tutorial interativo de sete etapas, com ordem das cartas, simulador de vira/manilhas, empates, apostas, mãos especiais, quatro poderes e roteiro da primeira partida. Inclui perguntas com explicação, navegação por teclado e catálogos completos em português/inglês. O idioma vale para o jogo inteiro. Em **Configurações → Idioma do jogo**, escolha português ou inglês; a preferência fica salva neste navegador. O menu da sala permite trocar durante a partida sem reiniciar a mesa. O seletor do tutorial usa a mesma preferência global.
+“Como jogar” opens a seven-step interactive tutorial covering card order, turn-up/manilha simulator, ties, betting, special hands, four powers and a first-match walkthrough. It includes explained questions, keyboard navigation and complete Portuguese/English catalogs. Language applies throughout the game. In **Configurações → Idioma do jogo**, select Portuguese/English; the preference is saved in this browser. The room menu can change it during a match without restarting the table. The tutorial selector shares the global preference.
 
+## Playing against bots and building test scenarios
 
-## Jogar contra bot e montar cenários de teste
+`bun run dev` enables the simple training bot/development tools by default. If the backend was already running before this increment, restart to load flags. Click **Jogar** to enter a 1v1 table against **Bot Treino**.
 
-`bun run dev` habilita, por padrão, o bot simples de treino e as ferramentas dev. Se o backend já estava rodando antes deste incremento, reinicie-o para carregar as novas flags. Clique **Jogar** para entrar direto numa mesa 1v1 contra **Bot Treino**.
+During a match open **Sala → Ferramentas de desenvolvimento**. Choose three cards, one of four powers and energy from 0 to 3; **Aplicar cenário e reiniciar mão** clears the current hand while preserving score. **Reiniciar mão aleatória** redeals normally. Play continues while the panel is open. Powers stay disabled in eleven/11×11 hands.
 
-Na partida, abra **Sala → Ferramentas de desenvolvimento**. Escolha suas três cartas, um dos quatro poderes e energia de 0 a 3; **Aplicar cenário e reiniciar mão** limpa a mão atual e preserva o placar. **Reiniciar mão aleatória** redistribui normalmente. O jogo continua enquanto o painel está aberto. Poderes continuam desativados em mão de onze e 11×11.
+Independent backend flags:
 
-Flags independentes no backend:
+- `ENABLE_SOLO=true`: enables bot play, including production if desired.
+- `ENABLE_DEV_TOOLS=true`: enables tools **only with `NODE_ENV=development`**, in owner-controlled solo tables. It enables nothing in production/test/missing environments.
+- `ENABLE_SOLO=false bun run dev` disables bots; `ENABLE_DEV_TOOLS=false bun run dev` keeps bots without tools.
 
-- `ENABLE_SOLO=true`: habilita Jogar contra bot, inclusive em produção se desejado.
-- `ENABLE_DEV_TOOLS=true`: habilita ferramentas **somente com `NODE_ENV=development`**, em mesas solo do dono. Não habilita nada em produção/test/ambiente ausente.
-- `ENABLE_SOLO=false bun run dev` desativa o bot; `ENABLE_DEV_TOOLS=false bun run dev` mantém o bot sem ferramentas.
+`bun run start:server` leaves both disabled by default. No VITE configuration or browser parameter grants permission. Production builds exclude the panel even against a development backend. Bots decide with their own cards/public information without reading your hand. Solo rematches start immediately; returning to the menu leaves the room.
 
-`bun run start:server` mantém ambas fechadas por padrão. Nenhuma configuração VITE ou parâmetro no navegador concede permissão. O build de produção exclui o painel mesmo apontando para um backend dev. O bot decide com suas próprias cartas e informações públicas, sem ler sua mão. Revanche solo inicia imediatamente; Voltar ao menu sai da sala.
+`bun run test:e2e:solo` opens isolated servers on ports 3002/5174/4174 and exercises development/production builds on desktop/mobile. Ports must be free. The command produces a test build targeting 3002; afterward run `VITE_BACKEND_URL='' bun run build` for the default build, or use your environment's backend URL.
 
-`bun run test:e2e:solo` abre servidores isolados nas portas 3002/5174/4174 e exercita dev e build de produção em desktop/mobile. Essas portas devem estar livres. O comando produz um build de teste apontando para 3002; rode `VITE_BACKEND_URL='' bun run build` depois para gerar novamente o build padrão, ou use a URL de backend do seu ambiente.
+## Frontend version and build
 
-## Versão e build do frontend
-
-O rodapé do menu exibe `v<versão>+<build>`, por exemplo `v0.1.0+1792414800`. A versão semântica vem de `apps/web/package.json` e deve ser incrementada ao preparar uma release. O Vite gera o build numérico em segundos Unix (UTC) ao iniciar uma compilação ou servidor dev; o valor fica fixo naquele artefato e não muda ao recarregar a página. Não depende do relógio do navegador nem expõe informações do ambiente.
+The menu footer displays `v<version>+<build>`, for example `v0.1.0+1792414800`. Semantic version comes from `apps/web/package.json` and must be incremented when preparing releases. Vite generates the numeric build in Unix seconds (UTC) at compilation/development-server startup; it stays fixed in that artifact and does not change on page reload. It depends on neither browser time nor exposed environment information.

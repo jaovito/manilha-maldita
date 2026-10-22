@@ -1,21 +1,21 @@
-# ADR 008 — Pausas de apresentação controladas pelo servidor
+# ADR 008 — Server-controlled presentation pauses
 
-Status: aceito para o incremento inicial do M4, autorizado pelo pedido de animações e tempo legível entre resultados e nova vez.
+Status: accepted for the initial M4 increment, authorized by the request for animations and readable intervals between results and the next turn.
 
-## Contexto
+## Context
 
-O servidor publicava diretamente a decisão seguinte à vaza e distribuía outra mão no mesmo comando que encerrava a anterior. Os jogadores não tinham um intervalo estável para observar resultado, placar ou por que alguém iniciaria novamente. Esperar animação ou ACK do cliente permitiria prolongar a partida e produzir relógios diferentes entre jogadores.
+The server published the next decision immediately after each trick and dealt another hand in the command ending the previous hand. Players had no stable interval to observe results, scores or why someone would open again. Waiting for client animation or ACKs would allow extending matches and create different clocks between players.
 
-## Decisão
+## Decision
 
-A autoridade da sala introduz pausas fixas de apresentação: distribuição **900 ms**, resultado de vaza **1.800 ms** e resultado de mão **2.400 ms**. São defaults operacionais reversíveis de playtest; não alteram força, pontos, sorteio, orçamento de reconexão nem os tempos disponíveis para decisões. O cliente não pode modificar ou confirmar sua duração.
+Room authority introduces fixed presentation pauses: dealing **900 ms**, trick results **1,800 ms** and hand results **2,400 ms**. These are reversible operational playtest defaults; they change no strength, points, assignment, reconnection budget or decision time. Clients cannot change or acknowledge their duration.
 
-`RoomView.transition` é opcional e contém somente `{ id, kind: 'deal' | 'trick' | 'hand', until }`. O identificador é opaco e `until` é um instante do relógio do servidor em milissegundos. Ausência indica que não há pausa de apresentação. Enquanto presente, `decisionId` e `deadline` são nulos; `paused` continua reservado à proteção de reconexão. A interface deve bloquear ações de gameplay nesse intervalo e pode apresentar animação, texto e áudio derivados da projeção autorizada. SYNC, reconexão e desistência continuam disponíveis; sair de uma partida sem desistir continua proibido.
+`RoomView.transition` is optional and contains only `{ id, kind: 'deal' | 'trick' | 'hand', until }`. Its ID is opaque and `until` is a server-clock timestamp in milliseconds. Absence means no presentation pause. While present, `decisionId` and `deadline` are null; `paused` remains reserved for reconnection protection. The UI must block gameplay actions during this interval and may present animation, text and audio derived from authorized projections. SYNC, reconnection and resignation remain available; leaving a match without resigning remains prohibited.
 
-A vaza resolvida permanece em `completedTricks`; o turno indicado na fase é o próximo, ainda sem decisão aberta. Em `HAND_END`, a mão encerrada, suas cartas autorizadas e seu resultado permanecem projetados; somente ao fim desse intervalo ocorre o sorteio da mão seguinte e uma nova pausa `deal`. Ao atingir doze, `MATCH_END` permanece visível e não distribui outra mão. Nenhuma dessas pausas revela cartas cobertas, remanescentes ou Máscara sem vaza resolvida.
+The resolved trick remains in `completedTricks`; the phase indicates the next turn but no decision is open yet. In `HAND_END`, the completed hand, its authorized cards and result remain projected; only after the interval does the next hand get assigned with a fresh `deal` pause. At twelve points, `MATCH_END` remains visible and no further hand is dealt. These pauses reveal no face-down/remaining cards or Máscara without a resolved trick.
 
-Comandos, callbacks e presença passam pela mesma fila da sala. O agendamento identifica tanto a decisão quanto a transição, rejeitando callbacks de contextos substituídos. Nenhuma proteção é debitada durante a apresentação; ausências só passam a consumir orçamento quando a próxima decisão abre. Reconectar não altera o fim da pausa. Um callback atrasado abre a decisão com seu tempo completo no instante processado: não aplica timeout retroativo a um jogador que ainda não recebeu decisão acionável. Desistência, encerramento anormal e revanche removem a transição.
+Commands, callbacks and presence use the same room queue. Scheduling identifies both decision and transition, rejecting callbacks from replaced contexts. No protection is consumed during presentation; absences start consuming budget only when the next decision opens. Reconnecting does not change the pause end. A delayed callback opens the decision with its full time at processing time: it does not apply a retroactive timeout to a player who has not received an actionable decision. Resignation, abnormal termination and rematches remove transitions.
 
-## Validação e limites
+## Validation and limits
 
-Testes com relógio falso cobrem fronteiras, callback atrasado/obsoleto, idempotência, rejeições, entropia diferida, placar estável, reconexão sem consumo antecipado e desistência em cada pausa. Integração HTTP/WS real aguarda as transições, preservando sessões independentes e partidas completas. Os valores exigem playtests humanos; a entrega não comprova balanceamento, duração final de partidas, recuperação após reinício nem infraestrutura de produção.
+Fake-clock tests cover boundaries, delayed/stale callbacks, idempotency, rejections, deferred entropy, stable scores, reconnection without early budget consumption and resignation during each pause. Real HTTP/WS integration waits for transitions while preserving independent sessions and complete matches. These values require human playtests; delivery does not prove balance, final match duration, restart recovery or production infrastructure.

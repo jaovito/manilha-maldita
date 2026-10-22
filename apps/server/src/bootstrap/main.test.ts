@@ -28,10 +28,10 @@ test('environment uses local defaults and validates explicit deployment origins'
     secureCookies: true,
     allowedOrigins: ['https://truco.example', 'http://localhost:5173'],
   });
-  for (const PORT of ['', '-1', '65536', '1.5', '1e3', ' 3001', 'Infinity']) {
+  for (const PORT of ['', '-1', '65536', '1.5', '1e3', ' 3001', 'Infinity', '3001\n']) {
     expect(() => parseServerOptions({ PORT })).toThrow('INVALID_PORT');
   }
-  for (const HOST of ['', 'localhost/path', ' localhost', 'http://localhost']) {
+  for (const HOST of ['', 'localhost/path', ' localhost', 'http://localhost', 'localhost\n']) {
     expect(() => parseServerOptions({ HOST })).toThrow('INVALID_HOST');
   }
   expect(() => parseServerOptions({ SECURE_COOKIES: 'yes' })).toThrow('INVALID_SECURE_COOKIES');

@@ -1,21 +1,21 @@
-# ADR 005 — Composição pura das regras-base do M1
+# ADR 005 — Pure composition of M1 base rules
 
-Estado: aceita para o M1, 18/10/2026.
+Status: accepted for M1, 2026-10-18.
 
-## Contexto
+## Context
 
-O bootstrap e os resolvedores de cartas/vazas não permitiam concluir uma partida. O M1 exige apostas, onze e um ciclo testável, preservando privacidade e autoridade sem antecipar o servidor do M2 ou poderes do M3.
+Bootstrap and card/trick resolvers could not complete a match. M1 requires betting, eleven and a testable loop, preserving privacy and authority without bringing forward the M2 server or M3 powers.
 
-## Decisão
+## Decision
 
-Compor funções puras em `game-core/match`, com fases discriminadas e transições imutáveis. `startMatch` recebe contagem, iniciador e escolhas de Fisher–Yates confiáveis. `executeCommand` recebe assento resolvido pela aplicação e revisão esperada. `dealNextHand` distribui somente após `HAND_END`, com rotação e nova entropia explícita. Distribuição e resolução são síncronas; não há espera por animação ou relógio.
+Compose pure functions in `game-core/match` with discriminated phases and immutable transitions. `startMatch` receives player count, opener and trusted Fisher–Yates choices. `executeCommand` receives the application-resolved seat and expected revision. `dealNextHand` deals only after `HAND_END`, with rotation and fresh explicit entropy. Dealing and resolution are synchronous; neither waits for animation or a clock.
 
-Apostas têm valor aceito e proposto separados; contra-aumento aceita o anterior antes de propor o próximo. Onze e 11×11 são discriminadas por `hand.kind`, proibindo apostas. Pontuação ocorre apenas no encerramento, limita o placar a 12 e preserva a recompensa original em evento. As cartas continuam conservadas entre mãos restantes, vira, monte e jogadas concluídas/em curso.
+Betting separates accepted and proposed values; a counter-raise accepts the previous value before proposing the next. Eleven and 11×11 are discriminated by `hand.kind`, prohibiting bets. Scoring happens only at hand end, caps scores at 12 and preserves the original reward in an event. Cards remain conserved across remaining hands, turn-up card, draw pile and completed/current plays.
 
-Projeções por allowlist são separadas do estado. Mãos ocultas expõem contagem, e cartas cobertas não recebem identidade pública. A equipe de onze mantém a informação já conhecida na mão; 11×11 concede somente a mão própria. Eventos do motor não contêm cartas privadas.
+Allowlisted projections are separate from state. Hidden hands expose counts, and face-down cards have no public identity. The eleven team retains already-known hand information; 11×11 grants only the player's own hand. Engine events contain no private cards.
 
-## Consequências e limites
+## Consequences and limits
 
-O motor conclui partidas de regras-base em testes sem runtime, rede ou banco. Isso não cria um modo clássico de produto. Poderes/energia/preparação ainda não existem e entram no M3, com mãos especiais sem sorteio nem regeneração. Sessões, filas por sala, identidade da partida, relógios e reconexão entram no M2.
+The engine completes base-rule matches in tests without runtime, network or database. This creates no classic product mode. Powers/energy/preparation do not yet exist and arrive in M3, with no power assignment or regeneration in special hands. Sessions, room queues, match identity, clocks and reconnection arrive in M2.
 
-Revisão antiga impede reaplicar uma transição aceita. Esse mecanismo não substitui a deduplicação da aplicação com `commandId`, autenticação e devolução do ACK original. O adaptador também deve impedir comandos de outra partida e gerar entropia uniforme criptográfica. O estado interno nunca deve ser enviado diretamente ao cliente. Não há persistência ou recuperação de partidas após queda do processo.
+Stale revisions prevent reapplying accepted transitions. This does not replace application deduplication using `commandId`, authentication and returning the original ACK. The adapter must also reject commands for other matches and generate uniform cryptographic entropy. Internal state must never be sent directly to clients. There is no persistence or match recovery after a process crash.

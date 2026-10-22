@@ -1,23 +1,23 @@
-# ADR 001 — Bun e arquitetura modular
+# ADR 001 — Bun and modular architecture
 
-- Estado: aceita pelo proprietário.
-- Data: 2026-10-17.
-- Contrato vigente: [architecture.md](../architecture.md).
+- Status: accepted by the owner.
+- Date: 2026-10-17.
+- Current contract: [architecture.md](../architecture.md).
 
-## Contexto
+## Context
 
-O projeto ainda está em pré-produção. O proprietário escolheu Bun para front/back e pediu Clean Architecture, DDD e SOLID onde forem úteis, com atenção a arquivos grandes e pastas difíceis de navegar.
+The project is still in preproduction. The owner selected Bun for frontend/backend and requested Clean Architecture, DDD and SOLID where useful, with attention to oversized files and hard-to-navigate folders.
 
-## Decisão
+## Decision
 
-Adotar Bun como gerenciador do monorepo, executor das ferramentas e runtime do backend. React/Vite entregam código para o navegador. Usar um `bun.lock` e fixar a versão de Bun no bootstrap.
+Adopt Bun as monorepo manager, tooling runner and backend runtime. React/Vite deliver browser code. Use one `bun.lock` and pin the Bun version during bootstrap.
 
-Manter um monólito modular: funcionalidades agrupadas em módulos, aplicação e adaptadores separados, domínio de partida puro em `game-core` e contratos públicos em `game-protocol`. Montar dependências explicitamente e preservar uma autoridade por sala. Aplicar máquina de estados, ports e adapters, eventos e estratégias somente onde houver necessidade concreta.
+Keep a modular monolith: features grouped into modules, application and adapters separated, pure match domain in `game-core` and public contracts in `game-protocol`. Compose dependencies explicitly and preserve one authority per room. Apply state machines, ports/adapters, events and strategies only where there is a concrete need.
 
-Organizar o frontend por features, com estado do servidor separado de seleção e animação. Manter testes próximos do comportamento e verificar fronteiras de imports. Revisar arquivos acima de 300 linhas, extrair antes de ampliar perto de 450 e refatorar arquivos de 500 ou mais, salvo exceção justificada; reavaliar pastas com cerca de 15 arquivos.
+Organize frontend code by feature, separating server state from selection and animation. Keep tests close to behavior and check import boundaries. Review files exceeding 300 lines, extract before extending files near 450, and refactor files with 500 or more unless an exception is justified; reassess folders around 15 files.
 
-## Consequências
+## Consequences
 
-O domínio pode ser testado e simulado sem Bun, HTTP ou navegador. Adaptadores concentram as integrações; a aplicação coordena efeitos e serialização. Evitar camadas vazias, interfaces sem consumidor e fragmentação mecânica exige revisão de coesão, além das métricas de tamanho.
+The domain can be tested and simulated without Bun, HTTP or a browser. Adapters concentrate integrations; the application coordinates effects and serialization. Avoiding empty layers, unused interfaces and mechanical fragmentation requires cohesion review in addition to size metrics.
 
-O bootstrap deverá validar ferramentas sob Bun e implementar checks de fronteiras. Não há instalação, implementação ou testes de compatibilidade concluídos por esta decisão. O estado de partida em memória continua sem recuperação após queda do processo.
+Bootstrap must validate tools under Bun and implement boundary checks. This decision alone completes no installation, implementation or compatibility testing. In-memory match state still cannot recover after a process crash.

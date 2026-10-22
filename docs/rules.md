@@ -1,149 +1,149 @@
-# Regras implementáveis do Truco Caótico
+# Implementable rules for Truco Caótico
 
-Fonte normativa do comportamento do jogo no MVP. Leia antes de alterar regras, poderes, pontuação, turnos, temporizadores ou reconexão. A visão de produto está em [GDD.md](../GDD.md); intenções futuras ali descritas não ampliam este contrato. Custos e tempos continuam sujeitos a playtests, sem ajustes silenciosos.
+Normative source for MVP game behavior. Read before changing rules, powers, scoring, turns, timers, or reconnection. The product vision is in [GDD.md](../GDD.md); future intentions described there do not expand this contract. Costs and timings remain subject to playtests, without silent adjustments.
 
-## Regras-base: contrato implementável
+## Base rules: implementation contract
 
-Vocabulário: **partida** (`match`) vai até 12 pontos; **mão** (`hand`) distribui três cartas; **vaza** (`trick`) recebe uma carta de cada participante.
+Terminology: a **match** ends at 12 points; a **hand** deals three cards; a **trick** receives one card from each participant.
 
-### Baralho, assentos e comparação
+### Deck, seats, and comparison
 
-40 cartas, quatro naipes, ranks em força normal crescente: `4 < 5 < 6 < 7 < Q < J < K < A < 2 < 3`. Embaralhe a cada mão; distribua três cartas por jogador e uma vira, sem reposição.
+40 cards, four suits, ranks in ascending normal strength: `4 < 5 < 6 < 7 < Q < J < K < A < 2 < 3`. Shuffle every hand; deal three cards per player and one vira, without replacement.
 
-Manilha é o sucessor da vira nesse ciclo, incluindo `3 -> 4`. Toda manilha vence qualquer comum; entre manilhas: `ouros < espadas < copas < paus`. Naipes não desempatarão comuns. Identidade física e força efetiva são distintas.
+The manilha is the vira's successor in this cycle, including `3 -> 4`. Every manilha beats every normal card; among manilhas: `diamonds < spades < hearts < clubs`. Suits do not break ties between normal cards. Physical identity and effective strength are distinct.
 
-Assentos horários: A0/B0 no 1v1; A0/B0/A1/B1 no 2v2. Sorteie o iniciador da partida e avance um assento por nova mão, inclusive após anulação. Cada jogador coloca uma carta por vaza; parceiros não somam forças.
+Clockwise seats: A0/B0 in 1v1; A0/B0/A1/B1 in 2v2. Randomly choose the match's starting player and advance one seat per new hand, including after a voided hand. Every player plays one card per trick; partners do not add strengths together.
 
-A maior força determina o resultado: máximas nas duas equipes empatam; máximas somente numa equipe fazem essa equipe vencer. Inicia a próxima vaza o autor da carta vencedora; havendo máximas iguais entre parceiros, o primeiro a jogá-la. Empate entre equipes conserva o iniciador da vaza empatada.
+The greatest strength determines the result: maxima on both teams produce a tie; maxima on only one team make that team win. The player who played the winning card starts the next trick; for equal maxima among partners, the first to play it starts. A tie between teams preserves the tied trick's starting player.
 
-### Encerramento e empates
+### Completion and ties
 
-Encerre assim que definido, nos dois formatos. Tabela simétrica para A/B:
+End the hand as soon as its result is determined, in both formats. The table is symmetric for A/B:
 
-| Resultados das vazas | Vencedor da mão |
+| Trick results | Hand winner |
 |---|---|
-| A, A | A, imediatamente |
-| A, empate | A, imediatamente |
-| empate, A | A, imediatamente |
+| A, A | A, immediately |
+| A, tie | A, immediately |
+| tie, A | A, immediately |
 | A, B, A | A |
 | A, B, B | B |
-| A, B, empate | A, vencedor da primeira |
-| empate, empate, A | A |
-| empate, empate, empate | Anulada, zero pontos |
+| A, B, tie | A, winner of the first |
+| tie, tie, A | A |
+| tie, tie, tie | Voided, zero points |
 
-Três empates sem pontos são convenção do produto, não regra universal de Truco.
+Three ties awarding no points are a product convention, not a universal Truco rule.
 
-### Cartas cobertas
+### Face-down cards
 
-Permitidas da segunda vaza em diante. Consomem carta e perdem para qualquer aberta ou mascarada revelada; todas cobertas produzem empate. Não revele identidade aos demais. Não combine coberta com poder de carta.
+Allowed from the second trick onward. They consume a card and lose to any face-up card or revealed masked card; all face-down cards produce a tie. Do not reveal their identity to others. Do not combine a face-down play with a card power.
 
-### Apostas
+### Stakes
 
-Escala `1 -> 3 -> 6 -> 9 -> 12`. Só o jogador do turno inicia pedido antes de jogar. Negociação pendente bloqueia cartas/poderes.
+Scale: `1 -> 3 -> 6 -> 9 -> 12`. Only the current player initiates a request before playing. Pending negotiation blocks cards/powers.
 
-Separe `acceptedStake`, `pendingStake`, `lastRaisingTeam`, `resumeTurnSeat`:
+Keep `acceptedStake`, `pendingStake`, `lastRaisingTeam`, and `resumeTurnSeat` separate:
 
-- Aceitar confirma o valor proposto e retoma o turno salvo.
-- Correr concede ao solicitante o valor já aceito, não o pendente.
-- Contra-aumentar **aceita implicitamente a proposta anterior**, propõe o próximo nível e transfere a resposta.
-- Não pule níveis nem aumente a própria proposta. Após aceitação, só a outra equipe pode iniciar novo aumento, num turno permitido.
-- No 2v2, qualquer parceiro desafiado responde; a primeira resposta válida serializada é definitiva. Responder não muda a vez.
-- Em 12, somente aceitar/correr. Correr fora de aposta pendente ou decisão de onze não existe no MVP; desistência de partida é separada.
+- Accepting confirms the proposed value and resumes the saved turn.
+- Folding awards the requester the already accepted value, not the pending one.
+- Counter-raising **implicitly accepts the previous proposal**, proposes the next level, and transfers the response.
+- Do not skip levels or raise your own proposal. After acceptance, only the other team may initiate another raise, during an allowed turn.
+- In 2v2, either challenged partner may respond; the first valid serialized response is final. Responding does not change the turn.
+- At 12, only accept/fold. Folding outside a pending stake or eleven-point decision does not exist in the MVP; match resignation is separate.
 
-Regressões: A pede 3, B propõe 6, A corre: **B ganha 3**. Com 6 aceito e 9 pendente, correr concede 6.
+Regressions: A requests 3, B proposes 6, A folds: **B gains 3**. With 6 accepted and 9 pending, folding awards 6.
 
-Pontue uma única vez, limitando o placar a 12 e registrando a recompensa original no evento. Ao alcançar 12, encerre sem nova distribuição. Abandono/falha técnica usam motivos próprios.
+Score exactly once, cap the score at 12, and record the original reward in the event. At 12, end without dealing again. Abandonment/technical failure use their own reasons.
 
-### Onze e mão decisiva
+### Eleven points and the deciding hand
 
-Uma só equipe em 11: observa cartas/vira e escolhe jogar por 3 ou correr, concedendo 1. No 2v2, vê cartas do parceiro durante a decisão; informação revelada não pode ser considerada esquecida. Primeira resposta válida da equipe prevalece.
+Only one team at 11: it sees cards/vira and chooses to play for 3 or fold, conceding 1. In 2v2, it sees partner cards during the decision; revealed information cannot be treated as forgotten. The team's first valid response prevails.
 
-Em 11×11: **mão decisiva aberta para o dono das cartas**. Cada um vê só as próprias cartas, não as do parceiro. Vale 3, sem decisão de correr nem cartas cobertas. Não implemente jogo às cegas por associá-lo ao nome “mão de ferro”. Três empates repetem a mão com iniciador rotacionado.
+At 11×11: **a deciding hand visible to each card's owner**. Everyone sees only their own cards, not their partner's. It is worth 3, without a fold decision or face-down cards. Do not implement blind play because of an association with the name “mão de ferro”. Three ties repeat the hand with the starting player rotated.
 
-Ambas as mãos especiais proíbem aumentos, poderes e futuros eventos; não sorteiam poderes nem alteram energia, inclusive regeneração. Essas convenções prevalecem sobre efeitos comuns.
+Both special hands prohibit raises, powers, and future events; they do not draw powers or change energy, including regeneration. These conventions override ordinary effects.
 
-## Distribuição e ciclo dos poderes
+## Power assignment and lifecycle
 
-### Sorteio e energia
+### Draws and energy
 
-Por mão comum: distribuir cartas, revelar vira, regenerar energia quando aplicável, sortear poderes e entregar cada poder somente ao seu dono; energia permanece pública. O poder expira ao fim da mão; não é guardável ou negociável.
+For each ordinary hand: deal cards, reveal the vira, regenerate energy when applicable, draw powers, and deliver each power only to its owner; energy remains public. The power expires at the end of the hand; it cannot be saved or traded.
 
-- Energia individual: inicial 2, máxima 3, regeneração +1 por nova mão habilitada, exceto a primeira da partida.
-- Uma ativação bem-sucedida por jogador/mão, também no 2v2; não é limite por equipe.
-- Casual: um poder uniforme e independente por jogador; repetições permitidas.
-- Competitivo 1v1: um poder uniforme, igual para ambos.
-- Competitivo 2v2: dois poderes distintos uniformemente sorteados; uma cópia de cada por equipe, atribuídas aleatoriamente aos parceiros.
-- Ambos os presets usam os mesmos quatro poderes no MVP. Não adicione experimentos só para diferenciá-los.
-- Não adapte sorteio a conta, placar, cartas, energia ou histórico. Energia insuficiente desabilita a ativação, sem reroll compensatório.
-- O poder sorteado é privado ao dono, inclusive em relação ao parceiro. Outros jogadores e a projeção pública só recebem sua identidade após uma ativação aceita.
-- Energia, pronto, ativação resolvida e alvo são públicos; resultados de informação e trocas respeitam privacidade. Pronto não revela a intenção selada.
-- Espião/Segunda Chance revelam o poder somente no fechamento do lote da preparação; Impulso/Máscara, junto da jogada aceita. A revelação da Máscara não revela a identidade da carta antes da resolução.
-- Rejeição, passe, expiração, fim da mão/partida e reconexão não revelam poderes nunca usados. Cada nova mão oculta novamente as novas atribuições.
+- Individual energy: initial 2, maximum 3, regeneration +1 per new eligible hand, except the match's first.
+- One successful activation per player/hand, including in 2v2; this is not a team limit.
+- Casual: one uniform, independent power per player; duplicates allowed.
+- Competitive 1v1: one uniform power, identical for both.
+- Competitive 2v2: two distinct powers drawn uniformly; one copy of each per team, randomly assigned to partners.
+- Both presets use the same four powers in the MVP. Do not add experiments just to differentiate them.
+- Do not adapt draws to accounts, scores, cards, energy, or history. Insufficient energy disables activation, without a compensating reroll.
+- The assigned power is private to its owner, including with respect to their partner. Other players and the public projection receive its identity only after an accepted activation.
+- Energy, readiness, resolved activation, and target are public; information results and exchanges respect privacy. Readiness does not reveal sealed intent.
+- Espião/Segunda Chance reveal their power only when the preparation batch closes; Impulso/Máscara do so alongside the accepted play. Revealing Máscara does not reveal card identity before resolution.
+- Rejection, passing, expiry, hand/match completion, and reconnection do not reveal unused powers. Every new hand hides its new assignments again.
 
-A política competitiva espelhada ainda permite deduzir poderes a partir da própria atribuição; ocultar o snapshot não elimina essa inferência. Sua substituição por sorteio independente está pendente de decisão do proprietário. Espelhamento é simetria de acesso, não garantia de equilíbrio posicional. Não elimine a aleatoriedade escolhida pelo proprietário.
+The mirrored competitive policy still allows powers to be inferred from one's own assignment; hiding the snapshot does not eliminate this inference. Replacing it with independent draws is pending an owner decision. Mirroring provides symmetric access, not guaranteed positional balance. Do not eliminate the randomness chosen by the owner.
 
-### Preparação selada e ordem de resolução
+### Sealed preparation and resolution order
 
-Antes da primeira vaza, cada jogador envia uma intenção única e definitiva: poder de preparação com parâmetros válidos ou passe. Poder de turno permanece disponível após o passe. Timeout passa. Indicador público de pronto não distingue passe de ativação.
+Before the first trick, each player sends one final intent: a preparation power with valid parameters or a pass. Turn powers remain available after passing. Timeout passes. The public ready indicator does not distinguish passing from activation.
 
-Não publique escolhas, gastos, alvos ou resultados até todos responderem ou expirar o prazo. Valide energia, uso e alvo ao aceitar cada intenção. Resolva o lote atomicamente:
+Do not publish choices, costs, targets, or results until everyone responds or the deadline expires. Validate energy, use, and target when accepting each intent. Resolve the batch atomically:
 
-1. Retire todas as cartas escolhidas para Segunda Chance.
-2. Distribua substituições sem reposição, por assento a partir do iniciador.
-3. Resolva Espião nas mãos **já atualizadas**.
-4. Aplique gastos/usos, publique ativações e envie resultados privados aos destinatários.
-5. Abra o primeiro turno.
+1. Remove all cards selected for Segunda Chance.
+2. Deal replacements without replacement, in seat order from the starting player.
+3. Resolve Espião against the **already updated** hands.
+4. Apply costs/uses, publish activations, and send private results to their recipients.
+5. Open the first turn.
 
-Descartes não retornam ao monte na mão. Não intercale jogadas nem permita rever a intenção após observar os outros. A resolução independe da ordem de chegada dos pacotes.
+Discards do not return to the deck during the hand. Do not interleave plays or allow intent to be revised after observing others. Resolution is independent of packet arrival order.
 
-### Catálogo do MVP
+### MVP catalog
 
-| Poder | Custo | Janela | Contrato |
+| Power | Cost | Window | Contract |
 |---|---:|---|---|
-| Espião | 1 | Preparação | Escolher adversário e descobrir uma carta uniforme de sua mão final. |
-| Segunda Chance | 2 | Preparação | Descartar uma carta própria escolhida e comprar do monte restante. |
-| Impulso | 2 | Sua jogada | Carta comum ganha um nível normal de força nesta vaza, teto no 3. |
-| Máscara | 1 | Sua jogada | Carta oculta para todos, exceto dono, até resolução; disputa com força integral. |
+| Espião | 1 | Preparation | Choose an opponent and discover one uniformly selected card from their final hand. |
+| Segunda Chance | 2 | Preparation | Discard one selected card of your own and draw from the remaining deck. |
+| Impulso | 2 | Your play | A normal card gains one normal strength level for this trick, capped at 3. |
+| Máscara | 1 | Your play | Card hidden from everyone except its owner until resolution; contests at full strength. |
 
-**Espião:** resultado só ao usuário, não automaticamente ao parceiro. Não permite escolher a identidade física da carta, não altera mãos e não revela o monte. Na interface, clicar em um verso anônimo escolhe o adversário; a observação aleatória aparece naquele verso após a resolução. Após jogar outra carta aberta, a face observada continua ocupando um dos slots restantes, nunca um slot extra. Se houver jogada ainda opaca do alvo, a observação vira uma anotação textual de memória fora dos slots, pois não é possível confirmar se continua na mão. Essa memória não rastreia cartas ainda na mão nem jogadas ocultas. Quando uma jogada visível desse alvo, atual ou em vaza concluída, revela o mesmo valor e naipe, a observação deixa o assento; também desaparece quando a contagem da mão chega a zero. Carta coberta ou Máscara ainda oculta não informa se a carta observada saiu. Dois espiões podem descobrir a mesma carta, sem compensação.
+**Espião:** sends the result only to its user, not automatically to their partner. It does not allow choosing a card's physical identity, change hands, or reveal the deck. In the interface, clicking an anonymous card back selects the opponent; the random observation appears on that back after resolution. After another face-up card is played, the observed face continues to occupy one remaining slot, never an extra slot. If the target has a play that is still opaque, the observation becomes a textual memory note outside the slots, because it cannot be confirmed to remain in hand. This memory does not track cards still in hand or hidden plays. When a visible play by that target, current or in a completed trick, reveals the same rank and suit, the observation leaves the seat; it also disappears when the hand count reaches zero. A face-down card or still-hidden Máscara does not reveal whether the observed card has left. Two spies may discover the same card, without compensation.
 
-**Segunda Chance:** não compra vira, cartas distribuídas ou descartadas, inclusive a devolvida. Descarte/substituição são privados; mão continua com três cartas.
+**Segunda Chance:** cannot draw the vira, dealt cards, or discarded cards, including the returned card. Discard/replacement are private; the hand still contains three cards.
 
-**Impulso:** rejeite manilha, coberta e 3 comum, sem gastar. Ganhar nível normal de um rank que coincide com manilha não cria manilha: a classe continua comum. Não altere identidade física.
+**Impulso:** reject manilhas, face-down cards, and normal 3s without spending energy. Gaining the normal strength level of a rank that coincides with the manilha does not create a manilha: the class remains normal. Do not change physical identity.
 
-**Máscara:** aceita comum/manilha, nunca coberta. Mostre marcador inequívoco; não envie valor real antecipadamente para apenas escondê-lo com CSS. Se a mão encerrar por corrida antes da revelação, a carta permanece oculta aos demais durante a partida. Fim de mão não revela automaticamente mãos remanescentes/descartes.
+**Máscara:** accepts normal cards/manilhas, never face-down cards. Show an unambiguous marker; do not send the real value early merely to hide it with CSS. If a fold ends the hand before reveal, the card remains hidden from others during the match. Hand completion does not automatically reveal remaining hands/discards.
 
-Impulso/Máscara acompanham `PLAY_CARD` atomicamente. A UI seleciona poder antes da carta; o servidor valida junto e publica efeito antes da representação da jogada. Não crie buff órfão nem permita intercalar aposta. Rejeição não consome carta, energia, uso ou aleatoriedade.
+Impulso/Máscara accompany `PLAY_CARD` atomically. The UI selects the power before the card; the server validates both together and publishes the effect before the play representation. Do not create orphan buffs or allow an interleaved stake request. Rejection consumes no card, energy, use, or randomness.
 
-### Limites e expansões
+### Limits and expansions
 
-Sem reações aninhadas, contra-mágicas, retroatividade ou cadeias infinitas. Poder não cria/copia manilha, supera manilha com força comum, obriga aceitar Truco, muda pontos ou desfaz vaza.
+No nested reactions, counterspells, retroactive changes, or infinite chains. A power cannot create/copy a manilha, beat a manilha with normal strength, force acceptance of Truco, change points, or undo a trick.
 
-Não implementar agora: Pressão, Reflexo, Tudo ou Nada, Aposta Arriscada, Escudo, Conexão e eventos. Poderes de pontuação do rascunho eram redundantes, não funcionalidades aprovadas. Expansões exigem alvo, janela, custo, duração, visibilidade, ordem, interações, falhas e testes. Configuração de balanceamento é versionada e congelada por partida.
+Do not implement now: Pressão, Reflexo, Tudo ou Nada, Aposta Arriscada, Escudo, Conexão, or events. Draft scoring powers were redundant proposals, not approved features. Expansions require target, window, cost, duration, visibility, order, interactions, failures, and tests. Balance configuration is versioned and frozen per match.
 
-## Tempo, reconexão e término anormal
+## Time, reconnection, and abnormal completion
 
-Defaults de playtest; casual configura antes da partida, competitivo usa preset fixo:
+Playtest defaults; casual configures them before the match, competitive uses a fixed preset:
 
-| Decisão | Casual | Competitivo |
+| Decision | Casual | Competitive |
 |---|---:|---:|
-| Preparação | 15 s | 10 s |
-| Carta | 30 s | 20 s |
-| Aposta/onze | 20 s | 15 s |
-| Proteção cumulativa de reconexão por assento/partida | 60 s | 30 s |
+| Preparation | 15 s | 10 s |
+| Card | 30 s | 20 s |
+| Stake/eleven points | 20 s | 15 s |
+| Cumulative reconnection protection per seat/match | 60 s | 30 s |
 
-Servidor controla deadlines; timers identificam partida/fase/decisão e ignoram contexto obsoleto. Comando recebido no deadline ou depois está expirado. UI só estima o restante.
+The server controls deadlines; timers identify match/phase/decision and ignore stale context. A command received at or after the deadline has expired. The UI only estimates remaining time.
 
-Timeout: preparação passa; aposta/onze corre; carta joga aberta a de menor força efetiva, sem poder, empatando por identidade interna determinística. Fallback não depende de cartas ocultas alheias.
+Timeout: preparation passes; stake/eleven points folds; card decisions play the weakest effective card face-up, without a power, breaking ties by deterministic internal identity. Fallback does not depend on others' hidden cards.
 
-Reconexão preserva assento. Pausa protegida consome orçamento cumulativo, sem recarga, só quando uma decisão depende do ausente. Parceiro conectado ainda responde decisões de equipe. Retome tempo restante, não inteiro; pausas simultâneas não se somam artificialmente.
+Reconnection preserves the seat. Protected pauses consume a cumulative budget without refill, only when a decision depends on the absent player. A connected partner can still answer team decisions. Resume remaining time, not the full duration; simultaneous pauses do not add up artificially.
 
-Após proteção, aplique fallbacks. Três decisões exigidas do mesmo jogador expiradas consecutivamente causam abandono; ação válida dele zera a sequência. No 2v2, abandono derrota a equipe. Ambas as equipes inteiramente ausentes: expire sem vencedor, sem autojogadas ilimitadas.
+After protection, apply fallbacks. Three consecutive required decisions by the same player timing out cause abandonment; their valid action resets the sequence. In 2v2, abandonment defeats the team. If both teams are entirely absent, expire without a winner and without unlimited automatic plays.
 
-Casual pode desligar relógio de cartas, não expiração de salas vazias/desconectadas. Distinga desistência, abandono e falha técnica. Queda do processo com estado em memória é falha técnica, não derrota: documente que o MVP não recupera partidas após reinício sem persistência implementada.
+Casual may disable the card clock, not expiration of empty/disconnected rooms. Distinguish resignation, abandonment, and technical failure. A process crash with state in memory is a technical failure, not a defeat: document that the MVP does not recover matches after restart without implemented persistence.
 
-## Treino solo e cenários de desenvolvimento
+## Solo training and development scenarios
 
-Por autorização de 19/10/2026, “Jogar” pode iniciar treino 1v1 contra bot simples, sem alterar regras, poderes ou pontuação. O bot usa somente informação autorizada de seu assento. A criação depende de flag independente. Revanche solo é imediata; não exige confirmação de um segundo humano.
+As authorized on 19/10/2026, “Jogar” may start 1v1 training against a simple bot, without changing rules, powers, or scoring. The bot uses only information authorized for its seat. Creation depends on an independent flag. Solo rematch is immediate; it does not require confirmation from a second human.
 
-Somente em development e em mesa solo do dono, um comando de ferramentas reinicia a mão com cartas/poder/energia escolhidos. Mantém placar, unicidade das cartas e restrições de onze/11×11. É ferramenta de teste, indisponível em partidas multiplayer e produção. Veja [ADR 009](adr/009-solo-training-and-development-tools.md).
+Only in development and on the owner's solo table, a tooling command restarts the hand with selected cards/power/energy. It preserves score, card uniqueness, and eleven-point/11×11 restrictions. This is a test tool, unavailable in multiplayer matches and production. See [ADR 009](adr/009-solo-training-and-development-tools.md).

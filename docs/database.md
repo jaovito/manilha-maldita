@@ -1,64 +1,64 @@
-# Banco local, migrações e seeds
+# Local database, migrations, and seeds
 
-PostgreSQL 18.6 Alpine em Docker Compose, com Drizzle ORM 0.45.4, Drizzle Kit 0.31.11 e driver SQL nativo de Bun. O setup autorizado do M5 acrescenta schemas e migrations de produto; o servidor ainda não os utiliza e não há banco no caminho das jogadas.
+PostgreSQL 18.6 Alpine runs in Docker Compose, with Drizzle ORM 0.45.4, Drizzle Kit 0.31.11, and Bun's native SQL driver. The authorized M5 setup adds product schemas and migrations; the server does not use them yet, and gameplay does not query the database.
 
-## Desenvolvimento
+## Development
 
 ```sh
-# Opcional: personalize as configurações locais antes de subir os containers.
+# Optional: customize local settings before starting the containers.
 cp .env.example .env
 bun run db:up
 bun run db:migrate
 bun run db:seed
 ```
 
-Não sobrescreva um `.env` existente. Sem ele, os comandos usam os defaults locais de `.env.example`. Se alterar portas/senhas, mantenha `DATABASE_URL` e `TEST_DATABASE_URL` coerentes com as variáveis do Compose.
+Do not overwrite an existing `.env`. Without one, commands use the local defaults in `.env.example`. If you change ports/passwords, keep `DATABASE_URL` and `TEST_DATABASE_URL` consistent with the Compose variables.
 
-- Desenvolvimento: `127.0.0.1:55432`, banco `truco_dev`, usuário `truco`, volume `truco_postgres-data`.
-- Testes: `127.0.0.1:55433`, banco `truco_test`, usuário `truco_test`, armazenamento `tmpfs` descartável ao parar o container.
-- Ambos só publicam portas no loopback e possuem healthcheck; o Compose espera o PostgreSQL ficar pronto.
-- As credenciais do exemplo são fictícias, exclusivamente locais. Nunca as reutilize em produção.
+- Development: `127.0.0.1:55432`, database `truco_dev`, user `truco`, volume `truco_postgres-data`.
+- Tests: `127.0.0.1:55433`, database `truco_test`, user `truco_test`, temporary `tmpfs` storage discarded when the container stops.
+- Both publish ports on loopback only and have health checks; Compose waits for PostgreSQL to become ready.
+- Example credentials are fictitious and exclusively local. Never reuse them in production.
 
-`bun run db:down` para somente o PostgreSQL de desenvolvimento, preservando o volume. `bun run db:test:down` para somente a instância de testes, descartando seu armazenamento temporário. Não há comando de reset destrutivo do banco de desenvolvimento. Não use `docker compose down -v` se quiser preservar dados.
+`bun run db:down` stops only the development PostgreSQL service, preserving its volume. `bun run db:test:down` stops only the test instance, discarding its temporary storage. There is no destructive development database reset command. Do not use `docker compose down -v` if you want to preserve data.
 
-## Estrutura e ciclo de migrações
+## Structure and migration lifecycle
 
 ```text
 apps/server/
   drizzle.config.ts
   database/
-    target.ts             # seleção explícita e validação do destino local
-    connect.ts            # conexão Bun SQL + Drizzle
-    schema.ts             # exports para geração Drizzle
-    schema/               # contas, catálogos, resultados e jobs
-    migrations/           # SQL versionado e metadados do Drizzle
+    target.ts             # explicit selection and validation of the local target
+    connect.ts            # Bun SQL + Drizzle connection
+    schema.ts             # exports for Drizzle generation
+    schema/               # accounts, catalogs, results, and jobs
+    migrations/           # versioned SQL and Drizzle metadata
     migrate.ts
     cli.ts
     seeds/
-      run.ts              # executor transacional
-      registry.ts         # seeds locais de produto, inicialmente vazio
-  tests/database/         # guardas e integração real com PostgreSQL
+      run.ts              # transactional runner
+      registry.ts         # local product seeds, initially empty
+  tests/database/         # guards and real PostgreSQL integration
 ```
 
-As migrations 0000/0001 reservam o namespace `app` e permanecem intactas. A 0002 cria as 11 tabelas do M5 e a 0003 instala a função/trigger da fila. O histórico é gerenciado por Drizzle e não deve ser editado para forçar uma aplicação. `schema.ts` exporta os modelos de `schema/`; o ponto de entrada do gerador já carrega esses arquivos. Triggers e funções SQL permanecem em migration customizada versionada.
+Migrations 0000/0001 reserve the `app` namespace and remain unchanged. Migration 0002 creates the 11 M5 tables, and 0003 installs the queue function/trigger. Drizzle manages the history; do not edit it to force application. `schema.ts` exports models from `schema/`; the generator entry point already loads those files. SQL triggers and functions remain in a versioned custom migration.
 
-Ao introduzir modelos aprovados, declare-os em arquivos de schema por funcionalidade e ajuste o glob em `drizzle.config.ts` quando necessário. Gere SQL com `bun run db:generate --name=descricao`, revise-o e execute `bun run db:migrate`. Novas migrações entram no Git junto com os snapshots e o journal. Não reescreva migrações já aplicadas nem use `push` para contornar revisão.
+When introducing approved models, declare them in schema files grouped by feature and adjust the glob in `drizzle.config.ts` when necessary. Generate SQL with `bun run db:generate --name=description`, review it, and run `bun run db:migrate`. Commit new migrations with their snapshots and journal. Do not rewrite applied migrations or use `push` to bypass review.
 
-`bun run db:migrate:test` aplica o mesmo histórico exclusivamente ao banco de testes. Os comandos locais recusam modo produção, hosts remotos, bancos/usuários fora do alvo e parâmetros de conexão que possam redirecionar o destino. `TEST_DATABASE_URL` nunca usa `DATABASE_URL` como fallback. Erros de validação não imprimem a URL nem credenciais. Esses comandos não são um mecanismo de deploy para produção.
+`bun run db:migrate:test` applies the same history exclusively to the test database. Local commands reject production mode, remote hosts, databases/users outside the target, and connection parameters that could redirect the destination. `TEST_DATABASE_URL` never falls back to `DATABASE_URL`. Validation errors do not print the URL or credentials. These commands are not a production deployment mechanism.
 
-## Seeds e fixtures
+## Seeds and fixtures
 
-Cada tarefa de seed declara um `id` e `run(transaction)`. Registre em `developmentSeeds` somente dados determinísticos e fictícios compatíveis com os modelos já existentes. Faça upsert por chaves estáveis para que executar duas vezes produza o mesmo estado, sem duplicatas. Evite aleatoriedade não controlada e datas variáveis em testes.
+Each seed task declares an `id` and `run(transaction)`. Register only deterministic, fictitious data compatible with existing models in `developmentSeeds`. Upsert using stable keys so that running twice produces the same state without duplicates. Avoid uncontrolled randomness and changing dates in tests.
 
-`runSeeds` rejeita IDs vazios/duplicados e executa o lote inteiro numa transação: se uma tarefa falha, o lote é revertido. Não há truncamento de tabelas, reset automático ou bypass das validações do domínio. Quando os módulos existirem, criação de dados que exija regras de negócio deverá passar por suas operações autorizadas.
+`runSeeds` rejects empty/duplicate IDs and runs the entire batch in one transaction: if a task fails, the batch rolls back. It does not truncate tables, reset automatically, or bypass domain validation. Once modules exist, data creation that requires business rules must use their authorized operations.
 
-O registro deve apenas listar tarefas importadas: implemente suas operações em arquivos separados de seed, que também entram na cobertura. O registro de produto permanece vazio: assets, curva de níveis e política de recompensas ainda não foram configurados. `db:seed` informa isso explicitamente; as fixtures de teste não são adicionadas ao registro.
+The registry should only list imported tasks: implement operations in separate seed files, which also participate in coverage. The product registry remains empty: assets, the level curve, and reward policy have not been configured. `db:seed` reports this explicitly; test fixtures are not added to the registry.
 
-Os testes de integração criam um schema exclusivo com identificador aleatório, registram duas linhas fictícias determinísticas, verificam repetição sem duplicação e rollback e removem seu próprio schema ao terminar. Assim não dependem de dados do desenvolvedor e podem coexistir sem apagar tabelas alheias. O nome aleatório isola o espaço de teste; o conteúdo das fixtures é fixo.
+Integration tests create a dedicated schema with a random identifier, insert two deterministic fictitious rows, verify repetition without duplication and rollback, and remove their own schema afterward. They do not depend on developer data and can coexist without deleting unrelated tables. The random name isolates the test namespace; fixture contents remain fixed.
 
-## Verificação
+## Verification
 
-A suíte do M5 aplica migrations no banco de testes, verifica restrições e exclusão/anonimização, entrega de NOTIFY após commit, ausência de aviso em rollback, persistência sem listener e dois consumidores reais com SKIP LOCKED. O comportamento do worker ainda não existe; essas regressões validam a base SQL, não um serviço de filas completo.
+The M5 suite applies migrations to the test database and checks constraints, deletion/anonymization, NOTIFY delivery after commit, no notification on rollback, persistence without a listener, and two real consumers using SKIP LOCKED. Worker behavior did not exist in the initial setup; those regressions validate the SQL foundation rather than a complete queue service.
 
 ```sh
 bun run test:database
@@ -66,73 +66,75 @@ bun run test:coverage
 bun run check
 ```
 
-`test:database` sobe apenas o serviço de testes, espera o healthcheck e mede cobertura da infraestrutura de conexão, seleção de destino, migração e seed. `test:coverage` inclui essa suíte e `check` a exige; portanto a verificação completa e o CI precisam de Docker/Compose. Unitários do motor e testes DOM continuam executáveis separadamente sem banco.
+`test:database` starts only the test service, waits for its health check, and measures coverage of connection, target selection, migration, and seed infrastructure. `test:coverage` includes this suite, and `check` requires it; full verification and CI therefore need Docker/Compose. Engine unit tests and DOM tests remain runnable separately without a database.
 
-A base de testes fica disponível após a execução; pare-a com `db:test:down` quando terminar. Não se interrompe uma instância compartilhada automaticamente. Configurações, CLI e o registro de seeds são infraestrutura fora da métrica de produto; os módulos executáveis de conexão, migração e seed são inventariados e exigem o mínimo de 80% como os demais arquivos medidos.
+The test database remains available afterward; stop it with `db:test:down` when finished. Shared instances are not stopped automatically. Configuration, CLI, and the seed registry are infrastructure outside the product metric; executable connection, migration, and seed modules are inventoried and require the same 80% minimum as other measured files.
 
-## Modelos do setup M5
+## M5 setup models
 
-| Tabela | Dados e invariantes |
+| Table | Data and invariants |
 | --- | --- |
-| `accounts` | UUID, login canônico único (`[a-z0-9_]{3,32}`), hash PHC Argon2id, estado e criação. Sem e-mail, documento, nome civil ou senha reversível. Formato do hash não comprova seus parâmetros. |
-| `sessions` | Conta, hash SHA-256 hexadecimal de futuro token aleatório, criação, expiração e revogação. Hash único; a validação SQL de formato não substitui geração/validação criptográfica na aplicação. |
-| `profiles` | Apelido público e FKs opcionais para avatar, baralho e mesa. `NULL` significa escolha padrão a resolver na aplicação; nenhum catálogo artificial é criado. |
-| `avatars` | ID estável, nome, `avatar_url` relativo a `/art/`, nível mínimo, disponibilidade e ordenação. Sem upload ou host externo. A existência do asset e eventuais recortes do atlas serão validados na configuração do catálogo. |
-| `deck_themes`, `table_themes` | Catálogos distintos com chave de asset confiável, nível mínimo, disponibilidade e ordenação. Nunca CSS/JavaScript ou URL enviada por jogador. |
-| `player_progress` | XP e pontos competitivos acumulados, não negativos, em `bigint`. Nível é derivado da curva futura; não há coluna `level`. Não converter para `number` sem limite seguro; DTO futuro deve definir serialização. |
-| `match_results` | Resumo autoritativo por ID de partida, preset, formato, treino, placar, motivo, vencedor, contagens públicas, tempos e versão da política. Sem cartas ou snapshots. |
-| `match_participants` | Assento e conta opcional por partida; duplicar conta/assento é proibido. Contexto validado por FK composta. Conta ausente atende convidados/bot e anonimização. Equipe deriva da paridade do assento. |
-| `match_rewards` | Uma concessão por participante, XP/pontos e data. FK composta preserva preset/treino; pontos positivos exigem competitivo e não-solo. Vencedor, valor, conta elegível e totalização ainda serão validados pela aplicação. |
-| `jobs` | Trabalho `match_rewards` vinculado a resultado, único por tipo/partida. Sem payload JSON, dados de jogador ou credenciais. |
+| `accounts` | UUID, unique canonical login (`[a-z0-9_]{3,32}`), Argon2id PHC hash, status, and creation time. No email, identity document, legal name, or reversible password. Hash format does not prove its parameters. |
+| `sessions` | Account, hexadecimal SHA-256 hash of a future random token, creation, expiration, and revocation. Unique hash; SQL format validation does not replace cryptographic generation/validation in the application. |
+| `profiles` | Public nickname and optional avatar, deck, and table FKs. `NULL` means a default selection to resolve in the application; no artificial catalog is created. |
+| `avatars` | Stable ID, name, `avatar_url` relative to `/art/`, minimum level, availability, and ordering. No uploads or external hosts. Asset existence and any atlas crops will be validated when configuring the catalog. |
+| `deck_themes`, `table_themes` | Separate catalogs with a trusted asset key, minimum level, availability, and ordering. Never player-supplied CSS/JavaScript or URLs. |
+| `player_progress` | Accumulated, nonnegative XP and competitive points stored as `bigint`. Level derives from the future curve; there is no `level` column. Do not convert to `number` without a safe bound; future DTOs must define serialization. |
+| `match_results` | Authoritative summary by match ID, preset, format, training mode, score, reason, winner, public counts, timestamps, and policy version. No cards or snapshots. |
+| `match_participants` | Seat and optional account per match; duplicate accounts/seats are prohibited. Context is validated by a composite FK. An absent account supports guests/bots and anonymization. Team derives from seat parity. |
+| `match_rewards` | One grant per participant, XP/points, and date. A composite FK preserves preset/training context; positive points require competitive, non-solo play. Winner, amount, eligible account, and total updates still require application validation. |
+| `jobs` | `match_rewards` work linked to a result, unique by type/match. No JSON payload, player data, or credentials. |
 
-Não há recuperação de conta, política de senha, curva de XP, regra anticolusão, concessão de recompensas ou validação de desbloqueios implementada por estas tabelas. A aplicação é a autoridade; constraints são defesa adicional, não autorização para SQL direto de jogadores. Seleções cosméticas precisarão validar XP/nível e disponibilidade no servidor e preservar o tema do dono nas projeções, sem identificar cartas ocultas.
+These tables do not implement account recovery, a password policy, an XP curve, anti-collusion rules, reward grants, or unlock validation. The application is authoritative; constraints provide additional defense rather than authorizing direct player SQL. Cosmetic selections must validate XP/level and availability on the server and preserve the owner's theme in projections without identifying hidden cards.
 
-## Fila de resultados PostgreSQL
+## PostgreSQL result queue
 
-Não requer extensão nem configuração global: PostgreSQL 18 já fornece LISTEN/NOTIFY e SKIP LOCKED. A migration 0003 instala trigger `jobs_notify_ready` e função `app.notify_jobs_ready()` com search_path fixo, invoker e EXECUTE revogado de PUBLIC. O canal `truco_jobs_ready` carrega somente string vazia, inclusive em reagendamento; notificações podem ser coalescidas. O consumidor deve drenar a tabela, nunca contar notificações como jobs.
+No extension or global configuration is required: PostgreSQL 18 already provides LISTEN/NOTIFY and SKIP LOCKED. Migration 0003 installs the `jobs_notify_ready` trigger and `app.notify_jobs_ready()` function with a fixed search_path, invoker privileges, and EXECUTE revoked from PUBLIC. Channel `truco_jobs_ready` carries only an empty string, including on rescheduling; notifications may be coalesced. Consumers must drain the table, never count notifications as jobs.
 
-O setup fornece estados `pending`, `running`, `completed`, `failed`, `run_at`, tentativas, limite, prazo/token de reserva, término e código de erro restrito. Default de cinco tentativas e teto técnico de cem são parâmetros reversíveis do setup, não política de recompensa. Índices parciais atendem busca por pendência, reserva expirada e limpeza terminal.
+The setup provides `pending`, `running`, `completed`, and `failed` states, `run_at`, attempts, a limit, lease deadline/token, completion time, and a restricted error code. The default of five attempts and technical ceiling of one hundred are reversible setup parameters, not reward policy. Partial indexes support pending work, expired leases, and terminal cleanup.
 
-Contrato do worker a implementar:
+Worker contract to implement:
 
-1. Criar resultado e job em uma transação confiável; rollback não salva nem notifica. Nunca aceitar resultado/recompensa como autoridade do cliente.
-2. Escutar por conexão dedicada (ou session pooling); LISTEN não pode depender de transaction pooling. Confirmar a inscrição antes de consultar pendências ao iniciar/reconectar. Fazer polling de segurança mesmo sem notificação.
-3. Selecionar lote pequeno de jobs vencidos, `ORDER BY run_at, id FOR UPDATE SKIP LOCKED`, sem manter transação durante espera externa. Esta fila não garante ordem global entre consumidores.
-4. Para recompensas só em PostgreSQL, aplicar concessões, incrementos atômicos dos totais e conclusão do job na mesma transação curta. Unicidade impede repetição; atualizar várias contas em ordem estável evita deadlocks desnecessários.
-5. Se houver trabalho fora da transação, reservar com token/prazo, confirmar reserva antes de executar e exigir o mesmo token ao concluir. Recuperar reservas expiradas, reagendar com espera crescente, limitar tentativas e inspecionar `failed`. Leases não dispensam idempotência de efeitos.
-6. Limitar workers/conexões/lotes e monitorar espera, idade das pendências, falhas, locks e crescimento da tabela. Limpeza, autovacuum e capacidade precisam ser medidos antes de considerar particionamento.
+1. Create the result and job in a trusted transaction; rollback neither saves nor notifies. Never treat client results/rewards as authoritative.
+2. Listen through a dedicated connection (or session pooling); LISTEN cannot depend on transaction pooling. Confirm subscription before querying pending work on startup/reconnection. Poll as a fallback even without notifications.
+3. Select a small batch of due jobs with `ORDER BY run_at, id FOR UPDATE SKIP LOCKED`, without holding a transaction during external waits. This queue does not guarantee global ordering across consumers.
+4. For PostgreSQL-only rewards, apply grants, atomic total increments, and job completion in the same short transaction. Uniqueness prevents repetition; update multiple accounts in a stable order to avoid unnecessary deadlocks.
+5. For work outside the transaction, acquire a lease with a token/deadline, confirm it before execution, and require the same token on completion. Recover expired leases, reschedule with increasing delays, limit attempts, and inspect `failed` jobs. Leases do not remove the need for idempotent effects.
+6. Bound workers/connections/batches and monitor wait time, pending age, failures, locks, and table growth. Measure cleanup, autovacuum, and capacity before considering partitioning.
 
-No setup inicial não havia consumidor. O segundo incremento fornece `PostgresJobQueue` e `startJobWorker`, com polling/retentativas/recuperação descritos abaixo; limpeza e métricas de capacidade ainda não estão implementadas. A fila de comandos/timers por sala permanece em memória. Um resultado só é durável após commit; queda antes disso continua sendo limitação do estado vivo atual.
+The initial setup had no consumer. The second increment provides `PostgresJobQueue` and `startJobWorker`, with polling/retries/recovery described below; cleanup and capacity metrics remain unimplemented. The per-room command/timer queue remains in memory. A result becomes durable only after commit; crashes before that remain a limitation of the current live state.
 
-### Consumidor transacional — incremento 2
+### Transactional consumer — increment 2
 
-`src/modules/jobs/adapters/outbound/postgres-queue.ts` recebe um cliente Bun.SQL e um processador obrigatório. `enqueue(tx, matchId, maxAttempts)` só aceita handle transacional; o produtor deve gravar o resultado autoritativo nessa mesma transação. Repetir enqueue preserva job/estado/tentativas/prazo existentes. A fila não tem endpoint público nem processador vazio de produção.
+`src/modules/jobs/adapters/outbound/postgres-queue.ts` receives a Bun.SQL client and a required processor. `enqueue(tx, matchId, maxAttempts)` accepts only a transaction handle; the producer must write the authoritative result in that same transaction. Repeated enqueue preserves the existing job/state/attempts/deadline. The queue has no public endpoint or empty production processor.
 
-`runNext()` reserva uma linha vencida (ou reserva antiga expirada), incrementa a tentativa e chama o processador dentro de um savepoint, mantendo o lock da linha. Efeitos SQL e status `completed` compartilham o commit. Exceção reverte os efeitos ao savepoint e grava somente retry/falha; queda da conexão reverte a transação inteira e libera o job. O processador deve usar apenas o handle recebido para efeitos no mesmo banco, sem HTTP, e-mail, outros clientes, commit/close ou qualquer I/O externo. A tipagem é contrato de integração, não sandbox para código não confiável.
+`runNext()` leases one due row (or an old expired lease), increments the attempt count, and calls the processor inside a savepoint while holding the row lock. SQL effects and `completed` status share the commit. Exceptions roll effects back to the savepoint and record only retry/failure; connection loss rolls back the entire transaction and releases the job. The processor must use only the supplied handle for effects in the same database, without HTTP, email, other clients, commit/close, or any external I/O. Types define an integration contract, not a sandbox for untrusted code.
 
-Entradas de enqueue são `unknown` até validar tipo e domínio: IDs opacos de 1–80 caracteres `[A-Za-z0-9_-]` conforme o protocolo e tentativas numéricas inteiras de 1–100. Valores são sempre parâmetros Bun.SQL, inclusive os lidos do banco; nomes de tabelas/colunas, ordenação e SQL são estáticos. Não usar `unsafe`, `sql.raw`, strings interpoladas comuns ou blacklist de palavras SQL para processar entradas. A checagem de formato é complementar à parametrização, não seu substituto. Ver [política de segurança SQL](security.md#sql-parametrizado-e-validação-de-entrada).
+Enqueue inputs remain `unknown` until type and domain validation: opaque IDs of 1–80 `[A-Za-z0-9_-]` characters, matching the protocol, and numeric integer attempts from 1–100. Values always use Bun.SQL parameters, including values read from the database; table/column names, ordering, and SQL are static. Do not use `unsafe`, `sql.raw`, ordinary interpolated strings, or SQL keyword blacklists to process inputs. Format checks complement parameterization rather than replacing it. See the [SQL security policy](security.md#parameterized-sql-and-input-validation).
 
-Retry começa em 1 s, dobra até 60 s e respeita `max_attempts`; esses parâmetros são operacionais reversíveis. Falhas não persistem exceções/payloads, apenas `JOB_PROCESSING_FAILED`. Reserva antiga expirada com tentativas esgotadas vira `failed` com `LEASE_EXPIRED`. O relógio PostgreSQL controla vencimento. Timeout por statement/inatividade é 5 s local à transação; não executar funções longas ou side effects externos. Consumidores externos com leases publicados separadamente não devem ser misturados sem revisar fencing/idempotência.
+Retry starts at 1 s, doubles up to 60 s, and respects `max_attempts`; these operational parameters are reversible. Failures do not persist exceptions/payloads, only `JOB_PROCESSING_FAILED`. Old expired leases with exhausted attempts become `failed` with `LEASE_EXPIRED`. PostgreSQL time controls due dates. Statement/idle timeout is 5 s, local to the transaction; do not execute long functions or external side effects. External consumers with separately published leases must not be mixed in without reviewing fencing/idempotency.
 
-`startJobWorker` recebe o port de fila, scheduler e sink de eventos seguros. Faz varredura inicial após LISTEN, acorda por NOTIFY/reconexão e consulta a cada 1 s mesmo sem aviso. Coalesce avisos, executa um job por vez e cede após 25 operações; opções têm limites validados. Falha de armazenamento encerra a rodada sem busy loop. Shutdown cancela polling/wakes, remove listener e aguarda operação em andamento; o cliente SQL continua sob responsabilidade do chamador. O adaptador usa o listener dedicado do Bun.SQL; não usar transaction pooling nesse caminho.
+`startJobWorker` receives the queue port, scheduler, and safe event sink. It performs an initial scan after LISTEN, wakes on NOTIFY/reconnection, and queries every 1 s even without notifications. It coalesces notifications, runs one job at a time, and yields after 25 operations; option bounds are validated. Storage failure ends the round without a busy loop. Shutdown cancels polling/wakes, removes the listener, and awaits ongoing work; the SQL client remains the caller's responsibility. The adapter uses Bun.SQL's dedicated listener; do not use transaction pooling on this path.
 
-Os componentes estão disponíveis para composição, mas `startServer` não os inicia: a concessão real de XP/pontos e o produtor de resultados precisam ser implementados primeiro. Importar o módulo não consome jobs, abre conexão nem instala timers. Para revisar o protocolo e limites, veja [ADR 012](adr/012-postgresql-job-processing.md).
+The components are available for composition, but `startServer` does not start them: actual XP/point grants and the result producer must be implemented first. Importing the module does not consume jobs, open connections, or install timers. See [ADR 012](adr/012-postgresql-job-processing.md) for protocol and limits.
 
-## Acesso, retenção e exclusão
+## Access, retention, and deletion
 
-Somente o backend acessará as tabelas; frontend recebe DTOs por allowlist. O ambiente local mantém a role proprietária anterior, sem alegação de privilégio mínimo de produção. No deploy, separar credencial de migração/DDL e roles de runtime, restringir catálogos/credenciais/resultados por responsabilidade, usar TLS validado e comprovar criptografia de banco/backups em repouso. Nunca publicar as tabelas diretamente como API.
+Only the backend will access the tables; the frontend receives allowlisted DTOs. The local environment retains the existing owner role, with no claim of production least privilege. At deployment, separate migration/DDL credentials from runtime roles, restrict catalogs/credentials/results by responsibility, use verified TLS, and prove database/backup encryption at rest. Never expose the tables directly as an API.
 
-Baseline técnico proposto para os próximos incrementos, sem coleta real nem rotina de limpeza neste setup:
+Proposed technical baseline for later increments, without real collection or cleanup routines in this setup:
 
-- Conta/perfil/progresso: até solicitação de exclusão; perfil, progresso e sessões são removidos em cascata. O login não é publicado no ranking, somente o apelido.
-- Sessões: revogação/expiração pela aplicação; remover registros vencidos ou revogados em até 24 h. Tokens utilizáveis nunca são persistidos.
-- Resultados, participantes e recompensas: 90 dias; excluir resultado remove filhos/jobs. Exclusão da conta remove o vínculo do participante (`SET NULL`), preservando somente resumo sem apelido/credencial; outros registros operacionais precisam de revisão no fluxo de exclusão.
-- Jobs concluídos: 7 dias; falhos: até 30 dias para diagnóstico com código seguro. Pendências/reservas não são descartadas por idade nem junto de um resultado ainda não processado; alertar e resolver antes da limpeza.
+- Account/profile/progress: until a deletion request; profile, progress, and sessions cascade on deletion. Rankings publish only the nickname, never the login.
+- Sessions: application revocation/expiration; remove expired or revoked records within 24 h. Usable tokens are never persisted.
+- Results, participants, and rewards: 90 days; deleting a result removes its children/jobs. Account deletion removes the participant link (`SET NULL`), preserving only a summary without nickname/credentials; other operational records require review in the deletion flow.
+- Completed jobs: 7 days; failed jobs: up to 30 days for diagnosis using a safe code. Pending jobs/leases are not discarded by age or alongside an unprocessed result; alert and resolve them before cleanup.
 
-Os prazos são hipóteses reversíveis de minimização e precisam ser operacionalizados antes de ativar persistência real. Após expirar o histórico, os totais de longo prazo permanecem em `player_progress`; não se promete reconstruí-los integralmente a partir de um ledger com retenção finita. A exclusão em backups precisa acompanhar a política do ambiente e não equivale a DELETE imediato em cópias existentes.
+These periods are reversible minimization assumptions and must be operationalized before enabling actual persistence. After history expires, long-term totals remain in `player_progress`; full reconstruction from a ledger with finite retention is not promised. Backup deletion must follow the environment's policy and does not imply immediate DELETE from existing copies.
 
-Em worktrees, isolar `COMPOSE_PROJECT_NAME`, portas e URLs num `.env` ignorado, sem reutilizar volumes/banco do checkout principal. O banco de testes continua exclusivamente `truco_test`, role `truco_test`, host loopback e armazenamento temporário. Não aplicar migrations novas no banco de desenvolvimento compartilhado sem solicitação.
+In worktrees, isolate `COMPOSE_PROJECT_NAME`, ports, and URLs in an ignored `.env`, without reusing the primary checkout's volumes/database. The test database remains exclusively `truco_test`, with role `truco_test`, a loopback host, and temporary storage. Do not apply new migrations to a shared development database without a request.
 
-Referências: [NOTIFY](https://www.postgresql.org/docs/18/sql-notify.html), [LISTEN](https://www.postgresql.org/docs/18/sql-listen.html), [SKIP LOCKED](https://www.postgresql.org/docs/18/sql-select.html).
+References: [NOTIFY](https://www.postgresql.org/docs/18/sql-notify.html), [LISTEN](https://www.postgresql.org/docs/18/sql-listen.html), [SKIP LOCKED](https://www.postgresql.org/docs/18/sql-select.html).
 
-O worker recebe configuração explícita por `WorkerOptions`: polling padrão de 1.000 ms (limites de 10–60.000 ms) e até 25 jobs por despertar (limites de 1–100). Defaults e limites ficam em constantes nomeadas em `application/worker.ts`; opções inválidas são rejeitadas antes da inscrição. A futura composição do worker poderá ler variáveis de ambiente e passar essas opções; a camada de aplicação não acessa `process.env`.
+The worker receives explicit configuration through `WorkerOptions`: default polling is 1,000 ms (bounds 10–60,000 ms), with up to 25 jobs per wake (bounds 1–100). Defaults and bounds are named constants in `application/worker.ts`; invalid options are rejected before subscription. Future worker composition may read environment variables and pass these options; the application layer does not access `process.env`.
+
+The third increment's credential foundation generates Argon2id hashes and SHA-256 verifiers compatible with `accounts.password_hash` and `sessions.token_hash`, demonstrated in `account-credentials.test.ts` using real PostgreSQL and rollback. Passwords are prepared with HMAC-SHA256 using the mandatory environment-only `PASSWORD_PEPPER`; Argon2id still generates independent random salts. The database stores neither the pepper nor a usable session bearer. Typed bootstrap configuration bounds hashing/verification costs and concurrency; it does not change database schema. There is no new migration or runtime account write; repository/login integration, operational retention, and revocation remain pending. See [ADR 013](adr/013-account-credential-foundation.md).

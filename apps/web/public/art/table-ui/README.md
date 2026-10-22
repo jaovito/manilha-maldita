@@ -1,18 +1,18 @@
-# Interface da mesa — taverna
+# Table interface — tavern
 
-Peças decorativas originais geradas com a ferramenta integrada `image_gen` em 19/10/2026 a partir do mockup 2v2 aprovado pelo usuário. Sem textos ou valores embutidos: o HTML mantém idioma, acessibilidade e estado autoritativo.
+Original decorative pieces generated with integrated `image_gen` on 2026-10-19 from the user-approved 2v2 mockup. No embedded text or values: HTML retains language, accessibility and authoritative state.
 
-- `crest.png`: brasão azul com asas de tecido e metal dourado.
-- `crest-enemy.png`: variante vinho, mantendo o metal dourado.
-- `ribbon.png`: faixa vinho com pontas dobradas e bordado dourado.
-- `ribbon-green.png`: variante verde, mantendo o bordado dourado.
-- `parchment.png`: pergaminho vazio, bordas enroladas e suporte de madeira.
-- `wood.png`: placa de madeira vazia, cantos chanfrados e filetes dourados.
+- `crest.png`: blue crest with fabric wings and gold metal.
+- `crest-enemy.png`: burgundy variant preserving gold metal.
+- `ribbon.png`: burgundy ribbon with folded ends and gold embroidery.
+- `ribbon-green.png`: green variant preserving gold embroidery.
+- `parchment.png`: empty parchment, rolled edges and wooden support.
+- `wood.png`: empty wooden plate with beveled corners and gold trim.
 
-Prompts de produção: peças isoladas de interface 2D em pixel art, vistas de frente, fundo transparente, sem números, letras ou símbolos na área central. Brasão azul com centro vazio e asas laterais; faixa vinho com centro vazio de 70%, pontas dobradas e bordado somente nas extremidades; pergaminho vertical com centro claro de 80% livre para texto; placa horizontal de nogueira com centro escuro livre de 80%. As variantes alteram somente azul para vinho e vinho para verde, preservando ouro e silhueta. Referência: mockup aprovado `exec-ccf3c69a-a948-4243-a0b3-302c135cfb15.png`.
+Production prompts: isolated 2D pixel-art interface pieces, front-facing, transparent background, no numbers, letters or symbols in the central area. Blue crest with empty center/lateral wings; burgundy ribbon with 70% empty center, folded ends and embroidery only at the ends; vertical parchment with 80% clear center for text; horizontal walnut plate with 80% empty dark center. Variants change only blue to burgundy and burgundy to green, preserving gold/silhouette. Reference: approved mockup `exec-ccf3c69a-a948-4243-a0b3-302c135cfb15.png`.
 
-Uso: `Table/Theme` compõe os materiais com fundos CSS e camadas decorativas sem interceptar cliques. As cartas comuns, versos, atlas de poderes e suas proporções não foram alterados. O backend não depende destes arquivos.
+Usage: `Table/Theme` composes materials through CSS backgrounds/decorative layers without intercepting clicks. Standard cards, backs, power atlas and their aspect ratios were unchanged. The backend does not depend on these files.
 
-O pergaminho usa sua proporção original de 614×768, com escala uniforme e `image-rendering: pixelated`. Sua moldura tem tamanho definido pelo viewport e não acompanha o volume de texto; somente a lista interna rola. Não usar escala independente nos eixos nem border-image para esticar a peça.
+Parchment uses its original 614×768 aspect ratio with uniform scaling and `image-rendering: pixelated`. Frame size follows the viewport rather than text volume; only the internal list scrolls. Do not scale axes independently or use border-image to stretch this piece.
 
-Distribuição: PNGs com alfa, redimensionados para até 768 px (brasões/pergaminho) ou 1024 px (faixas/madeira), total aproximado de 2 MB.
+Distribution: alpha PNGs resized to at most 768 px (crests/parchment) or 1024 px (ribbons/wood), approximately 2 MB total.

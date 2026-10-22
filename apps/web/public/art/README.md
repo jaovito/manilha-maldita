@@ -1,67 +1,67 @@
-# Arte da interface
+# Interface artwork
 
-Assets gerados em 18/10/2026 com a ferramenta integrada ImageGen, a partir da direção visual autorizada pelo usuário: pixel art de fantasia, feltro verde, madeira, dourado e pergaminho. As imagens de referência orientam o estilo; os arquivos abaixo foram gerados para este projeto.
+Assets generated on 2026-10-18 with integrated ImageGen, following the user-authorized art direction: fantasy pixel art, green felt, wood, gold and parchment. Reference images guide the style; the files below were generated for this project.
 
-- `tabletop.png`: fundo decorativo da entrada e mesa, sem informações de partida.
-- `avatars.png`: atlas 2×2 de retratos decorativos, sem seleção ou atributos de gameplay.
-- `card-back.png`: verso de todas as cartas ocultas; não identifica cartas físicas.
-- `menu-tabletop.png`: fundo próprio do menu e lobby, com feltro livre no centro, vela, baralho e cuia nas bordas. Gerado com ImageGen integrado na revisão do menu; não contém botões ou dados de jogador.
-- `menu-reference-plate.png`: edição da referência fornecida pelo usuário, com ImageGen integrado. Preserva a composição, logo e ilustrações decorativas; remove a navegação e os dados fictícios do perfil para receber controles HTML. Não é o arquivo original da referência nem uma reprodução pixel a pixel.
-- `menu-icons.png`: atlas transparente 2×3 de ícones pixel art, gerado com ImageGen integrado, consumido por CSS. A cartola usa rotação de apresentação para orientar a aba para baixo.
-- `menu-button-frame.svg`: moldura decorativa vetorial original, desenhada em código para botões funcionais.
+- `tabletop.png`: decorative entrance/table background without match information.
+- `avatars.png`: 2×2 decorative portrait atlas without selection or gameplay attributes.
+- `card-back.png`: back for all hidden cards; does not identify physical cards.
+- `menu-tabletop.png`: dedicated menu/lobby background with clear central felt and candle, deck and mate gourd around the edges. Generated with integrated ImageGen during the menu revision; contains no buttons or player data.
+- `menu-reference-plate.png`: integrated ImageGen edit of the user-provided reference. Preserves composition, logo and decorative illustrations; removes navigation and fictional profile data to accommodate HTML controls. This is neither the original reference file nor a pixel-exact reproduction.
+- `menu-icons.png`: transparent 2×3 pixel-art icon atlas generated with integrated ImageGen and consumed through CSS. The top hat is rotated for presentation so its brim points downward.
+- `menu-button-frame.svg`: original decorative vector frame drawn in code for functional buttons.
 
-Ranks, naipes, pontuação e textos da partida são derivados exclusivamente das projeções autorizadas. As cartas ilustradas no fundo do menu, incluindo Espião, são decoração estática; não indicam cartas recebidas ou poderes implementados. Não há dados privados de adversários embutidos nos assets. Valores de nível, XP e moeda da referência foram removidos; o perfil exibe indisponibilidade, sem saldo ou progresso fictício.
+Ranks, suits, scores and match text derive exclusively from authorized projections. Illustrated cards in the menu background, including Espião, are static decoration; they do not indicate dealt cards or implemented powers. Assets contain no opponents’ private data. Reference level, XP and currency values were removed; the profile shows unavailability rather than fictional balances or progress.
 
-A fonte local Pixelify Sans está em `../fonts/`, acompanhada da licença SIL Open Font License. Origem: https://github.com/google/fonts/tree/main/ofl/pixelifysans.
+The local Pixelify Sans font is in `../fonts/` with its SIL Open Font License. Source: https://github.com/google/fonts/tree/main/ofl/pixelifysans.
 
-O menu usa também Jersey 25 local, com a licença OFL em `../fonts/OFL-Jersey25.txt`. Origem: https://github.com/google/fonts/tree/main/ofl/jersey25.
+The menu also uses local Jersey 25, with its OFL license in `../fonts/OFL-Jersey25.txt`. Source: https://github.com/google/fonts/tree/main/ofl/jersey25.
 
-## Prompts utilizados
+## Production prompts
 
-### Edição fiel da composição do menu
+### Faithful menu composition edit
 
 EDIT THE PROVIDED REFERENCE IMAGE as a production game-menu background plate. Preserve the original 1567x882 landscape composition, pixel-art style, exact colors, exact object positions, scale, cropped props and all intricate pixel details as faithfully as possible. Keep UNCHANGED: the TRUCO com PODERES logo and crown at upper left, the wooden corners, candle, left deck, green felt flourishes, the two overlapping parchment playing cards at lower-left, the illustrated ESPIÃO card on lower-right, the mate gourd at right, coins and bottom card decks, the bottom footer gold line and center crown. Keep the TOP-RIGHT gold profile frame and its original round illustrated rogue avatar, pencil, coin icon and plus-square icon, in exactly their reference positions. REMOVE ONLY the six central navigation buttons completely (frames, icons and text) and reconstruct matching emerald felt behind them, leaving the entire central vertical button area empty for live HTML UI. Inside the profile frame REMOVE ONLY all name/level/currency/XP text, numbers, horizontal dividers and progress bar, replacing their region with matching dark navy background; keep the avatar and gold frame. In footer REMOVE ONLY SAIR text and v0.1 alpha text, retain exit icon, golden frame and crown. Do not invent any new objects or rearrange anything. No new UI or new text. The existing logo and existing ESPIÃO card illustration/text should be retained as reference decorative artwork. This is a close faithful image edit, not a redesign, not a new camera angle.
 
-### Ícones do menu
+### Menu icons
 
 Create a production 2 columns by 3 rows TRANSPARENT sprite atlas with SIX separate 16-bit pixel-art game menu icons. Each equal square cell, no gutters, no frame, centered icon fills 75% of its cell, isolated on genuine transparent alpha. Atlas portrait 1024x1536, each cell512x512. Crisp coarse visible pixel clusters, antique amber gold highlights, deep near-black/navy hard pixel outlines, exactly polished fantasy tavern card-game interface illustrated icon style. Top-left: two overlapping small dark emerald playing card backs with thick ivory parchment outlines and gold tiny edge highlights, slightly tilted opposite ways. Top-right: golden little house with peaked gable roof, dark door opening and strong dark outline, warm yellow lit edges. Middle-left: group of three golden bust silhouettes, larger central head/bust with two smaller people behind left/right, shaded golden ochre fill with pale yellow highlights. Middle-right: open cream parchment book with golden cover, black pixel horizontal lines on pages and central golden spine. Bottom-left: black/navy magician top hat with a rich red band and red brim, strong golden highlights on edges, chunky crisp pixel outline. Bottom-right: circular antique golden gear with eight square teeth and black circular central hole, shaded amber gold/beige highlights, strong dark outline. No people portraits, no letters, no words, no numbers, no UI buttons, no frames, no backgrounds, no shadows outside icon silhouettes, no watermark. The six icons have consistent optical size and near-square footprint; keep every icon strictly within its own exact cell.
 
-### Menu e lobby
+### Menu and lobby
 
 Use case: game menu background asset, not a mockup. Create an original richly crafted 16-bit pixel-art top-down tavern gaming table, landscape 1536x1024. The user references are style and composition guidance: deep emerald felt fills central 78%, warm walnut planks around diagonal edge corners, ornate restrained muted-green symmetrical stitched flourishes around edges, antique ochre gold trim. Crisp visible pixel clusters, restrained dithering and warm candlelight, dark navy shadows, cozy Brazilian fantasy card-game atmosphere. Peripheral still-life details ONLY in the far outer 18%: lit candle on wood upper-left corner, cropped stacked ornate navy card backs and two brass tokens lower-left, a dark mate gourd with metal straw on wood at middle-right, and cropped navy card deck lower-right. Keep central area from x25% to78% and y12% to90% entirely EMPTY dark green felt for live UI buttons and panels; large uncluttered flat negative space. The table is rectangular felt with diagonal corner wood insets, not an octagon frame dominating center. True top-down view, refined high-end cohesive pixel art. NO interface, NO buttons, NO words, NO numbers, NO letters, NO logo, NO character, NO powers cards, NO watermark. Colors match emerald #063c2d, navy #081a27, amber #e6ae4e, burgundy #81182b. No blur, no photo-realism, no smooth vector look.
 
-### Mesa
+### Table
 
 Use case: stylized-concept. Asset type: usable game background for a browser card game, not a UI screenshot. Create an original landscape 1536x1024 top-down pixel-art tavern card table matching a richly crafted 16-bit fantasy card-game art direction: deep emerald green felt, warm dark walnut wood at edges, antique ochre gold trim, crisp visible square pixels, restrained dithering, dark navy shadows and warm candlelight. A huge EMPTY green felt octagonal tabletop should occupy the central 88% of the composition, leaving ample uninterrupted dark-green negative space for live cards and controls drawn by code. Subtle symmetrical stitched suit-like flourishes near the inner felt edges, fine double gold lines around an octagonal border. Only small peripheral details: candle and brass coin on the far upper-left wood corner, a few cropped blue card backs at the far lower-left edge, restrained shadowed wood at right. Flat true top down, symmetric tabletop. No people, no cards in the central playing space, no text, no numbers, no logos, no buttons, no interface frames, no watermarks. High-end cohesive pixel art with legible forms and a cozy mysterious mood, not photorealistic, not blurry.
 
-### Retratos
+### Portraits
 
 Use case: stylized-concept. Asset type: square sprite atlas of four original fantasy card-player portraits, 1024x1024. Exact 2 by 2 grid with four EQUAL square tiles, no gutters; each portrait strictly centered within its own quadrant, no overlap across boundaries. Same cohesive crisp 16-bit pixel-art style, visible pixel clusters, dark navy outlines, warm ochre gold highlights, rich emerald and burgundy accents. Each tile dark near-black navy solid background with bust portrait filling about 80%, all same size and framing. Upper left: mysterious charming male rogue in navy broad brimmed hat with red hatband, short dark beard and one bright eye. Upper right: confident auburn-haired woman wearing a burgundy ranger hat, green cloak, expressive face. Lower left: cheerful moustached card-player with a teal hat and cream scarf. Lower right: older silver-haired woman adventurer in a purple hood with gold clasp. Stylized friendly rivals, original characters, faces readable at 64px, eyes facing mostly viewer. No circles, no border frames (code adds them), no hands/cards, no letters, no names, no text, no watermark. Only the four portraits in precise evenly sized quadrants.
 
-### Verso
+### Card back
 
 Use case: stylized-concept. Asset type: single playing-card BACK illustration, tall portrait ratio 2:3, for a browser pixel-art fantasy card game. A single rectangular card fills the image edge to edge. Crisp 16-bit pixel art, navy blue and midnight teal background, finely engraved symmetrical gold stepped border, tiny burgundy corner accents, ornamental crosshatched diamond filigree. Center a beautifully designed symmetrical antique gold four-suit-inspired crest containing a subtle emerald diamond. Warm worn parchment outer edge with square pixel corner bevels. Rich but restrained detailing readable at 60px wide. The entire image is only the card back face, no tabletop, no surroundings, no perspective, no drop shadow outside, no cards behind it, no text, letters, numerals or watermark. Match an emerald-felt tavern card game with dark wood, gilded frames and parchment cards.
 
-## Molduras e ícones do lobby
+## Lobby frames and icons
 
-`lobby-frame.svg` é arte vetorial original feita em código, inspirada na moldura pixel art da referência de criação de sala fornecida pelo usuário. Usa bordas em nove partes para preservar cantos e ornamentos em painéis de tamanhos diferentes. `features/room/components/Lobby/Icon/index.tsx` contém ícones vetoriais próprios de jogadores, espadas, cartas, chave, cadeado, relógio, voltar, iniciar e olho. Não foram gerados novos bitmaps nesta revisão. As cartas decorativas do painel de poderes são HTML/CSS e não representam poderes implementados ou regras de força.
+`lobby-frame.svg` is original vector artwork drawn in code, inspired by the user-provided room-creation reference’s pixel-art frame. Nine-slice borders preserve corners and ornaments across panel sizes. `features/room/components/Lobby/Icon/index.tsx` contains original vector icons for players, swords, cards, key, lock, clock, back, start and eye. This revision generated no new bitmaps. Decorative cards in the power panel use HTML/CSS and represent neither implemented powers nor strength rules.
 
-## Cartas de poder da mesa
+## Table power cards
 
-`power-illustrations.png`: atlas original 2×2, gerado com a ferramenta ImageGen integrada (skill `imagegen`). Ordem: Espião, Segunda Chance, Impulso, Máscara. Usado por CSS somente como ilustração decorativa das cartas de poder; títulos, custos, energia, estado e ações são HTML acessível. Não contém dados reais de uma partida. A imagem da referência orientou a apresentação em carta, sem alterar custos ou janelas do catálogo vigente.
+`power-illustrations.png`: original 2×2 atlas generated with integrated ImageGen (`imagegen` skill). Order: Espião, Segunda Chance, Impulso, Máscara. CSS uses it only for decorative power-card illustration; titles, costs, energy, state and actions use accessible HTML. Contains no real match data. The reference guided card presentation without changing current catalog costs or activation windows.
 
-Prompt utilizado:
+Production prompt:
 
 > Create ONE production game art atlas, a precisely aligned 2x2 grid, four equal square illustrations edge to edge, no gutters, each image entirely within its own quadrant, used as the central art on collectible power cards in an original browser fantasy Brazilian truco tavern game. Stylized-concept, crisp 16-bit pixel art with clearly visible square clusters, dark midnight navy backgrounds, antique warm golden highlights, emerald teal and burgundy red accents, chunky readable silhouette, no smooth vector, no blur. Top left: mysterious charming spy card-player, broad navy hat with burgundy band, cloak, one glinting eye, holding three small parchment cards. Top right: two worn cream playing cards encircled by a magical emerald and gold circular swap arrow, signifying a second chance card exchange. Bottom left: dynamic golden lightning bolt surrounded by small ascending amber sparks, symbolizing power boost. Bottom right: mysterious theatrical ivory masquerade mask with burgundy ribbon over navy shadow and emerald smoke, symbolizing temporary concealment. Unified illustration family, consistent pixel size and contrast, each focal subject centered and filling 80% of its own square tile. NO letters, text, words, numbers, borders, UI frames, card titles, cost badges, logos, watermark. The frontend will draw all frames and text. Opaque dark navy background.
 
-## Revisão Manilha Maldita: cenário em camadas
+## Manilha Maldita revision: layered scenery
 
-A entrada e o lobby agora consomem os assets independentes de [layers/README.md](layers/README.md), gerados usando `menu-reference-plate.png` como referência direta. Os fundos anteriores são preservados como fontes; a mesa da partida usa agora as camadas independentes de [table-layers/README.md](table-layers/README.md). O atlas novo dos poderes segue a referência de quatro cartas fornecida pelo usuário. Textos, custos, estados e controles continuam em HTML.
+The entrance/lobby now consume independent assets from [layers/README.md](layers/README.md), generated using `menu-reference-plate.png` as the direct reference. Previous backgrounds remain as source material; the match table now uses independent layers from [table-layers/README.md](table-layers/README.md). The new power atlas follows the user’s four-card reference. Text, costs, state and controls remain in HTML.
 
-## Perfil clássico e avatares pixel art
+## Classic profile and pixel-art avatars
 
-`profile-frame.svg` é uma moldura original em nove partes, com cantos ornamentados inspirados no segundo anexo do usuário. `avatars-pixel.png` é o novo atlas 2×2 gerado pelo ImageGen integrado, usando `codex-clipboard-7897e50c-1578-48db-831d-c35d69dd8796.png` como referência visual. O atlas anterior foi preservado. Os quatro retratos são usados no menu, lobby e mesa, com recorte circular e renderização pixelada.
+`profile-frame.svg` is an original nine-slice frame with ornamental corners inspired by the user’s second attachment. `avatars-pixel.png` is the new 2×2 atlas generated with integrated ImageGen using `codex-clipboard-7897e50c-1578-48db-831d-c35d69dd8796.png` as visual reference. The previous atlas was preserved. All four portraits appear in menu, lobby and table with circular cropping and pixelated rendering.
 
-Prompt exato:
+Exact prompt:
 
 > Create a production 2x2 avatar sprite atlas for Manilha Maldita, strictly matching the CHUNKY low-resolution cartoon pixel art portrait inside the circular frame in the supplied reference. Four equal square cells, no gaps, no outer borders, no lettering, no UI, no circles. Each cell a centered head-and-shoulders three-quarter-view rogue portrait on flat deep burgundy red background, suitable for circular cropping. Deliberately LARGE clearly visible square pixel clusters as if each portrait were drawn at 64x64 then nearest-neighbor enlarged. Bold dark navy outlines, limited 16-color palette, simple expressive eyes, simplified faces, large hats, compact cartoon proportions; NOT realistic, NOT painterly, NOT detailed skin, no anti-aliasing or gradients. Top left: moustached man in dark navy broad-brim hat with red band, navy high collar with orange trim, almost exactly the reference's jaunty card-player silhouette. Top right: red-haired woman in red hat with green feather, green cloak. Bottom left: tan moustached man in green hat with cream feather, cream scarf. Bottom right: silver-haired woman in purple hood with gold trim. Strong readable silhouettes, all heads same scale and comfortably inside central 85 percent of cell. One square atlas with four perfectly equal quadrants. Match reference's playful chunky retro game visual, not the more realistic detailed avatar style.

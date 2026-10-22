@@ -1,10 +1,10 @@
-# Simulação inicial do M3
+# Initial M3 simulation
 
-Execução local: `bun run simulate 30`. Versão das regras: `m3-v1`. Amostras e políticas são sintéticas, sem dados de jogadores. Cada linha contém 30 cenários independentes, dois arranjos de assentos/equipes e braços com/sem poderes: 120 partidas por linha, 1.440 partidas no total.
+Local run: `bun run simulate 30`. Rules version: `m3-v1`. Samples/policies are synthetic without player data. Each row contains 30 independent scenarios, two seat/team arrangements and arms with/without powers: 120 matches per row, 1,440 matches total.
 
-Embaralhamento e poderes usam fluxos independentes por mão; decisões usam outro fluxo. A comparação mantém a distribuição do mesmo número de mão entre braços. Duração é contada em decisões, não minutos. As políticas recebem somente sua projeção e podem reagir a trocas, cartas públicas e informação do Espião.
+Shuffling/powers use independent per-hand streams; decisions use another stream. Comparison preserves dealing for the same hand number across arms. Duration is counted in decisions rather than minutes. Policies receive only their own projection and may react to exchanges, public cards and Espião information.
 
-| Formato | Preset | Política | Mãos médias | Decisões médias | Vitória do iniciador | Diferença pareada com poderes (IC 95% aprox.) |
+| Format | Preset | Policy | Mean hands | Mean decisions | Opening-player wins | Paired difference with powers (approx. 95% CI) |
 |---|---|---|---:|---:|---:|---|
 | 1v1 | casual | conservative | 20.3 | 163.3 | 53.3% | +16.7 pp [-2.3; +35.7] |
 | 1v1 | casual | aggressive | 1.3 | 14.1 | 40.0% | +0.0 pp [-9.4; +9.4] |
@@ -19,8 +19,8 @@ Embaralhamento e poderes usam fluxos independentes por mão; decisões usam outr
 | 2v2 | competitive | aggressive | 1.1 | 19.1 | 50.0% | -3.3 pp [-12.7; +6.0] |
 | 2v2 | competitive | probabilistic | 2.0 | 31.4 | 43.3% | +1.7 pp [-14.9; +18.3] |
 
-O intervalo normal aproximado usa o cenário pareado como unidade, sem tratar as duas permutações como amostras independentes. É uma verificação exploratória pequena: intervalos amplos ou degenerados não demonstram ausência de efeito. A taxa de 50% não comprova simetria posicional nem equilíbrio individual dos poderes.
+The approximate normal interval uses each paired scenario as its unit, without treating both permutations as independent samples. This is a small exploratory check: wide or degenerate intervals do not demonstrate absence of an effect. A 50% rate proves neither positional symmetry nor individual power balance.
 
-O JSON da ferramenta inclui contagens separadas de poderes atribuídos e usados por estrato. Uso é seleção da política; não é estimativa causal do poder individual. A diferença pareada estima o efeito do conjunto habilitado sobre a vitória do iniciador sob essas políticas. Não foi estimado efeito marginal individual de cada poder. Não houve alteração automática de custos, sorteios ou regras com base nos resultados.
+Tool JSON includes separate assigned/used power counts per stratum. Usage is policy selection, not an individual power causal estimate. The paired difference estimates the effect of the enabled set on opening-player wins under these policies. Individual marginal power effects were not estimated. Results triggered no automatic change to costs, assignment or rules.
 
-Playtests com pessoas, blefe, cooperação, clareza, frustração, duração em minutos e intenção de revanche permanecem no M4. As seeds sintéticas são entradas locais de reprodução; o relatório público não contém estado privado ou seeds de partidas reais.
+Human playtests, bluffing, cooperation, clarity, frustration, duration in minutes and rematch intentions remain in M4. Synthetic seeds are local reproducibility inputs; the public report contains no private state or real-match seeds.

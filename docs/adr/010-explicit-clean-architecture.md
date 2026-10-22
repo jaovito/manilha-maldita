@@ -1,52 +1,52 @@
-# ADR 010 — Camadas explícitas de Clean Architecture no backend
+# ADR 010 — Explicit backend Clean Architecture layers
 
-- Estado: aceita; migração autorizada pelo proprietário.
-- Data: 2026-10-20.
-- Complementa: [ADR 001](001-bun-modular-architecture.md) e [ADR 006](006-room-authority-and-reconnection.md).
+- Status: accepted; migration authorized by the owner.
+- Date: 2026-10-20.
+- Complements: [ADR 001](001-bun-modular-architecture.md) and [ADR 006](006-room-authority-and-reconnection.md).
 
-## Contexto
+## Context
 
-O motor de regras já era puro, mas a implementação do servidor concentrava armazenamento, execução de comandos, presença, publicação e timers em `RoomService`. O tipo da sala incluía conexões e fila; handlers HTTP/WS ficavam no bootstrap; sessões misturavam armazenamento e operações. A estrutura dificultava reconhecer a arquitetura aprovada e testar suas fronteiras.
+The rules engine was already pure, but server implementation concentrated storage, command execution, presence, publication and timers in `RoomService`. Room types included connections and queues; HTTP/WS handlers lived in bootstrap; sessions mixed storage and operations. This made the approved architecture difficult to recognize and its boundaries difficult to test.
 
-## Decisão
+## Decision
 
-Manter um monólito modular com Clean Architecture, organizado por funcionalidade. Ports e adapters expressam as fronteiras externas; não constituem uma arquitetura alternativa nem exigem um container de DI.
+Keep a feature-organized modular monolith with Clean Architecture. Ports/adapters express external boundaries; they are neither an alternative architecture nor a requirement for a DI container.
 
-As responsabilidades são:
+Responsibilities:
 
-- `domain`: entidades, configurações e políticas sem protocolo de rede, runtime ou I/O. O domínio de cartas, mãos, vazas e partidas permanece em `packages/game-core`, representado por tipos e funções puras.
-- `application/use-cases`: operações da aplicação, separadas por intenção. Coordenação compartilhada fica em `application/services`; contratos de entrada/saída em `application/ports`; dados de entrada e projeção em `application/dto`.
-- `adapters/inbound`: validação/tradução das entradas e integração com HTTP/WS.
-- `adapters/outbound`: implementações concretas de armazenamento em memória, credenciais, relógio, entropia, agendamento e envio por socket.
-- `composition.ts` e `bootstrap`: montagem explícita; entradas públicas `index.ts` exportam os contratos e fábricas do módulo.
+- `domain`: entities, configuration and policies without network protocol, runtime or I/O. Card, hand, trick and match domains remain in `packages/game-core` as pure types/functions.
+- `application/use-cases`: application operations separated by intent. Shared coordination belongs in `application/services`; input/output contracts in `application/ports`; input/projection data in `application/dto`.
+- `adapters/inbound`: input validation/translation and HTTP/WS integration.
+- `adapters/outbound`: concrete implementations of in-memory storage, credentials, clock, entropy, scheduling and socket delivery.
+- `composition.ts` and `bootstrap`: explicit assembly; public `index.ts` entrypoints export module contracts/factories.
 
-`rooms` mantém a autoridade de lobby e partida. `sessions` implementa identidade de convidado, emissão, consulta e alteração de apelido. `transport` contém os adaptadores HTTP/WS e proteções de rede. `matches` fornece políticas de relógio de decisão; não é um segundo escritor da partida.
+`rooms` retains lobby/match authority. `sessions` implements guest identity, issuance, lookup and nickname changes. `transport` contains HTTP/WS adapters and network protections. `matches` provides decision-clock policies; it is not a second match writer.
 
-O estado de domínio da sala é separado do envelope operacional que contém conexões, cache de respostas, fila, cancelamento de timers e sequência de snapshots. Os ports de repositório são específicos do consumidor. Não há repositórios genéricos nem modelos ORM sem persistência correspondente.
+Room domain state is separate from the operational envelope containing connections, response cache, queue, timer cancellation and snapshot sequence. Repository ports are consumer-specific. There are no generic repositories or ORM models without corresponding persistence.
 
-Dentro de `application`, organize primeiro por responsabilidade (`use-cases`, `services`, `ports`, `dto`, `state`) e depois por funcionalidade. Coordenação compartilhada de lobby, partida, bot e despacho fica sob `services`; projeções e erros de saída ficam em `dto/mappers`. Presença e preparação de entropia são comportamento de serviços, não estado. O reset de mão de desenvolvimento é uma operação em `use-cases/solo`. Não crie uma pasta genérica de auxiliares nem duplique as pastas de funcionalidades na raiz da aplicação.
+Within `application`, organize first by responsibility (`use-cases`, `services`, `ports`, `dto`, `state`), then feature. Shared lobby, match, bot and dispatch coordination belongs under `services`; projections and outbound errors belong in `dto/mappers`. Presence and entropy preparation are service behavior, not state. Development hand reset is an operation in `use-cases/solo`. Do not create a generic helpers folder or duplicate feature folders at the application root.
 
-### Consistência e limites dos repositórios
+### Repository consistency and boundaries
 
-O repositório de salas armazena a autoridade viva em memória. Ele devolve a mesma instância operacional para preservar a fila por sala; não devolve cópias independentes de agregados. Portanto, não é substituível por um repository SQL de `load/save` sem rever a consistência e a recuperação. Esta migração não introduz persistência durável.
+The room repository stores live authority in memory. It returns the same operational instance to preserve the per-room queue, rather than independent aggregate copies. It therefore cannot be replaced with a SQL `load/save` repository without revisiting consistency and recovery. This migration introduces no durable persistence.
 
-Todos os escritores, incluindo timers e bot, continuam passando pela fila da sala. A extração de casos de uso não cria locks, filas ou transações independentes. Identidade da conexão, cache de idempotência, revisão, contexto de decisão e identidade do callback preservam a ordem de validação existente.
+All writers, including timers and the bot, still use the room queue. Extracting use cases creates no independent locks, queues or transactions. Connection identity, idempotency cache, revision, decision context and callback identity preserve the existing validation order.
 
-Os DTOs internos pertencem à aplicação. O protocolo público permanece em `game-protocol`; schemas e serialização ficam nas bordas. Projeções continuam sendo construídas por allowlist e por destinatário. Compatibilidade estrutural de tipos não autoriza enviar estado privado.
+Internal DTOs belong to the application. The public protocol remains in `game-protocol`; schemas and serialization stay at boundaries. Projections remain allowlisted and recipient-specific. Structural type compatibility does not authorize sending private state.
 
-### Verificação
+### Verification
 
-O verificador de arquitetura bloqueia imports externos indevidos em domínio/aplicação, incluindo protocolo na aplicação, e chamadas diretas comuns de runtime nesses arquivos. O grafo local do servidor verifica ciclos e dependências indiretas de camadas internas para adaptadores/bootstrap, inclusive por reexports.
+The architecture checker blocks inappropriate external imports in domain/application, including protocol imports in application, and common direct runtime calls in those files. The local server graph checks cycles and indirect dependencies from inner layers to adapters/bootstrap, including reexports.
 
-Essas verificações são complementadas por testes dos casos de uso e ports falsos, testes do motor e integração HTTP/WS real. A análise estática não prova todas as propriedades semânticas nem substitui testes de concorrência e privacidade. Não foram reduzidas as exigências de cobertura.
+These checks are complemented by use-case tests with fake ports, engine tests and real HTTP/WS integration. Static analysis proves neither every semantic property nor replaces concurrency/privacy tests. Coverage requirements were not reduced.
 
-## Consequências
+## Consequences
 
-Casos de uso e adaptadores passam a ter caminhos reconhecíveis; regras e coordenação podem ser exercitadas sem servidor HTTP. A separação adiciona contratos específicos, mas preserva composição manual e funções quando classes não agregam comportamento.
+Use cases/adapters now have recognizable paths; rules and coordination can be exercised without an HTTP server. Separation adds specific contracts while preserving manual composition and functions where classes add no behavior.
 
-Não há mudança de stack, regras, formato de mensagens, autenticação, persistência ou infraestrutura. Reiniciar o processo ainda perde salas e sessões. Deploy e push não fazem parte desta decisão.
+There is no change to stack, rules, message formats, authentication, persistence or infrastructure. Restarting still loses rooms and sessions. Deployment and push are outside this decision.
 
-## Referências
+## References
 
-- [Clean Architecture — Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html): direção das dependências e separação entre regras, casos de uso e adaptadores.
-- [Hexagonal Architecture — Alistair Cockburn](https://alistair.cockburn.us/hexagonal-architecture): isolamento da aplicação por ports e adapters.
+- [Clean Architecture — Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html): dependency direction and separation of rules, use cases and adapters.
+- [Hexagonal Architecture — Alistair Cockburn](https://alistair.cockburn.us/hexagonal-architecture): application isolation through ports/adapters.

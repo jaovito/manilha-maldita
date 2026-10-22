@@ -1,46 +1,31 @@
+import { DEFAULT_ORIGINS, SERVER_DEFAULTS, type ServerOptions } from './environment';
 import { createRoomService, createRuntimePorts } from '../modules/rooms';
 import { createSessions } from '../modules/sessions';
 import { createLimiter, createTransport } from '../modules/transport';
 
-export type ServerOptions = Readonly<{
-  port?: number;
-  hostname?: string;
-  allowedOrigins?: readonly string[];
-  secureCookies?: boolean;
-  environment?: string;
-  soloEnabled?: boolean;
-  devTools?: boolean;
-}>;
-
-export const DEFAULT_ORIGINS = [
-  'http://127.0.0.1:5173',
-  'http://127.0.0.1:4173',
-  'http://127.0.0.1:3001',
-  'http://localhost:5173',
-  'http://localhost:4173',
-  'http://localhost:3001',
-] as const;
+export { DEFAULT_ORIGINS, type ServerOptions } from './environment';
 
 export function startServer(options: ServerOptions = {}) {
   const ports = createRuntimePorts();
   const rooms = createRoomService(ports, {
-    soloEnabled: options.soloEnabled === true,
-    devTools: options.environment === 'development' && options.devTools === true,
+    soloEnabled: options.soloEnabled ?? SERVER_DEFAULTS.soloEnabled,
+    devTools:
+      options.environment === 'development' && (options.devTools ?? SERVER_DEFAULTS.devTools),
   });
   const transport = createTransport({
     rooms,
     sessions: createSessions(ports.now),
     limiter: createLimiter(ports.now),
-    soloEnabled: options.soloEnabled === true,
+    soloEnabled: options.soloEnabled ?? SERVER_DEFAULTS.soloEnabled,
     allowedOrigins: options.allowedOrigins ?? DEFAULT_ORIGINS,
-    secureCookies: options.secureCookies ?? false,
+    secureCookies: options.secureCookies ?? SERVER_DEFAULTS.secureCookies,
     now: ports.now,
   });
 
   try {
     const server = Bun.serve({
-      port: options.port ?? 3001,
-      hostname: options.hostname ?? '127.0.0.1',
+      port: options.port ?? SERVER_DEFAULTS.port,
+      hostname: options.hostname ?? SERVER_DEFAULTS.hostname,
       fetch: transport.app.fetch,
       websocket: {
         ...transport.websocket,
