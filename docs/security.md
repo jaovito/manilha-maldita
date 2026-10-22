@@ -46,6 +46,18 @@ Se forem adotadas senhas, armazenar somente hash apropriado para senhas, prefere
 
 Referências: [OWASP — WebSocket Security](https://cheatsheetseries.owasp.org/cheatsheets/WebSocket_Security_Cheat_Sheet.html), [Cryptographic Storage](https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html) e [Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
 
+### Setup do M5 — limite da proteção entregue
+
+O incremento de 22/10/2026 cria tabelas/migrations para contas opcionais, cosméticos, progresso, resumos de resultados e fila PostgreSQL. Nenhum endpoint, login, worker ou escrita de jogador foi conectado ao runtime; as descrições de M2/M3/M4 acima continuam válidas para o jogo em execução. A necessidade de cada dado, acesso, retenção e exclusão está em [database.md](database.md#modelos-do-setup-m5).
+
+Contas reservam login canônico e hash PHC Argon2id, não e-mail ou senha reversível. Sessões reservam hashes de tokens aleatórios, expiração e revogação. Restrições de formato não demonstram força da senha, custo do hash ou entropia do token. Implementar hashing/verificação, limites de tentativas e concorrência, rotação/revogação de sessões, CSRF, recuperação e reautenticação permanece obrigatório no incremento de autenticação. Schema sozinho não impede brute force.
+
+XP e pontos não negativos, unicidade de conta por partida/recompensa, referências de catálogo e contexto competitivo/treino são defesas no banco. O futuro backend deve derivar usuário da sessão, rejeitar campos extras, calcular nível pelo XP confirmado, autorizar cada seleção e aceitar somente resultados da autoridade da sala. Não haverá endpoint público de incremento de XP/pontos ou confirmação de vitória. Catálogos/URLs são controlados pela aplicação, não por jogadores. A regex de caminho só restringe o formato; o catálogo futuro ainda deve conferir assets existentes e confiáveis.
+
+Fila guarda apenas referência ao resumo da partida. O canal NOTIFY não contém IDs ou dados privados; notificações são visíveis a usuários do banco e não oferecem autenticação do conteúdo. Um aviso forjado apenas acordará o worker, que deverá consultar/validar tarefas reais. A função do trigger não é SECURITY DEFINER, fixa search_path e não tem EXECUTE público. Acesso à fila fica no backend; a role local proprietária não representa configuração segura de produção.
+
+Sem integração de runtime, não se declara proteção implementada contra fraude de ranking, combinação de vitórias, elegibilidade incorreta, seleção indevida de cosmético ou repetição de efeitos do worker. TLS, criptografia de volumes/backups e papéis de produção continuam sem verificação de ambiente. A fila não recupera partidas que nunca foram persistidas.
+
 ## Privacidade dos poderes (M3)
 
 Compromissos aceitos na preparação são privados até fechar o lote; só o indicador pronto é público. Gastos, uso e ativações aparecem juntos depois da resolução. Espião fica somente na projeção do usuário; parceiros não recebem esse resultado. O snapshot de reconexão aplica a mesma allowlist. O histórico público de ativações informa poder/autor/alvo, sem descarte, substituição ou carta investigada.

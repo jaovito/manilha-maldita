@@ -6,6 +6,18 @@ O repositório contém documentação, apresentação HTML e bootstrap com cinco
 
 M1, M2 e M3 concluídos nos respectivos escopos. Já é possível jogar partidas privadas com energia, preparação selada e quatro poderes no navegador, com duas ou quatro sessões distintas. O M3 acrescenta simulações pareadas. O M4 está em andamento: o primeiro incremento acrescenta feedback audiovisual e intervalos legíveis entre decisões; revisão ampla de acessibilidade e playtests humanos continuam pendentes. Concluir um marco não equivale a concluir todo o MVP.
 
+## M5 — incremento 1: setup de persistência e fila (22/10/2026)
+
+Escopo autorizado: preparar tabelas, migrations e configuração PostgreSQL em worktree isolada para revisão incremental. A extensão de produto aprovada inclui contas opcionais, avatares de catálogo sem upload/pixel art existente, abas de Avatares/Baralhos/Mesas, temas completos visíveis entre jogadores, desbloqueios por nível e ranking por vitórias competitivas. Isso substitui a postergação anterior de XP/ranking; não inclui loja, vantagem paga ou mudança das regras do motor.
+
+Implementação deste incremento: 11 tabelas no namespace `app` para contas/sessões/perfil/progresso, três catálogos, resumo/participantes/recompensas e jobs; constraints, índices, migration Drizzle e trigger transacional NOTIFY vazio. Sem extensão, Redis ou parâmetros globais. Arquitetura e minimização em [ADR 011](docs/adr/011-m5-postgresql-foundation.md), [banco](docs/database.md) e [segurança](docs/security.md). Catálogos e política de recompensas sem seeds fictícios.
+
+Validação: `bun install --frozen-lockfile` sem mudança no lockfile; `VITE_BACKEND_URL='' bun run check` aprovado (lint/fronteiras, formato, tipos, cobertura e build), com **371 testes** — 187 servidor/core/tooling/integração, 158 DOM e 26 PostgreSQL. **145 fontes executáveis** medidas acima do mínimo individual; schemas novos com 100% de linhas/funções. Permanecem 20 avisos de lint em arquivos preexistentes e sinal de revisão de tamanho na mesa, sem novos avisos neste incremento. O primeiro check detectou callbacks de FK não exercitados: regressão de equivalência entre metadados e FKs reais corrigiu a cobertura, sem exclusões. Drizzle confirmou ausência de drift após gerar as migrations.
+
+Banco: migrations aplicadas desde a base e repetidas na instância exclusiva `truco-m5-setup-postgres-test-1`, porta 56433, via `.env` ignorado criado na worktree (nenhum arquivo local/credencial do checkout principal foi copiado). Regressões confirmaram integridade, rollback de resultado/job, NOTIFY vazio só após commit e reagendamento, silêncio em rollback/conclusão, job durável sem listener e consumidores concorrentes SKIP LOCKED. Worktree `/Users/jaovito/.codex/worktrees/m5-database-setup/truco`, branch `codex/m5-database-setup`; checkout principal e banco de desenvolvimento preservados. Sem push, deploy, CI remoto ou E2E novo — não há mudança de interface/transporte neste incremento.
+
+Limites: sem rotas, login, recuperação, validação de desbloqueios na aplicação, concessão real, worker, polling/retry/limpeza, ranking/UI ou deploy. Valores de XP/pontos, curva de níveis, elegibilidade de convidados/treino/abandono e antiexploração permanecem pendentes. Schema não comprova proteção de produção nem recuperação do estado vivo após queda.
+
 ## M4 — incremento 1: feedback audiovisual e compreensão dos resultados
 
 ### Refinamento: primeiro acesso e controles indisponíveis
@@ -102,7 +114,7 @@ Executados com sucesso: instalação por `bun install --frozen-lockfile`, lint, 
 - [x] M2: salas, convidados, lobby, autoridade, 1v1/2v2, timers e reconexão.
 - [x] M3: energia, sorteios, preparação selada, quatro poderes e simulações.
 - [ ] M4: mesa responsiva, áudio, acessibilidade, E2E completo e playtests.
-- [ ] M5: resultados, contas opcionais e cosméticos; ranking/experimentos depois.
+- [ ] M5: resultados, contas opcionais, avatares/baralhos/mesas, XP/níveis e ranking competitivo; setup de persistência em revisão, integrações pendentes. Experimentos depois.
 
 Não espere acabamento para obter uma partida multiplayer jogável. Pronto exige comportamento funcional, regressões, verificações executadas quando possível, contratos/documentação atualizados e ausência de novos vazamentos ou corridas. Declare o que permanece não verificado; concluir um marco não equivale a concluir o jogo.
 

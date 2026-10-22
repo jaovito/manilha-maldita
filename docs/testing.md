@@ -108,6 +108,10 @@ O domínio possui código executável de regras-base, composição e projeções
 
 ## Testes de banco
 
+O setup do M5 acrescenta regressões reais em `apps/server/tests/database/m5-*.test.ts`: formato de hashes, unicidade e FKs, exclusão/anonimização, totais bigint e não negativos, catálogos locais, contexto de recompensas, unicidade de jobs, estados/tentativas/reservas e códigos de erro. Fixtures são transacionais e revertidas; casos de notificações/concorrência usam conexões independentes, commits reais e limpeza apenas dos próprios resultados.
+
+A entrega de NOTIFY é sincronizada por um canal-barreira separado: ausência antes do commit/rollback não é inferida de um sleep. A suíte verifica que um job continua consultável sem listener e que dois consumidores PostgreSQL com SKIP LOCKED não selecionam a mesma linha reservada; rollback a libera. Não há teste alegando worker, retry automático, login ou desbloqueio implementados. Testes de metadados conferem separação de credenciais/perfil/progresso e ausência de payload privado nos resumos; esses testes também exercitam callbacks do schema sem excluir arquivos da cobertura.
+
 Siga [database.md](database.md): `test:database` e a execução completa de cobertura sobem somente o serviço PostgreSQL de testes. Nunca reutilize o banco de desenvolvimento. A suíte real verifica migração repetida, seleção de destino, seeds idempotentes e rollback, usando schemas exclusivos removidos no final. O CI requer Docker/Compose; ausência de banco não é convertida em teste ignorado ou sucesso.
 
 A cobertura inventaria também os módulos de conexão, seleção de alvo, migração e execução de seeds. CLI, declaração do namespace e registro de tarefas são configuração/infraestrutura; não se excluem módulos de comportamento. Configurações e secrets de produção não são aceitos pelas ferramentas locais.

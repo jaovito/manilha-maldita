@@ -290,6 +290,8 @@ A apresentação e o diálogo usam portal para `document.body`, evitando recorte
 
 Sem consulta de banco por jogada no MVP. Persistência futura separa contas/cosméticos/resultados do estado vivo; término é idempotente por `matchId`. Transações não atravessam decisões humanas.
 
+O setup do M5 (22/10/2026) materializa somente os schemas/migrations dessa persistência em `apps/server/database/schema/`. `app.jobs` serve como fila durável de recompensas, com FK para resultado e trigger transacional de NOTIFY vazio; não há Redis, extensão ou worker conectado. No próximo incremento, resultado e job serão gravados atomicamente, e concessão/totais/conclusão do job terão transação curta idempotente. O listener terá conexão dedicada, recuperação por consulta e polling; NOTIFY não é entrega durável. A fila autoritativa por sala permanece em memória. Modelagem, retenção e limites em [database.md](database.md); decisão em [ADR 011](adr/011-m5-postgresql-foundation.md).
+
 Logs operacionais: correlação, fase, versão, comando, duração e código de erro, sem payload integral, tokens, cartas ou sementes. Auditoria privada/reprodução tem canal, acesso e retenção separados; não use `console.log(gameState)`.
 
 Meça salas, latência, rejeições, duplicatas, desconexões, duração, abandono e uso de poderes. Não use IDs de jogador/sala como labels de métricas. Analytics externos exigem decisão explícita.

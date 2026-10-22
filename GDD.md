@@ -31,6 +31,8 @@ O objetivo é oferecer partidas rápidas, sociais, competitivas e com alto poten
 
 Não haverá ranking global, loja de itens, torneios, campanha, bots sofisticados ou aplicativos nativos no MVP.
 
+**Atualização autorizada do M5 (22/10/2026):** ranking global por vitórias competitivas, XP/níveis e desbloqueios exclusivamente cosméticos passam ao escopo do M5. Contas permanecem opcionais para jogar. A personalização terá abas independentes de Avatares, Baralhos e Mesas; avatares são pré-prontos, sem upload, preservando o pixel art existente. Baralhos mudam verso e estilo de naipes/valores sem mudar identidade, legibilidade ou regras; outros jogadores veem o tema do dono, respeitando a informação autorizada. Vira usa o tema padrão. Não há autorização para loja, vantagem paga ou desbloqueio de poderes. Valores de XP/pontos, curva de níveis, recuperação de conta e critérios de elegibilidade permanecem pendentes. O primeiro incremento do M5 prepara apenas o banco e a fila de resultados.
+
 ---
 
 ## 2. Regras-base da partida

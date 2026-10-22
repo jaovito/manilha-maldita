@@ -15,6 +15,20 @@
       "when": 1792292664770,
       "tag": "0001_track-application-schema",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792677513142,
+      "tag": "0002_m5-persistence-foundation",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792677544883,
+      "tag": "0003_jobs-notifications",
+      "breakpoints": true
     }
   ]
 }

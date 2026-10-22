@@ -16,6 +16,8 @@ Nome provisório: **Truco Caótico**. É Truco com poderes. Balatro inspira comb
 - Ranking, matchmaking público, loja, experiência, eventos, poderes experimentais, bots de produção, espectadores, torneios, replay público e infraestrutura distribuída ficam para depois do MVP.
 - Competitivo inicialmente é um preset, não um sistema ranqueado/anticolusão completo. Meta de duração: 10–20 minutos, pendente de playtest.
 
+Extensão autorizada para o M5 em 22/10/2026: contas opcionais, avatares de catálogo sem upload, baralhos completos visíveis entre jogadores, mesas cosméticas, XP/níveis para desbloqueios e ranking global por vitórias no competitivo. Esta autorização substitui apenas a postergação de XP/ranking acima. O primeiro incremento entrega somente schemas/migrations e base da fila PostgreSQL; autenticação, worker, valores de recompensa, recuperação de conta e elegibilidade antiexploração ainda não estão implementados. Veja [docs/database.md](docs/database.md) e [ADR 011](docs/adr/011-m5-postgresql-foundation.md).
+
 Não altere decisões de produto sem autorização. Custos, tempos e métricas são hipóteses de playtest; documente ajustes técnicos reversíveis.
 
 ## Fontes de verdade e leitura por tarefa

@@ -1,4 +1,5 @@
-import { pgSchema } from 'drizzle-orm/pg-core';
-
-// Namespace reserved for future application tables. No product models are invented here.
-export const app = pgSchema('app');
+export * from './schema/accounts';
+export * from './schema/catalogs';
+export * from './schema/jobs';
+export * from './schema/namespace';
+export * from './schema/results';

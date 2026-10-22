@@ -93,7 +93,7 @@ bun run db:seed
 bun run test:database
 ```
 
-Os comandos têm defaults locais e `.env.example` para personalização. O registro de seeds de produto está inicialmente vazio; os testes possuem suas próprias fixtures determinísticas, com repetição e rollback verificados. Não há modelos de produto inventados neste bootstrap. Veja portas, segurança dos destinos e como criar novas migrações/seeds em [docs/database.md](docs/database.md).
+Os comandos têm defaults locais e `.env.example` para personalização. O setup do M5 acrescenta 11 tabelas para contas/sessões, cosméticos, progressão, resultados e jobs, sem integrar essas tabelas ao servidor de jogo. A fila usa tabela durável e trigger transacional `NOTIFY`; não exige Redis, `pg_partman` nem configuração global do PostgreSQL. Não há worker ou login neste incremento. Seeds de produto continuam vazios: nenhum catálogo ou valor de recompensa fictício foi publicado. Veja modelos, limites, retenção e operação em [docs/database.md](docs/database.md).
 
 A verificação completa (`bun run check`) agora requer Docker/Compose para a suíte de banco real. Pare os serviços quando necessário com `bun run db:down` e `bun run db:test:down`; o volume de desenvolvimento é preservado.
 
