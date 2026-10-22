@@ -1,0 +1,206 @@
+/* The game underneath uses exactly the normal Table and game-shell composition. */
+.guided-tutorial {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  isolation: isolate;
+  font-family: "Pixelify Sans", sans-serif;
+  color: #ffe7b0;
+}
+.guided-toolbar {
+  position: relative;
+  z-index: 5;
+  flex: none;
+  padding: 8px 12px;
+  border-bottom: 1px solid #b68a3c66;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.guided-toolbar button,
+.guided-toolbar summary {
+  padding: 8px 12px;
+  border: 2px solid #b68a3c;
+  border-radius: 12px 4px;
+  background: #071f24;
+  color: #ffe7b0;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+.guided-toolbar details > .game-language {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 270px;
+  background: #071f24;
+  padding: 12px;
+}
+.guided-coach {
+  position: fixed;
+  z-index: 4;
+  width: min(350px, calc(100vw - 24px));
+  max-height: min(440px, calc(100dvh - 32px));
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(130deg, #15382e, #071d22 72%);
+  border: 2px solid #e6b65b;
+  border-radius: 24px 7px 24px 7px;
+  box-shadow:
+    inset 0 0 0 3px #14312b,
+    inset 0 0 0 4px #846233,
+    0 8px 24px #0008;
+}
+.guided-coach::before {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #123127;
+  border: 2px solid #e6b65b;
+  rotate: 45deg;
+  z-index: -1;
+}
+.guided-coach[data-placement="top"]::before {
+  bottom: -8px;
+  left: calc(var(--guided-arrow-x, 50%) - 6px);
+}
+.guided-coach[data-placement="bottom"]::before {
+  top: -8px;
+  left: calc(var(--guided-arrow-x, 50%) - 6px);
+}
+.guided-coach[data-placement="left"]::before {
+  right: -8px;
+  top: calc(var(--guided-arrow-y, 50%) - 6px);
+}
+.guided-coach[data-placement="right"]::before {
+  left: -8px;
+  top: calc(var(--guided-arrow-y, 50%) - 6px);
+}
+.guided-coach-reading {
+  min-height: 0;
+  padding: 18px 20px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.guided-kicker {
+  color: #e3b665;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+.guided-progress {
+  margin: 6px 0;
+  color: #bac7ba;
+  font-size: 12px;
+}
+.guided-coach progress {
+  display: block;
+  width: 100%;
+  height: 3px;
+  accent-color: #dba94e;
+}
+.guided-coach h2 {
+  margin: 12px 0;
+  font-size: 22px;
+  line-height: 1.1;
+}
+.guided-explanation {
+  margin: 0;
+  color: #ffedc2;
+  font-family: "Jersey 25", sans-serif;
+  font-size: 22px;
+  line-height: 1.15;
+}
+.guided-explanation[data-complete="true"] {
+  border-left: 3px solid #c8dc8b;
+  padding-left: 10px;
+}
+.guided-instruction {
+  margin: 10px 0 0;
+  color: #ebc36f;
+  font-family: "Jersey 25", sans-serif;
+  font-size: 17px;
+}
+.guided-navigation {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px;
+  padding: 10px 14px;
+  border-top: 1px solid #b68a3c66;
+}
+.guided-navigation button {
+  min-height: 38px;
+  padding: 6px 8px;
+  font-family: "Jersey 25", sans-serif;
+  font-size: 19px;
+}
+.guided-navigation .guided-restart {
+  grid-column: 1 / -1;
+  min-height: 24px;
+  background: none;
+  border: none;
+  box-shadow: none;
+  font-size: 15px;
+}
+.guided-navigation button:disabled {
+  opacity: 0.45;
+}
+.guided-spotlight {
+  position: fixed;
+  z-index: 2;
+  border: 2px solid #ffe7a1;
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 9999px #020e0bb8,
+    0 0 20px #ffcc6580;
+  pointer-events: none;
+}
+.guided-suit-order {
+  padding: 10px;
+  border: 1px solid #b68a3c;
+  border-radius: 8px;
+  background: #061d19;
+  font-size: 16px;
+  line-height: 1.6;
+  text-align: center;
+}
+.guided-suit-order span:nth-of-type(odd) {
+  color: #ff9990;
+}
+.guided-scene {
+  isolation: isolate;
+  z-index: 0;
+}
+/* The coach gives the opening instruction; the regular turn badge/status stay visible. */
+.guided-scene .turn-announcement {
+  display: none;
+}
+
+/* Read left to right, then continue on the next row; never squash the card art. */
+.guided-rank-order {
+  --playing-card-ratio: 2 / 3;
+  display: grid;
+  position: absolute;
+  z-index: 100;
+  background: #073b2e url("/art/layers/felt.png") repeat;
+  border-radius: 8px;
+  top: 32%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(66vw, 660px);
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 10px 12px;
+  padding: 3px;
+  margin: 0;
+  list-style: none;
+}
+.guided-rank-order li {
+  min-width: 0;
+}
+.guided-rank-card {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+}

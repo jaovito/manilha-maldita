@@ -1,0 +1,65 @@
+@media (max-width: 600px), (max-height: 500px) {
+  .guided-rank-order {
+    width: calc(100% - 48px);
+    max-width: 340px;
+    top: 28%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px 12px;
+  }
+  .guided-coach {
+    width: min(310px, calc(100vw - 24px));
+    max-height: min(300px, calc(100dvh - 32px));
+    border-radius: 18px 5px;
+  }
+  .guided-coach-reading {
+    padding: 12px 14px;
+  }
+  .guided-kicker {
+    display: none;
+  }
+  .guided-coach h2 {
+    font-size: 18px;
+    margin: 8px 0;
+  }
+  .guided-explanation {
+    font-size: 19px;
+  }
+  .guided-instruction {
+    font-size: 16px;
+  }
+  .guided-toolbar {
+    padding: 6px 10px;
+    gap: 4px;
+  }
+  .guided-toolbar button,
+  .guided-toolbar summary {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+  .guided-navigation {
+    padding: 8px 10px;
+    gap: 4px;
+  }
+  .guided-navigation button {
+    font-size: 17px;
+    min-height: 34px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guided-tutorial *,
+  .guided-tutorial *::before,
+  .guided-tutorial *::after {
+    scroll-behavior: auto;
+  }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .guided-rank-order {
+    width: 40vw;
+    max-width: 400px;
+    left: 24%;
+    top: 18%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+  }
+}

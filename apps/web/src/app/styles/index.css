@@ -66,3 +66,5 @@
 @import "../../features/room/components/Table/History/styles.css";
 
 @import "../../features/room/components/Table/Card/proportions.css";
+@import "../../features/menu/components/Tutorial/Guided/styles.css";
+@import "../../features/menu/components/Tutorial/Guided/responsive.css";

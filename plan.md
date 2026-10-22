@@ -531,3 +531,22 @@ Regressão DOM cobre dono, alvo, parceiro e outro adversário, dois Espiões com
 Validação: `bun run check` aprovado (355 testes, cobertura de 140 fontes e 20 avisos existentes de lint); suíte DOM repetida após ampliar os casos (158 aprovados), typecheck e build aprovados. Dois E2E focados do Espião aprovados em desktop/mobile. O lote amplo de 2v2 encontrou timeout de 90 s no desktop e a sobreposição já registrada entre dock de poderes e avatar no mobile; verificações do novo registro privado passaram antes dessas falhas. Sem commit ou push.
 
 Após encerrar as sessões temporárias de inspeção, o 2v2 desktop completo passou na repetição (46,9 s), mantendo limite e asserções originais. O E2E amplo mobile permanece com a sobreposição de layout indicada acima; não foi alterado para ocultar a falha.
+
+## Tutorial guiado na mesa — 22/10/2026
+
+Em Como jogar, nova opção “Jogar tutorial guiado” abre treino local com 17 etapas. Destaques ensinam mão, ordem crescente, vira A→2 e ciclo 3→4, hierarquia de naipes, comparações com vitória/derrota/empate, pontuação, truco, energia, preparação e os quatro poderes. Avanço depende da ação indicada nos exercícios; resultado explica a força ou efeito. Coberta e mascarada são diferenciadas. Textos em português/inglês, teclado, foco, movimento reduzido, repetição e saída disponíveis. Preserva faces/versos e proporção das cartas e reaproveita as artes existentes dos poderes e avatares. Cenários públicos fixos, sem sala, servidor, temporizador ou autoridade sobre partidas reais; sem persistência de progresso.
+
+Validação: `bun run check` aprovado (357 testes, cobertura de 144 fontes e 20 avisos preexistentes de lint); oito E2E do guia e treino aprovados em Chromium desktop/mobile. Geometria verifica proporções, controles e distância entre mão e mesa em desktop, iPhone SE, 320×568 e paisagem. Inspeção visual via playwright-cli encontrou sobreposições nas telas menores e um fundo de botão escondendo a arte dos poderes; ambos corrigidos. Documentação atualizada. Sem commit ou push nesta etapa.
+
+
+### Revisão do tutorial sobre a mesa real — 22/10/2026
+
+Substituída a composição paralela pelo mesmo `Table` e casca visual da partida. Mantidos cenário, brasões, avatares, mão, vira, energia, poderes e histórico. Somente snapshots demonstrativos são fornecidos localmente; nenhuma sala ou comando de rede é criado. Balões com spotlight ficam ancorados ao conteúdo, mudam de posição/altura conforme viewport e acompanham seleção, resultado, expansão por hover e redimensionamento. Seta acompanha o alvo mesmo nas margens. Controles de saída/idioma ficam no próprio balão; tooltip global não cobre o guia. Aviso transitório central de turno é omitido durante a explicação, preservando status e selo normais.
+
+`bun run check` aprovado: 358 testes, cobertura de 147 fontes, build e 20 avisos de lint anteriores. Oito E2E de guia/treino aprovados em desktop/mobile. Inspeção por playwright-cli em 1440×900, 1280×720, 375×667, 320×568 e 844×390. Regressões de posicionamento verificam limites e ausência de sobreposição com o alvo. A expansão vertical do poder e o tooltip sobre a navegação foram detectados e corrigidos sem mudar a mesa normal. Sem commit ou push.
+
+### Ordem de força com faces reais — 22/10/2026
+
+A etapa “Conheça a força das cartas” exibe as dez faces `CardFace` sobre a mesa, ordenadas 4, 5, 6, 7, Q, J, K, A, 2, 3. Preserva a proporção 2:3 e as mesmas métricas de arte da partida. O balão se ancora à sequência; retrato e paisagem compacta usam duas fileiras, e paisagem coloca a explicação ao lado para manter área de leitura. Arte de referência fica acima dos elementos secundários da mesa. Instrução de leitura por fileiras traduzida para inglês.
+
+`bun run check` aprovado (358 testes, cobertura de 148 fontes, 20 avisos de lint anteriores). Quatro E2E do treino aprovados: dez cartas, ordem, proporção, ausência de oclusão e posicionamento em desktop/mobile. Formatação final aprovada após ajuste CSS de paisagem. Inspeção via playwright-cli em 1440×900, 375×667, 320×568 e 844×390. Sem commit ou push.

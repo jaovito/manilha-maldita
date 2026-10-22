@@ -8,7 +8,7 @@ export default defineConfig({
     .filter((project) => project.name?.endsWith('-dev'))
     .map((project) => ({
       ...project,
-      testMatch: ['**/settings/i18n.e2e.ts', '**/tutorial/tutorial.e2e.ts'],
+      testMatch: ['**/settings/i18n.e2e.ts', '**/tutorial/*.e2e.ts'],
     })),
   webServer: Array.isArray(solo.webServer) ? solo.webServer.slice(0, 2) : (solo.webServer ?? []),
 });

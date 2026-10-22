@@ -1,5 +1,5 @@
 /* One 115 × 172.5 design, scaled by the card itself instead of viewport breakpoints. */
-.game-shell .game-table .card-face {
+:is(.game-shell .game-table, .guided-rank-order) .card-face {
   container-type: inline-size;
   border: 0;
   outline: 0;
@@ -7,8 +7,8 @@
   border-radius: 4.35%;
 }
 
-.game-shell .game-table .card-face::before,
-.game-shell .game-table .card-face::after {
+:is(.game-shell .game-table, .guided-rank-order) .card-face::before,
+:is(.game-shell .game-table, .guided-rank-order) .card-face::after {
   content: none;
 }
 
@@ -39,33 +39,33 @@
   font-size: 11.3cqw;
 }
 
-.game-shell .game-table .card-face .card-corner {
+:is(.game-shell .game-table, .guided-rank-order) .card-face .card-corner {
   display: flex;
   top: 6.09cqw;
   left: 6.96cqw;
   font-size: 21.74cqw;
 }
 
-.game-shell .game-table .card-face .card-rank {
+:is(.game-shell .game-table, .guided-rank-order) .card-face .card-rank {
   font-size: 25.22cqw;
   line-height: inherit;
 }
 
-.game-shell .game-table .card-face .card-corner-bottom {
+:is(.game-shell .game-table, .guided-rank-order) .card-face .card-corner-bottom {
   top: auto;
   left: auto;
   bottom: 6.09cqw;
   right: 6.96cqw;
 }
 
-.game-shell .game-table .card-face .card-suit {
+:is(.game-shell .game-table, .guided-rank-order) .card-face .card-suit {
   top: 50%;
   left: 50%;
   font-size: 66.09cqw;
   filter: drop-shadow(0.87cqw 1.74cqw 0 #ba984d);
 }
 
-.game-shell .game-table .card-face .card-corner > span {
+:is(.game-shell .game-table, .guided-rank-order) .card-face .card-corner > span {
   display: block;
 }
 
