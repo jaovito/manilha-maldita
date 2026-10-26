@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { GuidedTutorial } from './Guided';
+import { t } from '../../../../shared/i18n';
 import { EnergyIcon } from '../../../../shared/EnergyIcon';
 import { useLocale } from '../../../../shared/i18n';
 import type { Locale } from '../../../../shared/i18n/types';
@@ -10,6 +12,7 @@ const suits = ['♦', '♠', '♥', '♣'];
 export function Tutorial({ onClose }: { onClose: () => void }) {
   const { locale, changeLocale, messages } = useLocale();
   const text = messages.tutorial;
+  const [guided, setGuided] = useState(false);
   const [step, setStep] = useState(0);
   const [answer, setAnswer] = useState<number | null>(null);
   const [vira, setVira] = useState(4);
@@ -31,12 +34,14 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     heading.current?.focus();
     if (article.current) article.current.scrollTop = 0;
-  }, [step, locale]);
+  }, [step, locale, guided]);
 
   const navigate = (next: number) => {
     setStep(next);
     setAnswer(null);
   };
+
+  if (guided) return <GuidedTutorial onBack={() => setGuided(false)} onExit={onClose} />;
 
   return createPortal(
     <section
@@ -80,6 +85,9 @@ export function Tutorial({ onClose }: { onClose: () => void }) {
               <option value="en">English</option>
             </select>
           </label>
+          <button type="button" className="button-primary" onClick={() => setGuided(true)}>
+            {t('Jogar tutorial guiado')}
+          </button>
           <button type="button" onClick={onClose}>
             ← {text.back}
           </button>

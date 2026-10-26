@@ -7,7 +7,6 @@ import { leaveRoom } from '../../use-cases/lobby/leave-room';
 import { requestRematch } from '../../use-cases/lobby/request-rematch';
 import { setReady } from '../../use-cases/lobby/set-ready';
 import { startRoomMatch } from '../../use-cases/lobby/start-match';
-import { beginMatch } from '../match/gameplay';
 
 /** Shared concurrency preconditions precede every lobby mutation. */
 export function applyLobby(
@@ -22,7 +21,7 @@ export function applyLobby(
   if (!room.state.seats[seat]) throw new Error('NOT_MEMBER');
 
   const action = message.action;
-  if (action.type === 'REMATCH') requestRematch(room, seat);
+  if (action.type === 'REMATCH') requestRematch(room, seat, ports);
   else if (action.type === 'LEAVE') leaveRoom(room, seat);
   else {
     if (room.state.status !== 'lobby') throw new Error('INVALID_PHASE');
@@ -46,6 +45,5 @@ export function applyLobby(
     }
   }
 
-  if (room.state.solo && action.type === 'REMATCH') beginMatch(room, ports);
   room.state.revision++;
 }

@@ -168,3 +168,67 @@ test('finished solo snapshots expose only the viewer reward eligibility after de
     f.service.close();
   }
 });
+
+test('rejected solo rematch preserves the finished match and can retry after persistence recovers', async () => {
+  let blocked = false;
+  let reservations = 0;
+  let released = 0;
+  const records: MatchRecord[] = [];
+  const f = fixture(
+    { soloEnabled: true },
+    {
+      policyVersion: 'fixture-v1',
+      reserve() {
+        if (blocked) throw new Error('PERSISTENCE_UNAVAILABLE');
+        reservations++;
+      },
+      release() {
+        released++;
+      },
+      write(record) {
+        records.push(record);
+      },
+    },
+  );
+  const random = spyOn(f.ports, 'randomInt');
+  const human = f.peer('rematch-player');
+
+  try {
+    const { code } = await f.service.create(human.session, 'Player', defaultRoomConfig, true);
+    await human.connect(code);
+    await human.send({ type: 'SURRENDER' });
+    const finished = structuredClone(human.view);
+    const calls = random.mock.calls.length;
+    blocked = true;
+    const rejected = human.message({ type: 'REMATCH' });
+
+    expect(await human.raw(rejected)).toMatchObject({ code: 'PERSISTENCE_UNAVAILABLE' });
+    await human.send({ type: 'SYNC' });
+    expect(human.view).toEqual(finished);
+    expect(random.mock.calls.length).toBe(calls);
+    expect(reservations).toBe(1);
+    expect(records).toHaveLength(1);
+
+    blocked = false;
+    // A repeated rejected command remains rejected without taking a new reservation.
+    expect(await human.raw(rejected)).toMatchObject({ code: 'PERSISTENCE_UNAVAILABLE' });
+    expect(reservations).toBe(1);
+    random.mockImplementationOnce(() => {
+      throw new Error('entropy failed');
+    });
+    expect(await human.send({ type: 'REMATCH' })).toMatchObject({ type: 'ERROR' });
+    await human.send({ type: 'SYNC' });
+    expect(human.view).toEqual(finished);
+    expect(released).toBe(1);
+
+    expect(await human.send({ type: 'REMATCH' })).toMatchObject({ type: 'ACK' });
+    expect(human.view.status).toBe('playing');
+    expect(human.view.matchId).not.toBe(finished.matchId);
+    expect(human.view.outcome).toBeNull();
+    expect(human.view.match).not.toBeNull();
+    expect(records).toHaveLength(1);
+  } finally {
+    random.mockRestore();
+    f.service.close();
+  }
+});

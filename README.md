@@ -176,6 +176,8 @@ The tool produces aggregate JSON by format, preset and conservative/aggressive/p
 
 “Como jogar” opens a seven-step interactive tutorial covering card order, turn-up/manilha simulator, ties, betting, special hands, four powers and a first-match walkthrough. It includes explained questions, keyboard navigation and complete Portuguese/English catalogs. Language applies throughout the game. In **Configurações → Idioma do jogo**, select Portuguese/English; the preference is saved in this browser. The room menu can change it during a match without restarting the table. The tutorial selector shares the global preference.
 
+“Jogar tutorial guiado” opens a 17-step local practice table using the real card renderer. It covers card strength, manilhas, betting and powers without creating a room, running timers or persisting progress.
+
 ## Playing against bots and building test scenarios
 
 `bun run dev` enables the simple training bot/development tools by default. If the backend was already running before this increment, restart to load flags. Click **Jogar** to enter a 1v1 table against **Bot Treino**. Completed matches started with an account grant reduced cosmetic XP (50 completion + 25 victory by default), without ranking points. Using the development hand-reset tools makes that match ineligible for rewards. The bot bases raises/counter-raises and occasional bluffs only on its authorized view.

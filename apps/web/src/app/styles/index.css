@@ -76,3 +76,5 @@
 @import "../../features/player/components/Ranking/styles.css";
 @import "../../features/player/components/Panel/menu.css";
 @import "../../features/player/components/Panel/responsive.css";
+@import "../../features/menu/components/Tutorial/Guided/styles.css";
+@import "../../features/menu/components/Tutorial/Guided/responsive.css";
