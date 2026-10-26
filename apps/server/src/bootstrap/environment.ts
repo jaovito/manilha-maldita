@@ -1,10 +1,14 @@
-import { type AuthenticationPolicy, validateAuthenticationPolicy } from '../modules/accounts';
 import {
-  isPasswordPepper,
-  type Argon2Policy,
   type AccountApplication,
+  type Argon2Policy,
+  type AuthenticationPolicy,
+  isPasswordPepper,
   validateArgon2Policy,
+  validateAuthenticationPolicy,
 } from '../modules/accounts';
+import type { Ports } from '../modules/rooms';
+import { parseTrustedProxies } from '../shared/request-peer';
+import type { BackendServices } from './backend-services';
 
 export const DEFAULT_ORIGINS = [
   'http://127.0.0.1:5173',
@@ -24,6 +28,9 @@ export type ServerOptions = Readonly<{
   soloEnabled?: boolean;
   devTools?: boolean;
   accounts?: AccountApplication;
+  backend?: BackendServices;
+  trustedProxies?: readonly string[];
+  ports?: Ports;
 }>;
 
 export const SERVER_DEFAULTS = {
@@ -98,6 +105,9 @@ export function parseServerOptions(env: ServerEnvironment): ServerOptions {
   return {
     hostname,
     port,
+    ...(env.TRUSTED_PROXY_IPS !== undefined
+      ? { trustedProxies: parseTrustedProxies(env.TRUSTED_PROXY_IPS) }
+      : {}),
     environment: env.NODE_ENV ?? SERVER_DEFAULTS.environment,
     soloEnabled:
       env.ENABLE_SOLO === undefined ? SERVER_DEFAULTS.soloEnabled : env.ENABLE_SOLO === 'true',

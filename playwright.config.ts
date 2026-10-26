@@ -4,7 +4,7 @@ export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.e2e.ts',
   // Solo and global-language flows require the isolated development servers.
-  testIgnore: ['**/solo/**', '**/settings/i18n.e2e.ts'],
+  testIgnore: ['**/solo/**', '**/player/**', '**/settings/i18n.e2e.ts'],
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : '50%',

@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { PasswordService, type PasswordHasher } from '../../index';
+import { type PasswordHasher, PasswordService } from '../../index';
 
 const password = 'fixture password with spaces';
 

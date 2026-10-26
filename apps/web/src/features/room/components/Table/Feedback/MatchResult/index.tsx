@@ -1,3 +1,8 @@
+import {
+  MATCH_RESULT_READING_MS,
+  MATCH_RESULT_CELEBRATION_MS,
+} from '../../../../../../shared/match-presentation';
+import { MatchRewards } from './Rewards';
 import { t } from '../../../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
@@ -58,7 +63,7 @@ export function MatchResult({
             : current,
         );
       },
-      reading ? 1800 : 5000,
+      reading ? MATCH_RESULT_READING_MS : MATCH_RESULT_CELEBRATION_MS,
     );
 
     return () => window.clearTimeout(timer);
@@ -186,6 +191,14 @@ export function MatchResult({
             }[outcome.reason]
           }
         </p>
+        {room.matchId && (
+          <MatchRewards
+            key={`${room.matchId}:${room.rewardEligibility}`}
+            matchId={room.matchId}
+            eligibility={room.rewardEligibility}
+            completed={outcome.reason === 'completed'}
+          />
+        )}
         {celebrating ? (
           <p className="match-end-hint">{t('Um momento para o resultado…')}</p>
         ) : (

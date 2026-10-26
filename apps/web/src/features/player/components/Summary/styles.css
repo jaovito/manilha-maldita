@@ -1,0 +1,49 @@
+.player-summary {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #6e603f;
+  border-radius: 4px;
+  padding: 13px 18px;
+  background: #07151e;
+  margin-bottom: 18px;
+}
+.player-summary .avatar,
+.player-ranking .avatar {
+  display: block;
+  width: 68px;
+  height: 68px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 3px solid #c19750;
+}
+.player-summary > div {
+  min-width: 0;
+  flex: 1;
+}
+.player-summary strong {
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+.player-summary p {
+  font-size: 15px;
+  margin: 2px 0 5px;
+  color: #d1c7a3;
+}
+.player-summary small {
+  display: block;
+  color: #b5b9a5;
+  font-size: 12px;
+}
+.player-summary progress {
+  display: block;
+  width: min(280px, 100%);
+  height: 8px;
+  accent-color: #dfa844;
+  margin: 5px 0;
+}
+.player-points {
+  font-size: 19px;
+  color: #ecc878;
+  white-space: nowrap;
+}

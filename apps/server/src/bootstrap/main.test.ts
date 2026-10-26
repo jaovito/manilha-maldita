@@ -50,7 +50,7 @@ test('environment uses local defaults and validates explicit deployment origins'
 });
 
 test('main starts a real listener from explicit environment without exposing configuration', async () => {
-  const runtime = main({ PORT: '0', HOST: '127.0.0.1', SECURE_COOKIES: 'false' });
+  const runtime = await main({ PORT: '0', HOST: '127.0.0.1', SECURE_COOKIES: 'false' });
   try {
     const response = await fetch(new URL('/api/guest', runtime.server.url));
     expect(response.status).toBe(401);
@@ -71,4 +71,28 @@ test('solo flag is independent and development tooling fails closed outside expl
   expect(parseServerOptions({ ENABLE_DEV_TOOLS: 'true' }).devTools).toBe(false);
   for (const key of ['ENABLE_SOLO', 'ENABLE_DEV_TOOLS'])
     expect(() => parseServerOptions({ [key]: 'yes' })).toThrow('INVALID_FEATURE_FLAG');
+});
+
+test('entry lifecycle reports fixed codes and closes the listener on shutdown', async () => {
+  const { shutdown, startupFailed } = await import('./main');
+  const { spyOn } = await import('bun:test');
+  const report = spyOn(console, 'error').mockImplementation(() => {});
+  const previous = process.exitCode;
+
+  try {
+    const runtime = await main({ PORT: '0', NODE_ENV: 'test' });
+    await shutdown(runtime);
+    await shutdown({
+      async stop() {
+        throw new Error('private stop error');
+      },
+    });
+    startupFailed();
+    expect(report.mock.calls).toEqual([['SERVER_STOP_FAILED'], ['SERVER_START_FAILED']]);
+    expect(process.exitCode).toBe(1);
+    await expect(main({ PORT: '0', HOST: '192.0.2.1', NODE_ENV: 'test' })).rejects.toThrow();
+  } finally {
+    process.exitCode = previous ?? 0;
+    report.mockRestore();
+  }
 });

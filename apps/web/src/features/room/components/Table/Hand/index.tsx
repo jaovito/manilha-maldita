@@ -1,3 +1,4 @@
+import { Avatar } from '../../../../../shared/Avatar';
 import { t } from '../../../../../shared/i18n';
 import type { Action, MatchView, RoomView } from '@truco/game-protocol';
 import { disabledHint } from '../../../../../shared/DisabledTooltip';
@@ -44,7 +45,10 @@ export function TableHand({
             {t('Sua vez')}
           </span>
         )}
-        <span className={`seat-avatar avatar-${room.selfSeat}`} aria-hidden="true" />
+        <Avatar
+          className="seat-avatar"
+          index={room.seats[room.selfSeat]?.appearance?.avatar.spriteIndex ?? room.selfSeat}
+        />
         <strong>
           {room.seats[room.selfSeat]?.nickname ?? t('Você')} <small>{t('VOCÊ')}</small>
         </strong>
@@ -108,7 +112,7 @@ export function TableHand({
                 cancel();
               }}
             >
-              <CardFace card={card} />
+              <CardFace card={card} theme={room.seats[room.selfSeat]?.appearance?.deck.assetKey} />
             </button>
           ))}
       </section>

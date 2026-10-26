@@ -1,13 +1,23 @@
-import { t } from '../i18n';
 import {
   type ClientMessage,
   type RoomView,
   type ServerMessage,
   serverMessageSchema,
 } from '@truco/game-protocol';
+import { t } from '../i18n';
 import { backendUrl } from './backend-url';
 
-export async function request<T>(path: string, body?: unknown): Promise<T> {
+export class HttpError extends Error {
+  constructor(
+    message: string,
+    readonly code: string | undefined,
+    readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
+async function sendRequest(path: string, body?: unknown): Promise<Response> {
   const httpErrors = new Map([
     ['SOLO_DISABLED', t('Partidas contra bot estão desativadas neste servidor.')],
     [
@@ -55,10 +65,22 @@ export async function request<T>(path: string, body?: unknown): Promise<T> {
 
     const message = typeof code === 'string' ? httpErrors.get(code) : undefined;
 
-    throw new Error(message ?? t('Não foi possível concluir. Confira os dados e tente novamente.'));
+    throw new HttpError(
+      message ?? t('Não foi possível concluir. Confira os dados e tente novamente.'),
+      typeof code === 'string' ? code : undefined,
+      response.status,
+    );
   }
 
-  return response.json();
+  return response;
+}
+
+export async function request<T>(path: string, body?: unknown): Promise<T> {
+  return (await sendRequest(path, body)).json();
+}
+
+export async function requestNoContent(path: string, body: unknown): Promise<void> {
+  await sendRequest(path, body);
 }
 
 export type Action = ClientMessage['action'];

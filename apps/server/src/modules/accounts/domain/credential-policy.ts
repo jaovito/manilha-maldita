@@ -1,4 +1,4 @@
-export const MIN_PASSWORD_CHARACTERS = 15;
+export const MIN_PASSWORD_CHARACTERS = 6;
 export const MAX_PASSWORD_CHARACTERS = 128;
 
 /** Login names are canonical identifiers; passwords are never trimmed or normalized. */

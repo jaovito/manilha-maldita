@@ -23,16 +23,59 @@ export function createAccountApplication(dependencies: AuthenticationDependencie
   if (!dependencies.dummyPasswordHash.startsWith('$argon2id$'))
     throw new Error('INVALID_AUTHENTICATION_POLICY');
 
-  const configured = { ...dependencies, policy: { ...policy } };
+  type Revocation = Readonly<{ tokenHash: string } | { accountId: string }>;
+  const listeners = new Set<(event: Revocation) => void>();
+  const revoke = (event: Revocation) => {
+    dependencies.onRevoked?.(event);
+
+    for (const listener of listeners) listener(event);
+  };
+  const configured = { ...dependencies, onRevoked: revoke, policy: { ...policy } };
 
   return {
     sessionTtlMs: policy.sessionTtlMs,
+    revoke,
+    subscribeRevocations(listener: (event: Revocation) => void) {
+      listeners.add(listener);
+
+      return () => {
+        listeners.delete(listener);
+      };
+    },
     authenticate: (
       mode: 'register' | 'login',
       input: unknown,
       peer: string,
       previousToken?: unknown,
-    ) => authenticate(configured, mode, input, peer, previousToken),
+    ) =>
+      (async () => {
+        try {
+          const result = await authenticate(configured, mode, input, peer, previousToken);
+          await configured.audit?.(
+            mode === 'register' ? 'register_success' : 'login_success',
+            result.profile.accountId,
+          );
+
+          return result;
+        } catch (error) {
+          // Denied traffic is counted by the limiter without growing an unbounded audit stream.
+          if (
+            error instanceof Error &&
+            ['INVALID_CREDENTIALS', 'REGISTRATION_FAILED', 'INVALID_PASSWORD'].includes(
+              error.message,
+            )
+          )
+            await configured.audit?.(mode === 'register' ? 'register_failure' : 'login_failure');
+
+          throw error;
+        }
+      })(),
+
+    async sessionByHash(hash: string) {
+      if (hash.length !== 64 || /[^a-f0-9]/.test(hash)) return null;
+
+      return configured.repository.findSession(hash);
+    },
 
     async session(token: unknown) {
       const hash = await configured.tokenHash(token);
@@ -43,7 +86,11 @@ export function createAccountApplication(dependencies: AuthenticationDependencie
     async logout(token: unknown) {
       const hash = await configured.tokenHash(token);
 
-      if (hash) await configured.repository.revokeSession(hash);
+      if (hash) {
+        await configured.repository.revokeSession(hash);
+        configured.onRevoked?.({ tokenHash: hash });
+        await configured.audit?.('logout');
+      }
     },
   };
 }

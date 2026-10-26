@@ -1,12 +1,12 @@
 import { nextWakeAt, updateConnectivity } from '../../../matches';
-import { advanceClock, closeAbnormally } from './match/gameplay';
 import { roomView } from '../dto/mappers/room-view';
 import type { RoomRepository } from '../ports/room-repository';
 import type { Ports } from '../ports/runtime';
+import type { RoomRuntime } from '../state/room-runtime';
+import { advanceClock, closeAbnormally } from './match/gameplay';
+import { connected, humanConnected, protectionMs } from './membership/presence';
 import { serializeRoom } from './room-queue';
 import { advanceBot, botWakeAt } from './solo/bot';
-import { connected, humanConnected, protectionMs } from './membership/presence';
-import type { RoomRuntime } from '../state/room-runtime';
 
 /** Lifecycle and timer effects share the exact same authority/queue as player commands. */
 export class RoomLifecycle {
@@ -20,6 +20,8 @@ export class RoomLifecycle {
     this.rooms.clear();
 
     for (const room of rooms) {
+      if (room.state.status === 'playing') closeAbnormally(room, null, 'technical');
+      this.captureResult(room);
       room.cancel?.();
       for (const member of room.state.seats) {
         try {
@@ -50,6 +52,7 @@ export class RoomLifecycle {
   tick(room: RoomRuntime): void {
     if (room.emptySince !== null && this.ports.now() >= room.emptySince + protectionMs(room)) {
       if (room.state.status === 'playing') closeAbnormally(room, null, 'expired');
+      this.captureResult(room);
       room.cancel?.();
       this.rooms.delete(room.state.code);
 
@@ -68,6 +71,7 @@ export class RoomLifecycle {
   }
 
   publish(room: RoomRuntime): void {
+    this.captureResult(room);
     room.emptySince = humanConnected(room) ? null : (room.emptySince ?? this.ports.now());
     room.sequence++;
 
@@ -86,6 +90,40 @@ export class RoomLifecycle {
     room.emptySince = humanConnected(room) ? null : (room.emptySince ?? this.ports.now());
     this.refreshPresence(room);
     this.schedule(room);
+  }
+
+  private captureResult(room: RoomRuntime): void {
+    const record = room.matchRecord;
+    const state = room.state.match;
+
+    if (!record || !state) return;
+
+    const activations = state.powers?.activations.length ?? 0;
+
+    if (record.lastHand !== state.hand.number) record.lastActivations = 0;
+
+    record.powersUsed += Math.max(0, activations - record.lastActivations);
+    record.lastActivations = activations;
+    record.lastHand = state.hand.number;
+
+    if (room.state.status !== 'finished' || record.reported || !room.state.outcome) return;
+
+    this.ports.results?.write({
+      id: record.id,
+      preset: room.state.config.preset,
+      format: room.state.config.format,
+      solo: room.state.solo === true,
+      ...room.state.outcome,
+      scoreA: state.score.A,
+      scoreB: state.score.B,
+      handsPlayed: state.hand.number,
+      powersUsed: record.powersUsed,
+      rewardPolicyVersion: record.policyVersion,
+      startedAt: record.startedAt,
+      finishedAt: Math.max(record.startedAt, this.ports.now()),
+      participants: record.seats.map(({ seat, accountId }) => ({ seat, accountId })),
+    });
+    record.reported = true;
   }
 
   schedule(room: RoomRuntime): void {

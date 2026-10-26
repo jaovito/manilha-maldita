@@ -1,5 +1,5 @@
-import { beginMatch } from '../../services/match/gameplay';
 import type { Sink } from '../../ports/room-publisher';
+import { beginMatch } from '../../services/match/gameplay';
 import { memberSeat } from '../../services/membership/presence';
 import type { RoomContext } from '../context';
 

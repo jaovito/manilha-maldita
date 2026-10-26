@@ -1,9 +1,10 @@
+import type { TableTheme } from '@truco/game-protocol';
 import { ScenicCandle } from '../../../../../shared/ScenicCandle';
 
 /** Static decoration is independent of players, private cards and match lifecycle. */
-export function TableScenery() {
+export function TableScenery({ theme = 'classic' }: { theme?: TableTheme | undefined }) {
   return (
-    <div className="table-scenery" aria-hidden="true">
+    <div data-table={theme} className="table-scenery" aria-hidden="true">
       <div className="table-floor" />
       <div className="table-felt" />
       <div className="table-rail" />

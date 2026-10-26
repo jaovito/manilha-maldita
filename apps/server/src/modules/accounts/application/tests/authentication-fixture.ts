@@ -1,5 +1,5 @@
 import { createAccountApplication } from '../account-application';
-import type { AuthenticationDependencies, AccountRepository } from '../ports/authentication';
+import type { AccountRepository, AuthenticationDependencies } from '../ports/authentication';
 import { PasswordService } from '../services/password-service';
 
 export function authenticationFixture() {
@@ -30,7 +30,7 @@ export function authenticationFixture() {
     },
     async findSession() {
       if (state.failure) throw new Error('secret database detail');
-      return profile;
+      return { ...profile, expiresAt: 86_400_000 };
     },
     async revokeSession() {
       calls.revoked++;

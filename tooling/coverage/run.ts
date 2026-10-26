@@ -14,14 +14,14 @@ const suites = [
       './packages',
       './apps/server/src',
       './apps/server/tests/integration',
+      './apps/server/tests/database',
     ],
   },
   { name: 'web', cwd: resolve(root, 'apps/web'), tests: [] },
-  { name: 'database', cwd: root, tests: ['./apps/server/tests/database'] },
 ];
 
 for (const suite of suites) {
-  if (suite.name === 'database') {
+  if (suite.name === 'server') {
     const compose = Bun.spawn(
       ['docker', 'compose', '--profile', 'test', 'up', '-d', '--wait', 'postgres-test'],
       {

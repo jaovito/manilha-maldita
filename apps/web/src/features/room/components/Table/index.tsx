@@ -234,9 +234,15 @@ export function Table({ room, send }: { room: RoomView; send: (action: Action) =
                     title={hiddenReason}
                   >
                     {play.covered || !('card' in play) ? (
-                      <CardBack kind={play.covered ? 'covered' : masked ? 'masked' : undefined} />
+                      <CardBack
+                        theme={room.seats[play.seat]?.appearance?.deck.assetKey}
+                        kind={play.covered ? 'covered' : masked ? 'masked' : undefined}
+                      />
                     ) : (
-                      <CardFace card={play.card} />
+                      <CardFace
+                        card={play.card}
+                        theme={room.seats[play.seat]?.appearance?.deck.assetKey}
+                      />
                     )}
                   </span>
                   <small>

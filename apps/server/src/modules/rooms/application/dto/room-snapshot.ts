@@ -1,5 +1,5 @@
 import type { projectPlayerView } from '@truco/game-core/projections';
-import type { RoomConfig, RoomOutcome, RoomState } from '../../domain/room';
+import type { MemberAppearance, RoomConfig, RoomOutcome, RoomState } from '../../domain/room';
 import type { CommandReply } from './commands';
 
 export type RoomTransition = { id: string; kind: 'deal' | 'trick' | 'hand'; until: number };
@@ -14,7 +14,15 @@ export type RoomView = {
   status: RoomState['status'];
   hostSeat: number;
   selfSeat: number;
-  seats: readonly ({ seat: number; nickname: string; connected: boolean; ready: boolean } | null)[];
+  rewardEligibility?: 'eligible' | 'guest' | 'development';
+  seats: readonly ({
+    seat: number;
+    nickname: string;
+    connected: boolean;
+    ready: boolean;
+    appearance?: Omit<MemberAppearance, 'table'> | undefined;
+  } | null)[];
+  tableTheme?: MemberAppearance['table'] | undefined;
   config: RoomConfig;
   matchId: string | null;
   decisionId: string | null;

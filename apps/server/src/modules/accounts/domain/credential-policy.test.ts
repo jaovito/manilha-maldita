@@ -27,7 +27,7 @@ test('login identifiers obey the canonical database contract without coercion', 
 });
 
 test('password lengths count Unicode code points and reject malformed UTF-16', () => {
-  for (const value of ['x'.repeat(15), 'x'.repeat(128), '🃏'.repeat(15), '🃏'.repeat(128)])
+  for (const value of ['x'.repeat(6), 'x'.repeat(128), '🃏'.repeat(6), '🃏'.repeat(128)])
     expect(isPassword(value)).toBe(true);
 
   for (const value of [
@@ -37,12 +37,12 @@ test('password lengths count Unicode code points and reject malformed UTF-16', (
     {},
     [],
     '',
-    'x'.repeat(14),
+    'x'.repeat(5),
     'x'.repeat(129),
-    '🃏'.repeat(14),
+    '🃏'.repeat(5),
     '🃏'.repeat(129),
-    `${'x'.repeat(15)}\uD800`,
-    `${'x'.repeat(15)}\uDC00`,
+    `${'x'.repeat(6)}\uD800`,
+    `${'x'.repeat(6)}\uDC00`,
   ])
     expect(isPassword(value)).toBe(false);
 });
@@ -51,8 +51,8 @@ test('passwords accept spaces, punctuation, Unicode and SQL-like text verbatim',
   for (const value of [
     "  ' OR 1=1; --  ",
     ' espaços e símbolos 🃏 ',
-    'á'.repeat(15),
-    'a\u0301'.repeat(15),
+    'á'.repeat(6),
+    'a\u0301'.repeat(6),
   ])
     expect(isPassword(value)).toBe(true);
 });

@@ -5,16 +5,10 @@ import {
   roomCodeSchema,
 } from '@truco/game-protocol';
 import type { Hono } from 'hono';
-import { getCookie } from 'hono/cookie';
-import {
-  SESSION_COOKIE as COOKIE,
-  MAX_MESSAGE_BYTES as MAX_BYTES,
-  type TransportDependencies,
-} from '../../../contracts';
+import { MAX_MESSAGE_BYTES as MAX_BYTES, type TransportDependencies } from '../../../contracts';
+import { resolvePlayerSession } from './player-session';
 
 export function registerRoomRoutes(app: Hono, options: TransportDependencies) {
-  const { sessions } = options;
-
   app.post('/api/rooms', async (context) => {
     const text = await context.req.text();
     if (new TextEncoder().encode(text).length > MAX_BYTES)
@@ -30,7 +24,7 @@ export function registerRoomRoutes(app: Hono, options: TransportDependencies) {
     const parsed = createRoomRequestSchema.safeParse(input);
     if (!parsed.success) return context.json({ code: 'INVALID_MESSAGE' }, 400);
 
-    const session = sessions.find(getCookie(context, COOKIE));
+    const session = await resolvePlayerSession(context, options);
     if (!session) return context.json({ code: 'UNAUTHENTICATED' }, 401);
     return context.json(
       await options.rooms.create(
@@ -38,6 +32,7 @@ export function registerRoomRoutes(app: Hono, options: TransportDependencies) {
         session.nickname,
         normalizeConfig(parsed.data.config),
         parsed.data.solo,
+        session.identity,
       ),
       201,
     );
@@ -57,9 +52,9 @@ export function registerRoomRoutes(app: Hono, options: TransportDependencies) {
     if (!code.success || !joinRoomRequestSchema.safeParse(input).success)
       return context.json({ code: 'INVALID_MESSAGE' }, 400);
 
-    const session = sessions.find(getCookie(context, COOKIE));
+    const session = await resolvePlayerSession(context, options);
     if (!session) return context.json({ code: 'UNAUTHENTICATED' }, 401);
-    await options.rooms.join(code.data, session.id, session.nickname);
+    await options.rooms.join(code.data, session.id, session.nickname, session.identity);
     return context.json({ code: code.data });
   });
 }

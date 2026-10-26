@@ -36,6 +36,20 @@
       "when": 1792689916801,
       "tag": "0004_account-rate-limits",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792700645770,
+      "tag": "0005_player-progression-security",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793019677572,
+      "tag": "0006_solo-progression",
+      "breakpoints": true
     }
   ]
 }

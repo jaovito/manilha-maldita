@@ -1,0 +1,113 @@
+.player-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  background: #010b12dd;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  backdrop-filter: blur(5px);
+}
+.player-panel {
+  --gold: #d7a451;
+  width: min(1140px, 100%);
+  max-height: calc(100svh - 44px);
+  display: flex;
+  flex-direction: column;
+  color: #f5dfb3;
+  font-family: "Pixelify Sans", sans-serif;
+  border: 14px solid transparent;
+  border-image: url("/art/profile-frame.svg") 40 / 28px / 2px stretch;
+  background: #091d24;
+  box-shadow: 0 18px 75px #000b;
+  position: relative;
+}
+.player-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 24px;
+  background: linear-gradient(90deg, #17342f, #0b1c25);
+  border-bottom: 1px solid #80653a;
+}
+.player-panel h2 {
+  font-size: clamp(27px, 3vw, 38px);
+  margin: 3px 0 0;
+  color: #ffe1a1;
+}
+.player-panel h3 {
+  margin: 0 0 8px;
+  color: #f9d994;
+  font-size: 25px;
+}
+.player-panel p {
+  line-height: 1.45;
+}
+.player-panel button {
+  min-height: 44px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 18px;
+  color: #fce1a8;
+  background: #174d3b;
+  border: 2px solid #ac8546;
+  border-radius: 3px;
+  padding: 8px 17px;
+  box-shadow: 0 3px #030e14;
+}
+.player-panel button:hover:not(:disabled) {
+  background-color: #26654a;
+  border-color: #ffe0a3;
+}
+.player-panel button:focus-visible {
+  outline: 3px solid #fbe8b5;
+  outline-offset: 3px;
+}
+.player-panel button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.player-panel .player-close {
+  font-size: 30px;
+  min-width: 44px;
+  padding: 0;
+  background: #33252b;
+}
+.player-panel-body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  min-height: 0;
+  padding: 18px 24px 24px;
+  scrollbar-color: #a17f47 #0a1920;
+}
+.player-panel-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  border-top: 1px solid #4a4935;
+  padding: 12px 24px;
+  font-size: 13px;
+  color: #c4c9ab;
+  background: #071822;
+}
+.player-panel-footer button {
+  flex-shrink: 0;
+  background: #1a3038;
+}
+.player-error {
+  padding: 12px 16px;
+  border: 1px solid #bd725e;
+  background: #3d2327;
+  color: #ffdbc5;
+}
+.player-empty {
+  text-align: center;
+  padding: 50px 18px;
+  color: #d5c79e;
+}
+.player-empty button {
+  display: block;
+  margin: 20px auto;
+}

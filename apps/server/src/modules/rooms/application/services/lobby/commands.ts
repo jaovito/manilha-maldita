@@ -1,5 +1,4 @@
 import type { RoomCommand } from '../../dto/commands';
-import { beginMatch } from '../match/gameplay';
 import type { Ports } from '../../ports/runtime';
 import type { RoomRuntime } from '../../state/room-runtime';
 import { changeSeat } from '../../use-cases/lobby/change-seat';
@@ -8,6 +7,7 @@ import { leaveRoom } from '../../use-cases/lobby/leave-room';
 import { requestRematch } from '../../use-cases/lobby/request-rematch';
 import { setReady } from '../../use-cases/lobby/set-ready';
 import { startRoomMatch } from '../../use-cases/lobby/start-match';
+import { beginMatch } from '../match/gameplay';
 
 /** Shared concurrency preconditions precede every lobby mutation. */
 export function applyLobby(

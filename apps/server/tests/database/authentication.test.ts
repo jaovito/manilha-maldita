@@ -1,10 +1,10 @@
-import type { SQL } from 'bun';
 import { expect, test } from 'bun:test';
+import type { SQL } from 'bun';
 import { getTableConfig } from 'drizzle-orm/pg-core';
 import { authRateLimits } from '../../database/schema';
 import {
-  createPostgresAuthLimiter,
   createAuthRateKey,
+  createPostgresAuthLimiter,
 } from '../../src/modules/accounts/adapters/outbound/postgres-auth-limiter';
 import { withAuthenticationFixture } from './authentication-fixture';
 
@@ -76,7 +76,13 @@ async function fixtureIssueDisabled(client: SQL, id: string) {
     '../../src/modules/accounts/adapters/outbound/postgres-account-repository'
   );
 
-  return createPostgresAccountRepository(client).issueSession(id, 'a'.repeat(64), 60_000, null);
+  return createPostgresAccountRepository(client).issueSession(
+    id,
+    'a'.repeat(64),
+    60_000,
+    null,
+    'unverified-hash',
+  );
 }
 
 test('real HTTP injection attempts and forged rewards are rejected without changing account/progress rows', async () => {
@@ -159,4 +165,63 @@ test('an expired rate key resets even when bounded cleanup cannot remove it in t
       await client`SELECT attempts, expires_at > statement_timestamp() AS fresh FROM app.auth_rate_limits WHERE key_hash = ${target}`;
     expect(row).toMatchObject({ attempts: 1, fresh: true });
   });
+});
+
+test('a password verified before a concurrent credential change cannot issue a session afterward', async () => {
+  const { spyOn } = await import('bun:test');
+  const { createPostgresAccountMaintenance } = await import(
+    '../../src/modules/accounts/adapters/outbound/postgres-account-maintenance'
+  );
+  await withAuthenticationFixture(
+    async ({ client, login, password, passwords, repository, post, get }) => {
+      const registered = await post('register', { login, password, nickname: 'Player' });
+      const oldCookie = registered.headers.get('set-cookie')?.split(';')[0];
+      const account = await repository.findLogin(login);
+      if (!account) throw new Error('Missing account');
+      const newPassword = 'replacement secure password fixture';
+      const newHash = await passwords.hash(newPassword);
+      const originalVerify = passwords.verify.bind(passwords);
+      let verified: (() => void) | undefined;
+      let release: (() => void) | undefined;
+      const checked = new Promise<void>((resolve) => {
+        verified = resolve;
+      });
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const verify = spyOn(passwords, 'verify').mockImplementation(async (input, hash) => {
+        const result = await originalVerify(input, hash);
+        verified?.();
+        await gate;
+
+        return result;
+      });
+      const pending = post('login', { login, password });
+
+      try {
+        await checked;
+        expect(
+          await createPostgresAccountMaintenance(client).change(
+            account.accountId,
+            account.passwordHash,
+            newHash,
+          ),
+        ).toBe(true);
+        release?.();
+        const rejected = await pending;
+        expect(rejected.status).toBe(401);
+        expect(await rejected.json()).toEqual({ code: 'INVALID_CREDENTIALS' });
+        expect(
+          await client`SELECT id FROM app.sessions WHERE account_id = ${account.accountId} AND revoked_at IS NULL`,
+        ).toHaveLength(0);
+        expect((await get(oldCookie)).status).toBe(401);
+      } finally {
+        release?.();
+        await pending;
+        verify.mockRestore();
+      }
+
+      expect((await post('login', { login, password: newPassword })).status).toBe(200);
+    },
+  );
 });

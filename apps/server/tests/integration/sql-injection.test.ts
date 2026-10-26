@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { defaultRoomConfig, serverMessageSchema, type ServerMessage } from '@truco/game-protocol';
+import { defaultRoomConfig, type ServerMessage, serverMessageSchema } from '@truco/game-protocol';
 import { ownCard, type Player, setup } from './multiplayer-fixture';
 
 function nextMessage(socket: WebSocket, accepts: (message: ServerMessage) => boolean) {

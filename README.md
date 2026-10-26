@@ -178,7 +178,7 @@ The tool produces aggregate JSON by format, preset and conservative/aggressive/p
 
 ## Playing against bots and building test scenarios
 
-`bun run dev` enables the simple training bot/development tools by default. If the backend was already running before this increment, restart to load flags. Click **Jogar** to enter a 1v1 table against **Bot Treino**.
+`bun run dev` enables the simple training bot/development tools by default. If the backend was already running before this increment, restart to load flags. Click **Jogar** to enter a 1v1 table against **Bot Treino**. Completed matches started with an account grant reduced cosmetic XP (50 completion + 25 victory by default), without ranking points. Using the development hand-reset tools makes that match ineligible for rewards. The bot bases raises/counter-raises and occasional bluffs only on its authorized view.
 
 During a match open **Sala → Ferramentas de desenvolvimento**. Choose three cards, one of four powers and energy from 0 to 3; **Aplicar cenário e reiniciar mão** clears the current hand while preserving score. **Reiniciar mão aleatória** redeals normally. Play continues while the panel is open. Powers stay disabled in eleven/11×11 hands.
 
@@ -195,3 +195,13 @@ Independent backend flags:
 ## Frontend version and build
 
 The menu footer displays `v<version>+<build>`, for example `v0.1.0+1792414800`. Semantic version comes from `apps/web/package.json` and must be incremented when preparing releases. Vite generates the numeric build in Unix seconds (UTC) at compilation/development-server startup; it stays fixed in that artifact and does not change on page reload. It depends on neither browser time nor exposed environment information.
+
+## Optional persistent player backend
+
+The default server continues to support guests. M5 adds optional account authentication/maintenance, server-authoritative cosmetic levels, curated avatar/deck/table catalogs, competitive points/ranking and durable PostgreSQL reward jobs. Enable with `ENABLE_ACCOUNTS=true` only after migrations, product seeds and a securely configured `PASSWORD_PEPPER`; local startup also requires `NODE_ENV=development` or `test`. See [.env.example](.env.example), [database operation](docs/database.md#persistent-player-backend-and-operation) and [ADR 015](docs/adr/015-persistent-player-backend.md). Remote SQL requires verified TLS; public deployment security remains an environment validation step.
+
+The [player API contract](docs/player-api.md) covers registration/login/session/logout, progression, profile/cosmetic selection, current-password recovery-code issuance, one-time recovery, password change and deletion. Public catalog/ranking reads require no account. Game HTTP/WebSocket handshakes derive identity from account cookies, while guests retain their original flow. No frontend account screens or new theme rendering is included in this backend increment. Live rooms and pre-commit results remain in memory; durable result/job storage begins at commit.
+
+## Player customization (M5)
+
+With `ENABLE_ACCOUNTS=true` and the persistent backend configured, the menu includes optional accounts, global competitive ranking and separate Avatars/Decks/Tables tabs. Guest play remains available. Unlock levels and equipped cosmetics are confirmed by the server. Deck fronts/backs follow each card owner; table style is local to its viewer. See [player API](docs/player-api.md), [asset provenance](apps/web/public/art/cosmetics/README.md) and `bun run test:e2e:player` for the isolated browser flow.

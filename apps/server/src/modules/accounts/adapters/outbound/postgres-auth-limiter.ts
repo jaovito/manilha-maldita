@@ -1,7 +1,7 @@
 import { createHmac, createSecretKey } from 'node:crypto';
-import { isPasswordPepper } from '../../domain/argon2-policy';
 import type { SQL } from 'bun';
 import type { AttemptRule } from '../../application/ports/authentication';
+import { isPasswordPepper } from '../../domain/argon2-policy';
 
 /** Global rule must come first, bounding both expensive work and new per-peer/login keys. */
 export function createPostgresAuthLimiter(client: SQL) {

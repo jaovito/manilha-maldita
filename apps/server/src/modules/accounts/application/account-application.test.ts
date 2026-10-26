@@ -67,7 +67,10 @@ test('missing, disabled and incorrect credentials fail generically after passwor
 test('session lookup and logout ignore invalid tokens and use repository verifiers for valid ones', async () => {
   const fixture = authenticationFixture();
   expect(await fixture.app.session(null)).toBeNull();
-  expect(await fixture.app.session('a'.repeat(64))).toEqual(fixture.profile);
+  expect(await fixture.app.session('a'.repeat(64))).toEqual({
+    ...fixture.profile,
+    expiresAt: 86_400_000,
+  });
   await fixture.app.logout(null);
   await fixture.app.logout('a'.repeat(64));
   expect(fixture.calls.revoked).toBe(1);

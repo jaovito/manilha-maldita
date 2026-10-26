@@ -1,3 +1,4 @@
+import type { MemberIdentity } from '../../../domain/room';
 import { assertSessionCapacity } from '../../services/lobby/creation';
 import type { RoomContext } from '../context';
 
@@ -6,6 +7,7 @@ export async function join(
   code: string,
   sessionId: string,
   nickname: string,
+  identity?: MemberIdentity,
 ): Promise<void> {
   const room = context.lifecycle.getRoom(code);
 
@@ -21,7 +23,13 @@ export async function join(
     const seat = room.state.seats.indexOf(null);
     if (seat < 0) throw new Error('ROOM_FULL');
 
-    room.state.seats[seat] = { sessionId, nickname, ready: false, strikes: 0 };
+    room.state.seats[seat] = {
+      sessionId,
+      nickname,
+      ready: false,
+      strikes: 0,
+      ...(identity ? { identity: structuredClone(identity) } : {}),
+    };
     for (const member of room.state.seats) {
       if (member) member.ready = false;
     }

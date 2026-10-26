@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
-import { defaultRoomConfig, type Action } from '@truco/game-protocol';
-import { setup, Player, ownCard, completeMatch } from './multiplayer-fixture';
+import { type Action, defaultRoomConfig } from '@truco/game-protocol';
+import { completeMatch, ownCard, Player, setup } from './multiplayer-fixture';
 
 for (const preset of ['casual', 'competitive'] as const)
   test(`${preset}: real clients seal preparations, resolve powers privately and complete a match`, async () => {

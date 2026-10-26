@@ -1,7 +1,7 @@
 import { createClock, updateConnectivity } from '../../../../matches';
 import type { Ports } from '../../ports/runtime';
-import { connected, protectionMs } from '../membership/presence';
 import type { RoomRuntime } from '../../state/room-runtime';
+import { connected, protectionMs } from '../membership/presence';
 
 export function openDecision(room: RoomRuntime, ports: Ports): void {
   const state = room.state.match;

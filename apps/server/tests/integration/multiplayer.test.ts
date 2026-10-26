@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import { defaultRoomConfig } from '@truco/game-protocol';
-import { Player, setup, ownCard, assertPrivacy, completeMatch } from './multiplayer-fixture';
+import { assertPrivacy, completeMatch, ownCard, Player, setup } from './multiplayer-fixture';
 
 test('1v1 real multiplayer protects authority, idempotence, reconnect and rematch contexts', async () => {
   const game = await setup(2);

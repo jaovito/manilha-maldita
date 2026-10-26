@@ -1,8 +1,8 @@
 import type { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
-import { getConnInfo } from 'hono/bun';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { cors } from 'hono/cors';
+import { requestPeer } from '../../../../shared/request-peer';
 import type { AccountApplication } from '../../application/account-application';
 
 export const ACCOUNT_COOKIE = 'truco_account';
@@ -10,6 +10,7 @@ const ACCOUNT_PATH = '/api/accounts';
 const publicFailures = new Map([
   ['AUTH_RATE_LIMITED', 429],
   ['INVALID_ACCOUNT_INPUT', 400],
+  ['INVALID_PASSWORD', 400],
   ['INVALID_CREDENTIALS', 401],
   ['REGISTRATION_FAILED', 400],
   ['PASSWORD_CAPACITY_EXCEEDED', 503],
@@ -20,6 +21,7 @@ export function registerAccountRoutes(
   accounts: AccountApplication,
   origins: readonly string[],
   secure: boolean,
+  trustedProxies: readonly string[] = [],
 ) {
   app.use(
     `${ACCOUNT_PATH}/*`,
@@ -59,13 +61,7 @@ export function registerAccountRoutes(
         return context.json({ code: 'INVALID_ACCOUNT_INPUT' }, 400);
       }
 
-      let peer = 'local';
-
-      try {
-        peer = getConnInfo(context).remote.address ?? 'local';
-      } catch {
-        /* In-process HTTP tests have no socket peer; never trust forwarding headers. */
-      }
+      const peer = requestPeer(context, trustedProxies);
 
       try {
         const result = await accounts.authenticate(
@@ -78,8 +74,15 @@ export function registerAccountRoutes(
           httpOnly: true,
           sameSite: 'Strict',
           secure,
-          path: ACCOUNT_PATH,
+          path: '/api',
           maxAge: Math.floor(accounts.sessionTtlMs / 1000),
+        });
+
+        deleteCookie(context, ACCOUNT_COOKIE, {
+          path: ACCOUNT_PATH,
+          httpOnly: true,
+          sameSite: 'Strict',
+          secure,
         });
 
         return context.json({ nickname: result.profile.nickname }, mode === 'register' ? 201 : 200);
@@ -107,6 +110,13 @@ export function registerAccountRoutes(
   app.post(`${ACCOUNT_PATH}/logout`, async (context) => {
     try {
       await accounts.logout(getCookie(context, ACCOUNT_COOKIE));
+      deleteCookie(context, ACCOUNT_COOKIE, {
+        path: '/api',
+        httpOnly: true,
+        sameSite: 'Strict',
+        secure,
+      });
+
       deleteCookie(context, ACCOUNT_COOKIE, {
         path: ACCOUNT_PATH,
         httpOnly: true,

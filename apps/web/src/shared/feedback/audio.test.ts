@@ -35,6 +35,28 @@ export class TestAudioContext {
   close = mock(async () => {});
   gains: ReturnType<typeof gainNode>[] = [];
   oscillators: ReturnType<typeof oscillatorNode>[] = [];
+  sources: {
+    buffer: AudioBuffer | null;
+    connect: ReturnType<typeof mock>;
+    disconnect: ReturnType<typeof mock>;
+    start: ReturnType<typeof mock>;
+    stop: ReturnType<typeof mock>;
+    onended: (() => void) | null;
+  }[] = [];
+  decodeAudioData = mock(async (_data: ArrayBuffer) => ({ duration: 3.85 }));
+
+  createBufferSource() {
+    const source = {
+      buffer: null as AudioBuffer | null,
+      connect: mock(() => {}),
+      disconnect: mock(() => {}),
+      start: mock(() => {}),
+      stop: mock(() => {}),
+      onended: null as (() => void) | null,
+    };
+    this.sources.push(source);
+    return source;
+  }
 
   constructor() {
     if (TestAudioContext.fail) throw new Error('device unavailable');

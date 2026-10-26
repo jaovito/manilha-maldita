@@ -3,15 +3,15 @@ import { Hono } from 'hono';
 import { localDatabaseUrl } from '../../database/target';
 import { createAccountApplication } from '../../src/modules/accounts';
 import { registerAccountRoutes } from '../../src/modules/accounts/adapters/inbound/account-http';
-import { createPostgresAccountRepository } from '../../src/modules/accounts/adapters/outbound/postgres-account-repository';
-import {
-  createPostgresAuthLimiter,
-  createAuthRateKey,
-} from '../../src/modules/accounts/adapters/outbound/postgres-auth-limiter';
 import {
   createAccountSessionToken,
   hashAccountSessionToken,
 } from '../../src/modules/accounts/adapters/outbound/crypto-session-token';
+import { createPostgresAccountRepository } from '../../src/modules/accounts/adapters/outbound/postgres-account-repository';
+import {
+  createAuthRateKey,
+  createPostgresAuthLimiter,
+} from '../../src/modules/accounts/adapters/outbound/postgres-auth-limiter';
 import {
   fixturePepper,
   passwordHasherFixture,
@@ -22,6 +22,7 @@ import { ensureDatabaseSchema } from './database-fixtures';
 export async function withAuthenticationFixture(
   run: (fixture: {
     client: SQL;
+    passwords: PasswordService;
     address: URL;
     login: string;
     password: string;
@@ -70,6 +71,7 @@ export async function withAuthenticationFixture(
   try {
     await run({
       client,
+      passwords,
       address: server.url,
       login,
       password,

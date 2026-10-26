@@ -68,16 +68,3 @@
 .game-shell .game-table .card-face .card-corner > span {
   display: block;
 }
-
-/* Original font metrics and bold pixel strokes, with a distinct five. */
-@font-face {
-  font-family: "Manilha Card Numerals";
-  src: url("/fonts/ManilhaCardNumerals.ttf") format("truetype");
-  font-weight: 700;
-  font-display: swap;
-  unicode-range: U+0035;
-}
-
-.card-rank[data-rank="5"] {
-  font-family: "Manilha Card Numerals", "Pixelify Sans", monospace;
-}

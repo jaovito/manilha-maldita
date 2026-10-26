@@ -439,4 +439,8 @@ These elements must be adjusted using simulated matches and real player tests.
 
 ### Authorized extension — solo training (19/10/2026)
 
-The Jogar button may open a 1v1 match against a simple training bot, enabled by an independent flag. This does not include sophisticated bots, ranking, progression, or matchmaking. Tools to arrange hands/powers and restart hands are restricted to development and the player's own solo tables, never production. The detailed contract is in ADR 009.
+The Jogar button may open a 1v1 match against a simple training bot, enabled by an independent flag. The 26/10/2026 follow-up authorizes reduced cosmetic XP for completed solo matches and strength-based raise decisions, including occasional bluffs. Ranking points and matchmaking remain excluded. Tools to arrange hands/powers and restart hands are restricted to development and the player's own solo tables, never production. The detailed contract is in ADR 009.
+
+## Approved M5 backend extension
+
+Following the initial guest MVP, the owner authorized optional accounts, predefined pixel avatars, independent deck/table catalogs, cosmetic-only levels and an accumulated-points competitive ranking. Deck themes describe backs, suits and ranks, and the owner's theme is visible to opponents without revealing hidden card identities. There are no avatar uploads, selected/unlocked powers or gameplay advantages. The approved initial progression policy and eligibility are defined in [rules.md](docs/rules.md#m5-account-progression-extension); [ADR 015](docs/adr/015-persistent-player-backend.md) describes the implementation and operational limits. Browser account/customization screens and rendering the new theme manifests remain frontend work.

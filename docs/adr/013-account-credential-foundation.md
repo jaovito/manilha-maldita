@@ -47,3 +47,7 @@ The next integration must use generic responses/equivalent work for missing acco
 Unit tests exercise types, boundaries, Unicode, literal SQL-like inputs, shared saturation and release after errors. Adapter tests use real Argon2id/Web Crypto; they check format/cost, independent salts, exact verification, rejection of out-of-budget costs, supported cost upgrades, pepper mismatch/missing-pepper rejection and compatible SHA-256. Configuration/composition tests verify mandatory secrets, numeric grammar, shared capacity and memory budgets. PostgreSQL integration writes hashes in a transactional fixture, rereads/verifies passwords and looks up token verifiers without persisting bearers. This is not an HTTP authentication flow.
 
 References: [Bun.password](https://bun.sh/guides/util/hash-a-password), [OWASP Password Storage](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html), [NIST SP 800-63B — Authenticators](https://pages.nist.gov/800-63-4/sp800-63b/authenticators/).
+
+## Password minimum update
+
+The owner explicitly requested a six-character minimum. The current policy accepts 6–128 Unicode code points for registration, login, recovery and password changes, superseding the original 15-character minimum above. Existing longer passwords remain valid. Argon2id, independent random salts, server-side pepper, bounded work, password blocklist and authentication admission limits remain in place.

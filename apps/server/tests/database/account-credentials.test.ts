@@ -1,12 +1,12 @@
 import { expect, test } from 'bun:test';
 import { eq } from 'drizzle-orm';
 import { accounts, sessions } from '../../database/schema';
-import { passwordHasherFixture } from '../../src/modules/accounts/adapters/outbound/tests/password-hasher-fixture';
+import { isLoginName, PasswordService } from '../../src/modules/accounts';
 import {
   createAccountSessionToken,
   hashAccountSessionToken,
 } from '../../src/modules/accounts/adapters/outbound/crypto-session-token';
-import { isLoginName, PasswordService } from '../../src/modules/accounts';
+import { passwordHasherFixture } from '../../src/modules/accounts/adapters/outbound/tests/password-hasher-fixture';
 import { fixturePasswordHash } from './account-fixtures';
 import { rejectsConstraint, withDatabaseFixture } from './database-fixtures';
 

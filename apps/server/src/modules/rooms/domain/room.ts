@@ -8,8 +8,20 @@ export type RoomConfig = {
   responseTimeoutMs: number;
 };
 
+export type MemberAppearance = Readonly<{
+  avatar: Readonly<{ id: string; avatarUrl: '/art/avatars-pixel.png'; spriteIndex: number }>;
+  deck: Readonly<{ id: 'classic' | 'ember' | 'arcane'; assetKey: 'classic' | 'ember' | 'arcane' }>;
+  table: Readonly<{
+    id: 'classic' | 'burgundy' | 'midnight';
+    assetKey: 'classic' | 'burgundy' | 'midnight';
+  }>;
+}>;
+
+export type MemberIdentity = Readonly<{ accountId: string; appearance: MemberAppearance }>;
+
 export type Member = {
   bot?: boolean;
+  identity?: MemberIdentity;
   sessionId: string;
   nickname: string;
   ready: boolean;

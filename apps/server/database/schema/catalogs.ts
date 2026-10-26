@@ -9,6 +9,7 @@ export const avatars = app.table(
     id: text('id').primaryKey(),
     name: text('name').notNull(),
     avatarUrl: text('avatar_url').notNull(),
+    spriteIndex: integer('sprite_index').notNull().default(0),
     requiredLevel: integer('required_level').notNull().default(1),
     active: boolean('active').notNull().default(true),
     sortOrder: integer('sort_order').notNull().default(0),
@@ -16,6 +17,7 @@ export const avatars = app.table(
   (table) => [
     check('avatars_id', sql`${table.id} ~ '^[a-z][a-z0-9-]{0,63}$'`),
     check('avatars_name', sql`char_length(btrim(${table.name})) BETWEEN 1 AND 64`),
+    check('avatars_sprite', sql`${table.spriteIndex} BETWEEN 0 AND 3`),
     check('avatars_level', sql`${table.requiredLevel} >= 1`),
     check('avatars_order', sql`${table.sortOrder} >= 0`),
     check(

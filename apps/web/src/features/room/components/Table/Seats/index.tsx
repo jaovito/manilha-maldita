@@ -1,3 +1,4 @@
+import { Avatar } from '../../../../../shared/Avatar';
 import { t } from '../../../../../shared/i18n';
 import type { MatchView, RoomView } from '@truco/game-protocol';
 import { SeatCards } from './Cards';
@@ -56,6 +57,7 @@ export function TableSeats({
               aria-label={`${member?.nickname ?? t('Jogador')}${teammate ? t(', sua dupla') : t(', adversário')}`}
             >
               <SeatCards
+                theme={member?.appearance?.deck.assetKey}
                 hand={hand}
                 name={member?.nickname ?? t('Jogador')}
                 spying={spying && !teammate}
@@ -64,7 +66,10 @@ export function TableSeats({
                 position={spyPosition?.seat === hand.seat ? spyPosition.index : 0}
                 hasOpaquePlay={hasOpaquePlay}
               />
-              <span className={`seat-avatar avatar-${hand.seat}`} aria-hidden="true" />
+              <Avatar
+                className="seat-avatar"
+                index={member?.appearance?.avatar.spriteIndex ?? hand.seat}
+              />
               <div className="seat-info">
                 <strong className="seat-name">{member?.nickname ?? t('Jogador')}</strong>
                 <span className="seat-team">

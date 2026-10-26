@@ -1,7 +1,7 @@
 import type { SQL, TransactionSQL } from 'bun';
 import type {
-  AccountProfile,
   AccountRepository,
+  AccountSessionProfile,
   LoginRecord,
 } from '../../application/ports/authentication';
 
@@ -51,11 +51,12 @@ export function createPostgresAccountRepository(client: SQL): AccountRepository 
       });
     },
 
-    issueSession(accountId, tokenHash, ttlMs, previousHash) {
+    issueSession(accountId, tokenHash, ttlMs, previousHash, verifiedPasswordHash) {
       return inTransaction(async (tx) => {
-        // Lock the account so concurrent disable/delete cannot race session issuance.
+        // Bind issuance to the credential actually verified before Argon2 released control.
         const [account] =
-          await tx`SELECT id FROM app.accounts WHERE id = ${accountId} AND status = 'active' FOR UPDATE`;
+          await tx`SELECT id FROM app.accounts WHERE id = ${accountId} AND status = 'active'
+            AND password_hash = ${verifiedPasswordHash} FOR UPDATE`;
 
         if (!account) return false;
 
@@ -71,14 +72,22 @@ export function createPostgresAccountRepository(client: SQL): AccountRepository 
     },
 
     findSession(tokenHash) {
-      return inTransaction<AccountProfile | null>(async (tx) => {
-        const [row] = await tx<ProfileRow[]>`SELECT a.id AS account_id, p.nickname
+      return inTransaction<AccountSessionProfile | null>(async (tx) => {
+        const [row] = await tx<
+          (ProfileRow & { expires_at: Date })[]
+        >`SELECT a.id AS account_id, p.nickname, s.expires_at
           FROM app.sessions s JOIN app.accounts a ON a.id = s.account_id
           JOIN app.profiles p ON p.account_id = a.id
           WHERE s.token_hash = ${tokenHash} AND s.revoked_at IS NULL
             AND s.expires_at > statement_timestamp() AND a.status = 'active'`;
 
-        return row ? { accountId: row.account_id, nickname: row.nickname } : null;
+        return row
+          ? {
+              accountId: row.account_id,
+              nickname: row.nickname,
+              expiresAt: row.expires_at.getTime(),
+            }
+          : null;
       });
     },
 

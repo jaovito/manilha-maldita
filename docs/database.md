@@ -144,3 +144,25 @@ The third increment's credential foundation generates Argon2id hashes and SHA-25
 Migration 0004 adds `auth_rate_limits` with HMAC-only scope keys, bounded attempts, expiration and an expiry index; prior migrations remain immutable. Registration writes account, profile, initial zero progress and a session in one transaction. Session issuance checks/locks active account state and rotates the presented same-account session atomically. Reads enforce active account, expiry and revocation; logout updates the verifier's record. No result, XP or competitive-point producer is connected.
 
 Rate checks use atomic PostgreSQL upserts, shared across consumer instances, before password work. Expired records are eligible immediately and deleted on later admission in batches of at most 100; physical deletion while idle is not implemented. Global admission bounds creation of peer/login keys. Repository and limiter operations use local statement/lock timeouts; deployment still needs a bounded client pool and operational connection settings. Fixtures use only the dedicated test instance and remove their own account/rate records. No production migrations or player writes were executed. See [ADR 014](adr/014-account-authentication-api.md).
+
+## Persistent player backend and operation
+
+Migration `0005_player-progression-security.sql` adds recovery verifiers, fixed audit events, immutable reward policies, replay receipts and avatar atlas indices. Product seeds now populate four current pixel avatars and three independent deck/table choices. Re-running seeds preserves existing curated rows; runtime manifests allow only supported presentation assets. Apply migrations and seeds explicitly before enabling accounts:
+
+```sh
+bun run db:up
+bun run db:migrate
+bun run db:seed
+# Set PASSWORD_PEPPER securely in the server environment before activation.
+NODE_ENV=development ENABLE_ACCOUNTS=true bun run start:server
+```
+
+These commands target the designated local development database. The existing local CLI refuses remote URLs/production; a production migration/seed procedure with a separate privileged deployment role must be reviewed before publication. Tests use only `TEST_DATABASE_URL` and the isolated Compose test database. No remote database was changed by this increment.
+
+The live application uses a bounded Bun.SQL pool (`DATABASE_POOL_SIZE=4`, range 2–8) and a dedicated LISTEN connection, with certificate verification for remote URLs (`sslmode=verify-full`). `ENABLE_ACCOUNTS=false` avoids persistent composition. Database migrations are never applied automatically by server startup. A missing curated default fails startup, and reusing a reward version with different values fails closed. [ADR 015](adr/015-persistent-player-backend.md) lists all typed worker, outbox, lease and policy settings, data access/retention, and failure boundaries.
+
+One result transaction also inserts participants and its `match_rewards` job. The processor uses that result's immutable policy and captured account seats, inserts each participant grant once and increments bigint progress in the same savepoint as completion. Public progress values are decimal strings. Cosmetic selection locks actual progress, validates active catalogs and derives level server-side. Ranking uses positive competitive points, 50 entries per page, at most 1,000 pages, and account ID as the internal stable tie break; IDs are omitted from public entries. This bound intentionally limits deep offset work; accounts below the first 50,000 entries are not exposed through pagination yet.
+
+Maintenance uses bounded 100-row deletes per category and existing targeted indexes, not pg_partman. Finished/revoked sessions are retained for one day, audit for seven days, completed jobs for seven days, failed jobs for thirty days, and results/participants/reward ledgers for ninety days when no unfinished job remains. Pending work is preserved. Progress remains until account deletion. Opaque match receipts remain after result deletion so a repeated result cannot produce new rewards. These receipts and versioned policy rows have no player references. Account deletion cascades profile/progress/session/security rows and nulls historical participant/audit references. No database administrator credential or operational retry endpoint is exposed to players.
+
+Migration 0006 adds `reward_policies.solo_xp_percent` with a 0–99 constraint. Existing policies default to zero, preserving historical training eligibility. New default policy `m5-v2` uses 50%; operators must choose a fresh version when changing any policy field. Reward rows preserve the actual solo context, and the existing database constraint still forbids positive competitive points for solo play.

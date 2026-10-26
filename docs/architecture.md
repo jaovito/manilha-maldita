@@ -486,4 +486,54 @@ Account security configuration defaults to `ARGON2_MEMORY_KIB=19456`, `ARGON2_IT
 
 `accounts/application` coordinates registration/login/session/logout through repository, password, credential and admission ports. PostgreSQL adapters implement atomic registration, durable session state and shared attempt counters; the inbound Hono adapter validates HTTP boundaries and sets the account cookie. Bootstrap passes an optional route installer to transport, mounting accounts before the guest-session guard. The public application barrel remains free of HTTP/SQL adapters. Typed `parseAuthenticationPolicy` centralizes session/rate defaults and validates ranges.
 
-`startServer({ accounts })` can accept an explicitly composed application; CLI startup remains guest-only. Account cookies are separate from guest gameplay credentials. Database clients are provided/owned by the caller, with no connection at import time and no database access per game command. Full production composition and account-to-seat binding remain pending. [ADR 014](adr/014-account-authentication-api.md) defines the review boundary.
+`startServer({ accounts })` accepts an explicitly composed application; CLI startup also supports the complete persistent backend behind `ENABLE_ACCOUNTS=true` (see ADR 015). Account cookies are separate from guest gameplay credentials. Database clients are provided/owned by the caller, with no connection at import time and no database access per game command. The following M5 backend increment supplies bounded SQL composition and account-to-seat binding; hosted production validation remains pending. [ADR 014](adr/014-account-authentication-api.md) defines the review boundary.
+
+### Persistent player composition
+
+Bootstrap composes account security, durable admission, player catalogs/progress, SQL result writer, transactional reward worker and bounded retention. `progression/domain` contains pure policy/manifests/result contracts; its public application entry does not import SQL or HTTP adapters. Room ports accept a bounded result writer, reserve before drawing and freeze identities at start. Final summaries enter a retrying process-local buffer and become durable with result/job commit; room state itself stays in memory. Transport resolves account cookies at HTTP/WS entry and checks short permission leases for established sockets, avoiding a database round-trip per game command. Seat projections contain curated avatar/deck metadata; each recipient receives its own table theme. See [ADR 015](adr/015-persistent-player-backend.md) for the approved policy, revocation bound, cleanup and crash limitations.
+
+### Optional player presentation
+
+`features/player` owns the account controller, strict HTTP DTO parsing, account forms, catalog browser and global ranking. Its public index is the application integration boundary. The optional `/api/features.accounts` capability is advertised only when the complete persistent backend exists. Account state stays in React memory; the existing transport carries credentialed requests and supports logout's no-content response. Remote panels discard obsolete requests, and mutations invalidate outstanding profile reads.
+
+`shared/Avatar` and `shared/PlayingCard` provide presentation shared by catalog previews and the room. Deck/table keys come from the protocol allowlist; no arbitrary URL, CSS or uploaded asset enters the renderer. Card markup follows the existing authorized visibility projection and keeps anonymous backs independent of private faces. Rank/suit styling is independent of gameplay values. Original avatar art remains the common atlas. Cosmetic styles are split by panel, collection, account, summary and ranking; responsive rules keep navigation and close controls outside the scrolling content.
+
+Account authentication opens contextually when a guest attempts to equip a cosmetic. The collection stays mounted, preserving the selected tab and preview on cancellation or successful authentication; equipment still requires an explicit, server-validated confirmation. Account management and the public ranking are independent profile actions. The collection contains only Avatars, Decks and Tables tabs.
+
+The cosmetics collection omits the profile summary banner; the selected avatar is already visible in the avatar preview. Account details remain in the independent account panel and menu profile.
+
+All account password fields share a labeled visibility control with independent state and an accessible eye button. Passwords start masked; clearing a field or beginning a pending operation masks it again. The toggle is a non-submit button and preserves controlled input values and password-manager autocomplete metadata.
+
+Account security shows a single recovery-code generation submit button below the current-password field. Password-change and deletion modes provide a Back action to restore that default view without issuing credentials.
+
+Table cosmetic previews size to their available container width with an explicit aspect ratio and proportional card decorations. Compact previews use actual responsive dimensions rather than transforming a fixed-width layout box.
+
+On desktop, table collection captions have additional separation from their preview art, and the collection description has spacing before the grid. Mobile retains its compact spacing.
+
+The desktop cosmetics dialog adapts thumbnail and showcase dimensions to viewport height. Short desktop windows use one row for the three table themes, while avatar collections retain their grid. The cosmetic-only principle appears once in the fixed footer at every viewport size, including short mobile windows. Account/ranking panels and the mobile scrolling layout keep their own behavior.
+
+### Browser navigation
+
+The application uses public hash routes for menu subviews and retains `?room=CODE` for invitations. Internal transitions push browser history entries; native Back/Forward restores join/tutorial/settings/account/cosmetics/ranking views. Closing a modal uses the previous application entry, with a local fallback for direct links. Navigation never stores credentials or match snapshots in history.
+
+Back from a room closes its WebSocket and returns to the prior screen; it does not send SURRENDER/LEAVE or assign a result. Existing server disconnection protection, expiry and abandonment rules still apply. Forward rejoins that room through its real authenticated endpoint and receives a fresh authorized snapshot, provided the room/session remain valid. Explicit in-game exit keeps its existing server-confirmed behavior. Room-entry and restoration generations discard late responses/errors after newer navigation, including pending entry attempts. The root menu does not trap users inside the site.
+
+Mobile deck previews size the fan, rotated cards and rank/suit typography proportionally to the available preview width, with a margin for rotation. Compact collection items and the showcase retain separate size caps; desktop height-based sizing remains unchanged.
+
+The result dialog reads committed per-match rewards through an authenticated personal endpoint. It presents XP and competitive-point grants separately, including zero ranked points, and distinguishes pending processing, failed reads and noneligible results. Room snapshots carry only the viewer's eligibility; the reward query joins the authenticated account's participation to committed grants. Unknown and foreign match IDs have the same response. Polling is bounded and cancelled on unmount/rematch; gameplay actions remain available independently of reward processing.
+
+Arcane card corners reserve a proportional gap between the serif rank and suit in both orientations. The spacing scales with the card typography, covering gameplay cards and cosmetic previews.
+
+Reward summaries use two restrained panels integrated with the result frame: gold XP and muted green competitive points. Confirmed values use a system sans-serif face with tabular numerals so 5, S and 8 remain visually distinct; surrounding labels retain the pixel-art typeface.
+
+### Card typography comparison prototype
+
+The development-only `/card-fonts.html` entry mounts `pages/CardFonts` independently of the game/account flow. It renders all forty legal Truco cards with the shared CardFace component for ten font candidates, with six pixel-art options shown by default, a common rank size/spacing, three themes and three preview widths. The explicit “Tema da carta” selector applies Clássico, Brasa or Arcano to every visible font sample. The reference is pure Pixelify Sans without the special five substitution. Candidate CSS and alternative fonts load only through this separate entry; the selected Jersey 10 is shared with gameplay; no gameplay font selection or account preference is changed. The standard Vite production build continues to use only index.html. Imported font files and original licenses are documented in public/fonts/comparison/README.md.
+
+The comparison prioritizes Jersey 10, Tiny5, Micro 5 and VT323, followed by Pixelify Sans and Jersey 25. “Todas as fontes” additionally reveals the four serif/sans-serif references. Each candidate uses its supplied font weight; the newly added pixel faces use weight 400 without synthetic bold. Jersey 10 was selected for gameplay on 2026-10-26.
+
+Gameplay card values now use the locally bundled Jersey 10 at its original weight 400 across Clássico, Brasa and Arcano, including cosmetic previews and revealed-card views. Theme-specific suit artwork, palettes and backs remain distinct. The previous single-glyph five override and rank-specific Georgia/Jersey 25 families were removed; no synthetic bold or rank shadow is applied.
+
+### Short match-result music
+
+Approved victory/defeat MP3s (3.85 seconds each) preload once after a user gesture and decode into the existing AudioContext. Final cues use a non-looping AudioBufferSource; ordinary effects remain synthesized. Invalid/missing clips fall back to the original final cue without delayed replay. Clip decoding rejects durations above four seconds. The final-result reading and celebration durations are shared constants: music waits through the same 1800 ms reading interval before the title; repeated snapshots do not reschedule it. Initial finished snapshots, reload and reconnection never replay past results. Volume updates affect active music immediately; mute, hidden tabs, room reset and unmount stop/cancel playback. Errors never prevent gameplay or navigation. Asset/source provenance lives in public/audio/README.md.

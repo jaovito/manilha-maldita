@@ -1,14 +1,10 @@
 import type { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
-import { getConnInfo } from 'hono/bun';
-import { getCookie } from 'hono/cookie';
 import { cors } from 'hono/cors';
-import {
-  SESSION_COOKIE as COOKIE,
-  MAX_MESSAGE_BYTES as MAX_BYTES,
-  type TransportDependencies,
-} from '../../../contracts';
+import { requestPeer } from '../../../../../shared/request-peer';
+import { MAX_MESSAGE_BYTES as MAX_BYTES, type TransportDependencies } from '../../../contracts';
 import { errorCode } from '../errors';
+import { resolvePlayerSession } from './player-session';
 
 export function installRequestSecurity(app: Hono, options: TransportDependencies) {
   const { limiter } = options;
@@ -41,13 +37,7 @@ export function installRequestSecurity(app: Hono, options: TransportDependencies
       if (!options.allowedOrigins.includes(context.req.header('Origin') ?? ''))
         return context.json({ code: 'FORBIDDEN_ORIGIN' }, 403);
     }
-    // Proxy headers are deliberately ignored; only the actual peer identifies an IP.
-    let ip = 'local';
-    try {
-      ip = getConnInfo(context).remote.address ?? 'local';
-    } catch {
-      /* app.request has no network peer. */
-    }
+    const ip = requestPeer(context, options.trustedProxies);
     if (!limiter.allow(`ip:${ip}`, 120)) return context.json({ code: 'RATE_LIMITED' }, 429);
     const length = Number(context.req.header('Content-Length') ?? 0);
     if (length > MAX_BYTES) return context.json({ code: 'MESSAGE_TOO_LARGE' }, 413);
@@ -57,10 +47,16 @@ export function installRequestSecurity(app: Hono, options: TransportDependencies
 }
 
 export function requireSession(app: Hono, options: TransportDependencies) {
-  const { sessions, limiter } = options;
+  const { limiter } = options;
 
   app.use('/api/*', async (context, next) => {
-    const session = sessions.find(getCookie(context, COOKIE));
+    let session: Awaited<ReturnType<typeof resolvePlayerSession>>;
+
+    try {
+      session = await resolvePlayerSession(context, options);
+    } catch {
+      return context.json({ code: 'SERVICE_UNAVAILABLE' }, 503);
+    }
     if (!session) return context.json({ code: 'UNAUTHENTICATED' }, 401);
     if (!limiter.allow(`session:${session.id}`, 180))
       return context.json({ code: 'RATE_LIMITED' }, 429);

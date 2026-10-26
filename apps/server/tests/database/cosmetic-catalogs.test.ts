@@ -6,8 +6,8 @@ import { rejectsConstraint, withDatabaseFixture } from './database-fixtures';
 test('three independent cosmetic catalogs expose only curated presentation metadata', () => {
   for (const table of [avatars, deckThemes, tableThemes]) {
     const config = getTableConfig(table);
-    expect(config.columns).toHaveLength(6);
-    expect(config.checks).toHaveLength(5);
+    expect(config.columns).toHaveLength(table === avatars ? 7 : 6);
+    expect(config.checks).toHaveLength(table === avatars ? 6 : 5);
     expect(config.columns.map((column) => column.name)).not.toContain('power');
   }
 });
@@ -76,7 +76,7 @@ test('deck and table styles are allowlisted keys with valid unlock requirements'
       );
       const [item] = await tx
         .insert(table)
-        .values({ id: 'classic', name: 'Clássico', assetKey: 'classic', requiredLevel: 6 })
+        .values({ id: 'fixture-classic', name: 'Classic', assetKey: 'classic', requiredLevel: 6 })
         .returning();
       expect(item).toMatchObject({ requiredLevel: 6, active: true });
     }

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { SpyCardPreview } from './Preview';
 import { t } from '../../../../../../shared/i18n';
-import type { MatchView } from '@truco/game-protocol';
+import type { DeckTheme, MatchView } from '@truco/game-protocol';
 import { cardLabel } from '../../../../utils/cards';
 import { CardBack, CardFace } from '../../Card';
 
 type Intel = NonNullable<NonNullable<MatchView['powers']>['intel']>;
 
-function Observation({ intel }: { intel: Intel }) {
+function Observation({ intel, theme }: { intel: Intel; theme?: DeckTheme | undefined }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -25,17 +25,20 @@ function Observation({ intel }: { intel: Intel }) {
           role="img"
           aria-label={t('Espião · Só você: {0}. Vista na preparação.', [cardLabel(intel.card)])}
         >
-          <CardFace card={intel.card} />
+          <CardFace card={intel.card} theme={theme} />
         </span>
         <i aria-hidden="true">{t('VISTO')} </i>
       </button>
-      {expanded && <SpyCardPreview card={intel.card} onClose={() => setExpanded(false)} />}
+      {expanded && (
+        <SpyCardPreview theme={theme} card={intel.card} onClose={() => setExpanded(false)} />
+      )}
     </>
   );
 }
 
 export function SeatCards({
   hand,
+  theme,
   name,
   spying,
   spy,
@@ -44,6 +47,7 @@ export function SeatCards({
   hasOpaquePlay,
 }: {
   hand: MatchView['hand']['hands'][number];
+  theme?: DeckTheme | undefined;
   name: string;
   spying: boolean;
   spy: (index: number) => void;
@@ -61,7 +65,7 @@ export function SeatCards({
               role="img"
               aria-label={cardLabel(card)}
             >
-              <CardFace card={card} />
+              <CardFace card={card} theme={theme} />
             </span>
           ))
         : Array.from({ length: hand.count }, (_, index) => (
@@ -69,11 +73,12 @@ export function SeatCards({
             <span className="mini-card" key={index} data-spy-placeholder={spying}>
               {intel && !hasOpaquePlay && index === Math.min(position, hand.count - 1) ? (
                 <Observation
+                  theme={theme}
                   key={`${intel.target}:${intel.card.rank}:${intel.card.suit}`}
                   intel={intel}
                 />
               ) : (
-                <CardBack />
+                <CardBack theme={theme} />
               )}
             </span>
           ))}
@@ -100,7 +105,7 @@ export function SeatCards({
               aria-label={t('Espionar carta {0} de {1}', [index + 1, name])}
               onClick={() => spy(index)}
             >
-              <CardBack />
+              <CardBack theme={theme} />
             </button>
           ))}
         </div>

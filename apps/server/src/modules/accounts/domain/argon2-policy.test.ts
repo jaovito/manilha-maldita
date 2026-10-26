@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { isPasswordPepper, validateArgon2Policy, type Argon2Policy } from './argon2-policy';
+import { type Argon2Policy, isPasswordPepper, validateArgon2Policy } from './argon2-policy';
 
 const policy: Argon2Policy = {
   memoryKiB: 19_456,

@@ -1,3 +1,4 @@
+import type { MemberIdentity } from '../domain/room';
 import type { RoomInputValidation } from './ports/input-validation';
 import type { RoomPort } from './ports/room-port';
 import type { RoomRepository } from './ports/room-repository';
@@ -47,6 +48,35 @@ export class RoomApplication implements RoomPort {
 
   receive(...args: Parameters<RoomPort['receive']>) {
     return executeRoomCommand(this.context, ...args);
+  }
+
+  async updateIdentity(
+    sessionId: string,
+    identity: MemberIdentity,
+    nickname?: string,
+  ): Promise<void> {
+    for (const room of this.context.rooms.values()) {
+      if (!room.state.seats.some((member) => member?.sessionId === sessionId)) continue;
+
+      try {
+        await this.context.lifecycle.enqueue(room, () => {
+          const member = room.state.seats.find((entry) => entry?.sessionId === sessionId);
+
+          if (!member || member.identity?.accountId !== identity.accountId) return;
+
+          member.identity = structuredClone(identity);
+          if (nickname !== undefined) member.nickname = nickname;
+
+          if (room.state.status === 'lobby') {
+            room.state.revision++;
+            this.context.lifecycle.publish(room);
+          }
+        });
+      } catch (error) {
+        // A room may expire while an earlier membership update waits in its own queue.
+        if (!(error instanceof Error) || error.message !== 'ROOM_NOT_FOUND') throw error;
+      }
+    }
   }
 
   close(): void {

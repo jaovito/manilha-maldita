@@ -1,8 +1,8 @@
 import { afterEach, expect, mock, test } from 'bun:test';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { defaultRoomConfig, type RoomView } from '@truco/game-protocol';
-import { App } from './index';
 import { connectRoom, envelope, request } from '../../shared/transport/client';
+import { App } from './index';
 
 const originalFetch = globalThis.fetch;
 const originalWebSocket = globalThis.WebSocket;

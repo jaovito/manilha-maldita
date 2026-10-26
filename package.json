@@ -20,7 +20,7 @@
     "test": "bun run test:unit && bun run test:dom",
     "test:unit": "bun test ./tooling/tests ./packages ./apps/server/src",
     "test:dom": "bun run --filter @truco/web test",
-    "test:integration": "bun test ./apps/server/tests/integration",
+    "test:integration": "bun run db:test:up && bun test ./apps/server/tests/integration",
     "test:e2e": "bun --bun ./node_modules/@playwright/test/cli.js test",
     "test:e2e:install": "bun --bun ./node_modules/@playwright/test/cli.js install chromium",
     "check": "bun run lint && bun run format:check && bun run typecheck && bun run test:coverage && bun run build",
@@ -40,7 +40,8 @@
     "dev:web": "bun run --filter @truco/web dev",
     "start:server": "bun apps/server/src/bootstrap/main.ts",
     "simulate": "bun packages/game-sim/cli.ts",
-    "test:e2e:solo": "bun run test:e2e --config=playwright.solo.config.ts"
+    "test:e2e:solo": "bun run test:e2e --config=playwright.solo.config.ts",
+    "test:e2e:player": "bun run test:e2e --config=playwright.player.config.ts"
   },
   "devDependencies": {
     "typescript": "7.0.2",

@@ -1,8 +1,8 @@
 import { dealNextHand, type MatchState } from '@truco/game-core/match';
 import type { Ports } from '../../ports/runtime';
-import { choices, powerSetup } from './randomness';
 import type { RoomRuntime } from '../../state/room-runtime';
 import { openDecision } from './decisions';
+import { choices, powerSetup } from './randomness';
 
 const durationMs = { deal: 900, trick: 1800, hand: 2400 } as const;
 

@@ -1,0 +1,56 @@
+.player-ranking {
+  max-width: 850px;
+  margin: 0 auto;
+  min-height: 360px;
+}
+.ranking-heading {
+  text-align: center;
+  margin: 6px 0 25px;
+}
+.ranking-heading > span {
+  font-size: 60px;
+  color: #dbaf5a;
+}
+.ranking-heading p {
+  color: #b9c5b3;
+  margin: 8px 0;
+}
+.player-ranking table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #10262b;
+}
+.player-ranking th {
+  text-align: left;
+  color: #c3c6ab;
+  font-weight: normal;
+  font-size: 14px;
+  padding: 14px 18px;
+  background: #07171f;
+}
+.player-ranking td {
+  padding: 12px 18px;
+  border-bottom: 1px solid #3d4c41;
+}
+.player-ranking td:nth-child(2) {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  overflow-wrap: anywhere;
+}
+.player-ranking td:first-child,
+.player-ranking td:last-child {
+  color: #ebc473;
+  font-size: 22px;
+}
+.player-ranking .avatar {
+  width: 44px;
+  height: 44px;
+}
+.ranking-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin: 20px 0 5px;
+}

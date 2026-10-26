@@ -89,9 +89,12 @@ export async function authenticate(
       credentials.tokenHash,
       policy.sessionTtlMs,
       previousHash,
+      account.passwordHash,
     );
 
     if (!issued) throw new Error('INVALID_CREDENTIALS');
+
+    if (previousHash) dependencies.onRevoked?.({ tokenHash: previousHash });
   }
 
   return { token: credentials.token, profile };

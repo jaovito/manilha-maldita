@@ -6,6 +6,7 @@ import {
   MAX_MESSAGE_BYTES as MAX_BYTES,
   type TransportDependencies,
 } from '../../../contracts';
+import { resolvePlayerSession } from './player-session';
 
 export function registerGuestEntry(app: Hono, options: TransportDependencies) {
   const { sessions } = options;
@@ -25,6 +26,18 @@ export function registerGuestEntry(app: Hono, options: TransportDependencies) {
     const parsed = guestRequestSchema.safeParse(input);
     if (!parsed.success) return context.json({ code: 'INVALID_MESSAGE' }, 400);
 
+    if (getCookie(context, 'truco_account') !== undefined && options.playerAuthenticator) {
+      try {
+        const account = await resolvePlayerSession(context, options);
+
+        return account
+          ? context.json({ nickname: account.nickname })
+          : context.json({ code: 'UNAUTHENTICATED' }, 401);
+      } catch {
+        return context.json({ code: 'SERVICE_UNAVAILABLE' }, 503);
+      }
+    }
+
     const tokenCookie = getCookie(context, COOKIE);
     const existing = tokenCookie ? sessions.rename(tokenCookie, parsed.data.nickname) : undefined;
     if (existing) return context.json({ nickname: existing.nickname });
@@ -43,10 +56,8 @@ export function registerGuestEntry(app: Hono, options: TransportDependencies) {
 }
 
 export function registerGuestProfile(app: Hono, options: TransportDependencies) {
-  const { sessions } = options;
-
-  app.get('/api/guest', (context) => {
-    const session = sessions.find(getCookie(context, COOKIE));
+  app.get('/api/guest', async (context) => {
+    const session = await resolvePlayerSession(context, options);
     return context.json({ nickname: session?.nickname });
   });
 }

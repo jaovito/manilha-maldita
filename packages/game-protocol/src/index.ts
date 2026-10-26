@@ -185,6 +185,12 @@ export const roomViewSchema = z.strictObject({
   code: roomCodeSchema,
   sequence: z.number().int().nonnegative(),
   roomRevision: z.number().int().nonnegative(),
+  tableTheme: z
+    .strictObject({
+      id: z.enum(['classic', 'burgundy', 'midnight']),
+      assetKey: z.enum(['classic', 'burgundy', 'midnight']),
+    })
+    .optional(),
   status: z.enum(['lobby', 'playing', 'finished']),
   hostSeat: seat,
   seats: z
@@ -193,6 +199,19 @@ export const roomViewSchema = z.strictObject({
         .strictObject({
           seat,
           nickname: nicknameSchema,
+          appearance: z
+            .strictObject({
+              avatar: z.strictObject({
+                id: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
+                avatarUrl: z.literal('/art/avatars-pixel.png'),
+                spriteIndex: z.number().int().min(0).max(3),
+              }),
+              deck: z.strictObject({
+                id: z.enum(['classic', 'ember', 'arcane']),
+                assetKey: z.enum(['classic', 'ember', 'arcane']),
+              }),
+            })
+            .optional(),
           connected: z.boolean(),
           ready: z.boolean(),
         })
@@ -216,6 +235,7 @@ export const roomViewSchema = z.strictObject({
     })
     .nullable(),
   selfSeat: seat,
+  rewardEligibility: z.enum(['eligible', 'guest', 'development']).optional(),
 });
 export type RoomView = z.infer<typeof roomViewSchema>;
 
@@ -244,3 +264,15 @@ export const createRoomRequestSchema = z.strictObject({
 });
 
 export const joinRoomRequestSchema = z.strictObject({});
+
+export {
+  accountNicknameSchema,
+  matchRewardSchema,
+  playerCatalogSchema,
+  playerProgressSchema,
+  rankingSchema,
+  recoveryResponseSchema,
+} from './player';
+export type { PlayerProgress, PlayerCatalog, RankingPage, DeckTheme, TableTheme } from './player';
+
+export type { MatchReward } from './player';

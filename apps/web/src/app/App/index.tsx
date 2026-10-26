@@ -1,15 +1,19 @@
-import { GameSettings, LanguageSelect } from '../../shared/Settings';
-import { t, useLocale } from '../../shared/i18n';
 import { defaultRoomConfig, nicknameSchema, type RoomView } from '@truco/game-protocol';
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { EntryMenu, Welcome } from '../../features/menu';
-import { Lobby, Table, MatchResult } from '../../features/room';
-import { RoomMenu } from '../../features/room/components/RoomMenu';
-import { MenuScenery } from '../../shared/MenuScenery';
-import { DisabledTooltip, disabledHint } from '../../shared/DisabledTooltip';
+import { PlayerPanel, usePlayer } from '../../features/player';
+import { DisabledTooltip } from '../../shared/DisabledTooltip';
 import { AudioControls, useGameFeedback } from '../../shared/feedback';
+import { t, useLocale } from '../../shared/i18n';
+import { MenuScenery } from '../../shared/MenuScenery';
+import { useBrowserNavigation } from '../../shared/navigation';
 import { loadNickname, saveNickname } from '../../shared/preferences/nickname';
+import { GameSettings } from '../../shared/Settings';
 import { type Action, connectRoom, envelope, request } from '../../shared/transport/client';
+
+import { GameRoomStage } from './RoomStage';
+import { watchRoomHistory } from './room-history';
+import { useServerFeatures } from './use-server-features';
 
 const DevTools = import.meta.env?.DEV
   ? lazy(() => import('../../features/room/components/DevTools'))
@@ -17,22 +21,15 @@ const DevTools = import.meta.env?.DEV
 
 export function App() {
   const { locale } = useLocale();
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const { navigate, back, route } = useBrowserNavigation();
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
-  const [soloEnabled, setSoloEnabled] = useState(false);
-  useEffect(() => {
-    let active = true;
-    request<{ solo?: unknown }>('/features')
-      .then((features) => {
-        if (active) setSoloEnabled(features.solo === true);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
+  const { accountsEnabled, soloEnabled } = useServerFeatures();
+  const player = usePlayer(accountsEnabled);
+  const playerSection = ['cosmetics', 'ranking', 'account'].includes(route.page)
+    ? (route.page as 'cosmetics' | 'ranking' | 'account')
+    : null;
   const { preferences, changePreferences, observe, reset } = useGameFeedback();
   const [nickname, setNickname] = useState(loadNickname);
   const [nicknameConfirmed, setNicknameConfirmed] = useState(() => Boolean(loadNickname()));
@@ -43,6 +40,30 @@ export function App() {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const connection = useRef<ReturnType<typeof connectRoom> | null>(null);
+  const boundRoom = useRef<string | null>(null);
+  const joining = useRef(0);
+  const entryIntent = useRef(0);
+
+  useEffect(() => {
+    if (!player.profile) return;
+    setNickname(player.profile.nickname);
+    setNicknameConfirmed(true);
+    saveNickname(player.profile.nickname);
+  }, [player.profile]);
+  const refreshProgress = player.refresh;
+  useEffect(() => {
+    if (room?.status !== 'finished' || !room.matchId || !accountsEnabled) return;
+    void refreshProgress();
+    const retries = [1000, 3000, 6000].map((delay) =>
+      setTimeout(() => {
+        void refreshProgress();
+      }, delay),
+    );
+
+    return () => {
+      for (const timer of retries) clearTimeout(timer);
+    };
+  }, [room?.status, room?.matchId, accountsEnabled, refreshProgress]);
 
   const changeNickname = (value: string) => {
     nicknameEdited.current = true;
@@ -76,14 +97,18 @@ export function App() {
 
   const join = useCallback(
     async (roomCode: string) => {
+      const epoch = ++joining.current;
       await request(`/rooms/${encodeURIComponent(roomCode)}/join`, {});
+      if (epoch !== joining.current) return;
+
       connection.current?.close();
       setRoom(null);
       reset();
-      history.replaceState(null, '', `/?room=${encodeURIComponent(roomCode)}`);
+      boundRoom.current = roomCode;
+      navigate('menu', roomCode);
       connection.current = connectRoom(roomCode, receiveRoom, connectionStatus, setError);
     },
-    [connectionStatus, receiveRoom, reset],
+    [connectionStatus, receiveRoom, reset, navigate],
   );
 
   useEffect(() => {
@@ -112,16 +137,42 @@ export function App() {
 
     return () => {
       mounted = false;
+      entryIntent.current++;
+      joining.current++;
       connection.current?.close();
     };
   }, [join]);
 
+  useEffect(
+    () =>
+      watchRoomHistory({
+        connection,
+        boundRoom,
+        joining,
+        reset,
+        join,
+        onError: setError,
+        onExit: (next) => {
+          entryIntent.current++;
+          setBusy(false);
+          setRoom(null);
+          setConnected(false);
+          setCode(next);
+          setError('');
+        },
+      }),
+    [join, reset],
+  );
+
   const enter = async (create: boolean, solo = false) => {
+    const epoch = joining.current;
+    const intent = ++entryIntent.current;
     setBusy(true);
     setError('');
 
     try {
       const guest = await request<{ nickname: unknown }>('/guest', { nickname });
+      if (intent !== entryIntent.current) return;
       const parsed = nicknameSchema.safeParse(guest.nickname);
       if (parsed.success) {
         setNickname(parsed.data);
@@ -134,11 +185,13 @@ export function App() {
             ...(solo ? { solo: true } : {}),
           })
         : { code: code.trim().toUpperCase() };
+      if (epoch !== joining.current) return;
       await join(next.code);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t('Falha ao entrar na sala.'));
+      if (intent === entryIntent.current)
+        setError(cause instanceof Error ? cause.message : t('Falha ao entrar na sala.'));
     } finally {
-      setBusy(false);
+      if (intent === entryIntent.current) setBusy(false);
     }
   };
 
@@ -157,7 +210,9 @@ export function App() {
       setRoom(null);
       setConnected(false);
       setCode('');
-      history.replaceState(null, '', '/');
+      boundRoom.current = null;
+      joining.current++;
+      navigate('menu', null, true);
     };
 
     // A finished match cannot hold navigation hostage to an unavailable ACK.
@@ -178,8 +233,29 @@ export function App() {
       className={`app-shell ${!room ? 'entry-shell' : room.match ? 'game-shell' : 'lobby-shell'}`}
     >
       <DisabledTooltip />
-      {settingsOpen && (
-        <GameSettings onClose={() => setSettingsOpen(false)}>
+      {playerSection && (
+        <PlayerPanel
+          key={playerSection}
+          initial={playerSection}
+          player={player}
+          nickname={nickname}
+          onClose={() => {
+            back();
+            player.clearError();
+          }}
+        />
+      )}
+      {!room && !nicknameConfirmed && accountsEnabled && (
+        <button
+          type="button"
+          className="welcome-account"
+          onClick={() => navigate('account', route.roomCode)}
+        >
+          {t('Entrar na conta')}
+        </button>
+      )}
+      {route.page === 'settings' && (
+        <GameSettings onClose={() => back()}>
           <AudioControls preferences={preferences} onChange={changePreferences} />
         </GameSettings>
       )}
@@ -187,7 +263,7 @@ export function App() {
         <button
           className="game-settings-trigger"
           type="button"
-          onClick={() => setSettingsOpen(true)}
+          onClick={() => navigate('settings', route.roomCode)}
         >
           {t('Configurações')}
         </button>
@@ -231,6 +307,25 @@ export function App() {
         />
       ) : !room ? (
         <EntryMenu
+          page={
+            route.page === 'join' || route.page === 'tutorial'
+              ? route.page
+              : code && route.roomCode
+                ? 'join'
+                : 'menu'
+          }
+          onNavigate={(page) => {
+            if (page === 'menu') back();
+            else navigate(page, null);
+          }}
+          profile={player.profile}
+          {...(accountsEnabled
+            ? {
+                onAccount: () => navigate('account', route.roomCode),
+                onCosmetics: () => navigate('cosmetics', route.roomCode),
+                onRanking: () => navigate('ranking', route.roomCode),
+              }
+            : {})}
           nickname={nickname}
           code={code}
           busy={busy}
@@ -239,42 +334,17 @@ export function App() {
           onEnter={enter}
           soloEnabled={soloEnabled}
           onPlay={() => void enter(true, true)}
-          onSettings={() => setSettingsOpen(true)}
+          onSettings={() => navigate('settings', route.roomCode)}
         />
       ) : (
-        <div
-          data-sequence={room.sequence}
-          aria-disabled={!connected}
-          {...disabledHint(!connected ? t('Aguarde reconectar para usar as ações da sala.') : null)}
-          className={`room-stage ${!connected ? 'disconnected' : ''}`}
-        >
-          {room.match && (
-            <div className="table-surface" inert={room.status === 'finished'}>
-              <Table room={room} send={send} />
-            </div>
-          )}
-          <MatchResult room={room} send={send} connected={connected} />
-          {room.match ? (
-            room.status === 'playing' && (
-              <RoomMenu room={room} connected={connected} send={send}>
-                <LanguageSelect />
-                <AudioControls preferences={preferences} onChange={changePreferences} />
-                {DevTools && room.devTools && room.solo && (
-                  <Suspense fallback={<p>{t('Carregando ferramentas…')}</p>}>
-                    <DevTools
-                      key={`${room.matchId}:${room.match?.hand.number}`}
-                      room={room}
-                      send={send}
-                      connected={connected}
-                    />
-                  </Suspense>
-                )}
-              </RoomMenu>
-            )
-          ) : (
-            <Lobby room={room} send={send} />
-          )}
-        </div>
+        <GameRoomStage
+          developmentTools={DevTools}
+          room={room}
+          connected={connected}
+          send={send}
+          preferences={preferences}
+          onChange={changePreferences}
+        />
       )}
     </main>
   );

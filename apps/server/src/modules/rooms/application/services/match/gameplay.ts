@@ -2,22 +2,45 @@ import { cardKey, cardStrength } from '@truco/game-core/cards';
 import { executeCommand, type PlayerCommand, startMatch } from '@truco/game-core/match';
 import { expirations } from '../../../../matches';
 import type { Ports } from '../../ports/runtime';
-import { connected, protectionMs } from '../membership/presence';
-import { choices, powerSetup } from './randomness';
 import type { RoomRuntime } from '../../state/room-runtime';
+import { connected, protectionMs } from '../membership/presence';
 import { openDecision } from './decisions';
+import { choices, powerSetup } from './randomness';
 import { advanceTransition, openTransition, settleGameplay } from './transitions';
 
 export function beginMatch(room: RoomRuntime, ports: Ports): void {
   const count = room.state.config.format === '1v1' ? 2 : 4;
 
-  room.state.match = startMatch(
-    count,
-    ports.randomInt(count),
-    choices(ports),
-    powerSetup(room, ports),
-  ).state;
-  room.state.matchId = ports.id();
+  const matchId = ports.id();
+  ports.results?.reserve(matchId);
+
+  try {
+    room.state.match = startMatch(
+      count,
+      ports.randomInt(count),
+      choices(ports),
+      powerSetup(room, ports),
+    ).state;
+  } catch (error) {
+    ports.results?.release(matchId);
+    throw error;
+  }
+
+  room.state.matchId = matchId;
+  room.matchRecord = {
+    id: matchId,
+    startedAt: ports.now(),
+    policyVersion: ports.results?.policyVersion ?? 'disabled',
+    seats: room.state.seats.map((member, seat) => ({
+      seat,
+      accountId: member?.identity?.accountId ?? null,
+      ...(member?.identity ? { identity: structuredClone(member.identity) } : {}),
+    })),
+    lastHand: 0,
+    lastActivations: 0,
+    powersUsed: 0,
+    reported: false,
+  };
   room.state.status = 'playing';
   room.state.outcome = null;
   room.budgets = room.state.seats.map(() => protectionMs(room));
