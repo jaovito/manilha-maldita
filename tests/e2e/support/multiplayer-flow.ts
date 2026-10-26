@@ -19,7 +19,10 @@ export function observeRoomSnapshots(page: Page) {
       if (!room) throw new Error('Snapshot autorizado ausente.');
       return room;
     },
-    { count: () => received.length },
+    {
+      count: () => received.length,
+      deal: () => received.find((room) => room.transition?.kind === 'deal'),
+    },
   );
 }
 
@@ -30,6 +33,21 @@ export async function waitForPresentation(pages: Page[]) {
 }
 
 export async function clickAndSync(pages: Page[], page: Page, target: Locator) {
+  // Joining can finish on one browser before the others render that membership revision.
+  await Promise.all(
+    pages.map((client) =>
+      expect(client.locator('.room-stage')).toHaveAttribute('aria-disabled', 'false'),
+    ),
+  );
+  await expect
+    .poll(async () => {
+      const sequences = await Promise.all(
+        pages.map((client) => client.locator('[data-sequence]').getAttribute('data-sequence')),
+      );
+      return sequences.every((sequence) => sequence !== null && sequence === sequences[0]);
+    })
+    .toBe(true);
+
   const previous = Number(await page.locator('[data-sequence]').getAttribute('data-sequence'));
   await target.click();
   await Promise.all(
