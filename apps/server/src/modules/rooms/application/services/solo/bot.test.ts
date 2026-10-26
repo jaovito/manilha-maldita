@@ -35,12 +35,24 @@ test('solo is independent, starts on connect, plays complete matches, supports r
       expect(
         (await human.send({ type: 'PLAY_CARD', card: own.cards[0], covered: false })).type,
       ).toBe('ACK');
+    } else if (
+      match.phase.type === 'RAISE_RESPONSE' &&
+      match.hand.betting.lastRaisingTeam === 'B'
+    ) {
+      await human.send({ type: 'RESPOND_RAISE', response: 'accept' });
     } else if (match.phase.type === 'ELEVEN_DECISION' && match.phase.team === 'A') {
       await human.send({ type: 'DECIDE_ELEVEN', response: 'play' });
     }
   }
   expect(human.view.status).toBe('finished');
   expect(human.view.outcome?.reason).toBe('completed');
+  expect(
+    human.snapshots.some(
+      (snapshot) =>
+        snapshot.match?.phase.type === 'RAISE_RESPONSE' &&
+        snapshot.match.hand.betting.lastRaisingTeam === 'B',
+    ),
+  ).toBe(true);
   const oldMatch = human.view.matchId;
   expect((await human.send({ type: 'REMATCH' })).type).toBe('ACK');
   expect(human.view.matchId).not.toBe(oldMatch);

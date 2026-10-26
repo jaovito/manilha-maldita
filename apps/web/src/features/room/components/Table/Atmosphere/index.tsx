@@ -9,7 +9,7 @@ export function TableAtmosphere({ room }: { room: RoomView }) {
 
   return (
     <>
-      <TableScenery />
+      <TableScenery theme={room.tableTheme?.assetKey} />
       {dealing && (
         <div
           key={`${room.matchId}:${match.hand.number}:${transition.id}`}
@@ -36,7 +36,12 @@ export function TableAtmosphere({ room }: { room: RoomView }) {
                 key={`${relative}:${round}`}
                 style={style}
               >
-                <CardBack />
+                <CardBack
+                  theme={
+                    room.seats[(relative + room.selfSeat) % match.playerCount]?.appearance?.deck
+                      .assetKey
+                  }
+                />
               </span>
             );
           })}

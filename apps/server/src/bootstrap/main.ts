@@ -1,53 +1,39 @@
-import { DEFAULT_ORIGINS, type ServerOptions, startServer } from './runtime';
+import { parseServerOptions, type ServerEnvironment } from './environment';
+import { createPersistentBackend } from './persistent-backend';
+import { startServer } from './runtime';
 
-type ServerEnvironment = Readonly<Record<string, string | undefined>>;
+export { parseServerOptions } from './environment';
 
-export function parseServerOptions(env: ServerEnvironment): ServerOptions {
-  for (const key of ['ENABLE_SOLO', 'ENABLE_DEV_TOOLS']) {
-    if (env[key] !== undefined && env[key] !== 'true' && env[key] !== 'false')
-      throw new Error('INVALID_FEATURE_FLAG');
+export async function main(env: ServerEnvironment = Bun.env) {
+  const options = parseServerOptions(env);
+  const backend = await createPersistentBackend(env);
+
+  try {
+    return startServer({ ...options, ...(backend ? { backend } : {}) });
+  } catch (error) {
+    await backend?.close();
+    throw error;
   }
-  const hostname = env.HOST ?? '127.0.0.1';
-  const portText = env.PORT ?? '3001';
-  if (!/^[a-zA-Z0-9.:-]+$/.test(hostname)) throw new Error('INVALID_HOST');
-  if (!/^\d+$/.test(portText)) throw new Error('INVALID_PORT');
-  const port = Number(portText);
-  if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('INVALID_PORT');
-  const secureText = env.SECURE_COOKIES ?? 'false';
-  if (secureText !== 'true' && secureText !== 'false') throw new Error('INVALID_SECURE_COOKIES');
-  const origins =
-    env.ALLOWED_ORIGINS === undefined
-      ? [...DEFAULT_ORIGINS]
-      : env.ALLOWED_ORIGINS.split(',').map((origin) => {
-          try {
-            const url = new URL(origin.trim());
-            if (
-              (url.protocol !== 'http:' && url.protocol !== 'https:') ||
-              url.username ||
-              url.password ||
-              url.pathname !== '/' ||
-              url.search ||
-              url.hash
-            )
-              throw new Error('INVALID_ORIGIN');
-            return url.origin;
-          } catch {
-            throw new Error('INVALID_ALLOWED_ORIGINS');
-          }
-        });
-  return {
-    hostname,
-    port,
-    environment: env.NODE_ENV ?? 'production',
-    soloEnabled: env.ENABLE_SOLO === 'true',
-    devTools: env.NODE_ENV === 'development' && env.ENABLE_DEV_TOOLS === 'true',
-    allowedOrigins: [...new Set(origins)],
-    secureCookies: secureText === 'true',
-  };
 }
 
-export function main(env: ServerEnvironment = Bun.env) {
-  return startServer(parseServerOptions(env));
+export function startupFailed() {
+  console.error('SERVER_START_FAILED');
+  process.exitCode = 1;
 }
 
-if (import.meta.main) main();
+export async function shutdown(runtime: { stop(): Promise<void> }) {
+  try {
+    await runtime.stop();
+  } catch {
+    console.error('SERVER_STOP_FAILED');
+    process.exitCode = 1;
+  }
+}
+
+if (import.meta.main) {
+  const runtime = await main().catch(startupFailed);
+  if (runtime) {
+    process.once('SIGTERM', shutdown.bind(null, runtime));
+    process.once('SIGINT', shutdown.bind(null, runtime));
+  }
+}

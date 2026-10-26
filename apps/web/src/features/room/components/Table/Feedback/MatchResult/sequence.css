@@ -61,3 +61,67 @@
     animation: none;
   }
 }
+
+.match-rewards {
+  margin: 16px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid #aa834c66;
+  color: #f7dfaa;
+}
+.match-rewards > strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d3bb91;
+}
+.match-rewards p {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.match-reward-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
+.match-reward-values span {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #b7914f55;
+  border-radius: 3px;
+  background: linear-gradient(135deg, #bd8d3320, #bd8d3305);
+  overflow-wrap: anywhere;
+}
+.match-reward-values span + span {
+  border-color: #8fb6ab44;
+  background: linear-gradient(135deg, #7ba99a15, #7ba99a03);
+}
+.match-reward-values b {
+  font-family: Arial, Helvetica, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(26px, 5vw, 34px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  text-shadow: none;
+  color: #ffe3a0;
+}
+.match-reward-values span + span b {
+  color: #b7e1d4;
+}
+.match-reward-values small {
+  font-size: 13px;
+  line-height: 1.3;
+  color: #d9cfb8;
+}
+.match-rewards button {
+  margin-top: 10px;
+  min-height: 44px;
+  font-size: 14px;
+}

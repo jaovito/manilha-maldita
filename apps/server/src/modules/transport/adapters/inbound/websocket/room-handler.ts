@@ -9,6 +9,7 @@ import {
 } from '../../../contracts';
 import { sendSocketMessage } from '../../outbound/socket-publisher';
 import { errorCode } from '../errors';
+import { resolvedPlayerSession } from '../http/player-session';
 
 export function registerRoomSocket(
   app: Hono,
@@ -27,20 +28,35 @@ export function registerRoomSocket(
       return next();
     },
     upgradeWebSocket((context) => {
-      const session = sessions.find(getCookie(context, COOKIE));
+      const session = resolvedPlayerSession(context);
       const code = context.req.param('code') ?? '';
       if (!session) throw new Error('UNAUTHENTICATED');
       let connection: Promise<string>;
       let pending = 0;
       let chain = Promise.resolve();
       let closed = false;
+      let release: (() => void) | undefined;
+      const expired = () =>
+        session.expiresAt <= now() ||
+        (session.credentialId
+          ? !options.playerAuthenticator?.valid(session)
+          : !sessions.find(getCookie(context, COOKIE)));
       return {
         onOpen(_event, socket) {
+          try {
+            release = options.playerAuthenticator?.retain(session, () =>
+              socket.close(1008, 'SESSION_REVOKED'),
+            );
+          } catch {
+            socket.close(1008, 'SESSION_CAPACITY');
+            return;
+          }
+
           sockets.add(socket);
           connection = options.rooms.connect(code, session.id, {
             send(message) {
               if (closed) return;
-              sendSocketMessage(socket, message, session.expiresAt <= now());
+              sendSocketMessage(socket, message, expired());
             },
             close() {
               socket.close(1000, 'CONNECTION_REPLACED');
@@ -50,7 +66,7 @@ export function registerRoomSocket(
             sendSocketMessage(
               socket,
               { type: 'ERROR', commandId: null, code: errorCode(error) },
-              session.expiresAt <= now(),
+              expired(),
             );
             socket.close(1008);
           });
@@ -75,7 +91,7 @@ export function registerRoomSocket(
             sendSocketMessage(
               socket,
               { type: 'ERROR', commandId: null, code: 'INVALID_MESSAGE' },
-              session.expiresAt <= now(),
+              expired(),
             );
             return;
           }
@@ -84,7 +100,7 @@ export function registerRoomSocket(
             sendSocketMessage(
               socket,
               { type: 'ERROR', commandId: null, code: 'INVALID_MESSAGE' },
-              session.expiresAt <= now(),
+              expired(),
             );
             return;
           }
@@ -92,7 +108,7 @@ export function registerRoomSocket(
           chain = chain
             .then(async () => {
               if (closed) return;
-              if (!sessions.find(getCookie(context, COOKIE))) {
+              if (expired()) {
                 socket.close(1008, 'SESSION_EXPIRED');
                 return;
               }
@@ -102,8 +118,9 @@ export function registerRoomSocket(
                 session.id,
                 connectionId,
                 parsed.data,
+                () => !closed && !expired(),
               );
-              if (!closed) sendSocketMessage(socket, reply, session.expiresAt <= now());
+              if (!closed) sendSocketMessage(socket, reply, expired());
               if (reply.type === 'ACK' && parsed.data.action.type === 'LEAVE')
                 socket.close(1000, 'LEFT_ROOM');
             })
@@ -112,7 +129,7 @@ export function registerRoomSocket(
                 sendSocketMessage(
                   socket,
                   { type: 'ERROR', commandId: parsed.data.commandId, code: errorCode(error) },
-                  session.expiresAt <= now(),
+                  expired(),
                 );
             })
             .finally(() => {
@@ -121,6 +138,7 @@ export function registerRoomSocket(
         },
         onClose(_event, socket) {
           closed = true;
+          release?.();
           sockets.delete(socket);
           void connection
             ?.then((id) => options.rooms.disconnect(code, session.id, id))

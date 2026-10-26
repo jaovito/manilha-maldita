@@ -1,13 +1,13 @@
-# Numeral cinco das cartas
+# Card numeral five
 
-`build-card-five.py` gera `apps/web/public/fonts/ManilhaCardNumerals.ttf` a partir de Pixelify Sans no peso 700. O arquivo contém somente U+0035, preservando avanço horizontal (603 unidades), altura, baseline e espessura dos traços da fonte original. Apenas o contorno do cinco muda: topo reto, haste esquerda contínua e parte inferior com os mesmos degraus dos outros números.
+`build-card-five.py` generates `apps/web/public/fonts/ManilhaCardNumerals.ttf` from Pixelify Sans weight 700. The file contains only U+0035, preserving horizontal advance (603 units), height, baseline and stroke thickness from the original font. Only the five outline changes: flat top, continuous left stem and lower section matching other numerals' steps.
 
-A derivação usa outro nome de família e preserva os créditos/licença SIL OFL 1.1 da origem. A licença completa acompanha a fonte em `apps/web/public/fonts/OFL-PixelifySans.txt`. O CSS aplica a derivação apenas ao valor 5 das faces das cartas; todos os outros caracteres continuam na fonte original.
+The derivative uses a different family name and preserves the source credits/SIL OFL 1.1 license. The complete license accompanies the font at `apps/web/public/fonts/OFL-PixelifySans.txt`. CSS applies the derivative only to rank 5 on card faces; all other characters retain the original font.
 
-Para regenerar, em um ambiente Python com `fonttools==4.60.2`:
+To regenerate in a Python environment with `fonttools==4.60.2`:
 
 ```sh
 python3 tooling/fonts/build-card-five.py
 ```
 
-A geração é uma tarefa de autoria do asset; o navegador não depende de Python. Depois de modificar o contorno, conferir lado a lado com 2, 4 e 6 em desktop e celular.
+Generation is an asset-authoring task; the browser does not depend on Python. After changing the outline, compare it beside 2, 4 and 6 on desktop/mobile.

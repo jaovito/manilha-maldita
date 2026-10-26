@@ -1,9 +1,9 @@
 import { type Card, cardKey } from '@truco/game-core/cards';
 import { dealNextHand } from '@truco/game-core/match';
 import type { RoomCommand } from '../../dto/commands';
-import { openTransition } from '../../services/match/transitions';
 import type { Ports } from '../../ports/runtime';
 import { choices, powerSetup } from '../../services/match/randomness';
+import { openTransition } from '../../services/match/transitions';
 import type { RoomRuntime } from '../../state/room-runtime';
 
 /** This trusted tooling path is restricted to the owner's solo development room. */
@@ -79,6 +79,13 @@ export function resetDevelopmentHand(
         ),
       },
     };
+
+  // A manipulated match cannot award progression, including after reconnecting.
+  if (room.matchRecord)
+    room.matchRecord.seats = room.matchRecord.seats.map((member) => ({
+      ...member,
+      accountId: null,
+    }));
 
   room.state.match = next;
   room.botWake = null;

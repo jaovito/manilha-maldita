@@ -1,4 +1,5 @@
 const publicErrors = new Set([
+  'PERSISTENCE_UNAVAILABLE',
   'SOLO_DISABLED',
   'ROOM_NOT_FOUND',
   'ROOM_FULL',

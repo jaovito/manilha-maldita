@@ -1,5 +1,5 @@
 import { normalizeConfig } from '../../../domain/configuration';
-import type { RoomConfig } from '../../../domain/room';
+import type { MemberIdentity, RoomConfig } from '../../../domain/room';
 import type { RoomInputValidation } from '../../ports/input-validation';
 import type { RoomRepository } from '../../ports/room-repository';
 import type { Ports, RoomOptions } from '../../ports/runtime';
@@ -15,13 +15,19 @@ export function assertSessionCapacity(rooms: RoomRepository, sessionId: string):
 
 /** Construct privately; the creation use case registers the room and schedules it synchronously. */
 export function createRoom(
-  request: { sessionId: string; nickname: string; config: RoomConfig; solo: boolean },
+  request: {
+    sessionId: string;
+    nickname: string;
+    config: RoomConfig;
+    solo: boolean;
+    identity?: MemberIdentity;
+  },
   rooms: RoomRepository,
   ports: Ports,
   options: RoomOptions,
   validation: RoomInputValidation,
 ): RoomRuntime {
-  const { sessionId, nickname, config: input, solo } = request;
+  const { sessionId, nickname, config: input, solo, identity } = request;
 
   if (solo && !options.soloEnabled) throw new Error('SOLO_DISABLED');
   if (rooms.size >= 256) throw new Error('ROOM_CAPACITY');
@@ -53,7 +59,15 @@ export function createRoom(
       revision: 0,
       hostSeat: 0,
       seats: Array.from({ length: config.format === '1v1' ? 2 : 4 }, (_, seat) =>
-        seat === 0 ? { sessionId, nickname, ready: false, strikes: 0 } : null,
+        seat === 0
+          ? {
+              sessionId,
+              nickname,
+              ready: false,
+              strikes: 0,
+              ...(identity ? { identity: structuredClone(identity) } : {}),
+            }
+          : null,
       ),
       status: 'lobby',
       match: null,

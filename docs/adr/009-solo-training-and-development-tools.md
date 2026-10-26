@@ -1,19 +1,25 @@
-# ADR 009 — Treino solo e ferramentas de desenvolvimento
+# ADR 009 — Solo training and development tools
 
-Status: aceito por solicitação explícita do usuário em 19/10/2026. Amplia o escopo anterior que adiava bots de produção somente para um bot simples de treino, sem ranking ou progressão.
+Status: accepted by explicit user request on 2026-10-19. Extends the previous deferral of production bots to a simple training bot. The 26/10/2026 follow-up authorizes reduced cosmetic XP, never ranking points.
 
-## Decisão
+## Decision
 
-“Jogar” cria uma sala solo 1v1 privada e inicia automaticamente ao conectar o dono. O bot ocupa o outro assento; terceiros não podem entrar. Reutiliza `chooseAction` de game-sim pela entrada pública do pacote, com política conservadora e exclusivamente `projectPlayerView` do próprio assento. Não lê mãos adversárias, monte, sementes ou estado secreto para decidir. Todos os comandos continuam passando pelo motor e pela fila única da sala. Pausas de apresentação permanecem; o bot pensa por 1 s em cada decisão. Sem humano conectado, o bot não joga e a sala expira normalmente. Revanche solo inicia outra partida; Voltar ao menu sai da sala. Multiplayer mantém o fluxo de lobby existente.
+“Jogar” creates a private solo 1v1 room and starts automatically when the owner connects. A bot occupies the other seat; third parties cannot join. It reuses game-sim's `chooseAction` through the public package entrypoint, using the training policy and exclusively its own seat's `projectPlayerView`. It reads no opponents' hands, draw pile, seeds or secret state to decide. All commands still use the engine and single room queue. Presentation pauses remain; the bot thinks for 1 s per decision. Without a connected human, the bot does not act and the room expires normally. Solo rematches start another match; returning to the menu leaves the room. Multiplayer retains the existing lobby flow.
 
-`ENABLE_SOLO=true` habilita a criação independentemente do ambiente. Padrão do servidor: desabilitado. `/api/features` comunica somente a disponibilidade pública. A flag é conferida também na aplicação, não apenas no botão.
+`ENABLE_SOLO=true` enables creation independently of environment. Server default: disabled. `/api/features` communicates only public availability. The application checks the flag too, not just the button.
 
-`ENABLE_DEV_TOOLS=true` requer **NODE_ENV exatamente development**, além de sala solo e assento do dono. Produção, test ou ambiente ausente nunca habilitam essas mutações, mesmo com a flag ligada. O frontend exige adicionalmente `import.meta.env.DEV`; o painel é importado condicionalmente e não entra no build de produção. Esconder a UI não substitui a validação do servidor.
+`ENABLE_DEV_TOOLS=true` requires **NODE_ENV exactly development**, a solo room and the owner's seat. Production, test or missing environments never enable these mutations, even with the flag on. The frontend additionally requires `import.meta.env.DEV`; the panel is conditionally imported and omitted from production builds. Hiding UI does not replace server validation.
 
-`DEV_RESET_HAND` aceita três cartas distintas opcionais, poder e energia (0–3). Tem o mesmo envelope de contexto/revisão, autenticação, limite de mensagens e cache de idempotência dos demais comandos. Rejeições precedem consumo de entropia. A aplicação inicia nova mão sem aplicar pontos, limpa compromissos/intel/jogadas, incrementa revisão e troca o contexto do timer. Cartas escolhidas são permutadas com a distribuição nova, inclusive vira/monte/mão do bot, conservando as 40 identidades. Não é uma operação disponível a partidas multiplayer. Mãos de onze/11×11 preservam suas regras e não permitem forçar poderes.
+`DEV_RESET_HAND` accepts three optional distinct cards, a power and energy (0–3). It uses the same context/revision envelope, authentication, message limits and idempotency cache as other commands. Rejections precede entropy consumption. The application starts a new hand without scoring, clears commitments/intel/plays, increments revision and replaces timer context. Selected cards are swapped into the new deal, including turn-up/pile/bot hand, conserving all 40 identities. This operation is unavailable to multiplayer matches. Eleven/11×11 preserve their rules and cannot force powers.
 
-A opção “Aplicar cenário e reiniciar mão” explicita que editar um cenário reinicia a mão completa, preservando o placar. Não altera uma vaza parcialmente resolvida. “Reiniciar mão aleatória” redistribui sem forçar cartas/poder. O jogo continua enquanto o painel está aberto, informado na UI. Ferramentas futuras como pausar simulação, editar adversário ou escolher vira exigem novos comandos validados, não acesso direto ao estado.
+“Aplicar cenário e reiniciar mão” makes clear that editing a scenario restarts the complete hand while preserving score. It never modifies a partially resolved trick. “Reiniciar mão aleatória” redeals without forcing cards/power. The game continues while the panel is open, as stated in the UI. Future tools such as pausing simulation, editing opponents or choosing the turn-up card require new validated commands rather than direct state access.
 
-## Verificação
+## Verification
 
-Testes cobrem partida completa contra bot, revanche, expiração sem humanos, projeções, conservação do baralho, rejeição de duplicatas, contextos obsoletos, idempotência e flags independentes. Integração real HTTP/WS comprova que produção e test recusam mutações dev. `test:e2e:solo` separa Vite dev e build de produção, nos perfis desktop/mobile. Nenhum deploy é parte deste incremento.
+Tests cover complete bot matches, rematches, expiry without humans, projections, deck conservation, duplicate rejection, stale contexts, idempotency and independent flags. Real HTTP/WS integration proves production and test reject development mutations. `test:e2e:solo` separates Vite development and production builds across desktop/mobile profiles. No deployment is part of this increment.
+
+## Follow-up — reduced progression and wager decisions (26/10/2026)
+
+The training policy evaluates its two strongest remaining cards, public trick wins and exposed opposing plays. Strong hands raise with an 80% decision probability; weak hands may bluff at 4% below six and 1% above it. Higher stakes require higher confidence. It can initiate and counter through 3/6/9/12, preserving engine turn, team rights, special-hand restrictions and the ceiling. These probabilities are initial playtest hypotheses, not measured difficulty. Existing simulation policies remain unchanged.
+
+Completed solo matches may grant reduced account XP under the versioned M5 policy (default 50% of total XP), without ranked points. Guests, interrupted matches and matches manipulated with development hand-reset tools receive no rewards. Enabling development tools alone does not remove eligibility.

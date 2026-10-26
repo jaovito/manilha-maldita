@@ -18,5 +18,31 @@ jobs:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
       - run: bun run check
+
+  browser:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, mobile-chromium]
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
       - run: bun --bun ./node_modules/@playwright/test/cli.js install --with-deps chromium
-      - run: bun run test:e2e
+      # Each viewport gets fresh server state and its own real request budget.
+      - run: bun run test:e2e --project=${{ matrix.project }}
+        env:
+          ENABLE_ACCOUNTS: 'false'
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: playwright-${{ matrix.project }}
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7

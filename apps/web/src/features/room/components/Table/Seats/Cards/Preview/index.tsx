@@ -1,9 +1,18 @@
+import type { DeckTheme } from '@truco/game-protocol';
 import { useEffect, useRef } from 'react';
 import { t } from '../../../../../../../shared/i18n';
 import { cardLabel, type Card } from '../../../../../utils/cards';
 import { CardFace } from '../../../Card';
 
-export function SpyCardPreview({ card, onClose }: { card: Card; onClose: () => void }) {
+export function SpyCardPreview({
+  card,
+  onClose,
+  theme,
+}: {
+  card: Card;
+  onClose: () => void;
+  theme?: DeckTheme | undefined;
+}) {
   const dialog = useRef<HTMLDialogElement>(null);
   const close = useRef<HTMLButtonElement>(null);
 
@@ -40,7 +49,7 @@ export function SpyCardPreview({ card, onClose }: { card: Card; onClose: () => v
     >
       <h2>{t('Carta revelada pelo Espião')}</h2>
       <div className="spy-preview-face" role="img" aria-label={cardLabel(card)}>
-        <CardFace card={card} />
+        <CardFace card={card} theme={theme} />
       </div>
       <strong>{cardLabel(card)}</strong>
       <p>{t('Vista na preparação; pode já ter sido jogada.')}</p>

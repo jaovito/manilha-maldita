@@ -2,6 +2,7 @@ import { t, useLocale } from '../i18n';
 import type { RoomView } from '@truco/game-protocol';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { GameAudio } from './audio';
+import { ResultAudio } from './result-audio';
 import { interactionSound, RoomAudioEvents } from './events';
 import { type AudioPreferences, loadAudioPreferences, saveAudioPreferences } from './preferences';
 
@@ -10,10 +11,15 @@ export function useGameFeedback() {
   const preferencesRef = useRef(preferences);
   const audio = useRef<GameAudio | null>(null);
   const events = useRef(new RoomAudioEvents());
+  const resultAudio = useRef<ResultAudio | null>(null);
 
   useEffect(() => {
     const engine = new GameAudio();
     audio.current = engine;
+    const result = new ResultAudio((sound) => {
+      if (document.visibilityState !== 'hidden') engine.play(sound, preferencesRef.current);
+    });
+    resultAudio.current = result;
     const unlock = () => engine.unlock();
     const keyboard = (event: KeyboardEvent) => {
       if (event.key === 'Enter' || event.key === ' ') unlock();
@@ -25,6 +31,7 @@ export function useGameFeedback() {
     };
     const visibility = () => {
       if (document.visibilityState === 'hidden') {
+        result.cancel();
         engine.silence();
         events.current.reset();
       }
@@ -39,6 +46,8 @@ export function useGameFeedback() {
       document.removeEventListener('keydown', keyboard);
       document.removeEventListener('click', click);
       document.removeEventListener('visibilitychange', visibility);
+      result.cancel();
+      resultAudio.current = null;
       engine.close();
       audio.current = null;
     };
@@ -48,15 +57,23 @@ export function useGameFeedback() {
     preferencesRef.current = next;
     setPreferences(next);
     saveAudioPreferences(next);
-    if (next.muted || next.volume === 0) audio.current?.silence();
+    audio.current?.updatePreferences(next);
+    if (next.muted || next.volume === 0) {
+      resultAudio.current?.cancel();
+      audio.current?.silence();
+    }
   };
   const observe = useCallback((room: RoomView) => {
     const sounds = events.current.observe(room);
     if (document.visibilityState === 'hidden') return;
 
-    for (const sound of sounds) audio.current?.play(sound, preferencesRef.current);
+    resultAudio.current?.observe(room, sounds);
   }, []);
-  const reset = useCallback(() => events.current.reset(), []);
+  const reset = useCallback(() => {
+    events.current.reset();
+    resultAudio.current?.cancel();
+    audio.current?.silence();
+  }, []);
 
   return { preferences, changePreferences, observe, reset };
 }

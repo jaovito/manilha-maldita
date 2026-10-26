@@ -1,0 +1,93 @@
+@font-face {
+  font-family: "Jersey 10";
+  src: url("/fonts/Jersey10.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+
+.card-face .card-rank {
+  font-family: "Jersey 10", monospace;
+  font-weight: 400;
+  text-shadow: none;
+}
+
+.player-avatar {
+  background-image: url("/art/avatars-pixel.png");
+  background-size: 200% 200%;
+  image-rendering: pixelated;
+}
+.player-avatar.avatar-0 {
+  background-position: 0 0;
+}
+.player-avatar.avatar-1 {
+  background-position: 100% 0;
+}
+.player-avatar.avatar-2 {
+  background-position: 0 100%;
+}
+.player-avatar.avatar-3 {
+  background-position: 100% 100%;
+}
+.card-back[data-deck="ember"] {
+  background-image: url("/art/cosmetics/deck-ember.png");
+}
+.card-back[data-deck="arcane"] {
+  background-image: url("/art/cosmetics/deck-arcane.png");
+}
+.card-face[data-deck="ember"] {
+  --card-paper: #ffdfaa;
+  background: #f8dfb8;
+  border-color: #d3a05a;
+  outline-color: #87412d;
+}
+.card-face[data-deck="arcane"] {
+  --card-paper: #ece1ff;
+  background: #ede4f5;
+  border-color: #cec0e8;
+  outline-color: #775395;
+}
+.card-face[data-deck="arcane"] .card-corner {
+  row-gap: 0.18em;
+}
+.card-face[data-deck="arcane"]::after {
+  color: #76528d;
+}
+.themed-suit {
+  width: 1em;
+  height: 1em;
+  display: block;
+}
+.card-corner .themed-suit {
+  height: 0.8em;
+  width: 0.8em;
+}
+.table-scenery[data-table="burgundy"] .table-felt,
+.cosmetic-table[data-table="burgundy"] {
+  background-image: url("/art/cosmetics/felt-burgundy.png");
+}
+.table-scenery[data-table="midnight"] .table-felt,
+.cosmetic-table[data-table="midnight"] {
+  background-image: url("/art/cosmetics/felt-midnight.png");
+}
+.table-scenery[data-table="midnight"] .table-rail {
+  filter: sepia(0.35) saturate(1.15);
+}
+
+.card-face[data-deck="ember"] .card-artwork {
+  background: #f8dfb8;
+  border-color: #d3a05a;
+  outline-color: #87412d;
+}
+.card-face[data-deck="arcane"] .card-artwork {
+  background: #ede4f5;
+  border-color: #cec0e8;
+  outline-color: #775395;
+}
+.card-face[data-deck="arcane"] .card-artwork::after {
+  color: #76528d;
+}
+.card-back-masked[data-deck] .hidden-card-mark {
+  background: #170b2ce8;
+  border-radius: 4px;
+  padding: 4px 0;
+}

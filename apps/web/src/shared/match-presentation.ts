@@ -1,0 +1,2 @@
+export const MATCH_RESULT_READING_MS = 1800;
+export const MATCH_RESULT_CELEBRATION_MS = 5000;

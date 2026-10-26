@@ -10,13 +10,19 @@ import {
 import { createRoomService } from '../composition';
 import type { Sink } from './ports/room-publisher';
 import type { Ports } from './ports/runtime';
+import type { ResultWriter } from './ports/result-writer';
+import type { MemberIdentity } from '../domain/room';
 
-export function fixture(options: { soloEnabled?: boolean; devTools?: boolean } = {}) {
+export function fixture(
+  options: { soloEnabled?: boolean; devTools?: boolean } = {},
+  results?: ResultWriter,
+) {
   let now = 0;
   let serial = 0;
   let seed = 12345;
   const timers: { at: number; callback: () => void; cancelled: boolean }[] = [];
   const ports: Ports = {
+    ...(results ? { results } : {}),
     now: () => now,
     id: () => `id_${++serial}`,
     randomInt(max) {
@@ -96,17 +102,18 @@ export function fixture(options: { soloEnabled?: boolean; devTools?: boolean } =
   }
   async function room(
     config: RoomConfig = { ...defaultRoomConfig, cardTimeoutMs: 1000, responseTimeoutMs: 1000 },
+    identities: readonly (MemberIdentity | undefined)[] = [],
   ) {
     const peers = Array.from({ length: config.format === '1v1' ? 2 : 4 }, (_, index) =>
       peer(`player_${index}`),
     );
     const host = peers[0];
     if (!host) throw new Error('NO_HOST');
-    const { code } = await service.create(host.session, 'Jogador 0', config);
+    const { code } = await service.create(host.session, 'Jogador 0', config, false, identities[0]);
     await host.connect(code);
     for (const [index, p] of peers.entries()) {
       if (index === 0) continue;
-      await service.join(code, p.session, `Jogador ${index}`);
+      await service.join(code, p.session, `Jogador ${index}`, identities[index]);
       await p.connect(code);
     }
     return { code, peers, host, advance };

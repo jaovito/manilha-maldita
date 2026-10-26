@@ -1,8 +1,8 @@
 import { expect, mock, test } from 'bun:test';
 import { fireEvent, render, screen, within } from '@testing-library/react';
-import { Tutorial } from './index';
 import { catalogs, loadLocale } from '../../../../shared/i18n';
 import { EntryMenu } from '../../pages/EntryMenu';
+import { Tutorial } from './index';
 
 test('guided lessons teach every topic, explain wrong and correct answers, and reset between lessons', () => {
   const close = mock(() => {});

@@ -66,5 +66,15 @@
 @import "../../features/room/components/Table/History/styles.css";
 
 @import "../../features/room/components/Table/Card/proportions.css";
+
+@import "../../shared/PlayingCard/themes.css";
+@import "../../features/player/components/Panel/styles.css";
+
+@import "../../features/player/components/Summary/styles.css";
+@import "../../features/player/components/Cosmetics/styles.css";
+@import "../../features/player/components/Account/styles.css";
+@import "../../features/player/components/Ranking/styles.css";
+@import "../../features/player/components/Panel/menu.css";
+@import "../../features/player/components/Panel/responsive.css";
 @import "../../features/menu/components/Tutorial/Guided/styles.css";
 @import "../../features/menu/components/Tutorial/Guided/responsive.css";

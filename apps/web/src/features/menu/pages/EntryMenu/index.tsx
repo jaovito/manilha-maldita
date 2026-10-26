@@ -1,13 +1,22 @@
-import { version } from '../../../../../package.json';
-import { t } from '../../../../shared/i18n';
+import type { PlayerProgress } from '@truco/game-protocol';
 import { nicknameSchema } from '@truco/game-protocol';
 import { useEffect, useRef, useState } from 'react';
-import { Tutorial } from '../../components/Tutorial';
+import { version } from '../../../../../package.json';
 import { disabledHint } from '../../../../shared/DisabledTooltip';
+import { t } from '../../../../shared/i18n';
 import { MenuIcon } from '../../components/Icon';
 import { MenuProfile } from '../../components/Profile';
+import { Tutorial } from '../../components/Tutorial';
+
+type EntryPage = 'menu' | 'join' | 'tutorial';
 
 type Props = {
+  page?: EntryPage;
+  onNavigate?: (page: EntryPage) => void;
+  profile?: PlayerProgress | null | undefined;
+  onAccount?: (() => void) | undefined;
+  onRanking?: (() => void) | undefined;
+  onCosmetics?: (() => void) | undefined;
   soloEnabled?: boolean;
   onSettings?: () => void;
   onPlay?: () => void;
@@ -20,6 +29,12 @@ type Props = {
 };
 
 export function EntryMenu({
+  page,
+  onNavigate,
+  profile,
+  onAccount,
+  onRanking,
+  onCosmetics,
   soloEnabled = false,
   onPlay,
   onSettings,
@@ -30,13 +45,16 @@ export function EntryMenu({
   onCodeChange,
   onEnter,
 }: Props) {
-  const [tutorial, setTutorial] = useState(false);
+  const [localPage, setLocalPage] = useState<EntryPage>(code ? 'join' : 'menu');
+  const activePage = page ?? localPage;
+  const navigate = onNavigate ?? setLocalPage;
+  const tutorial = activePage === 'tutorial';
   const tutorialTrigger = useRef<HTMLButtonElement>(null);
   const openedTutorial = useRef(false);
   useEffect(() => {
     if (!tutorial && openedTutorial.current) tutorialTrigger.current?.focus();
   }, [tutorial]);
-  const [joining, setJoining] = useState(Boolean(code));
+  const joining = activePage === 'join';
   const entryReason = busy
     ? t('Aguarde a entrada na sala.')
     : !nicknameSchema.safeParse(nickname).success
@@ -46,11 +64,18 @@ export function EntryMenu({
     entryReason ||
     (!/^[A-Z0-9]{6}$/.test(code) ? t('Informe um código de sala com 6 letras ou números.') : null);
 
-  if (tutorial) return <Tutorial onClose={() => setTutorial(false)} />;
+  if (tutorial) return <Tutorial onClose={() => navigate('menu')} />;
 
   return (
     <div className="main-menu">
-      <MenuProfile nickname={nickname} busy={busy} onNicknameChange={onNicknameChange} />
+      <MenuProfile
+        profile={profile}
+        onAccount={onAccount}
+        onRanking={onRanking}
+        nickname={nickname}
+        busy={busy}
+        onNicknameChange={onNicknameChange}
+      />
       <div className="menu-decoration" aria-hidden="true" />
       {joining ? (
         <section className="join-panel" aria-label={t('Entrar em uma sala privada')}>
@@ -87,7 +112,7 @@ export function EntryMenu({
             type="button"
             disabled={busy}
             {...disabledHint(busy ? t('Aguarde a entrada na sala.') : null)}
-            onClick={() => setJoining(false)}
+            onClick={() => navigate('menu')}
           >
             {t('← Voltar ao menu')}
           </button>
@@ -127,7 +152,7 @@ export function EntryMenu({
             className="menu-button menu-blue"
             type="button"
             aria-label={t('Entrar em sala')}
-            onClick={() => setJoining(true)}
+            onClick={() => navigate('join')}
           >
             <MenuIcon name="players" />
             <span>{t('Entrar em sala')}</span>
@@ -139,7 +164,7 @@ export function EntryMenu({
             aria-label={t('Como jogar')}
             onClick={() => {
               openedTutorial.current = true;
-              setTutorial(true);
+              navigate('tutorial');
             }}
           >
             <MenuIcon name="book" />
@@ -148,13 +173,16 @@ export function EntryMenu({
           <button
             className="menu-button menu-blue"
             type="button"
-            disabled
-            {...disabledHint(t('Este recurso estará disponível em uma versão futura.'))}
+            disabled={!onCosmetics || busy}
+            onClick={onCosmetics}
+            {...disabledHint(
+              !onCosmetics ? t('Este recurso estará disponível em uma versão futura.') : null,
+            )}
           >
             <MenuIcon name="hat" />
             <span>
               {t('Cosméticos')}
-              <small>{t('Em breve')}</small>
+              <small>{onCosmetics ? t('Avatares · Baralhos · Mesas') : t('Em breve')}</small>
             </span>
           </button>
           <button

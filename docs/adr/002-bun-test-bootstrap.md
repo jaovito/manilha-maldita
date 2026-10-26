@@ -1,22 +1,22 @@
-# ADR 002 — Bun Test e bootstrap sem gameplay
+# ADR 002 — Bun Test and bootstrap without gameplay
 
-- Estado: aceita conforme solicitação do proprietário.
-- Data: 2026-10-17.
+- Status: accepted as requested by the owner.
+- Date: 2026-10-17.
 
-> Registro histórico do bootstrap. As versões e a exceção de tooling abaixo foram atualizadas pela [ADR 003](003-biome-current-dependencies.md).
+> Historical bootstrap record. Versions and the tooling exception below were updated by [ADR 003](003-biome-current-dependencies.md).
 
-## Decisão
+## Decision
 
-Usar Bun Workspaces sem Turborepo e Bun Test para unitários/integração, substituindo o default anterior de Vitest. Manter fast-check para propriedades e Playwright para navegador. O ambiente React usa Happy DOM e Testing Library num processo separado dos testes sem DOM.
+Use Bun Workspaces without Turborepo and Bun Test for unit/integration tests, replacing the previous Vitest default. Keep fast-check for properties and Playwright for browser tests. React uses Happy DOM and Testing Library in a separate process from tests without DOM.
 
-Fixar Bun em 1.3.5, versão disponível e validada no bootstrap, e versões diretas das dependências no único `bun.lock`. TypeScript e ESLint usam versões compatíveis com seus peers; o bootstrap não exige instalar as versões mais recentes de cada ferramenta.
+Pin Bun to 1.3.5, the version available and validated during bootstrap, and direct dependency versions in one `bun.lock`. TypeScript and ESLint use versions compatible with their peers; bootstrap does not require the latest version of every tool.
 
-Criar configurações, pastas e testes do ambiente sem implementar regras, contratos de jogo, UI React ou servidor de produto. O build web contém somente o HTML de montagem; fixtures em testes não são endpoints do produto. Não criar comandos vazios nem aceitar ausência de testes como sucesso. Adicionar exports e entrypoints dos pacotes quando a implementação existir.
+Create environment configuration, folders and tests without implementing rules, game contracts, React UI or a product server. The web build contains only the mounting HTML; test fixtures are not product endpoints. Do not create empty commands or treat missing tests as success. Add package exports and entrypoints when their implementations exist.
 
-## Exceção de tooling
+## Tooling exception
 
-O instalador de browsers Playwright sob Bun 1.3.5 falhou com `ERR_TLS_CERT_ALTNAME_INVALID` num redirecionamento do CDN. A instalação com Node 24 funcionou mantendo TLS validado. O script de instalação usa Node explicitamente; desenvolvimento, lint, tipos, build e runners usam Bun. Reavaliar a exceção ao atualizar Bun, sem fallback oculto ou desativação de certificados.
+The Playwright browser installer under Bun 1.3.5 failed with `ERR_TLS_CERT_ALTNAME_INVALID` during a CDN redirect. Installation with Node 24 succeeded with TLS validation enabled. The installation script explicitly uses Node; development, lint, types, build and runners use Bun. Reassess the exception when upgrading Bun, without hidden fallbacks or disabled certificates.
 
-## Consequências
+## Consequences
 
-O setup tem verificações executáveis desde o início, com ambientes separados de produção e testes. Cobertura de ambiente não comprova gameplay nem multiplayer. CI está configurado, mas não foi executado remotamente. Compatibilidade de Safari/iOS permanece para validação futura.
+Setup has executable checks from the start, with separate production and test environments. Environment coverage does not prove gameplay or multiplayer. CI is configured but was not run remotely. Safari/iOS compatibility remains for future validation.

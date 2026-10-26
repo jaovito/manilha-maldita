@@ -1,137 +1,137 @@
-# Arquitetura e operação
+# Architecture and operations
 
-Leia ao trabalhar em estrutura, domínio, servidor, transporte, interface ou operação. Os caminhos abaixo são uma estrutura-alvo; não pressupõem implementação existente. Consulte também [segurança](security.md), [regras](rules.md) e [verificação](testing.md) conforme a mudança.
+Read this document when working on structure, domain, server, transport, interface, or operations. The paths below describe a target structure, not necessarily an existing implementation. Also consult [security](security.md), [rules](rules.md), and [verification](testing.md) as applicable.
 
-## Stack e organização
+## Stack and organization
 
-Decisão aprovada: monólito modular em TypeScript, com Bun no workspace e no backend, Clean Architecture nas dependências e DDD no domínio. Os defaults para implementação são:
+Approved decision: a modular TypeScript monolith, with Bun in the workspace and backend, Clean Architecture for dependencies, and DDD for the domain. Implementation defaults:
 
-| Área | Default |
+| Area | Default |
 |---|---|
-| Linguagem/workspace | TypeScript estrito, Bun workspaces, um único `bun.lock` |
-| Runtime | Bun, com versão fixada para desenvolvimento e CI |
-| Frontend | React + Vite executado com Bun; PixiJS na implementação da mesa/efeitos |
-| Backend | Bun + Hono + adaptador WebSocket para Bun |
-| Contratos | Schemas de runtime, preferencialmente Zod, com tipos derivados |
-| Testes | Bun Test para unitários/integração, fast-check para propriedades e Playwright para E2E |
-| Persistência | PostgreSQL + Drizzle; infraestrutura local preparada, sem banco por jogada |
-| Estado vivo no MVP | Memória, uma autoridade por sala |
+| Language/workspace | Strict TypeScript, Bun workspaces, one `bun.lock` |
+| Runtime | Bun, pinned for development and CI |
+| Frontend | React + Vite running with Bun; PixiJS for table/effects implementation |
+| Backend | Bun + Hono + Bun WebSocket adapter |
+| Contracts | Runtime schemas, preferably Zod, with derived types |
+| Tests | Bun Test for unit/integration tests, fast-check for properties, Playwright for E2E |
+| Persistence | PostgreSQL + Drizzle; local infrastructure prepared, no database per move |
+| MVP live state | Memory, one authority per room |
 
-Use Bun para instalação, scripts e execução das ferramentas do front e do back. O frontend entregue roda no navegador; não importe APIs de Bun no código destinado ao browser. Execute Vite explicitamente com Bun (`bunx --bun vite` e `bunx --bun vite build`). Mantenha typecheck separado: executar/transpilar TypeScript não comprova a correção dos tipos.
+Use Bun for installation, scripts, and frontend/backend tooling. The shipped frontend runs in the browser; do not import Bun APIs into browser code. Run Vite explicitly with Bun (`bunx --bun vite` and `bunx --bun vite build`). Keep type checking separate: executing/transpiling TypeScript does not prove type correctness.
 
-Preserve as escolhas aprovadas; mudanças futuras de runtime, ORM, framework ou gerenciador precisam de justificativa ligada à tarefa. Não mantenha dois gerenciadores/lockfiles, introduza Go sem necessidade medida ou torne Redis/banco obrigatório por jogada. Fixe versões e scripts no bootstrap; não invente versões nem atualize dependências alheias à tarefa. Ferramentas que exigirem outro runtime precisam de exceção documentada e validada, sem fallback silencioso.
+Preserve approved choices; future runtime, ORM, framework, or package manager changes require task-specific justification. Do not maintain two package managers/lockfiles, introduce Go without a measured need, or require Redis/database access for every move. Pin versions and scripts during bootstrap; do not invent versions or update unrelated dependencies. Tools requiring another runtime need a documented, validated exception without silent fallback.
 
-Estrutura-alvo; crie módulos somente quando necessários:
+Target structure; create modules only when needed:
 
 ```text
 AGENTS.md
-GDD.md                 # visão de produto e propostas futuras
+GDD.md                 # product vision and future proposals
 apps/
-  web/                 # lobby, UI, renderização, transporte do cliente
-  server/              # HTTP/WS, sessões, salas, timers, adaptadores
+  web/                 # lobby, UI, rendering, client transport
+  server/              # HTTP/WS, sessions, rooms, timers, adapters
 packages/
-  game-core/           # domínio, estados, regras, poderes, projeções puras
-  game-protocol/       # schemas, comandos e DTOs de transporte
-  game-sim/            # simulações e políticas de bots
+  game-core/           # domain, states, rules, powers, pure projections
+  game-protocol/       # transport schemas, commands, and DTOs
+  game-sim/            # simulations and bot policies
 docs/
   rules.md
   architecture.md
   security.md
   testing.md
   balancing.md
-  adr/                 # decisões estruturais, quando necessárias
+  adr/                 # structural decisions, when needed
 plan.md
 ```
 
-O core não importa UI, frameworks, sockets, ORM ou relógio global. Poderes começam como submódulo; extração futura não pode criar ciclos. Protocolo reutiliza tipos seguros, nunca o estado autoritativo inteiro como DTO.
+The core does not import UI, frameworks, sockets, an ORM, or a global clock. Powers start as a submodule; future extraction must not create cycles. The protocol reuses safe types, never the entire authoritative state as a DTO.
 
-Use domínio puro, aplicação/orquestração e adaptadores. Evite repositórios genéricos, containers de DI, microsserviços, event sourcing persistente e engines de plugins sem demanda concreta.
+Use a pure domain, application/orchestration, and adapters. Avoid generic repositories, DI containers, microservices, persistent event sourcing, and plugin engines without concrete demand.
 
-## Backend: módulos, Clean Architecture e DDD
+## Backend: modules, Clean Architecture, and DDD
 
-Organize primeiro por funcionalidade; dentro de cada módulo, separe domínio, aplicação e adaptadores conforme houver necessidade. Evite pastas globais de controllers, services e repositories reunindo funcionalidades diferentes.
+Organize by feature first; within each module, separate domain, application, and adapters as needed. Avoid global controller, service, and repository folders combining unrelated features.
 
 ```text
 apps/server/src/
-  bootstrap/                 # configuração e montagem do processo
+  bootstrap/                 # process configuration and composition
   modules/
     rooms/
-      domain/                # estado da sala, membros e configuração
+      domain/                # room state, members, and configuration
       application/
-        use-cases/           # membership, lobby, match e solo
-        services/            # fila e ciclo de vida; lobby, match, membership, solo e messaging
-        ports/               # entrada, repositório, publicação e runtime
-        dto/                 # comandos, projeções internos e mappers de saída
-        state/               # envelope operacional da sala
+        use-cases/           # membership, lobby, match, and solo
+        services/            # queue/lifecycle; lobby, match, membership, solo, messaging
+        ports/               # input, repository, publication, and runtime
+        dto/                 # internal commands/projections and output mappers
+        state/               # operational room envelope
       adapters/
-        inbound/             # validação dos contratos públicos
-        outbound/            # repositório em memória e runtime
-      composition.ts         # montagem das dependências do módulo
+        inbound/             # public contract validation
+        outbound/            # in-memory repository and runtime
+      composition.ts         # module dependency composition
     sessions/
-      domain/entities/       # identidade convidada e validade
+      domain/entities/       # guest identity and validity
       application/
-        use-cases/           # emitir, consultar e renomear sessão
-        ports/               # armazenamento, relógio e credenciais
-      adapters/outbound/     # memória e geração criptográfica
+        use-cases/           # issue, query, and rename sessions
+        ports/               # storage, clock, and credentials
+      adapters/outbound/     # memory and cryptographic generation
       composition.ts
     matches/
-      domain/                # política pura de tempo/reconexão
+      domain/                # pure timing/reconnection policy
     transport/
       adapters/
-        inbound/http/        # controllers e middleware de segurança
-        inbound/websocket/   # handler de conexão e mensagens
-        outbound/            # serialização e limites de saída
-      composition.ts         # montagem dos handlers Hono
+        inbound/http/        # controllers and security middleware
+        inbound/websocket/   # connection and message handler
+        outbound/            # serialization and outbound limits
+      composition.ts         # Hono handler composition
 ```
 
-Crie somente módulos e camadas exercitados pelo incremento atual. `matches` usa o domínio de `packages/game-core`; não duplique esse domínio em `apps/server`. A autoridade da sala coordena lobby e partida pela mesma fila, inclusive início e revanche; não crie escritores independentes para o mesmo estado. A separação implementada e os limites do repositório em memória estão registrados na [ADR 010](adr/010-explicit-clean-architecture.md).
+Create only modules and layers exercised by the current increment. `matches` uses the domain in `packages/game-core`; do not duplicate it in `apps/server`. Room authority coordinates lobby and match through the same queue, including startup and rematch; do not create independent writers for the same state. [ADR 010](adr/010-explicit-clean-architecture.md) records the implemented separation and in-memory repository limits.
 
-Dentro de `application`, o primeiro nível expressa responsabilidade arquitetural; funcionalidades agrupam arquivos dentro de `use-cases` e `services`. Não mantenha `lobby`, `match` ou `solo` como pastas irmãs dessas responsabilidades. `services` contém coordenação compartilhada, consultas de presença e preparação da entropia recebida por port; `state` contém apenas a estrutura operacional. `dto/mappers` constrói projeções autorizadas e traduz erros seguros para saída. A operação de desenvolvimento que reinicia a mão é um caso de uso em `use-cases/solo`, com suas restrições de ambiente e autorização preservadas.
+Within `application`, the first level expresses architectural responsibility; features group files inside `use-cases` and `services`. Do not keep `lobby`, `match`, or `solo` as siblings of those responsibilities. `services` contains shared coordination, presence queries, and preparation of entropy received through a port; `state` contains only the operational structure. `dto/mappers` builds authorized projections and translates safe output errors. The development operation that restarts a hand is a use case in `use-cases/solo`, preserving environment and authorization restrictions.
 
-A aplicação conhece o domínio e define os contratos de que precisa para efeitos externos. Adaptadores implementam esses contratos e dependem da aplicação/domínio, nunca o inverso. `bootstrap` conecta as implementações concretas por parâmetros ou construtores, sem container de DI obrigatório. Hono e APIs de Bun ficam nas bordas.
+The application knows the domain and defines its external-effect contracts. Adapters implement those contracts and depend on application/domain, never the reverse. `bootstrap` connects concrete implementations through parameters or constructors without requiring a DI container. Hono and Bun APIs remain at the edges.
 
-A partida é a fronteira de consistência das regras: carta, energia, aposta e resolução relacionadas são atualizadas numa única transição aceita. Use o vocabulário partida/mão/vaza; agregados e objetos de valor podem ser representados por tipos e funções puras. DDD não exige uma classe `Match` concentrando todo o comportamento nem uma classe para cada valor.
+The match is the rules' consistency boundary: related card, energy, wager, and resolution updates happen in a single accepted transition. Use match/hand/trick terminology; aggregates and value objects may be represented by types and pure functions. DDD does not require a `Match` class containing all behavior or a class for every value.
 
 ```text
 packages/game-core/src/
-  cards/                     # identidades, distribuição e força
-  tricks/                    # resolução de vazas
-  betting/                   # negociação de apostas
-  hands/                     # encerramento e mãos especiais
-  powers/                    # sorteio, energia e habilidades
-  match/                     # fases e composição das transições
-  projections/               # visões autorizadas de cada destinatário
+  cards/                     # identities, dealing, and strength
+  tricks/                    # trick resolution
+  betting/                   # wager negotiation
+  hands/                     # completion and special hands
+  powers/                    # assignment, energy, and abilities
+  match/                     # phases and transition composition
+  projections/               # authorized recipient views
 ```
 
-O fluxo de um comando é: adaptador valida mensagem e sessão → aplicação entra na fila da sala e verifica contexto/idempotência → core executa a transição → aplicação confirma o estado e agenda efeitos → projeções autorizadas são enviadas a cada destinatário. Confirmação em memória não implica persistência durável nem recuperação após queda.
+Command flow: adapter validates message/session → application enters the room queue and checks context/idempotency → core executes the transition → application commits state and schedules effects → authorized projections are sent to each recipient. An in-memory commit does not imply durable persistence or crash recovery.
 
-### Patterns e SOLID
+### Patterns and SOLID
 
-- Responsabilidade única: cada módulo/arquivo tem um conceito coeso e um motivo claro para mudar; extraia comportamento, não fragmentos arbitrários.
-- Inversão de dependências: crie ports pequenos para fronteiras reais, como relógio, entropia, agendamento e armazenamento. Não gere uma interface para cada função nem repositories para cartas/vazas.
-- Máquina de estados: fases explícitas e tratamento exaustivo dos comandos permitidos.
-- Eventos de domínio: fatos aceitos alimentam projeções e auditoria; informação privada mantém destinatários e canal próprios. Eventos não tornam event sourcing persistente obrigatório.
-- Strategy: use quando existirem políticas distintas, como sorteio independente/espelhado e políticas de simulação. Funções tipadas bastam; não antecipe engines de plugins.
-- Prefira composição a herança. Interfaces segregadas descrevem o que o consumidor usa; implementações alternativas devem preservar o mesmo contrato e invariantes.
+- Single responsibility: each module/file has one cohesive concept and a clear reason to change; extract behavior, not arbitrary fragments.
+- Dependency inversion: define small ports for real boundaries such as clock, entropy, scheduling, and storage. Do not create an interface for every function or repositories for cards/tricks.
+- State machine: explicit phases and exhaustive handling of allowed commands.
+- Domain events: accepted facts feed projections and auditing; private information retains its own recipients and channel. Events do not require persistent event sourcing.
+- Strategy: use when distinct policies exist, such as independent/mirrored assignment and simulation policies. Typed functions suffice; do not anticipate plugin engines.
+- Prefer composition over inheritance. Segregated interfaces describe consumer needs; alternative implementations must preserve the same contract and invariants.
 
-## Frontend: funcionalidades e separação de estados
+## Frontend: features and state separation
 
 ```text
 apps/web/src/
   app/
-    main.tsx                 # montagem da aplicação
-    App/                     # composição e seus testes
-    styles/                  # estilos globais e ordem da cascata
+    main.tsx                 # application mounting
+    App/                     # composition and its tests
+    styles/                  # global styles and cascade order
   features/
     menu/
-      index.ts               # API pública da feature
+      index.ts               # public feature API
       pages/EntryMenu/
         index.tsx
         index.test.tsx
-      components/            # Profile, Icon e seus estilos
-      styles/                # estilos da página e adaptações
+      components/            # Profile, Icon, and their styles
+      styles/                # page styles and adaptations
     room/
-      index.ts               # API pública da feature
+      index.ts               # public feature API
       components/
         Lobby/
           index.tsx
@@ -149,329 +149,395 @@ apps/web/src/
           Powers/
           Seats/
           styles/
-      utils/                 # formatação de cartas da feature
+      utils/                 # feature card formatting
   shared/
-    preferences/             # preferência local de apelido
-    transport/               # HTTP/WS compartilhado pela entrada e sala
+    preferences/             # local nickname preference
+    transport/               # HTTP/WS shared by entry and room
 ```
 
-Componentes, hooks, estilos e testes ficam próximos da funcionalidade que os utiliza. Componentes usam uma pasta por responsabilidade, com `index.tsx`, `index.test.tsx` quando houver testes próprios e `styles.css` quando houver estilos; filhos exclusivos ficam dentro do componente pai. Testes de comportamento podem ter nomes específicos, como `viewport.test.tsx`. Estilos responsivos extensos ficam em `styles/` junto ao componente. `pages` contém apenas páginas e seus testes; componentes ficam em `components` da feature, e estilos de página ficam em `styles` da feature. `utils` e `services` são criados apenas quando existe responsabilidade concreta, sem pastas vazias antecipadas. Cada feature expõe uma API pública pequena; outras features não importam seus arquivos internos. Código exclusivo de uma feature continua nela. Promova algo a `shared` quando houver reutilização concreta e responsabilidade estável.
+Keep components, hooks, styles, and tests close to the feature using them. Components use one folder per responsibility, with `index.tsx`, `index.test.tsx` for their own tests, and `styles.css` for styles; exclusive children stay inside their parent component. Behavior tests may use specific names such as `viewport.test.tsx`. Extensive responsive styles belong in `styles/` next to the component. `pages` contains only pages and their tests; components belong in the feature's `components`, and page styles in its `styles`. Create `utils` and `services` only for concrete responsibilities, without speculative empty folders. Each feature exposes a small public API; other features must not import its internals. Feature-specific code remains inside that feature. Promote code to `shared` when reuse is concrete and responsibility stable.
 
-Separe estado confirmado pelo servidor (cartas visíveis, turno, energia e placar), estado local da interface (seleção, painéis e preferências) e estado de animação. Uma seleção pode ser imediata; resultado, gasto e pontuação dependem da confirmação do servidor. Não mantenha uma segunda cópia autoritativa da partida no cliente.
+Separate server-confirmed state (visible cards, turn, energy, score), local UI state (selection, panels, preferences), and animation state. Selection may be immediate; outcomes, spending, and scoring require server confirmation. Do not maintain a second authoritative match state in the client.
 
-React coordena interface e estado de apresentação; PixiJS recebe dados autorizados e emite intenções de interação. Não replique as regras no renderizador nem faça o servidor depender da duração de animações. O cliente importa contratos públicos de `game-protocol`; o pacote não exporta o estado secreto ou o baralho ordenado. Importações de `game-core` pelo cliente, se necessárias, devem usar uma API explicitamente segura, sem carregar estado autoritativo.
+React coordinates interface and presentation state; PixiJS receives authorized data and emits interaction intents. Do not duplicate rules in the renderer or make the server depend on animation duration. The client imports public `game-protocol` contracts; the package does not export secret state or the ordered deck. Client imports from `game-core`, if needed, must use an explicitly safe API without loading authoritative state.
 
-O transporte compartilhado resolve HTTP e WS a partir de `VITE_BACKEND_URL`, uma origem pública HTTP(S) opcional definida no ambiente do build Vite ou em `apps/web/.env.local`. Sem valor, usa `/api` e a origem da página, preservando o proxy de desenvolvimento/preview. Caminhos, credenciais e query na configuração são rejeitados. HTTP inclui cookies; CORS é limitado a `ALLOWED_ORIGINS`, GET/POST e Content-Type. O handshake WS continua com validação explícita de origem. Acesso direto entre origens exige o mesmo site por causa do cookie SameSite=Strict; entre sites diferentes, use proxy na origem do frontend. Veja o exemplo no [README](../README.md#url-do-backend-no-frontend).
+Shared transport resolves HTTP and WS from `VITE_BACKEND_URL`, an optional public HTTP(S) origin defined in the Vite build environment or `apps/web/.env.local`. Without a value, it uses `/api` and the page origin, preserving the development/preview proxy. Paths, credentials, and queries in configuration are rejected. HTTP includes cookies; CORS is limited to `ALLOWED_ORIGINS`, GET/POST, and Content-Type. WS handshakes retain explicit origin validation. Direct cross-origin access requires the same site because of the SameSite=Strict cookie; across different sites, use a proxy on the frontend origin. See the [README example](../README.md#frontend-backend-url).
 
-## Tamanho, navegação e fronteiras
+## Size, navigation, and boundaries
 
-Os limites abaixo orientam código de produção escrito à mão, incluindo componentes e hooks. Contagem de linhas é um sinal de revisão; a extração precisa preservar coesão e ter responsabilidade clara.
+The following limits guide handwritten production code, including components and hooks. Line counts are review signals; extraction must preserve cohesion and clear responsibility.
 
-| Sinal | Ação |
+| Signal | Action |
 |---|---|
-| Arquivo acima de 300 linhas | Revisar responsabilidades e oportunidades de extração |
-| Arquivo chegando a 450 linhas | Extrair partes coesas antes de ampliar o comportamento |
-| Arquivo com 500 ou mais linhas | Refatorar antes de concluir; exceção exige justificativa explícita na revisão |
-| Pasta com cerca de 15 arquivos diretamente nela | Avaliar agrupamento por conceito; não criar subpastas artificiais para cumprir contagem |
-| Testes extensos | Separar por comportamento, mantendo proximidade com a área testada |
-| Arquivos gerados e lockfile | Excluídos dos limites; não editar/dividir geração para satisfazer métricas |
+| File over 300 lines | Review responsibilities and extraction opportunities |
+| File approaching 450 lines | Extract cohesive parts before expanding behavior |
+| File with 500 or more lines | Refactor before completion; exceptions need explicit review justification |
+| Folder with around 15 direct files | Consider grouping by concept; do not create artificial subfolders to meet counts |
+| Extensive tests | Split by behavior while staying close to the tested area |
+| Generated files and lockfile | Excluded from limits; do not edit/split generated output to satisfy metrics |
 
-Use nomes de domínio como `resolve-trick.ts`, `accept-raise.ts` e `project-player-view.ts`. Evite arquivos genéricos `utils.ts`, `helpers.ts` ou `services.ts`, e divisões mecânicas `part-1`/`part-2`. Não imponha um arquivo por função ou por interface.
+Use domain names such as `resolve-trick.ts`, `accept-raise.ts`, and `project-player-view.ts`. Avoid generic `utils.ts`, `helpers.ts`, or `services.ts` files and mechanical `part-1`/`part-2` splits. Do not require one file per function or interface.
 
-Módulos/pacotes expõem entradas públicas explícitas; evite cadeias de barrels e importações profundas de implementações alheias. Dependências devem ser acíclicas. Não crie dependência do core no protocolo de transporte para fechar ciclos; traduza mensagens em comandos de domínio na aplicação.
+Modules/packages expose explicit public entry points; avoid barrel chains and deep imports of another module's implementations. Dependencies must be acyclic. Do not make the core depend on the transport protocol to close a cycle; translate messages into domain commands in the application.
 
-No bootstrap, configure verificação de fronteiras de imports no lint: domínio sem runtime/framework/I/O, browser sem adapters do servidor e módulos sem acesso aos internos de outros módulos. Regras de tamanho entram como alertas/revisão com as exceções acima, sem declarar verificações existentes antes de implementá-las. Consulte [testing.md](testing.md) para os checks do incremento.
+During bootstrap, configure lint import boundaries: no runtime/framework/I/O in the domain, no server adapters in the browser, and no access to other modules' internals. Apply size rules through warnings/review with the exceptions above, without claiming checks exist before implementing them. See [testing.md](testing.md) for the increment's checks.
 
-## Motor de estado, comandos e aleatoriedade
+## State engine, commands, and randomness
 
-Modele fases explícitas: `LOBBY`, `DEALING`, `ELEVEN_DECISION`, `PREPARATION`, `TURN`, `RAISE_RESPONSE`, `TRICK_RESOLUTION`, `HAND_END`, `MATCH_END`. Após aposta, retome o turno salvo. Use uniões discriminadas; evite flags que permitam estados contraditórios.
+Model explicit phases: `LOBBY`, `DEALING`, `ELEVEN_DECISION`, `PREPARATION`, `TURN`, `RAISE_RESPONSE`, `TRICK_RESOLUTION`, `HAND_END`, `MATCH_END`. After a wager, resume the saved turn. Use discriminated unions; avoid flags allowing contradictory states.
 
-O core executa partidas sem navegador, rede, banco ou relógio real. Uma transição recebe estado, comando autorizado e contexto confiável e retorna estado, eventos e efeitos. Tempo e entropia são entradas explícitas; proíba `Math.random()`, `Date.now()`, I/O e timers no domínio. Testes usam relógio falso e entropia determinística.
+The core runs matches without browser, network, database, or real clock. A transition receives state, an authorized command, and trusted context, returning state, events, and effects. Time and entropy are explicit inputs; prohibit `Math.random()`, `Date.now()`, I/O, and timers in the domain. Tests use a fake clock and deterministic entropy.
 
-Em produção, o adaptador gera aleatoriedade criptograficamente segura e sem viés; não embaralhe por comparador aleatório. Registre resultados necessários à reprodução em trilha privada, com versão das regras. Nunca aceite sementes ou resultados do cliente nem publique a ordem do baralho.
+In production, the adapter generates cryptographically secure, unbiased randomness; do not shuffle with a random comparator. Record reproduction data in a private trail with the rules version. Never accept client seeds/results or publish deck order.
 
-Valide antes de sortear/debitar. Comando inválido ou repetido não avança estado, gerador, pontos ou energia. Conserve as 40 cartas entre mãos, vira, monte, mesa e descartes, sem duplicação de identidade.
+Validate before drawing/spending. Invalid or repeated commands do not advance state, the generator, points, or energy. Preserve all 40 cards across hands, the turn-up card, stock, table, and discards without duplicate identities.
 
-Resolução e projeção são funções separadas. Compartilhar algoritmos não autoriza compartilhar dados secretos. A UI pode indicar ações disponíveis, mas o servidor revalida cada comando.
+Resolution and projection are separate functions. Sharing algorithms does not authorize sharing secret data. The UI may show available actions, but the server revalidates every command.
 
-## Multiplayer e concorrência
+## Multiplayer and concurrency
 
-### Uma autoridade por sala
+### One authority per room
 
-Serialize comandos, timers e transições por sala. Não dependa apenas do event loop: operações assíncronas não podem permitir leitura e gravação concorrentes do mesmo estado. No MVP, uma fila por sala no processo é suficiente; não adicione um lock distribuído sem necessidade.
+Serialize commands, timers, and transitions per room. Do not rely solely on the event loop: asynchronous operations must not permit concurrent reads/writes of the same state. For the MVP, an in-process queue per room is sufficient; do not add a distributed lock without need.
 
-Identidade vem da sessão autenticada, inclusive para convidados. `playerId`, `teamId`, turno e permissão enviados pelo cliente não concedem autoridade.
+Identity comes from the authenticated session, including guests. Client-supplied `playerId`, `teamId`, turn, and permissions do not grant authority.
 
-O envelope deve identificar protocolo, sala, partida, comando e contexto de decisão, com `commandId`, `matchId`, `decisionId` e a versão esperada quando aplicável. Tipos de payload devem ser específicos por comando/poder, sem um objeto genérico cheio de opcionais.
+The envelope must identify protocol, room, match, command, and decision context through `commandId`, `matchId`, `decisionId`, and expected version where applicable. Payload types must be specific to each command/power rather than a generic object full of optional fields.
 
-- Faça parsing e validação de runtime antes de entrar no domínio.
-- Para comandos de turno, valide a versão de gameplay esperada e o contexto.
-- Para preparação simultânea e respostas de equipe, valide `decisionId`, fase e compromisso/resposta ainda aberto. Não invalide uma intenção apenas porque outro jogador ficou pronto ou um evento de presença ocorreu.
-- Separe presença de versão de gameplay. Não esconda conflitos reais flexibilizando toda validação de versão.
-- Uma decisão aceita fecha seu contexto; comandos atrasados não podem atingir a próxima vaza ou uma revanche.
+- Parse and validate at runtime before entering the domain.
+- For turn commands, validate the expected gameplay revision and context.
+- For simultaneous preparation and team responses, validate `decisionId`, phase, and an open commitment/response. Do not invalidate an intent merely because another player became ready or a presence event occurred.
+- Separate presence from gameplay revision. Do not conceal real conflicts by weakening all revision validation.
+- Accepted decisions close their context; late commands cannot affect the next trick or a rematch.
 
-### Idempotência e sincronização
+### Idempotency and synchronization
 
-Deduplicação por identidade lógica do jogador, partida e `commandId`, com política de tamanho e retenção. A chave sobrevive à reconexão; não depende do ID do socket. Autentique antes de acessar o registro. Para o mesmo ID e payload, devolva o resultado original; para ID reaproveitado com payload diferente, rejeite. Consulte duplicatas antes de rejeitar uma versão antiga, pois o ACK original pode ter se perdido.
+Deduplicate by logical player identity, match, and `commandId`, with bounded size/retention. The key survives reconnection and does not depend on socket ID. Authenticate before accessing the record. Return the original result for the same ID/payload; reject an ID reused with different content. Check duplicates before rejecting an old revision because the original ACK may have been lost.
 
-Eventos/snapshots precisam de ordenação e versão. O cliente ignora duplicatas e solicita ressincronização quando houver lacuna. Uma rejeição por estado obsoleto orienta atualizar a projeção; não reproduza automaticamente uma intenção em um turno novo.
+Events/snapshots require ordering and versioning. The client ignores duplicates and requests resynchronization on gaps. A stale-state rejection prompts a projection refresh; never replay an intent automatically in a new turn.
 
-Confirmações do cliente ou fim de animação não fazem o servidor avançar regras. Animações acompanham eventos aceitos. Em reconexão, descarte animações incompatíveis e reconstrua a interface a partir do snapshot autorizado.
+Client confirmations or animation completion do not advance server rules. Animations follow accepted events. On reconnection, discard incompatible animations and rebuild the UI from the authorized snapshot.
 
-Snapshots completos filtrados são aceitáveis no MVP; diffs são otimização posterior. Não use broadcasting do estado interno seguido de filtragem no navegador.
+Complete filtered snapshots are acceptable for the MVP; diffs are a later optimization. Do not broadcast internal state and then filter it in the browser.
 
-## Interface e experiência de jogo
+## Interface and gameplay experience
 
-Na tela de resultado, sair é uma navegação local: fecha o socket, cancela reconexões e limpa sala, convite na URL e estado de feedback. Se houver conexão, o cliente envia `LEAVE` antes de fechar, sem aguardar ACK. Sem conexão, “Voltar ao menu” e “Sair da sala” continuam disponíveis para qualquer jogador; revanche e retorno ao lobby continuam dependendo do servidor e das permissões do anfitrião. Isso não altera abandono, pontuação ou remoção autoritativa de membros. Durante lobby/partida em andamento, a saída mantém o fluxo de confirmação existente.
+On the result screen, leaving is local navigation: close the socket, cancel reconnects, and clear room, URL invitation, and feedback state. When connected, the client sends `LEAVE` before closing without waiting for ACK. When disconnected, “Back to menu” and “Leave room” remain available to any player; rematch and returning to the lobby still depend on the server and host permissions. This does not change abandonment, scoring, or authoritative member removal. Leaving during an active lobby/match retains the existing confirmation flow.
 
-Em celulares (até 600 px) e paisagem baixa (até 500 px de altura), o histórico começa recolhido numa aba lateral de 44 px com seta. O botão abre/fecha o pergaminho; Escape recolhe mantendo foco no mesmo controle. O conteúdo fechado fica oculto também para tecnologias assistivas. O painel aberto limita sua altura à tela e mantém rolagem interna, acompanhando novas ações somente enquanto o leitor estiver no final. Desktop mantém o histórico visível.
+On mobile (up to 600 px) and short landscape screens (up to 500 px tall), history starts collapsed in a 44 px side tab with an arrow. The button opens/closes the parchment; Escape collapses it while preserving focus on the same control. Closed content is also hidden from assistive technology. The open panel bounds its height to the screen and scrolls internally, following new actions only while the reader is at the bottom. Desktop keeps history visible.
 
-O pergaminho mantém a proporção original 614:768, com `background-size: contain` e amostragem pixelada. O viewport define seu tamanho; conteúdo vazio, novas ações, textos longos e expansão dos detalhes não mudam a moldura. A lista interna rola dentro das margens reservadas às dobras, sem deformar ou fatiar a arte. O aviso de histórico vazio também pertence à área interna de leitura.
+The parchment preserves its original 614:768 ratio, `background-size: contain`, and pixelated sampling. Its size follows the viewport; empty content, new actions, long text, and expanded details do not change its frame. The inner list scrolls within margins reserved for folds without warping or slicing the artwork. The empty-history message also belongs to the inner reading area.
 
-O histórico combina ações públicas com a observação privada do próprio Espião, identificada por “Só você”. A carta vem exclusivamente de `match.powers.intel` da projeção autorizada e só acompanha a ativação do próprio assento com o alvo correspondente. Continua como registro do que foi visto mesmo depois da jogada; uma nova mão usa somente o novo snapshot, sem guardar cartas no navegador. Parceiro, alvo e demais jogadores recebem apenas as ativações públicas, sem essa observação privada.
+History combines public actions with the player's private Spy observation, labeled “Only you”. The card comes exclusively from `match.powers.intel` in the authorized projection and is associated only with that seat's activation and matching target. It remains a record of what was seen even after the play; a new hand uses only the new snapshot, without storing cards in the browser. Teammates, targets, and other players receive only public activations without this private observation.
 
-Jogadas confirmadas animam a face autorizada da origem na mão até o slot da mesa por 380 ms, usando Web Animations. O clique local apenas registra geometria; rejeição não inicia movimento. Adversários partem de um verso anônimo, sem identificar a carta privada. Cobertas e máscaras preservam a representação já autorizada. Primeira carga, troca de mão/partida e retomada após pausa não reproduzem jogadas antigas; SYNC repetido não duplica o voo. Movimento reduzido desativa o deslocamento. O destaque de vencedor e os efeitos do poder iniciam ao pousar, dentro da pausa autoritativa existente.
+Confirmed plays animate the authorized face from its hand origin to its table slot for 380 ms using Web Animations. Local clicks only record geometry; rejection does not start motion. Opponents start from an anonymous back without identifying a private card. Covered/masked cards preserve their authorized representation. Initial load, hand/match changes, and resume after a pause do not replay old moves; repeated SYNC does not duplicate the flight. Reduced motion disables displacement. Winner highlights and power effects begin on landing, within the existing authoritative pause.
 
-O título e o valor da aposta ocupam áreas proporcionais dentro do medalhão, com folga para sua borda circular também em telas compactas.
+The wager title and value occupy proportional areas inside the medallion, leaving clearance for its circular border on compact screens too.
 
-O baralho da distribuição e a origem dos voos acompanham o eixo das cartas jogadas. Em telas acima de 600 px, a mão local compartilha esse eixo horizontal: centro da arena no 1v1 e eixo da composição no 2v2. Em retrato compacto, a mão mantém o espaço lateral reservado aos poderes.
+The dealing deck and flight origins follow the played-card axis. Above 600 px, the local hand shares that horizontal axis: the arena center in 1v1 and composition axis in 2v2. Compact portrait reserves lateral space for powers.
 
-Cartas comuns usam uma composição única proporcional à largura da própria face (unidades cqw), incluindo naipe, números, margens e moldura. O contexto muda apenas o tamanho externo; mão, mesa, vira e faces observadas mantêm o mesmo desenho.
+Ordinary cards use one composition proportional to face width (cqw units), including suits, numbers, margins, and frame. Context changes only the outer size; hand, table, turn-up card, and observed faces preserve the same design.
 
-O botão de Truco centraliza ícone e texto como um único bloco, com compensação óptica da fonte pixelada; a mesma composição atende aos contra-aumentos. “Passar preparação” também centraliza seu texto com compensação óptica, sem depender de padding assimétrico.
+The Truco button centers icon/text as a single block, with optical compensation for the pixel font; counter-raises share this composition. “Skip preparation” also centers its text optically without asymmetric padding.
 
-Na mesa, avatar e moldura do nome compartilham espaçamento de 12 px no desktop e 8 px nas telas compactas. Nomes têm largura intrínseca limitada pela coluna, sem margens automáticas que afastem a moldura do avatar; em retrato, os versos ficam acima da identidade.
+At the table, avatar/nameplate spacing is 12 px on desktop and 8 px on compact screens. Names have intrinsic widths bounded by their column, without auto margins separating the frame from its avatar; in portrait, backs sit above identity.
 
-A seleção “Jogar coberta” vale para uma jogada: expira quando o snapshot confirma a redução da mão do jogador. Comandos rejeitados e atualizações sem consumo de carta preservam a seleção; outra mão ou partida começa desmarcada.
+“Play covered” applies to one move: it expires when the snapshot confirms a reduction in the player's hand. Rejected commands and updates without card consumption preserve the selection; a different hand/match starts unchecked.
 
-O menu principal fica em `features/menu/pages/EntryMenu`. `shared/MenuScenery` compõe as camadas decorativas de menu e lobby: feltro repetível no shell, quatro cantos, quatro segmentos do símbolo central, vela, cuia, moedas, baralho e cartas do menu. PNGs com alpha preservam proporção; CSS define âncoras e tamanhos limitados, sem esticar uma imagem única. Logo Manilha Maldita e demais assets derivam da referência anterior, com procedência e prompts em `public/art/layers/README.md`. O perfil e navegação são HTML. A decoração não recebe estado de partida, não captura ponteiro/foco e fica oculta da árvore acessível. Animações CSS de cartas respeitam movimento reduzido. Em retrato, elementos secundários cedem espaço e o conteúdo pode rolar; em paisagem baixa, os controles ficam compactos. Criação/ingresso e recursos futuros desabilitados preservam os fluxos existentes.
+The main menu lives in `features/menu/pages/EntryMenu`. `shared/MenuScenery` composes menu/lobby decoration: repeating felt in the shell, four corners, four central-symbol segments, candle, cup, coins, deck, and menu cards. Alpha PNGs preserve proportions; CSS defines anchors and bounded sizes without stretching a single image. The Manilha Maldita logo and other assets derive from the previous reference, with provenance/prompts in `public/art/layers/README.md`. Profile/navigation remain HTML. Decoration receives no match state, captures no pointer/focus, and is hidden from the accessibility tree. CSS card animations respect reduced motion. Secondary elements yield space in portrait and content may scroll; short landscape uses compact controls. Creation/joining and disabled future features preserve existing flows.
 
-O lobby compõe `LobbySettings`, `LobbySeats` e `RoomInvite`: configurações editáveis somente pelo anfitrião, equipes relativas ao jogador e cópia do link público exclusivamente após clique. Clipboard indisponível ou rejeitado recebe orientação de cópia manual, sem falso sucesso. O código continua sendo convite, não credencial. As artes do menu não incorporam textos, ações, nível, moeda ou informações da partida.
+The lobby composes `LobbySettings`, `LobbySeats`, and `RoomInvite`: host-only settings, player-relative teams, and public-link copying only after a click. Unavailable/rejected Clipboard access offers manual-copy guidance without false success. The code remains an invitation, not a credential. Menu artwork contains no text, actions, levels, currency, or match information.
 
-Sem apelido local válido, `Welcome` (`features/menu/components/Welcome`) pede um apelido antes do menu. O campo recebe foco e aceita Enter; validade e limites usam o schema público do protocolo. `App` separa rascunho e confirmação: só salva o primeiro apelido ao confirmar, sem criar convidado nem entrar em sala. Um código de convite permanece no estado e reaparece no painel de ingresso. Valor local válido pula a etapa; a sessão recuperada também a dispensa. A confirmação fica válida por esta visita mesmo com storage bloqueado, e apagar o campo depois no perfil não interrompe o menu atual.
+Without a valid local nickname, `Welcome` (`features/menu/components/Welcome`) requests one before the menu. The field receives focus and accepts Enter; validity/limits use the public protocol schema. `App` separates draft and confirmation: it saves the first nickname only on confirmation without creating a guest or entering a room. An invitation code remains in state and reappears in the join panel. A valid local value or recovered session skips this step. Confirmation remains valid for the visit even with blocked storage; clearing the profile field later does not interrupt the current menu.
 
-O apelido digitado é uma preferência local validada em `shared/preferences/nickname`, restaurada no primeiro render e salva ao editar o perfil após confirmação. O cliente consulta a sessão pelo cookie e usa seu apelido confirmado quando o usuário ainda não iniciou uma edição; uma resposta atrasada não sobrescreve o campo em uso nem entra automaticamente num convite enquanto o usuário escolhe outro apelido. Ao entrar, a resposta da sessão confirma o apelido salvo. A preferência não autentica, não retoma assentos e não grava tokens; falhas do armazenamento são toleradas. Retenção e exclusão estão em [security.md](security.md).
+The entered nickname is a validated local preference in `shared/preferences/nickname`, restored on first render and saved when editing the profile after confirmation. The client queries the cookie session and uses its confirmed nickname if editing has not begun; late responses do not overwrite an active field or enter an invitation automatically while another nickname is being chosen. On entry, the session response confirms the saved nickname. This preference does not authenticate, resume seats, or store tokens; storage failures are tolerated. Retention/deletion are defined in [security.md](security.md).
 
-Na sala, a composição segue a referência de criação: coluna esquerda com título, configurações em linhas com ícones, link de convite com cópia e prévia decorativa; coluna direita com equipes, uma mensagem curta de condição de início e ações inferiores. Molduras SVG com recorte em nove partes preservam os ornamentos ao redimensionar. As colunas se empilham em telas estreitas. `Lobby/styles/scene.css`, `Lobby/Settings/styles.css`, `Lobby/Seats/styles.css` e `Lobby/styles/responsive.css` e `Lobby/styles/desktop.css` separam composição, controles, jogadores e adaptações.
+The room composition follows the creation reference: left column with title, icon-based setting rows, invitation link/copy, and decorative preview; right column with teams, a brief start condition, and bottom actions. Nine-slice SVG frames preserve ornaments during resizing. Columns stack on narrow screens. `Lobby/styles/scene.css`, `Lobby/Settings/styles.css`, `Lobby/Seats/styles.css`, `Lobby/styles/responsive.css`, and `Lobby/styles/desktop.css` separate composition, controls, players, and adaptations.
 
-Modo/preset usam radios nativos com aparência segmentada, seleção confirmada pelo snapshot e teclado preservado; convidados recebem o fieldset desabilitado. Temporizadores ficam em uma seção expansível e respeitam o preset. Sala privada e poderes aleatórios são invariantes e não aparecem como controles desabilitados. Não há opção de sala pública nem chat funcional; o catálogo explica os quatro poderes. Pronto fica no próprio assento; sair/iniciar/revanche ficam no rodapé. O link público de convite fica sempre visível em campo somente leitura, selecionável ao focar, com botão de copiar ao lado e orientação manual se Clipboard falhar.
+Mode/preset use native radios styled as segments, snapshot-confirmed selection, and preserved keyboard access; guests receive a disabled fieldset. Timers occupy an expandable section and respect the preset. Private rooms and random powers are invariants, not disabled controls. There is no public-room option or functional chat; the catalog explains the four powers. Ready is on the player's seat; leave/start/rematch sit in the footer. The public invitation link remains visible in a read-only field selected on focus, with an adjacent copy button and manual guidance on Clipboard failure.
 
-Configurações bloqueadas recebem paleta cinza dessaturada nos ícones, legendas e seletores, além da indicação “Somente leitura” vinculada ao fieldset. A opção atual continua distinguível, sem dourado de controle ativo; o texto mantém contraste sem reduzir a opacidade do painel inteiro. Esse estado acompanha a permissão atual do snapshot e não afeta copiar o convite.
+Locked settings use desaturated gray icons, labels, and selectors plus a “Read only” indication linked to the fieldset. The current option remains distinguishable without active-control gold; text preserves contrast without reducing whole-panel opacity. This state follows current snapshot permissions and does not affect invitation copying.
 
-Textos usam marfim e tons claros sobre painéis opacos de verde/azul escuro; dourado destaca títulos e códigos. Legendas têm no mínimo 14 px. Por refinamento solicitado pelo proprietário, botões de ação desabilitados ficam fortemente atenuados (opacidade de 0,25) e sem brilho/ampliação de hover. Cartas bloqueadas preservam a leitura das faces/versos, pois continuam sendo informação de jogo. Instruções e título recebem superfície própria, sem texto diretamente sobre a madeira ilustrada.
+Text uses ivory/light shades over opaque dark green/blue panels; gold highlights titles/codes. Captions are at least 14 px. At the owner's request, disabled action buttons are strongly attenuated (0.25 opacity) without hover glow/scale. Locked cards remain readable because faces/backs are game information. Instructions/title have their own surfaces without text directly on illustrated wood.
 
-`shared/DisabledTooltip` mantém `disabled` nativo e usa `title`, `aria-description` e `data-disabled-reason` com o mesmo motivo fixo por estado. Um único portal opaco e limitado ao viewport evita recortes e wrappers que alterariam a geometria. Hover, toque e foco nos poderes consultáveis apresentam a explicação; controles nativamente desabilitados continuam fora da ordem de Tab, com descrição disponível ao leitor de tela. A reconexão tem prioridade sobre motivos de decisão antigos. O tooltip nativo é suspenso enquanto o personalizado aparece e restaurado somente se o motivo continuar atual. Mover o ponteiro e rolar dentro da explicação preserva sua leitura; Escape, scroll externo, resize, mudança de motivo e remoção do controle fecham a apresentação e limpam recursos, sem enviar ações.
+`shared/DisabledTooltip` preserves native `disabled` and uses `title`, `aria-description`, and `data-disabled-reason` with the same fixed reason per state. One opaque, viewport-bounded portal avoids clipping and geometry-changing wrappers. Hover, touch, and focus on inspectable powers show explanations; natively disabled controls remain outside Tab order, with descriptions available to screen readers. Reconnection takes priority over stale decision reasons. Native tooltips are suspended while custom ones show and restored only if the reason remains current. Pointer movement and scrolling inside an explanation preserve reading; Escape, external scroll, resize, reason change, and control removal close it and clean up resources without sending actions.
 
-Os cartões dos assentos têm alturas uniformes entre equipes e reservam uma área inferior de ações, inclusive quando não há botão para aquele jogador. Os controles se ancoram nessa área, com altura mínima em unidades da fonte para comportar duas linhas sem variar a posição conforme apelidos ou badges.
+Seat cards have uniform heights across teams and reserve a bottom action area even without a button for that player. Controls anchor there with a minimum height in font units to support two lines without shifting with nicknames/badges.
 
-A interface atual usa React/DOM e CSS responsivo para entrada, lobby e mesa. O acabamento autorizado antecipa a parte visual do M4 sem migrar renderizador ou acrescentar regras: `Table` compõe `CardFace`, `TableSeats`, `TableActions` e `TableHistory`. Os estilos da aplicação separam fundamentos, lobby, mesa e cartas. Assets decorativos locais e a fonte licenciada estão em `apps/web/public/`; origem e prompts em `art/README.md`. Versos representam somente contagem pública, nunca identidade de cartas ocultas. A posição de cada assento é relativa ao jogador, inclusive em 1v1. Energia e poderes vêm da projeção autoritativa do M3; não são valores simulados para preencher o layout.
+The current UI uses React/DOM and responsive CSS for entry, lobby, and table. Authorized polish brings forward M4 visuals without changing renderer/rules: `Table` composes `CardFace`, `TableSeats`, `TableActions`, and `TableHistory`. Styles separate foundations, lobby, table, and cards. Local decoration assets and the licensed font live in `apps/web/public/`; provenance/prompts are in `art/README.md`. Backs represent only public counts, never hidden card identities. Seat positions are player-relative, including 1v1. Energy/powers come from M3 authoritative projections, not simulated layout values.
 
-A partida usa uma superfície de `100dvh`, sem largura máxima de página. A mesa é o fundo da cena, com HUD e controles posicionados por regiões proporcionais e tamanhos limitados por `clamp`. Estilos de viewport, assentos, retrato e paisagem ficam separados; a altura também determina a composição. A mão e as ações permanecem dentro da tela. O menu Sala fica em um `details` nativo durante a partida, limitado a informação da sala e som; o lobby aparece somente fora do jogo, e o encerramento tem apresentação/diálogo próprios; somente histórico e painéis secundários têm rolagem interna. Não é necessário usar a API de fullscreen do navegador ou bloquear orientação.
+Matches use a `100dvh` surface without a page max-width. The table forms the scene background, with HUD/controls in proportional regions and `clamp`-bounded sizes. Viewport, seat, portrait, and landscape styles are separate; height also determines composition. Hand/actions remain onscreen. During play, the Room menu uses native `details` limited to room information/audio; the lobby appears only outside play, and completion has its own presentation/dialog. Only history/secondary panels scroll internally. Browser fullscreen or orientation locking is unnecessary.
 
-O incremento inicial do M4 mantém o renderizador React/DOM existente e acrescenta efeitos pontuais em CSS: carteado com versos anônimos, chegada das cartas, destaque de vencedor e chamas decorativas. É uma escolha técnica reversível para não migrar toda a mesa por esses efeitos; PixiJS permanece a opção prevista para cenas/efeitos que justifiquem outro renderizador. Não mantenha dois renderizadores completos. React controla HUD, botões, foco e acessibilidade, sem regras autoritativas.
+The initial M4 increment keeps the React/DOM renderer and adds targeted CSS effects: anonymous-back dealing, card arrival, winner highlights, and decorative flames. This reversible technical choice avoids migrating the whole table for those effects; PixiJS remains the planned option for scenes/effects justifying another renderer. Do not maintain two complete renderers. React controls HUD, buttons, focus, and accessibility without authoritative rules.
 
-Mostre mão própria, equipes, vira/manilhas, placar, aposta aceita/proposta separadamente, turno, energia, poder e histórico público. Distinga coberta de Máscara e explique bloqueios por energia, turno, fase, alvo ou uso anterior.
+Show the player's hand, teams, turn-up/trump cards, score, accepted/proposed wager separately, turn, energy, power, and public history. Distinguish covered cards from Mask and explain blocks due to energy, turn, phase, target, or previous use.
 
-Ofereça clique/toque sem exigir arrastar, teclado/foco, distinção além de cor, áudio desligável e movimento reduzido. Animação, som ou reflexos não podem ser necessários para compreender regras.
+Offer click/touch without mandatory dragging, keyboard/focus, distinctions beyond color, optional audio, and reduced motion. Animation, sound, or reflexes must not be necessary to understand rules.
 
-Atualize por eventos, não renderize React inteiro por frame; limite partículas e limpe sockets/listeners/timers/texturas. FPS nunca decide o resultado. Use assets próprios ou licenciados com procedência. Cosméticos não afetam área clicável, legibilidade, tempo nem informação; domínio não importa inventário cosmético.
+Update through events rather than rerendering all of React per frame; bound particles and clean up sockets/listeners/timers/textures. FPS never decides results. Use owned/licensed assets with provenance. Cosmetics do not affect hit areas, readability, time, or information; the domain does not import cosmetic inventory.
 
-O [ADR 008](adr/008-authoritative-presentation-pauses.md) define pausas autoritativas de distribuição, vaza e mão. `transition` não é pausa de reconexão: mantém `decisionId/deadline` nulos e bloqueia gameplay até o servidor abrir a decisão seguinte. O resultado temporariamente ocupa a região do placar para deixar as cartas resolvidas visíveis; o histórico mantém explicações das vazas e somente ativações públicas confirmadas. O cliente anota o resultado recebido, sem recalcular vencedor nem consultar informação privada alheia.
+[ADR 008](adr/008-authoritative-presentation-pauses.md) defines authoritative dealing/trick/hand pauses. `transition` is not a reconnection pause: it keeps `decisionId/deadline` null and blocks gameplay until the server opens the next decision. Results temporarily occupy the score region to keep resolved cards visible; history retains trick explanations and only confirmed public activations. The client records received results without recalculating winners or accessing others' private information.
 
-`TurnAnnouncement` mostra “SUA VEZ!” em uma faixa central por 2,4 s quando há turno próprio acionável. O contexto visual usa partida, assento, mão, vaza e quantidade pública de jogadas, evitando repetição por SYNC, pausa/retomada e negociação da mesma carta mesmo quando muda `decisionId`. Nova vaza do mesmo assento recebe novo aviso. Ao montar em turno próprio já aberto, apresenta o aviso atual uma vez. Timer é somente de apresentação, limpo ao mudar contexto/desmontar e protegido contra callback obsoleto; não envia comandos, captura foco, bloqueia ações nem altera deadline. Movimento reduzido mantém a faixa estática pelo mesmo intervalo, enquanto o status e selo de turno permanecem disponíveis após ela sumir.
+`TurnAnnouncement` shows “YOUR TURN!” in a central banner for 2.4 s when the local turn is actionable. Visual context uses match, seat, hand, trick, and public play count, preventing repetition on SYNC, pause/resume, or negotiation of the same card even if `decisionId` changes. A new trick led by the same seat gets a new announcement. Mounting into an open local turn announces it once. This presentation-only timer is cleared on context changes/unmount and protected against stale callbacks; it sends no commands, captures no focus, blocks no actions, and changes no deadline. Reduced motion keeps the banner static for the same interval; status/turn badge remain after it disappears.
 
-`RoundAnnouncement` apresenta o resultado recebido da vaza/mão durante a transição autoritativa, com texto relativo ao assento (“você” no 1v1, “seu time” no 2v2); empate é neutro. `MatchResult` fica montado fora do menu Sala, acompanhando snapshots inclusive no lobby. Ao observar `playing -> finished` na mesma partida, apresenta resultado central por 5 s, sem botões. O estado de apresentação é ajustado antes do commit para impedir um flash do menu final. Em seguida mostra um diálogo compacto com título, placar, motivo e somente Revanche, Voltar ao lobby e Sair da sala. Os dois primeiros preservam o comando autoritativo existente `REMATCH`: somente o anfitrião pode limpar o resultado e retornar todos ao lobby, sem marcar pronto nem iniciar automaticamente. Sair preserva `LEAVE` com ACK; desconexão desabilita os controles. Durante jogo, Sala contém somente informação da sala e áudio; não renderiza o lobby/configurações congeladas. Confetes celebram somente a transição de uma partida em andamento para vitória própria natural: `outcome.reason=completed`, fase MATCH_END e placar do vencedor confirmado >=12. O placar continua limitado a 12 pelo contrato vigente. Abandono, desistência, término sem vencedor e derrota não geram confetes.
+`RoundAnnouncement` presents the received trick/hand result during authoritative transition, with seat-relative wording (“you” in 1v1, “your team” in 2v2); ties are neutral. `MatchResult` remains mounted outside the Room menu, following snapshots even in the lobby. Observing `playing -> finished` in the same match shows a central result for 5 s without buttons. Presentation state is adjusted before commit to prevent a final-menu flash. Then a compact dialog shows title, score, reason, and only Rematch, Back to lobby, and Leave room. The first two preserve authoritative `REMATCH`: only the host may clear the result and return everyone to the lobby, without marking ready or starting automatically. Leaving preserves `LEAVE` with ACK; disconnection disables controls. During play, Room contains only room information/audio, not frozen lobby/settings. Confetti celebrates only an ongoing match transitioning to a natural local win: `outcome.reason=completed`, MATCH_END, and confirmed winner score >=12. The contract still caps score at 12. Abandonment, surrender, no-winner completion, and defeat do not produce confetti.
 
-A apresentação e o diálogo usam portal para `document.body`, evitando recortes/transformações da mesa. O título recebe foco ao encerrar; a mesa de fundo fica `inert`, e Tab/Shift+Tab ficam nos controles habilitados do diálogo final. A camada de 48 quadrados é decorativa; CSS nas cores feltro/ouro/vinho controla a queda por até 5 s. As posições são decoração determinística independente da entropia do domínio. A camada tem `aria-hidden` e `pointer-events:none`; não bloqueia controles nem movimenta foco. A primeira carga de uma partida já encerrada abre diretamente o diálogo final. SYNC, reconexão durante a apresentação e snapshots repetidos não prolongam o intervalo nem reiniciam confetes; revanche/desmontagem cancelam o timer, e callbacks obsoletos não ocultam outra celebração. Movimento reduzido mantém os mesmos 5 s de leitura, com título estático e partículas ocultas. O observador de áudio usa o vencedor público e a paridade do assento, priorizando partida sobre mão e mão sobre vaza para tocar um único resultado, com tons distintos de vitória/derrota e empate neutro.
+Presentation/dialog use a `document.body` portal to avoid table clipping/transforms. The title receives focus on completion; the background table is `inert`, with Tab/Shift+Tab limited to enabled final-dialog controls. The 48-square layer is decorative; felt/gold/wine CSS colors animate falling for up to 5 s. Positions are deterministic decoration independent of domain entropy. The layer has `aria-hidden` and `pointer-events:none`, without blocking controls or moving focus. Loading an already finished match opens the final dialog directly. SYNC, reconnection during presentation, and repeated snapshots neither extend the interval nor restart confetti; rematch/unmount cancel the timer, and stale callbacks cannot hide another celebration. Reduced motion retains 5 s of reading with static title/hidden particles. The audio observer uses public winner/seat parity, prioritizing match over hand over trick for a single result sound, with distinct victory/defeat tones and neutral ties.
 
-`shared/feedback` sintetiza sons próprios via Web Audio, sem dependências ou assets remotos. `App` observa snapshots autorizados e reseta o observador ao perder conexão; sequências repetidas, saltos e primeira carga não reproduzem sons históricos. Sons de poder e resultado dependem do snapshot, enquanto seleção/clique são apresentação local. O engine desbloqueia após gesto, tolera indisponibilidade e limpa grafo/listeners ao desmontar. Volume e mute ficam em `truco.audio`; controles nativos aparecem no menu/lobby e dentro de “Sala” durante a partida. Movimento reduzido remove animações e chamas extras, mantendo resultado textual e intervalos de leitura.
+`shared/feedback` synthesizes original Web Audio sounds without remote dependencies/assets. `App` observes authorized snapshots and resets its observer on disconnection; repeated sequences, gaps, and first load do not replay historical sounds. Power/result sounds depend on snapshots; selection/click are local presentation. The engine unlocks after a gesture, tolerates unavailability, and cleans graph/listeners on unmount. Volume/mute live in `truco.audio`; native controls appear in menu/lobby and Room during play. Reduced motion removes extra animations/flames while retaining text results and reading intervals.
 
-## Persistência, observabilidade e operação
+## Persistence, observability, and operations
 
-Sem consulta de banco por jogada no MVP. Persistência futura separa contas/cosméticos/resultados do estado vivo; término é idempotente por `matchId`. Transações não atravessam decisões humanas.
+No database query per move in the MVP. Future persistence separates accounts/cosmetics/results from live state; completion is idempotent by `matchId`. Transactions do not span human decisions.
 
-Logs operacionais: correlação, fase, versão, comando, duração e código de erro, sem payload integral, tokens, cartas ou sementes. Auditoria privada/reprodução tem canal, acesso e retenção separados; não use `console.log(gameState)`.
+The M5 setup (2026-10-22) materializes only persistence schemas/migrations in `apps/server/database/schema/`. `app.jobs` is a durable reward queue with a result FK and transactional empty NOTIFY trigger; no Redis, extension, or connected worker. In a later increment, result/job will be written atomically, and grants/totals/job completion will share a short idempotent transaction. The listener needs a dedicated connection, query-based recovery, and polling; NOTIFY is not durable delivery. The authoritative room queue remains in memory. See [database.md](database.md) for models, retention, and limits and [ADR 011](adr/011-m5-postgresql-foundation.md) for the decision.
 
-Meça salas, latência, rejeições, duplicatas, desconexões, duração, abandono e uso de poderes. Não use IDs de jogador/sala como labels de métricas. Analytics externos exigem decisão explícita.
+Increment 2 adds `jobs`: pure retry domain, an application worker with queue/scheduler/event ports, and a PostgreSQL adapter in `adapters/outbound`. The adapter requires an explicit SQL client/transactional processor; imports start no resources. SKIP LOCKED selection keeps a row lock, applies the processor in a savepoint, and completes in the same transaction; rollback/failures and old leases have tested handling. The worker coalesces wakes, queries on startup/reconnection and through polling, bounds rounds, and shuts down awaiting active work. No HTTP/WS bootstrap integration, result producer, or real grants. [ADR 012](adr/012-postgresql-job-processing.md) records guarantees and SQL-effect limits.
 
-Limite recursos, expire salas e isole clientes lentos. Deploy futuro drena partidas e deixa de aceitar salas novas. Não presuma que funções HTTP efêmeras mantêm WS/salas em memória.
+Operational logs: correlation, phase, revision, command, duration, and error code without full payloads, tokens, cards, or seeds. Private audit/reproduction has separate channels, access, and retention; never use `console.log(gameState)`.
 
-Escala horizontal exige roteamento, escritor único por sala e recuperação protegida contra dupla autoridade; Redis Pub/Sub não resolve isso sozinho. Distribua somente após necessidade medida.
+Measure rooms, latency, rejections, duplicates, disconnects, duration, abandonment, and power usage. Do not use player/room IDs as metric labels. External analytics require an explicit decision.
 
-## Bootstrap atual
+Bound resources, expire rooms, and isolate slow clients. Future deployment drains matches and stops accepting new rooms. Do not assume ephemeral HTTP functions preserve WS/in-memory rooms.
 
-A base contém cinco workspaces (`web`, `server`, `game-core`, `game-protocol`, `game-sim`), dependências fixadas, TypeScript por ambiente, Biome e checagem de fronteiras com parser Oxc, além de smoke tests. Use Bun Workspaces sem Turborepo; considere orquestração/cache adicionais quando houver ganho medido. A árvore de módulos acima continua sendo referência de evolução: o core implementa as regras-base do M1; o servidor e o cliente funcional do M2 já usam salas autoritativas, transporte e projeções. A estrutura acima continua orientação para módulos futuros.
+Horizontal scaling requires routing, a single writer per room, and recovery protected against dual authority; Redis Pub/Sub alone does not solve this. Distribute only after a measured need.
 
-Bun está fixado em 1.4.3. Biome 2.5.15 substitui ESLint/Prettier. TypeScript 7.0.2, Vite 8.3.4 e plugin React 6.1.2 usam as versões estáveis atuais publicadas na revisão; as demais dependências diretas também foram conferidas contra a tag `latest` estável e permanecem fixadas no lockfile. Prefira versões estáveis atuais compatíveis, sem downgrade por conveniência nem versões canary/RC sem necessidade autorizada.
+## Current bootstrap
 
-A instalação limpa dos navegadores Playwright foi validada com Bun 1.4.3, removendo a exceção anterior de Node. Não desabilite validação TLS. Veja comandos e limites no [README](../README.md).
+The foundation contains five workspaces (`web`, `server`, `game-core`, `game-protocol`, `game-sim`), pinned dependencies, environment-specific TypeScript, Biome, Oxc-parser boundary checks, and smoke tests. Use Bun Workspaces without Turborepo; consider extra orchestration/caching when measured gains justify it. The module tree above remains an evolution reference: the core implements M1 base rules; M2 server/client already use authoritative rooms, transport, and projections. The structure still guides future modules.
 
-`bun run lint` executa Biome e `check:architecture`. Biome valida padrões de código, hooks e globais proibidos; a checagem de arquitetura usa `oxc-parser` para imports e APIs de tempo/entropia, sem executar código analisado ou depender de ESLint. Ela não é sandbox nem prova completa de ausência de ciclos; o teste do grafo verifica ciclos entre workspaces. As regras de quantidade de linhas seguem os limites de revisão já definidos.
+Bun is pinned to 1.4.3. Biome 2.5.15 replaces ESLint/Prettier. TypeScript 7.0.2, Vite 8.3.4, and React plugin 6.1.2 use the current stable versions published at the time of review; other direct dependencies were also checked against stable `latest` tags and remain pinned in the lockfile. Prefer compatible current stable versions without convenience downgrades or unauthorized canary/RC releases.
 
-## Registro da decisão
+Clean Playwright browser installation was validated with Bun 1.4.3, removing the earlier Node exception. Do not disable TLS validation. See the [README](../README.md) for commands/limits.
 
-A adoção de Bun e da organização modular está registrada em [ADR 001](adr/001-bun-modular-architecture.md). Este documento contém as instruções vigentes; a ADR registra motivação e consequências. Ambos descrevem uma estrutura-alvo, não implementação concluída.
+`bun run lint` runs Biome and `check:architecture`. Biome checks patterns, hooks, and forbidden globals; architecture checking uses `oxc-parser` for imports and time/entropy APIs without executing analyzed code or depending on ESLint. It is neither a sandbox nor complete proof of acyclicity; graph tests check workspace cycles. Line counts follow the review limits above.
 
-A escolha de Bun Test e os limites do bootstrap estão em [ADR 002](adr/002-bun-test-bootstrap.md).
+## Decision record
 
-A migração para Biome e atualização das dependências está registrada em [ADR 003](adr/003-biome-current-dependencies.md).
+Bun adoption and modular organization are recorded in [ADR 001](adr/001-bun-modular-architecture.md). This document contains current instructions; the ADR records motivation/consequences. Both describe a target structure, not completed implementation.
 
-## Infraestrutura local de persistência
+[ADR 002](adr/002-bun-test-bootstrap.md) records Bun Test and bootstrap limits.
 
-Docker Compose fornece PostgreSQL 18.6 para desenvolvimento e uma instância de testes isolada. Drizzle usa o driver SQL nativo de Bun; migrações e seeds locais ficam em `apps/server/database`, fora do core e da aplicação. A migração inicial reserva apenas o namespace `app`, sem tabelas de produto. O banco não é requisito de execução do motor nem armazenamento vivo das salas.
+[ADR 003](adr/003-biome-current-dependencies.md) records the Biome migration and dependency update.
 
-Leia [database.md](database.md) antes de alterar schemas, conexões, seeds ou fixtures. `test:coverage` inclui testes reais de banco, por isso o check completo e o CI requerem Docker. Testes unitários do domínio continuam independentes. A decisão e seus limites estão em [ADR 004](adr/004-local-postgresql-seeds.md).
+## Local persistence infrastructure
 
-## Motor de regras-base (M1)
+Docker Compose provides PostgreSQL 18.6 for development and an isolated test instance. Drizzle uses Bun's native SQL driver; local migrations/seeds live in `apps/server/database`, outside core/application. The initial migration reserves only the `app` namespace without product tables. The database is neither an engine runtime requirement nor live room storage.
 
-`game-core` expõe subpaths explícitos para cartas, distribuição, vazas, mãos, apostas, composição da partida e projeções. As funções são puras, retornam dados novos e rejeitam entradas inválidas com códigos estáveis sem incorporar cartas ao erro. São APIs internas tipadas; transporte deve validar payloads desconhecidos e nunca serializar esses dados privados diretamente.
+Read [database.md](database.md) before changing schemas, connections, seeds, or fixtures. `test:coverage` includes real database tests, so full checks/CI require Docker. Domain unit tests remain independent. See [ADR 004](adr/004-local-postgresql-seeds.md) for the decision/limits.
 
-O embaralhamento recebe 39 índices inteiros do adaptador confiável (limites exclusivos 40 até 2) e aplica Fisher–Yates num baralho novo. A origem criptográfica e uniforme desses índices será responsabilidade do adaptador de produção; nenhuma entropia vem do cliente. A distribuição usa rodadas de uma carta por assento, a partir do iniciador, com a vira após as três rodadas. Essa ordem interna é uma escolha técnica determinística e reversível, não uma alteração de regra ou garantia de segurança dos IDs.
+## Base rules engine (M1)
 
-O resolvedor de vaza exige uma vaza completa em ordem horária, rejeita duplicatas/vira e cobertas na primeira vaza. O resolvedor de mão aplica a tabela normativa e rejeita histórias com jogadas após término antecipado. A composição em `match` valida posse, fases, ordem, cobertas em mãos especiais, apostas e pontuação. Cada decisão fecha uma revisão; rejeição e entrega repetida com revisão antiga não modificam o estado. `finishHand` é auxiliar interno e não integra a API exportada. O motor não constitui servidor jogável.
+`game-core` exposes explicit subpaths for cards, dealing, tricks, hands, betting, match composition, and projections. Functions are pure, return new data, and reject invalid inputs with stable codes without putting cards into errors. These are typed internal APIs; transport must validate unknown payloads and never serialize this private data directly.
 
-A API de composição tem estados `TURN`, `RAISE_RESPONSE`, `ELEVEN_DECISION`, `HAND_END` e `MATCH_END`. Distribuição e resolução são passos síncronos atômicos, sem aguardar cliente/animação. `dealNextHand` exige `HAND_END`, rotaciona o iniciador e recebe novas escolhas de embaralhamento; a distribuição nunca ocorre após 12 pontos. A recompensa original é preservada em `HAND_ENDED`, mesmo com placar limitado a 12.
+Shuffling receives 39 integer indices from the trusted adapter (exclusive bounds 40 down to 2) and applies Fisher–Yates to a new deck. The production adapter is responsible for cryptographic, uniform index generation; no entropy comes from the client. Dealing uses one-card rounds per seat, starting with the leader, with the turn-up card after three rounds. This internal order is deterministic/reversible, not a rule change or ID-security guarantee.
 
-Projeções públicas e individuais são construídas por allowlist. Mãos ocultas têm apenas assento/contagem; cobertas não têm carta nem referência física para terceiros, inclusive em históricos e término. Onze mantém a visibilidade já concedida aos parceiros na mesma mão; 11×11 não concede essa visibilidade. O chamador autentica o destinatário. O protocolo de rede futuro deve adaptar essas visões, sem exportar o estado autoritativo.
+The trick resolver requires a complete clockwise trick, rejecting duplicates/the turn-up card and covered cards in the first trick. The hand resolver applies the normative table and rejects histories with plays after early completion. `match` composition validates ownership, phases, order, special-hand covered cards, wagers, and scoring. Each decision closes a revision; rejection and repeated delivery with an old revision do not mutate state. `finishHand` is an internal helper outside the exported API. The engine alone is not a playable server.
 
-O M1 foi entregue sem campos ou execução de poderes/energia. O M3 acrescentou essas transições respeitando `hand.kind`, mantendo mãos especiais sem sorteios ou regeneração; não crie um preset de produto sem poderes com base neste estágio do motor. Identificação de partida, sessões, filas, deduplicação por comando com replay de ACK e timers pertencem à aplicação M2. Veja [ADR 005](adr/005-base-match-engine.md).
+The composition API has `TURN`, `RAISE_RESPONSE`, `ELEVEN_DECISION`, `HAND_END`, and `MATCH_END` states. Dealing/resolution are synchronous atomic steps without waiting for clients/animation. `dealNextHand` requires `HAND_END`, rotates the leader, and receives new shuffle choices; dealing never occurs after 12 points. `HAND_ENDED` preserves the original reward even when the score is capped at 12.
 
-## Autoridade e transporte implementados no M2
+Public/individual projections are allowlisted. Hidden hands expose only seat/count; covered cards have no card or physical reference for others, including history/completion. Eleven preserves partner visibility already granted within the hand; 11×11 does not grant it. The caller authenticates the recipient. Future network protocol must adapt these views without exporting authoritative state.
 
-A entrada de salas delega à `RoomApplication`; os casos de uso, o executor de comandos e o serviço de ciclo de vida compartilham a mesma autoridade operacional. `serializeRoom` mantém a fila limitada e recupera após rejeições. Um comando recebido no deadline primeiro resolve a expiração e depois valida seu contexto; callbacks de timer carregam a decisão e não atingem mãos/revanches seguintes. A identidade da sala na fila é verificada também após remoção, impedindo callbacks de uma sala antiga de escrever em outra com o mesmo código.
+M1 shipped without power/energy fields or execution. M3 added these transitions while respecting `hand.kind`, keeping special hands free of draws/regeneration; do not derive a powerless product preset from this engine stage. Match IDs, sessions, queues, command deduplication with ACK replay, and timers belong to the M2 application. See [ADR 005](adr/005-base-match-engine.md).
 
-A aplicação de salas expõe casos de uso em `use-cases/membership`, `use-cases/lobby` e `use-cases/match`. `services/` coordena execução, publicação e agendamento; `state/` descreve o envelope operacional, separado do estado de domínio; `ports/` declara os contratos de efeitos e acesso à autoridade. `solo/` preserva a política de bot com visão limitada e ferramentas de desenvolvimento. `messaging/` constrói projeções internas e despacha comandos. Os consumidores externos usam as entradas públicas dos módulos. O repositório de salas retém a instância viva com sua fila; uma futura implementação durável exige novo desenho de consistência, não apenas trocar `Map` por SQL.
+## Authority and transport implemented in M2
 
+Room entry delegates to `RoomApplication`; use cases, command executor, and lifecycle service share operational authority. `serializeRoom` keeps the queue bounded and recovers after rejections. A command received at the deadline first resolves expiration, then validates context; timer callbacks carry the decision and cannot affect later hands/rematches. Queued room identity is checked even after removal, preventing an old room callback from writing to a different room with the same code.
 
-A entrada `@truco/game-protocol` contém schemas estritos de envelope, ações, configurações e snapshots, sem dependência do estado secreto. Os subpaths públicos do core são os declarados no manifesto; a checagem de arquitetura admite somente essas entradas e mantém o core inteiro proibido ao navegador. O domínio continua puro. A aplicação recebe relógio, entropia e agendamento por `Ports`; `rooms/adapters/outbound/runtime.ts` implementa UUIDs, rejection sampling criptográfico sem viés e timers canceláveis sobre tempo epoch monotônico.
+The room application exposes `use-cases/membership`, `use-cases/lobby`, and `use-cases/match`. `services/` coordinates execution, publication, and scheduling; `state/` describes the operational envelope separately from domain state; `ports/` declares effect/authority-access contracts. `solo/` preserves limited-view bot policy and development tools. `messaging/` builds internal projections and dispatches commands. External consumers use public module entry points. The room repository retains the live instance and queue; durable implementation requires a new consistency design, not merely replacing `Map` with SQL.
 
-`sequence` ordena snapshots completos; `roomRevision` fecha mudanças de lobby; `match.revision` e `decisionId` fecham decisões de gameplay. Presença altera sequência sem invalidar revisão de gameplay. Antes de efeitos ou rejeição de versão, uma requisição autenticada consulta o cache de `sessionId/matchId/commandId`: mesmo conteúdo recebe o ACK/erro original; conteúdo diferente é recusado. O cache guarda 512 respostas recentes por sala, e contexto/revisão protegem replay após evicção. O cliente usa UUID por comando, ignora snapshots repetidos/antigos e nunca repete automaticamente uma intenção após reconectar. Ao recuperar foco ou visibilidade, solicita um snapshot autorizado por `SYNC`, sem reaplicar intenções; os listeners são removidos ao fechar a conexão. Snapshots completos já ressincronizam lacunas; uma ação `SYNC` permite solicitá-los explicitamente.
+`@truco/game-protocol` contains strict envelope, action, configuration, and snapshot schemas without secret-state dependencies. Core public subpaths are declared in its manifest; architecture checks allow only those entries and prohibit the entire core in browser code. The domain remains pure. The application receives clock, entropy, and scheduling through `Ports`; `rooms/adapters/outbound/runtime.ts` implements UUIDs, unbiased cryptographic rejection sampling, and cancelable timers over monotonic epoch time.
 
-`DecisionClock` mantém o tempo restante e orçamento de proteção por assento. Só uma decisão dependente de ausente pausa; respostas de equipe usam política “qualquer parceiro”. Ausências simultâneas consomem orçamentos em paralelo. Após a proteção, o tempo restante volta a correr; quando cartas estão sem relógio e o ausente esgotou a proteção, a decisão recebe fallback imediato. Novas decisões já expiradas são agendadas para a próxima execução da fila, sem recursão nem bloqueio indefinido. Timeouts compartilhados contam para os assentos elegíveis da equipe; uma resposta válida zera a sequência do autor. No terceiro timeout consecutivo exigido do mesmo assento, a equipe perde por abandono.
+`sequence` orders full snapshots; `roomRevision` closes lobby changes; `match.revision` and `decisionId` close gameplay decisions. Presence changes sequence without invalidating gameplay revision. Before effects or revision rejection, authenticated requests query the `sessionId/matchId/commandId` cache: identical content receives its original ACK/error; different content is rejected. The cache stores 512 recent responses per room, while context/revision protect replay after eviction. The client uses UUIDs per command, ignores repeated/old snapshots, and never automatically repeats intents after reconnection. On focus/visibility recovery it requests an authorized snapshot through `SYNC` without replaying intents; listeners are removed on connection close. Full snapshots already resynchronize gaps; `SYNC` requests them explicitly.
 
-Configuração casual aceita tempos entre 1 e 120 segundos e pode desligar apenas o timer de carta. Competitivo congela carta/resposta em 20/15 s e proteção em 30 s; casual tem defaults 30/20 s e proteção de 60 s. M3 acrescenta preparação configurável no casual (default 15 s) e fixa em 10 s no competitivo. Uma sala sem conexões expira após o período de proteção do preset, sem vencedor e sem autojogadas ilimitadas. Outras salas/filas não dependem dessa espera.
+`DecisionClock` tracks remaining time and protection budget per seat. Only decisions requiring an absent player pause; team responses use an “any teammate” policy. Simultaneous absences consume budgets in parallel. After protection, remaining time resumes; with untimed cards and exhausted protection, decisions receive immediate fallback. Already-expired new decisions are scheduled for the next queue execution without recursion or indefinite blocking. Shared timeouts count toward eligible team seats; a valid response resets its author's sequence. On the third consecutive required timeout for the same seat, that team loses by abandonment.
 
-Lobby permite mudar somente para assento livre antes da partida; assentos ocupados são recusados pelo servidor mesmo quando o ocupante ainda não está pronto. Mudanças de assento/configuração/ingresso retiram confirmações de pronto. O anfitrião inicia apenas com todos presentes e prontos. Saída de lobby/final remove associação e transfere anfitrião; durante partida usa-se desistência explícita. Revanche volta ao lobby com mesmos assentos/configuração e nova confirmação de pronto, gerando novo `matchId` ao iniciar. A saída envia ACK antes de fechar o socket.
+Casual configuration accepts 1–120 s and may disable only the card timer. Competitive fixes card/response at 20/15 s and protection at 30 s; casual defaults to 30/20 s with 60 s protection. M3 adds configurable casual preparation (default 15 s) and fixes competitive at 10 s. A room without connections expires after preset protection, without winner or unlimited automatic plays. Other rooms/queues do not depend on this wait.
 
-Há cliente React DOM com mesa, lobby e reconexão limitada com backoff, usando proxy Vite `/api` e cookie de sessão; não existe estado autoritativo compartilhado entre navegadores. O visual é provisório em verde/ouro, sem assets gerados e sem antecipar o acabamento do M4. O backend não usa banco por jogada e não recupera partidas após reinício. Veja [ADR 006](adr/006-room-authority-and-reconnection.md) e as configurações no README.
+The lobby allows moving only to free seats before play; the server rejects occupied seats even if their occupant is not ready. Seat/configuration/join changes clear readiness. Hosts start only when everyone is present/ready. Leaving lobby/completion removes membership and transfers hosting; active play requires explicit surrender. Rematch returns to the lobby with the same seats/settings and fresh readiness, generating a new `matchId` on start. Leaving sends ACK before socket closure.
 
-## Poderes e simulações implementados no M3
+A React DOM client provides table, lobby, and bounded reconnect backoff through Vite `/api` proxy and session cookie; browsers do not share authoritative state. Its original green/gold appearance was provisional without generated assets or M4 polish. The backend does not query a database per move or recover matches after restart. See [ADR 006](adr/006-room-authority-and-reconnection.md) and README configuration.
 
-`powers/powers.ts` concentra sorteio, energia e validação de ativação; `powers/preparation.ts` sela intenções e resolve o lote. `PREPARATION` é uma fase explícita; os comandos de carta carregam o poder opcional atomicamente. `PowerSetup` é privado, fornecido pelo adaptador, e não integra o protocolo. A entrada interna sem poderes permanece para regressões-base e controle experimental, nunca como preset de sala. A [ADR 007](adr/007-sealed-powers-and-simulation.md) detalha amostragem, compatibilidade e limites.
+## Powers and simulations implemented in M3
 
-`TablePowers` separa seleção local e confirmação do servidor. A carta usa arte própria decorativa; custo, nome, energia e estado são HTML derivados da projeção, sem dados privados na imagem. O histórico ocupa seu painel próprio; poderes ficam numa carta em `Table/Powers/Card`, próxima da mão, com reserva de energia. O passe da preparação fica na área de ações, junto da contagem de prontos, preservando espaço para a carta em telas pequenas. A preparação começa recolhida. Clicar em um poder disponível seleciona os alvos diretamente na mesa: Espião destaca versos adversários; Segunda Chance habilita as cartas próprias para troca; Impulso/Máscara destacam cartas próprias elegíveis na sua vez. `Hand` contém a mão e a orientação contextual, sem selects ou painel para escolher cartas. `Seats/Cards` contém os versos clicáveis e a observação privada do Espião. Detalhes abrem sob demanda, fecham por botão/Esc e restauram foco à carta. A abertura é vinculada ao contexto da decisão; um contexto novo descarta o painel anterior. Seleção de poder de turno fica vinculada ao ID da decisão e é descartada quando ele muda. O servidor revalida custo, janela, alvo e posse independentemente dos bloqueios da interface.
+`powers/powers.ts` centralizes assignment, energy, and activation validation; `powers/preparation.ts` seals intents and resolves the batch. `PREPARATION` is explicit; card commands carry optional power atomically. `PowerSetup` is private, supplied by the adapter, and outside the protocol. The internal powerless entry remains for base regressions/experimental control, never a room preset. [ADR 007](adr/007-sealed-powers-and-simulation.md) details sampling, compatibility, and limits.
 
-`game-sim` depende somente das entradas públicas do core. As políticas recebem `PlayerView`; o executor privado cuida de fases, entropia e métricas. Fontes separadas por mão mantêm distribuições pareadas, com braços habilitado/controle e permutação de assentos/equipes. CLI local não integra o servidor nem exporta seeds de produção.
+`TablePowers` separates local selection from server confirmation. Cards use original decorative art; cost, name, energy, and state are projection-derived HTML without private image data. History has its own panel; powers occupy `Table/Powers/Card` near the hand with energy reserve. Preparation pass sits in actions beside ready counts, preserving small-screen card space. Preparation starts collapsed. Clicking an available power selects targets directly on the table: Spy highlights opposing backs; Second Chance enables own cards for exchange; Boost/Mask highlight eligible own cards on the local turn. `Hand` holds cards/contextual guidance without selects or a card-selection panel. `Seats/Cards` holds clickable backs and private Spy observations. Details open on demand, close by button/Esc, and restore focus to the card. Opening is tied to decision context; new context discards the old panel. Turn-power selection is tied to decision ID and cleared when it changes. The server revalidates cost, window, target, and ownership independently of UI blocks.
 
-## Organização física do frontend
+`game-sim` depends only on public core entry points. Policies receive `PlayerView`; the private runner handles phases, entropy, and metrics. Separate per-hand sources maintain paired distributions, enabled/control arms, and seat/team permutations. The local CLI does not integrate with the server or export production seeds.
 
-`app` contém somente montagem, composição (`App/`) e estilos globais. `features/menu` mantém apenas a página e seu teste em `pages/EntryMenu`, com Profile/Icon em `components/` e estilos da página em `styles/`, e expõe a entrada pela sua API pública; `features/room` expõe Lobby, Table e CardFace. Os nomes exportados dos componentes foram preservados, enquanto os arquivos seguem o padrão de diretório com `index.tsx`. O formato não exige um teste isolado para cada componente decorativo: os testes de composição existentes continuam junto do pai que exercita esses filhos.
+## Physical frontend organization
 
-Estilos pertencem à página/componente correspondente, incluindo adaptações da mesa e controles do lobby. `app/styles/index.css` é o único manifesto de carregamento: mantém explicitamente a cascata existente, inclusive a posição dos estilos globais entre as camadas. Não se importa CSS adicional nos componentes, evitando depender da ordem dos imports JavaScript. A ordem pode ser simplificada numa revisão visual própria; esta reorganização preserva o CSS gerado.
+`app` contains only mounting, composition (`App/`), and global styles. `features/menu` keeps only the page/test in `pages/EntryMenu`, Profile/Icon in `components/`, and page styles in `styles/`, exposing entry through its public API; `features/room` exposes Lobby, Table, and CardFace. Exported component names remain unchanged while files follow the `index.tsx` directory pattern. This does not require isolated tests for every decorative component: existing composition tests remain beside the parent exercising them.
 
-`room/utils/cards.ts` contém tipo de apresentação, naipes e rótulos de cartas, utilizados por mesa, assentos, histórico e poderes. Não importa JSX nem domínio privado. HTTP/WS e preferência de apelido permanecem compartilhados porque atendem entrada e sala; mover esses serviços para uma das features criaria uma dependência artificial entre elas.
+Styles belong to their page/component, including table adaptations/lobby controls. `app/styles/index.css` is the sole loading manifest: it explicitly preserves the existing cascade, including global style placement among layers. Components do not import extra CSS, avoiding JavaScript import-order dependence. Cascade order may be simplified in a separate visual review; this reorganization preserves generated CSS.
 
-A ilustração dos poderes usa um viewport quadrado (`aspect-ratio: 1`) para recortar o atlas 2×2 sem deformar os eixos. Moldura, título, custo e estado são elementos separados; o custo fica ancorado dentro da ilustração. Em celulares baixos, a carta vira uma miniatura com nome, arte e custo, reservando o rodapé para energia; o estado continua descrito no botão acessível e a seleção mantém contorno próprio. O clique na carta preserva os detalhes e o resultado privado do Espião. A carta fica à esquerda da mão, menor. Em dispositivos com hover e ponteiro fino (largura acima de 600 px), uma manga recorta aproximadamente a metade inferior em repouso; hover, foco, detalhes abertos ou poder selecionado revelam a carta inteira. A energia permanece visível. O recorte não altera a geometria quadrada da arte nem a semântica do botão. Telas de toque mantêm a carta inteira, sem um toque adicional para revelar. Em retrato e paisagem, a mão e a identificação própria reservam espaço lateral para o poder; movimento reduzido remove a transição.
+`room/utils/cards.ts` holds presentation types, suits, and card labels used by table, seats, history, and powers. It imports neither JSX nor private domain data. HTTP/WS and nickname preference remain shared because they serve entry/room; moving them into one feature would create artificial dependency.
 
-A projeção de poderes mantém `power: null` nos assentos alheios até uma ativação pública aceita na mão, inclusive para o parceiro. Somente o dono recebe a atribuição ainda não usada. O campo nulo também cobre ausência de poder nas especiais; a UI usa o tipo da mão para distinguir “Poder oculto” de “Sem poder”. Reconexão reaplica a projeção por destinatário, sem um snapshot público enriquecido no cliente. A UI lista poderes revelados e as ativações, preservando a carta própria.
+Power illustrations use a square viewport (`aspect-ratio: 1`) to crop the 2×2 atlas without distorting axes. Frame, title, cost, and status are separate; cost anchors inside the illustration. On short mobile screens, the card becomes a miniature with name/art/cost, reserving the footer for energy; state remains in the accessible button description and selection retains its outline. Card clicks preserve details/private Spy results. The smaller card sits left of the hand. Hover/fine-pointer devices above 600 px use a sleeve clipping roughly the bottom half at rest; hover, focus, open details, or selection reveal the full card. Energy remains visible. Clipping changes neither square art geometry nor button semantics. Touch screens keep the whole card without an extra reveal tap. Portrait/landscape hand and local identity reserve lateral power space; reduced motion removes the transition.
 
-A seleção de poder é local, ligada a partida/mão/decisão/atribuição/prontidão e descartada ao pausar ou mudar o contexto. Esc, botão de cancelamento ou novo clique no poder cancelam sem comando; foco retorna ao poder quando o cancelamento parte de um alvo. A instrução fica junto da mão; retratos baixos e paisagem compacta usam a área de status existente para preservar a mesa. Controles de carta coberta não aparecem durante a preparação; a barra de passe se compacta em paisagem. Clique numa carta de troca envia `PREPARE`; Impulso/Máscara continuam atômicos com `PLAY_CARD`. Não há mudança de autoridade ou protocolo.
+Power projections keep `power: null` on other seats until an accepted public activation in the hand, including teammates. Only the owner receives unused assignments. Null also covers absent powers in special hands; UI distinguishes “Hidden power” from “No power” by hand type. Reconnection reapplies recipient-specific projection without a client-enriched public snapshot. The UI lists revealed powers/activations while preserving the local card.
 
-No Espião, os versos continuam anônimos: o clique escolhe o adversário e a posição visual de apresentação da observação, sem escolher uma identidade física nem enviar um índice de carta ao servidor. A carta aleatória continua sendo determinada pelo servidor e revelada somente após resolver a preparação. A face ocupa o verso clicado e permanece em um dos slots restantes após outra carta aberta ser jogada. Se esse índice deixar de existir, a face ocupa o último slot. Quando há uma jogada ainda opaca do alvo, a UI mostra separadamente a memória textual “Visto”, com aviso de que pode já ter sido jogada. Esse deslocamento depende apenas da opacidade pública da jogada, sem analisar sua identidade oculta. Reconexão restaura a observação da projeção privada; a posição visual pode voltar ao primeiro verso. Nenhum ID permite rastrear uma carta mascarada/coberta.
+Power selection is local, tied to match/hand/decision/assignment/readiness, and discarded on pause/context change. Esc, cancel, or clicking the power again cancels without a command; target-origin cancellation restores focus to the power. Guidance sits near the hand; short portrait/compact landscape use the existing status area to preserve table space. Covered-card controls are absent during preparation; pass controls compact in landscape. Exchange-card clicks send `PREPARE`; Boost/Mask remain atomic with `PLAY_CARD`. Authority/protocol do not change.
 
-## HUD de turno e poder consumido
+For Spy, backs remain anonymous: clicks choose an opponent and visual observation position without selecting a physical identity or sending a card index to the server. The server still determines the random card, revealed only after preparation resolves. Its face occupies the clicked back and remains in a remaining slot after another open card is played. If that index disappears, it moves to the last slot. After an opaque target play, the UI separately shows textual “Seen” memory warning it may already have been played. This shift depends only on public opacity, not hidden identity. Reconnection restores private-projection observation; visual position may return to the first back. No ID permits tracking masked/covered cards.
 
-A carta de poder é renderizada enquanto o próprio assento não tem `used` confirmado na projeção. Seleção, intenção selada ainda pendente e rejeição não a removem. O indicador de energia permanece no dock, e Espião mantém a face privada na mão adversária/memória histórica. Na mão seguinte, a nova atribuição volta a aparecer. Não há mudança no sorteio, consumo ou sigilo do servidor.
+## Turn HUD and consumed power
 
-O status da partida fica no topo, abaixo do placar, com tipo de mão e tempo estimado quando aplicável. O avatar próprio recebe “Sua vez” somente em TURN do próprio assento, partida ativa e sem pausa. A coluna de ações remove o painel redundante “Jogar carta”; Truco e decisões mantêm alvos de toque de pelo menos 44 px, em tamanho compacto. A mão continua sendo o alvo de clique/toque para jogar, com teclado e bloqueios existentes.
+The power card renders until the local seat has confirmed `used` in the projection. Selection, pending sealed intent, and rejection do not remove it. Energy remains in the dock, and Spy retains the private face in the opponent's hand/history memory. The next hand displays its new assignment. Server assignment, consumption, and secrecy do not change.
 
-## Proporção das cartas de jogo
+Match status sits at the top below the score, with hand type and estimated time where applicable. The local avatar receives “Your turn” only during its active, unpaused TURN. Actions remove the redundant “Play card” panel; Truco/decisions retain compact touch targets of at least 44 px. The hand remains the click/touch play target with existing keyboard access/blocks.
 
-Faces e versos compartilham `--playing-card-ratio: 2 / 3`, compatível com a arte original do verso (1024×1536). Slots da mão, assentos, mesa e vira usam aspect-ratio e altura automática; regras responsivas ajustam somente a largura, com limites proporcionais à altura da tela quando necessário. O verso usa contain para preservar a imagem. A observação do Espião, inclusive a face ampliada no celular, usa a mesma proporção; a área clicável de alvo permanece independente, com pelo menos 44×44 px. As rotações decorativas dos versos não mudam sua caixa de layout nem revelam identidades.
+## Playing-card proportions
 
-A observação do Espião no assento é removida quando as jogadas autorizadas do alvo (vaza atual ou concluídas) contêm a mesma carta, comparando assento, valor e naipe. A condição é derivada do snapshot, inclusive após reconexão, sem estado de rastreamento adicional. A contagem pública zero também remove a observação. Uma carta diferente ou uma jogada ainda opaca não a remove nem revela identidades privadas.
+Faces/backs share `--playing-card-ratio: 2 / 3`, matching original back art (1024×1536). Hand, seat, table, and turn-up slots use aspect-ratio/automatic height; responsive rules change only width, bounded relative to screen height when necessary. Backs use contain to preserve art. Spy observation, including enlarged mobile faces, uses the same ratio; its independent hit target remains at least 44×44 px. Decorative back rotation does not change layout bounds or reveal identities.
 
-O destaque da carta vencedora usa o `nextLeader` da vaza confirmada, sem marcar vencedora em empate: cresce até 20%, treme por 900 ms e permanece 12% maior até terminar a apresentação autoritativa. O áudio de resultado existente inicia no mesmo snapshot, respeitando volume/mute e sem repetir em SYNC; o som/aviso do turno aguarda a liberação pelo servidor. A faixa de resultado ocupa o painel superior para não encobrir as cartas. Movimento reduzido mantém somente contorno e brilho estáticos. A faixa “Sua vez” tem largura e título cerca de um terço menores; a legenda mantém tamanho legível.
+Seat Spy observations disappear when authorized target plays (current/completed tricks) contain the same card, comparing seat, rank, and suit. This derives from snapshots, including reconnection, without extra tracking state. A public zero card count also removes the observation. Different cards or still-opaque plays neither remove it nor reveal private identities.
 
-A vela independente do menu usa uma única instância do PNG original, sem recortes. Um filtro SVG local combina ruído com máscara de intensidade gradual: somente o topo da chama recebe deslocamento, que chega a zero acima do pavio. A animação declarativa altera a intensidade, enquanto o halo pulsa via CSS; não há estado React por frame ou timers. A proporção 477:512 acompanha a decoração. Movimento reduzido desativa filtro e halo animado. A camada continua sem interação e oculta para tecnologias assistivas.
+Winning-card highlights use confirmed-trick `nextLeader`, with no winner on ties: grow up to 20%, shake for 900 ms, and remain 12% larger until authoritative presentation ends. Existing result audio starts in the same snapshot, respecting volume/mute without replay on SYNC; turn audio/announcement await server release. The result banner occupies the top panel to avoid covering cards. Reduced motion retains only static outline/glow. The “Your turn” banner/title are about one-third narrower/smaller while captions remain legible.
 
-A composição de menu recupera as bordas diagonais densas da referência anterior com quatro PNGs transparentes `border-*`, contendo madeira e tecido. Props reutilizam assets separados em âncoras de canto/lateral; não há retorno ao background monolítico. `MenuScenery/composition.css` organiza densidade, símbolo e molduras, e os breakpoints preservam acesso aos controles em retrato/paisagem. Logo e imagem original da vela permanecem preservadas.
+The standalone menu candle uses one original PNG instance without crops. A local SVG filter combines noise and a gradual intensity mask: only the flame tip displaces, reaching zero above the wick. Declarative animation changes intensity while the halo pulses through CSS; there is no per-frame React state or timer. Decoration preserves 477:512. Reduced motion disables filter/animated halo. The layer remains noninteractive and hidden from assistive technology.
 
-A renderização da vela passou para SVG com viewBox 477×512: a imagem raster original permanece única, e as primitivas do filtro usam coordenadas explícitas dessa arte. A máscara é gerada internamente por feFlood/feGaussianBlur e limitada acima do pavio. A saída combina a ponta deslocada com o restante original; ciclo declarativo de 1,6 s. Isso substitui o feImage usado como máscara e o filtro aplicado à imagem HTML, cujo efeito anterior ficou imperceptível.
+Menu composition restores the prior reference's dense diagonal borders using four transparent `border-*` PNGs with wood/fabric. Props reuse separate assets at corner/side anchors without returning to a monolithic background. `MenuScenery/composition.css` arranges density, symbol, and frames; breakpoints preserve control access in portrait/landscape. Logo/original candle image remain intact.
 
-As cartas de poder usam quatro artes completas 2:3 em `art/layers/power-card-*.png`, reproduzindo a referência de molduras douradas, faixas e pergaminho. Nome, custo e efeito permanecem HTML acessível sobre áreas vazias da arte; disponibilidade fica fora da carta. Miniaturas ocultam o efeito no celular, mantendo consulta pelo painel existente. A carta decorativa do menu compartilha a mesma composição.
+Candle rendering moved to SVG with viewBox 477×512: the original raster image remains a single instance, and filter primitives use explicit artwork coordinates. An internal feFlood/feGaussianBlur mask is bounded above the wick. Output combines the displaced tip with the original remainder on a declarative 1.6 s cycle. This replaces the feImage mask and HTML-image filter whose prior effect was imperceptible.
 
-O lobby remove o bloco de convite redundante, mantendo o link copiável. No desktop, espaçamento, avatares e áreas de ação se adaptam à altura; ajustes de tempo ficam em três colunas, e o catálogo de poderes expande sobre o painel com rolagem própria, sem esticar a página. O mobile preserva o empilhamento e a rolagem natural. As molduras e os cards de equipes são preservados.
+Power cards use four complete 2:3 artworks in `art/layers/power-card-*.png`, following gold frames, ribbons, and parchment references. Name/cost/effect remain accessible HTML over blank art areas; availability stays outside the card. Mobile miniatures hide the effect but retain the existing detail panel. The decorative menu card shares this composition.
 
-Cartas jogadas ocultas usam variantes públicas de `CardBack`: Máscara tem verso roxo, símbolo de máscara e “Vale força”; coberta usa a arte original do verso, sem símbolo ou texto sobreposto. Versos das mãos continuam genéricos. As variantes dependem somente de `power`/`covered` da projeção, nunca da identidade oculta. Descrições acessíveis explicam a diferença; faces autorizadas de Máscara mantêm contorno roxo.
+The lobby removes the redundant invitation block while keeping the copyable link. Desktop spacing, avatars, and action areas adapt to height; time settings use three columns, and the power catalog expands over the panel with its own scroll instead of stretching the page. Mobile keeps stacking/natural scroll. Frames/team cards remain intact.
 
-O menu de sala durante a partida usa `RoomMenu`: painel opaco com feltro discreto e moldura compartilhada do lobby, som, retorno e confirmação de desistência. Escape/fechar restauram foco ao acionador; Tab permanece nos controles do painel. Desistência envia `SURRENDER`, nunca `LEAVE` durante jogo ativo; após o resultado, a saída usa o fluxo existente com confirmação do servidor. Sem conexão, desistir fica desabilitado, mas o painel ainda pode fechar.
+Hidden played cards use public `CardBack` variants: Mask has a purple back, mask symbol, and “Counts as strength”; covered cards use original back art without overlaid symbol/text. Hand backs stay generic. Variants depend only on projected `power`/`covered`, never hidden identity. Accessible descriptions explain the difference; authorized Mask faces retain purple outlines.
 
-POST `/api/guest` passa a atualizar o apelido validado da sessão existente, preservando token, identidade e expiração. O nome vale para novas entradas/criações; assentos já ocupados preservam seu snapshot. Isso evita que criar/entrar devolva o apelido anterior após uma edição no menu.
+During play, `RoomMenu` provides an opaque panel with subtle felt/shared lobby frame, audio, return, and surrender confirmation. Escape/close restore trigger focus; Tab stays in panel controls. Surrender sends `SURRENDER`, never `LEAVE` during active play; after results, leaving uses the existing server-confirmed flow. Disconnection disables surrender but still permits panel closure.
 
-`shared/EnergyIcon` fornece o raio pixelado em SVG para custo dos poderes, reserva de energia e carta decorativa. O desenho é independente da fonte; números e rótulos acessíveis continuam nos componentes de origem. O SVG é decorativo e preserva proporção nos diferentes tamanhos de carta.
+POST `/api/guest` updates an existing session's validated nickname while preserving token, identity, and expiration. New joins/creations use it; occupied seats retain their snapshot. This prevents create/join from restoring the previous nickname after a menu edit.
 
-O perfil do menu usa `profile-frame.svg` como borda em nove partes e `avatars-pixel.png` como atlas 2×2 compartilhado com os assentos. O botão de lápis foca e seleciona o campo de apelido existente; respeita o estado ocupado e mantém o mesmo fluxo de persistência.
+`shared/EnergyIcon` supplies a pixelated SVG bolt for power costs, energy reserves, and decorative cards. Its shape is font-independent; accessible labels/numbers remain in source components. The decorative SVG preserves proportions across card sizes.
 
-A face do Espião usa `power-card-spy-character.png`, com personagem encapuzado, medalhão central e cápsula de energia à direita. As posições de custo/título/efeito são especializadas em `.power-spy`; textos e valores continuam em HTML, derivados do catálogo. A decoração do menu compartilha a mesma face.
+Menu profiles use `profile-frame.svg` as a nine-slice border and `avatars-pixel.png` as a 2×2 atlas shared with seats. The pencil button focuses/selects the existing nickname field, respects busy state, and preserves persistence flow.
 
-### Sequência final após a última carta
+The Spy face uses `power-card-spy-character.png`, featuring a hooded character, central medallion, and right-side energy capsule. `.power-spy` specializes cost/title/effect positions; text/values remain catalog-derived HTML. Menu decoration shares the face.
 
-Quando uma partida observada ao vivo termina por pontos e contém uma última vaza resolvida, `MatchResult` mantém a mesa desobstruída por 1800 ms (`reading`). A carta vencedora continua marcada pelo `nextLeader` público mesmo sem `transition`. Depois começa a apresentação de resultado por 5000 ms: confetes para vitória natural e explosão radial de 24 partículas em pixel art para derrota por pontos. Só então aparece o diálogo com as ações. O intervalo inicial não se aplica a desistência/abandono ou encerramentos sem vaza final; primeira carga já encerrada continua abrindo diretamente o diálogo.
+### Final sequence after the last card
 
-Os dois estágios são canceláveis, não reiniciam em SYNC/desconexão e rejeitam callbacks de um estágio ou partida anterior. O foco vai ao título somente depois da leitura da mesa. Movimento reduzido oculta partículas, mantendo os intervalos e informação textual. Nenhum timer do servidor, pontuação ou comando foi alterado. Esta sequência substitui o início imediato da apresentação descrito anteriormente.
+When a live-observed match ends by points with a final resolved trick, `MatchResult` keeps the table unobstructed for 1800 ms (`reading`). The winning card remains marked by public `nextLeader` even without `transition`. Result presentation then runs for 5000 ms: confetti for natural victory and a radial 24-particle pixel-art explosion for defeat by points. Only afterward does the action dialog appear. The initial interval does not apply to surrender/abandonment or endings without a final trick; initial load of an already ended match still opens the dialog directly.
 
-### Tutorial e internacionalização incremental
+Both stages are cancelable, do not restart on SYNC/disconnection, and reject callbacks from an earlier stage/match. Focus moves to the title only after table reading. Reduced motion hides particles while preserving intervals/text. No server timer, score, or command changed. This sequence supersedes the immediate presentation described earlier.
 
-`features/menu/components/Tutorial` abre pelo menu como diálogo em portal, com sete etapas, perguntas de prática e demonstração de vira/manilhas. Usa apenas exemplos públicos locais, sem sessões, comandos ou dados de partida. O ciclo visual de ranks é pedagógico; não substitui comparação autoritativa. Imagens reaproveitam assets do jogo e textos permanecem HTML. O fundo fica inerte; Escape, fechamento e conclusão restauram foco ao botão, e a navegação mantém o título e o rodapé acessíveis com scroll interno.
+### Tutorial and incremental internationalization
 
-`Tutorial/Guided` adiciona uma mesa local de treino em 17 etapas, acessível pelo guia. `lessons.ts` descreve cenários pedagógicos fixos; `Scene.tsx` monta o mesmo `Table` da partida e a mesma composição `app-shell/game-shell`, sem mesa ou estilos alternativos. `scenario.ts` fornece snapshots públicos de demonstração, sem transporte. O balão flutua ancorado ao elemento real (mão, vira, placar, carta, energia ou alvo), com spotlight; `useAnchor` observa resize, viewport e expansão da carta de poder, enquanto `placement` evita cobrir o alvo e limita o balão ao viewport. A seta acompanha o centro do alvo mesmo quando o balão encosta na margem. Controles de saída/idioma ficam dentro do balão. A etapa de força exibe dez faces `CardFace` sobre a mesa, em ordem crescente, usando o mesmo desenho/proporção das cartas da partida; o guia se ancora nessa sequência. Desktop dispõe uma fileira e retrato compacto usa duas, sempre com as dez cartas visíveis. Não importa o motor, cria sessões ou emite comandos: não é uma segunda implementação autoritativa das regras. Ações destacadas liberam o avanço e apresentam explicações de vitória/derrota e custos. Voltar e recomeçar reiniciam o exercício; não há relógio nem persistência do progresso. A área de explicação rola internamente no mobile, com navegação sempre acessível, foco contido e movimento reduzido respeitado. Textos do treino ficam em `shared/i18n/guided.ts`, agregados por `game.ts`.
+`features/menu/components/Tutorial` opens from the menu as a portal dialog with seven steps, practice questions, and turn-up/trump demonstrations. It uses only local public examples without sessions, commands, or match data. The visual rank cycle is educational, not authoritative comparison. Images reuse game assets and text remains HTML. Background is inert; Escape, close, and completion restore button focus, while navigation keeps title/footer accessible through internal scrolling.
 
-`shared/i18n` centraliza a interface inteira em português e inglês: menu, perfil, lobby, mesa, cartas/poderes, resultados, dicas, erros de transporte, áudio, ferramentas de desenvolvimento e tutorial. `game.ts` agrega os catálogos de mensagens de interface/mesa/feedback; a frase de origem em português é uma chave tipada, com placeholders posicionais para nomes e valores. `tutorial` e `raises` mantêm seus contratos próprios. Nunca traduza apelidos, códigos de sala, ranks ou valores do protocolo. Textos das cartas são elementos HTML sobre a arte, portanto acompanham o idioma.
+`Tutorial/Guided` adds a 17-step local practice table. `lessons.ts` defines fixed teaching scenarios and `Scene.tsx` uses the real `Table` and `app-shell/game-shell` composition. `scenario.ts` supplies public demonstration snapshots without transport or engine authority. Spotlight callouts anchor to the actual hand, vira, score, energy and powers; `useAnchor` tracks viewport changes and expanded cards, while `placement` avoids covering the target. Exit/language controls stay in the callout. `RankCards` displays all ten real faces in ascending strength, in one desktop row or two compact rows. Exercises explain outcomes and costs, reset on back/restart, trap focus and respect reduced motion. No sessions, timers or progress persistence are created. Guided messages live in `shared/i18n/guided.ts` and are aggregated with the other catalogs in `game.ts`.
 
-A preferência `truco.locale` é global e reativa (`useSyncExternalStore`), com sincronização entre abas; `App` atualiza `html.lang`. Configurações abre idioma e áudio no menu/entrada/lobby; durante a partida, o seletor fica no menu da sala. O seletor do tutorial também altera o jogo inteiro, sem perder a etapa atual. Trocar idioma não remonta a partida, reseta seleções, dispara comandos ou reinicia animações. Falhas de storage mantêm a troca em memória; valores desconhecidos usam português. Dicionários no escopo do módulo resolvem suas traduções apenas no acesso para não congelar rótulos. Novos idiomas devem manter placeholders, IDs, custos e respostas equivalentes; os testes verificam esses contratos.
+`shared/i18n` centralizes the whole Portuguese/English UI: menu, profile, lobby, table, cards/powers, results, tooltips, transport errors, audio, development tools, and tutorial. `game.ts` aggregates interface/table/feedback catalogs; Portuguese source phrases are typed keys with positional placeholders for names/values. `tutorial` and `raises` retain their own contracts. Never translate nicknames, room codes, ranks, or protocol values. Card text is HTML over artwork and therefore follows language selection.
 
-### Gritos de aumento
+Global, reactive `truco.locale` (`useSyncExternalStore`) synchronizes across tabs; `App` updates `html.lang`. Settings opens language/audio in menu/entry/lobby; during play, the selector is in the room menu. Tutorial language selection also changes the whole game without losing the current step. Switching language does not remount the match, reset selections, send commands, or restart animations. Storage failure keeps selection in memory; unknown values use Portuguese. Module-level dictionaries resolve translations only on access to avoid frozen labels. New languages must preserve equivalent placeholders, IDs, costs, and answers; tests enforce these contracts.
 
-`shared/feedback/raises` identifica apenas propostas confirmadas consecutivas na mesma partida/mão. `RaiseAnnouncement` mostra TRUCOOOOOOO!! / SEEEIS! / NOOVE! / DOOOZE!! por 1800 ms, com letras independentes e faixa de impacto em CSS. A camada não captura ponteiro nem foco; valor proposto fica explícito. Aceitar substitui o pedido por DEEESCE!! e o valor aceito por 1800 ms; correr, pausa ou troca de contexto cancelam o efeito; novo aumento substitui o anterior e callbacks obsoletos não apagam o novo. Primeira carga, gaps de sequência e retomada não repetem gritos.
+### Raise announcements
 
-Os botões de contra-aumento mostram o próximo valor (6/9/12); no teto exibem o limite desabilitado. O botão de pedido também acompanha o próximo nível após um aumento aceito. Rótulos novos vivem em `shared/i18n/raises.ts`, com catálogo pt-BR/en selecionado pela preferência global. Valores e comandos autoritativos não mudam.
+`shared/feedback/raises` identifies only consecutive confirmed proposals in the same match/hand. `RaiseAnnouncement` shows TRUCOOOOOOO!! / SEEEIS! / NOOVE! / DOOOZE!! for 1800 ms using independent letters and a CSS impact ribbon. The layer captures neither pointer nor focus; proposed value remains explicit. Acceptance replaces the request with DEEESCE!! and the accepted value for 1800 ms; folding, pause, or context change cancels it; new raises replace old ones, and stale callbacks cannot clear the new effect. Initial load, sequence gaps, and resume do not replay announcements.
 
-O sintetizador Web Audio produz quatro efeitos originais de aumento e um motivo descendente para aceite, com ondas dente-de-serra, envelopes curtos e motivos distintos, sem gravações externas ou fala sintética. O volume por nota é reduzido para compensar harmônicos e notas sobrepostas. Todos respeitam desbloqueio por gesto, volume, mute, desconexão e limpeza existentes. Os detectores de proposta e aceite confirmado alimentam o observador de áudio; aceite exige liquidar exatamente o valor pendente na mesma mão, sem disparar em contra-aumento implícito, corrida ou retomada. O som de aceite tem prioridade sobre o aviso sonoro de turno; movimento reduzido remove balanço/entrada, preservando texto por 1800 ms.
+Counter-raise buttons show the next value (6/9/12); at the ceiling they show a disabled limit. The request button also follows the next level after an accepted raise. New labels live in `shared/i18n/raises.ts`, with pt-BR/en catalogs selected globally. Authoritative values/commands do not change.
 
-### Treino solo e ferramentas dev
+Web Audio synthesizes four original raise effects and one descending acceptance motif using sawtooth waves, short envelopes, and distinct motifs without external recordings or synthetic speech. Per-note volume is reduced to compensate for harmonics/overlapping notes. All honor existing gesture unlock, volume, mute, disconnection, and cleanup. Proposal/confirmed-acceptance detectors feed the audio observer; acceptance requires settling exactly the pending value in the same hand without triggering on implicit counter-raise, fold, or resume. Acceptance audio takes priority over turn notification; reduced motion removes wobble/entry while preserving text for 1800 ms.
 
-[ADR 009](adr/009-solo-training-and-development-tools.md) registra a extensão autorizada. O serviço de ciclo de vida de salas agenda bot e timers na mesma fila; `solo/bot.ts` passa somente a projeção ao pacote game-sim. O bootstrap resolve flags independentes e bloqueia ferramentas fora de development. `solo/dev-tools.ts` recria uma mão consistente preservando o placar; o envelope e cache existentes impedem replay e contexto obsoleto. O frontend busca `/api/features` para habilitar Jogar e importa o painel condicionalmente apenas no Vite dev, exigindo também autorização da sala.
+### Solo training and development tools
 
+[ADR 009](adr/009-solo-training-and-development-tools.md) records the authorized extension. The room lifecycle service schedules bot/timers on the same queue; `solo/bot.ts` sends only the projection to game-sim. Bootstrap resolves independent flags and blocks tools outside development. `solo/dev-tools.ts` recreates a consistent hand preserving score; existing envelope/cache prevent replay/stale context. The frontend fetches `/api/features` to enable Play and conditionally imports the panel only in Vite dev, also requiring room authorization.
 
-### Cenário modular da partida
+### Modular match scenery
 
-`Table/Scenery` compõe piso, feltro repetível, moldura em nove partes, quatro arabescos e objetos independentes ancorados nos cantos. Usa assets de `art/table-layers/` derivados do fundo original preservado. `shared/ScenicCandle` reutiliza a mesma vela animada no menu e na mesa. O cenário não recebe projeção nem produz eventos: fica atrás da arena, inacessível e sem interceptar ponteiro. O tamanho da textura é fixo; cantos e objetos têm escala própria em retrato/paisagem. O layout e a autoridade das cartas reais permanecem nos componentes existentes.
+`Table/Scenery` composes floor, repeating felt, nine-slice frame, four flourishes, and independently corner-anchored objects. It uses `art/table-layers/` assets derived from the preserved original background. `shared/ScenicCandle` reuses the same animated candle in menu/table. Scenery receives no projection or events: it stays behind the arena, inaccessible and pointer-transparent. Texture size is fixed; corners/objects have independent portrait/landscape scales. Real-card layout/authority remain in existing components.
 
-### Materiais da interface da partida
+### Match interface materials
 
-`Table/Theme` aplica brasões de equipe, medalhão de aposta, molduras de nomes e faixas de ações, pergaminho do histórico e placas de madeira. Os PNGs transparentes em `public/art/table-ui` não contêm textos/valores; a UI continua derivando tudo das projeções e do i18n. Faces, versos, atlas dos poderes e regras de proporção permanecem em seus componentes originais. Cores das faixas são decorativas; rótulos e posições continuam identificando equipes e estados.
+`Table/Theme` applies team crests, wager medallion, name frames/action ribbons, history parchment, and wooden plaques. Transparent PNGs in `public/art/table-ui` contain no text/values; UI still derives everything from projections/i18n. Faces, backs, power atlas, and ratio rules remain in their original components. Ribbon colors are decorative; labels/positions still identify teams/states.
 
-`TableHistory` começa compacto: três entradas recentes no desktop e a última no celular. O botão com `aria-expanded` expande o histórico público da mão, com rolagem interna; Escape recolhe sem enviar comandos. A lista acompanha o final enquanto o leitor está a até 2 px dele; rolar para cima preserva a posição nas atualizações e voltar ao fim retoma o acompanhamento. Nova mão ou alternância entre compacto/expandido volta à ação mais recente. Jogadas opacas continuam redigidas pela projeção. Não há armazenamento novo. Seleção de carta coberta conserva o checkbox nativo acessível, apresentado com uma miniatura do verso; Máscara mantém seu visual distinto.
+`TableHistory` starts compact: three recent entries on desktop and the last on mobile. An `aria-expanded` button expands the hand's public history with internal scroll; Escape collapses without commands. The list follows the bottom while the reader is within 2 px; scrolling up preserves position during updates, and returning to the bottom resumes following. New hands or compact/expanded toggles return to the newest action. Opaque plays remain redacted by projection. No new storage. Covered-card selection keeps its accessible native checkbox with a back miniature; Mask retains its distinct appearance.
 
-Avisos de turno, resultados, aumentos e término reutilizam os materiais da mesa. Eventos, pausas, foco, áudios, respeito a movimento reduzido e autoridade do servidor permanecem nos componentes de feedback existentes.
+Turn, result, raise, and completion announcements reuse table materials. Events, pauses, focus, audio, reduced motion, and server authority remain in existing feedback components.
 
-`Table/Theme/nameplates.css` substitui as imagens dos nomes por molduras CSS de borda dupla dourada e cantos assimétricos. A altura acompanha o apelido completo, com quebra inclusive sem espaços; a descrição fica em linha separada. No celular, o assento superior reserva uma linha inteira para a identificação. `alignment.css` mantém a área útil das faixas de ações. Medalhão, placa de mão e status usam dimensões coordenadas por viewport para manter espaço entre os elementos.
+`Table/Theme/nameplates.css` replaces name images with double-gold-border CSS frames and asymmetric corners. Height follows full nicknames, wrapping even without spaces; descriptions use a separate line. Mobile top seats reserve a full identity row. `alignment.css` preserves action-ribbon content bounds. Medallion, hand plaque, and status use viewport-coordinated dimensions to keep separation.
 
-O pergaminho reserva 14% da largura de cada lado para madeira e ornamentos. No desktop e no histórico expandido, `history-frame.css` renderiza o mesmo PNG com border-image em nove partes: a dobra inferior ocupa uma borda própria de 40 px, seguida de 8 px de respiro interno. Apenas o centro se expande; a rolagem fica dentro da área útil. Em paisagem compacta, a borda inferior usa 16 px. O acompanhamento da rolagem permanece inalterado.
+Parchment reserves 14% of width on each side for wood/ornaments. On desktop/expanded history, `history-frame.css` renders the same PNG as a nine-slice border-image: the lower fold occupies its own 40 px border followed by 8 px inner clearance. Only the center expands; scrolling remains inside usable bounds. Compact landscape uses a 16 px lower border. Scroll following remains unchanged.
 
-No 1v1, `Table/Theme/tableau.css` reserva a altura da carta e da legenda em cada posição central, com intervalo de 16 px. As duas posições ficam em coluna em todas as telas, com a jogada local abaixo. No desktop, a identificação do assento superior fica ao lado da mão, liberando altura sem alterar as proporções das cartas.
+In 1v1, `Table/Theme/tableau.css` reserves card/caption height at each central position with a 16 px gap. Both positions remain a column on every screen, local play below. Desktop places top-seat identity beside the hand, freeing height without changing card proportions.
 
-`Table/Theme/heading.css` organiza o status e o assento superior em linhas consecutivas de grid no desktop e em paisagem, com 12 px entre eles. A altura real do texto participa do fluxo. O centro do 1v1 começa depois dessas linhas; `vertical-plays.css` mantém as jogadas em coluna e ajusta a escala à altura disponível. Em telas baixas, as legendas ficam ao lado das faces, sem alterar sua proporção. Molduras de nomes usam `fit-content`, limitadas à largura do assento. Alvos do Espião centralizam os versos na linha de toque sem esticar sua proporção.
+`Table/Theme/heading.css` places status/top seat in consecutive desktop/landscape grid rows with a 12 px gap. Actual text height participates in flow. The 1v1 center starts after these rows; `vertical-plays.css` keeps plays in a column and scales to available height. On short screens captions sit beside faces without changing ratio. Name frames use `fit-content`, bounded by seat width. Spy targets center backs in the touch row without stretching them.
 
-`Table/Theme/truco-button.css` preserva a proporção do PNG da faixa com background-size 100% auto. O botão principal usa proporção 4:1, limite de largura e escala menor em celulares baixos; o contra-aumento ocupa uma linha inteira da grade de respostas em paisagem.
+`Table/Theme/truco-button.css` preserves ribbon PNG ratio with background-size 100% auto. The primary button uses 4:1 ratio, bounded width, and smaller scale on short mobiles; counter-raise occupies a full response-grid row in landscape.
 
-A face observada pelo Espião aceita clique/toque para ampliar a mesma carta autorizada em um diálogo nativo, mantendo proporção 2:3. O diálogo retém o foco, fecha por botão, Escape ou fundo e restaura o foco ao acionador quando ele ainda existe. A troca/remoção da observação desmonta a ampliação; a memória textual após jogada opaca não cria uma nova face na mão. Essa consulta local não envia comandos nem pausa os timers.
+Clicking/tapping the Spy-observed face enlarges the same authorized card in a native dialog, preserving 2:3. The dialog traps focus, closes by button/Escape/backdrop, and restores trigger focus when it still exists. Observation changes/removal unmount enlargement; textual memory after opaque play creates no extra hand face. This local inspection sends no command and pauses no timer.
 
-O valor 5 nas faces usa Manilha Card Numerals, uma derivação de um único glifo da Pixelify Sans Bold sob SIL OFL 1.1. Mantém as métricas, baseline e espessuras originais; topo reto e haste esquerda contínua distinguem o cinco de S. O asset é reproduzível por `tooling/fonts/build-card-five.py`. Não há SVG sobreposto: o valor continua texto, herda a cor do naipe e a rotação da quina inferior. Os demais caracteres usam a fonte original.
+Face value 5 uses Manilha Card Numerals, a one-glyph derivative of Pixelify Sans Bold under SIL OFL 1.1. It preserves original metrics, baseline, and strokes; a straight top/continuous left stem distinguish five from S. `tooling/fonts/build-card-five.py` reproduces the asset. There is no overlaid SVG: rank remains text, inherits suit color and bottom-corner rotation. Other characters use the original font.
 
-Descrições das cartas de poder permanecem visíveis também em retrato e paisagem mobile. Usam a área de pergaminho da arte, fonte Jersey 25 e tamanho proporcional à carta; Espião reserva uma área própria abaixo do medalhão. O título de Segunda Chance escala para não quebrar fora da faixa em celulares estreitos. Não altera dimensões das cartas ou interação de ativação.
+Power descriptions remain visible in mobile portrait/landscape. They use artwork parchment, Jersey 25, and card-proportional size; Spy reserves its own area below the medallion. Second Chance's title scales to avoid escaping the ribbon on narrow phones. Card dimensions/activation do not change.
 
-Em celulares baixos, energia permanece no fluxo abaixo da carta de poder, sem posicionamento absoluto sobre a arte. Quando o texto de estado é ocultado por falta de altura, ele deixa de reservar espaço; a carta e seu selo inferior continuam inteiros, com separação da barra de energia.
+On short mobiles, energy remains in flow below the power card rather than absolutely over artwork. Status text hidden for lack of height no longer reserves space; the card/lower badge remain intact and separated from energy.
 
-No 2v2, a área das jogadas reserva um intervalo vertical entre a legenda superior e a face inferior. O espaço cresce por breakpoint sem distorcer as faces. Em retrato até 600 px de altura, as cartas da dupla ficam ao lado da identificação e as jogadas usam escala menor, preservando a proporção 2:3 e o espaço da mão local.
+In 2v2, played-card areas reserve a vertical gap between upper caption/lower face. Space grows by breakpoint without distorting faces. In portrait up to 600 px tall, teammate cards sit beside identity and plays use a smaller scale, preserving 2:3 and local hand clearance.
+
+### Optional account credential foundation
+
+`modules/accounts` separates pure credential policy (`domain`), hashing port/concurrency-limited service (`application`), and Bun.password/Web Crypto implementations (`adapters/outbound`). The application receives implementations through a port and does not access runtime, environment, or database. Account tokens are distinct from existing guest credentials. `bootstrap/environment.ts` validates typed configuration, and `bootstrap/account-security.ts` explicitly composes the credential service; guest startup does not invoke it. Share one service instance per process and validate attempts before hashing. The following increment adds opt-in registration/login routes and persistence; default CLI activation remains pending. See [ADR 013](adr/013-account-credential-foundation.md).
+
+Account security configuration defaults to `ARGON2_MEMORY_KIB=19456`, `ARGON2_ITERATIONS=2`, accepted verification ceilings of `ARGON2_MAX_MEMORY_KIB=65536` and `ARGON2_MAX_ITERATIONS=6`, and `PASSWORD_MAX_CONCURRENCY=2` within `PASSWORD_MEMORY_BUDGET_KIB=131072`. `PASSWORD_PEPPER` is mandatory for account-security composition: 64 lowercase hexadecimal characters, with no default, held outside the database. HMAC-SHA256 with that secret prepares the password input before Argon2id adds its independent random salt. Bounded older costs remain verifiable; pepper rotation, rehash, and account recovery are not implemented. Environment validation does not establish production memory capacity; benchmark configured costs/concurrency on the target deployment.
+
+### Opt-in account authentication
+
+`accounts/application` coordinates registration/login/session/logout through repository, password, credential and admission ports. PostgreSQL adapters implement atomic registration, durable session state and shared attempt counters; the inbound Hono adapter validates HTTP boundaries and sets the account cookie. Bootstrap passes an optional route installer to transport, mounting accounts before the guest-session guard. The public application barrel remains free of HTTP/SQL adapters. Typed `parseAuthenticationPolicy` centralizes session/rate defaults and validates ranges.
+
+`startServer({ accounts })` accepts an explicitly composed application; CLI startup also supports the complete persistent backend behind `ENABLE_ACCOUNTS=true` (see ADR 015). Account cookies are separate from guest gameplay credentials. Database clients are provided/owned by the caller, with no connection at import time and no database access per game command. The following M5 backend increment supplies bounded SQL composition and account-to-seat binding; hosted production validation remains pending. [ADR 014](adr/014-account-authentication-api.md) defines the review boundary.
+
+### Persistent player composition
+
+Bootstrap composes account security, durable admission, player catalogs/progress, SQL result writer, transactional reward worker and bounded retention. `progression/domain` contains pure policy/manifests/result contracts; its public application entry does not import SQL or HTTP adapters. Room ports accept a bounded result writer, reserve before drawing and freeze identities at start. Final summaries enter a retrying process-local buffer and become durable with result/job commit; room state itself stays in memory. Transport resolves account cookies at HTTP/WS entry and checks short permission leases for established sockets, avoiding a database round-trip per game command. Seat projections contain curated avatar/deck metadata; each recipient receives its own table theme. See [ADR 015](adr/015-persistent-player-backend.md) for the approved policy, revocation bound, cleanup and crash limitations.
+
+### Optional player presentation
+
+`features/player` owns the account controller, strict HTTP DTO parsing, account forms, catalog browser and global ranking. Its public index is the application integration boundary. The optional `/api/features.accounts` capability is advertised only when the complete persistent backend exists. Account state stays in React memory; the existing transport carries credentialed requests and supports logout's no-content response. Remote panels discard obsolete requests, and mutations invalidate outstanding profile reads.
+
+`shared/Avatar` and `shared/PlayingCard` provide presentation shared by catalog previews and the room. Deck/table keys come from the protocol allowlist; no arbitrary URL, CSS or uploaded asset enters the renderer. Card markup follows the existing authorized visibility projection and keeps anonymous backs independent of private faces. Rank/suit styling is independent of gameplay values. Original avatar art remains the common atlas. Cosmetic styles are split by panel, collection, account, summary and ranking; responsive rules keep navigation and close controls outside the scrolling content.
+
+Account authentication opens contextually when a guest attempts to equip a cosmetic. The collection stays mounted, preserving the selected tab and preview on cancellation or successful authentication; equipment still requires an explicit, server-validated confirmation. Account management and the public ranking are independent profile actions. The collection contains only Avatars, Decks and Tables tabs.
+
+The cosmetics collection omits the profile summary banner; the selected avatar is already visible in the avatar preview. Account details remain in the independent account panel and menu profile.
+
+All account password fields share a labeled visibility control with independent state and an accessible eye button. Passwords start masked; clearing a field or beginning a pending operation masks it again. The toggle is a non-submit button and preserves controlled input values and password-manager autocomplete metadata.
+
+Account security shows a single recovery-code generation submit button below the current-password field. Password-change and deletion modes provide a Back action to restore that default view without issuing credentials.
+
+Table cosmetic previews size to their available container width with an explicit aspect ratio and proportional card decorations. Compact previews use actual responsive dimensions rather than transforming a fixed-width layout box.
+
+On desktop, table collection captions have additional separation from their preview art, and the collection description has spacing before the grid. Mobile retains its compact spacing.
+
+The desktop cosmetics dialog adapts thumbnail and showcase dimensions to viewport height. Short desktop windows use one row for the three table themes, while avatar collections retain their grid. The cosmetic-only principle appears once in the fixed footer at every viewport size, including short mobile windows. Account/ranking panels and the mobile scrolling layout keep their own behavior.
+
+### Browser navigation
+
+The application uses public hash routes for menu subviews and retains `?room=CODE` for invitations. Internal transitions push browser history entries; native Back/Forward restores join/tutorial/settings/account/cosmetics/ranking views. Closing a modal uses the previous application entry, with a local fallback for direct links. Navigation never stores credentials or match snapshots in history.
+
+Back from a room closes its WebSocket and returns to the prior screen; it does not send SURRENDER/LEAVE or assign a result. Existing server disconnection protection, expiry and abandonment rules still apply. Forward rejoins that room through its real authenticated endpoint and receives a fresh authorized snapshot, provided the room/session remain valid. Explicit in-game exit keeps its existing server-confirmed behavior. Room-entry and restoration generations discard late responses/errors after newer navigation, including pending entry attempts. The root menu does not trap users inside the site.
+
+Mobile deck previews size the fan, rotated cards and rank/suit typography proportionally to the available preview width, with a margin for rotation. Compact collection items and the showcase retain separate size caps; desktop height-based sizing remains unchanged.
+
+The result dialog reads committed per-match rewards through an authenticated personal endpoint. It presents XP and competitive-point grants separately, including zero ranked points, and distinguishes pending processing, failed reads and noneligible results. Room snapshots carry only the viewer's eligibility; the reward query joins the authenticated account's participation to committed grants. Unknown and foreign match IDs have the same response. Polling is bounded and cancelled on unmount/rematch; gameplay actions remain available independently of reward processing.
+
+Arcane card corners reserve a proportional gap between the serif rank and suit in both orientations. The spacing scales with the card typography, covering gameplay cards and cosmetic previews.
+
+Reward summaries use two restrained panels integrated with the result frame: gold XP and muted green competitive points. Confirmed values use a system sans-serif face with tabular numerals so 5, S and 8 remain visually distinct; surrounding labels retain the pixel-art typeface.
+
+### Card typography comparison prototype
+
+The development-only `/card-fonts.html` entry mounts `pages/CardFonts` independently of the game/account flow. It renders all forty legal Truco cards with the shared CardFace component for ten font candidates, with six pixel-art options shown by default, a common rank size/spacing, three themes and three preview widths. The explicit “Tema da carta” selector applies Clássico, Brasa or Arcano to every visible font sample. The reference is pure Pixelify Sans without the special five substitution. Candidate CSS and alternative fonts load only through this separate entry; the selected Jersey 10 is shared with gameplay; no gameplay font selection or account preference is changed. The standard Vite production build continues to use only index.html. Imported font files and original licenses are documented in public/fonts/comparison/README.md.
+
+The comparison prioritizes Jersey 10, Tiny5, Micro 5 and VT323, followed by Pixelify Sans and Jersey 25. “Todas as fontes” additionally reveals the four serif/sans-serif references. Each candidate uses its supplied font weight; the newly added pixel faces use weight 400 without synthetic bold. Jersey 10 was selected for gameplay on 2026-10-26.
+
+Gameplay card values now use the locally bundled Jersey 10 at its original weight 400 across Clássico, Brasa and Arcano, including cosmetic previews and revealed-card views. Theme-specific suit artwork, palettes and backs remain distinct. The previous single-glyph five override and rank-specific Georgia/Jersey 25 families were removed; no synthetic bold or rank shadow is applied.
+
+### Short match-result music
+
+Approved victory/defeat MP3s (3.85 seconds each) preload once after a user gesture and decode into the existing AudioContext. Final cues use a non-looping AudioBufferSource; ordinary effects remain synthesized. Invalid/missing clips fall back to the original final cue without delayed replay. Clip decoding rejects durations above four seconds. The final-result reading and celebration durations are shared constants: music waits through the same 1800 ms reading interval before the title; repeated snapshots do not reschedule it. Initial finished snapshots, reload and reconnection never replay past results. Volume updates affect active music immediately; mute, hidden tabs, room reset and unmount stop/cancel playback. Errors never prevent gameplay or navigation. Asset/source provenance lives in public/audio/README.md.
+
+At portrait viewports up to 360×600, four-player side seats place the 24px avatar beside 16px card backs and the name/status underneath. Compact padding and status spacing reserve room above the power/energy stack, without moving bottom actions or reducing text font sizes. More specific side-seat rules retain this arrangement across the shared heading grid overrides.

@@ -39,6 +39,17 @@ function scenario() {
     pending: 0,
     cancel: null,
   };
+  room.matchRecord = {
+    id: 'match',
+    startedAt: 0,
+    policyVersion: 'test',
+    seats: [{ seat: 0, accountId: 'eligible' }],
+    lastHand: 0,
+    lastActivations: 0,
+    powersUsed: 0,
+    reported: false,
+  };
+
   const message: ClientMessage = {
     protocol: 1,
     commandId: 'reset',
@@ -85,6 +96,7 @@ test('customizing all four powers preserves 40 unique cards and score while clea
     expect(state.powers?.intel).toEqual([null, null]);
     expect(state.powers?.commitments).toEqual([null, null]);
     expect(room.transition?.kind).toBe('deal');
+    expect(room.matchRecord?.seats[0]?.accountId).toBeNull();
   }
 });
 
@@ -108,6 +120,7 @@ test('unauthorized, stale and special-hand power edits fail before consuming ent
     expect(() => resetDevelopmentHand(room, seat, request, counted)).toThrow(error);
   expect(room.state.match).toBe(before);
   expect(samples).toBe(0);
+  expect(room.matchRecord?.seats[0]?.accountId).toBe('eligible');
   if (!before) throw new Error('Missing state');
   room.state.match = { ...before, score: { A: 11, B: 0 } };
   expect(() =>

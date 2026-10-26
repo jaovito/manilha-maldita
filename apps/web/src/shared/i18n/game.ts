@@ -1,3 +1,4 @@
+import { playerEnglish } from './player';
 import { guidedEnglish } from './guided';
 import { interfaceEnglish } from './interface';
 import { tableEnglish } from './table';
@@ -8,6 +9,7 @@ export const gameEnglish = {
   ...interfaceEnglish,
   ...tableEnglish,
   ...feedbackEnglish,
+  ...playerEnglish,
   ...guidedEnglish,
 };
 export type MessageKey = keyof typeof gameEnglish;

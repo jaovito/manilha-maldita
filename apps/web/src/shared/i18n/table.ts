@@ -158,4 +158,18 @@ export const tableEnglish = {
   'Carta revelada pelo Espião': 'Card revealed by Spy',
   'Ampliar carta revelada: {0}': 'Enlarge revealed card: {0}',
   'Fechar carta': 'Close card',
+  'Recompensas da partida': 'Match rewards',
+  'Você recebeu': 'You received',
+  'Experiência recebida': 'Experience received',
+  'Pontos de ranking': 'Ranking points',
+  'Partidas interrompidas não concedem recompensas.': 'Interrupted matches do not grant rewards.',
+  'Entre na conta antes de começar uma partida para ganhar XP.':
+    'Sign in before starting a match to earn XP.',
+  'Partidas alteradas pelas ferramentas de desenvolvimento não concedem XP.':
+    'Matches modified with development tools do not grant XP.',
+  'Esta partida não concede recompensas.': 'This match does not grant rewards.',
+  'Não foi possível confirmar as recompensas agora.': 'Could not confirm rewards right now.',
+  'Recompensas em processamento. Seu progresso será atualizado automaticamente.':
+    'Rewards are processing. Your progress will update automatically.',
+  'Consultar novamente': 'Check again',
 } as const;

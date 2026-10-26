@@ -1,0 +1,2 @@
+ALTER TABLE "app"."reward_policies" ADD COLUMN "solo_xp_percent" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
+ALTER TABLE "app"."reward_policies" ADD CONSTRAINT "reward_policies_solo_xp" CHECK ("app"."reward_policies"."solo_xp_percent" BETWEEN 0 AND 99);

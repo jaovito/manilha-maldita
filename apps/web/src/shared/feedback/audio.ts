@@ -1,3 +1,4 @@
+import { ResultMusic } from './result-music';
 import type { AudioPreferences } from './preferences';
 
 export type Sound =
@@ -107,12 +108,13 @@ const notes: Record<Sound, readonly Note[]> = {
   ],
 };
 
-/** A small original synthesizer; no remote audio, recordings or gameplay state. */
+/** Gesture-unlocked feedback combines synthesized cues and approved same-origin result clips. */
 export class GameAudio {
   private context: AudioContext | null = null;
   private unlocked = false;
   private disposed = false;
   private active = new Set<GainNode>();
+  private music: ResultMusic | null = null;
 
   unlock(): void {
     if (this.disposed) return;
@@ -120,6 +122,10 @@ export class GameAudio {
     try {
       this.context ??= typeof AudioContext === 'undefined' ? null : new AudioContext();
       this.unlocked = this.context !== null;
+      if (this.context && !this.music) {
+        this.music = new ResultMusic(this.context);
+        void this.music.preload();
+      }
       const resumed = this.context?.resume();
       void resumed?.catch(() => {});
     } catch {
@@ -140,6 +146,9 @@ export class GameAudio {
       return;
 
     try {
+      if ((sound === 'matchWin' || sound === 'matchLose') && this.music?.play(sound, preferences))
+        return;
+
       for (const [frequency, offset, duration] of notes[sound]) {
         const oscillator = context.createOscillator();
         const gain = context.createGain();
@@ -173,7 +182,12 @@ export class GameAudio {
     }
   }
 
+  updatePreferences(preferences: AudioPreferences): void {
+    this.music?.updatePreferences(preferences);
+  }
+
   silence(): void {
+    this.music?.silence();
     for (const gain of this.active) {
       try {
         gain.disconnect();
@@ -186,6 +200,8 @@ export class GameAudio {
 
   close(): void {
     this.disposed = true;
+    this.music?.close();
+    this.music = null;
     this.unlocked = false;
     this.silence();
     try {

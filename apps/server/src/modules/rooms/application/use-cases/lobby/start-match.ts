@@ -1,5 +1,5 @@
-import { beginMatch } from '../../services/match/gameplay';
 import type { Ports } from '../../ports/runtime';
+import { beginMatch } from '../../services/match/gameplay';
 import type { RoomRuntime } from '../../state/room-runtime';
 
 export function startRoomMatch(room: RoomRuntime, seat: number, ports: Ports): void {

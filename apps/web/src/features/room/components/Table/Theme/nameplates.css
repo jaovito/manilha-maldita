@@ -176,3 +176,58 @@
     min-height: 44px;
   }
 }
+
+/* Compact side seats leave space between the vira, power stack and bottom actions. */
+@media (max-width: 360px) and (max-height: 600px) and (orientation: portrait) {
+  .game-shell .arena[data-player-count="4"] .player-seat:is(.seat-relative-1, .seat-relative-3) {
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 1px;
+  }
+
+  .game-shell
+    .arena[data-player-count="4"]
+    .player-seat:is(.seat-relative-1, .seat-relative-3)
+    .seat-avatar {
+    grid-column: 1;
+    grid-row: 1;
+    width: 24px;
+    height: 24px;
+  }
+
+  .game-shell
+    .arena[data-player-count="4"]
+    .player-seat:is(.seat-relative-1, .seat-relative-3)
+    .seat-cards {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .game-shell
+    .arena[data-player-count="4"]
+    .player-seat:is(.seat-relative-1, .seat-relative-3)
+    .seat-info {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .game-shell
+    .arena[data-player-count="4"]
+    .player-seat:is(.seat-relative-1, .seat-relative-3)
+    .mini-card {
+    width: 16px;
+  }
+
+  .game-shell
+    .arena[data-player-count="4"]
+    .player-seat:is(.seat-relative-1, .seat-relative-3)
+    .seat-name {
+    padding: 1px 5px;
+  }
+
+  .game-shell
+    .arena[data-player-count="4"]
+    .player-seat:is(.seat-relative-1, .seat-relative-3)
+    .seat-team {
+    margin-top: 0;
+  }
+}

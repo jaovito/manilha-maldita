@@ -1,25 +1,25 @@
-# ADR 006 — Salas autoritativas e reconexão do M2
+# ADR 006 — M2 authoritative rooms and reconnection
 
-Estado: aceita para o M2, 18/10/2026.
+Status: accepted for M2, 2026-10-18.
 
-## Contexto
+## Context
 
-O motor M1 era puro e executava partidas sem rede. Salas privadas 1v1/2v2 exigem identidade de convidado, lobby e um escritor único para partidas, presença, timers e revanche. O MVP não demanda distribuição nem persistência por jogada.
+The pure M1 engine ran matches without networking. Private 1v1/2v2 rooms require guest identity, a lobby and one writer for matches, presence, timers and rematches. The MVP needs neither distribution nor per-play persistence.
 
-## Decisão
+## Decision
 
-Usar `RoomService` em memória com fila por sala, limitada e recuperável após erros. Hono/Bun fica no bootstrap/adaptadores; tempo, IDs, entropia e agendamento entram por ports. Transporte valida schemas estritos do protocolo; o navegador importa somente seus contratos públicos. O servidor gera o iniciador, os embaralhamentos e as decisões.
+Use an in-memory `RoomService` with a bounded per-room queue that recovers after errors. Hono/Bun stay in bootstrap/adapters; time, IDs, entropy and scheduling enter through ports. Transport validates strict protocol schemas; the browser imports only public contracts. The server generates the opener, shuffles and decisions.
 
-Convidados retomam o assento por cookie HttpOnly/SameSite=Strict com credencial criptográfica expirável. O código da sala é convite, nunca identidade. A associação sessão/sala/assento é verificada antes do registro de idempotência e do envio de projeção. Conexão nova substitui a anterior sem disputar reconexão automática.
+Guests resume seats through an HttpOnly/SameSite=Strict cookie with an expiring cryptographic credential. Room codes are invitations, never identity. Session/room/seat membership is checked before idempotency recording or projection delivery. A new connection replaces the old one without competing automatic reconnections.
 
-Separar sequência de snapshots, revisão de lobby e revisão/contexto de gameplay. Cache recente por jogador lógico, partida e comando devolve o ACK original após reconectar; conteúdo diferente com o mesmo ID é rejeitado. Os 512 resultados recentes de cada sala são retidos até evicção/expiração. A proteção contra replay antigo continua pela revisão e decisão mesmo após evicção. Cada envio é projeção autorizada completa e validada por schema.
+Separate snapshot sequence, lobby revision and gameplay revision/context. A recent cache keyed by logical player, match and command returns the original ACK after reconnection; different content with the same ID is rejected. Each room retains 512 recent results until eviction/expiry. Revision/decision checks continue blocking old replays after eviction. Every send is a complete authorized, schema-validated projection.
 
-Relógio de decisão usa tempo explícito e orçamento cumulativo de reconexão, sem recarga entre ausências. Pausas só quando nenhum responsável elegível conectado pode agir; retomar o restante, nunca o prazo inteiro. Terminar ausências sem timer de cartas exige fallback após proteção. Salas totalmente desconectadas expiram em 60 s casual/30 s competitivo sem vencedor. Esses detalhes operacionais não mudam as regras de cartas, apostas ou poderes.
+Decision clocks use explicit time and a cumulative reconnection budget that does not refill between absences. Pause only when no connected eligible actor can act; resume the remainder, never the whole deadline. Ending absences without a card timer requires a fallback after protection. Fully disconnected rooms expire after 60 s casual/30 s competitive without a winner. These operational details do not change card, betting or power rules.
 
-## Consequências
+## Consequences
 
-Partidas, lobby e revanche podem ser exercitados por clientes HTTP/WS e contextos de navegador independentes. Há uma mesa DOM funcional para validar M2 antes do acabamento visual. Poderes, energia e preparação continuam no M3; não foi criado um novo preset de produto.
+Matches, lobbies and rematches can be exercised through independent HTTP/WS clients and browser contexts. A functional DOM table validates M2 before visual polish. Powers, energy and preparation remain in M3; no new product preset was created.
 
-Unitários e integração Bun de servidor compartilham uma execução de cobertura: o bootstrap importa o transporte real, de modo que o relatório mede cada arquivo sobre o conjunto de comportamentos sem impor porcentagens sobre imports parciais de smoke tests. DOM e PostgreSQL permanecem isolados. O mínimo de 80% por arquivo e o inventário de fontes continuam obrigatórios, sem novas exclusões de produto.
+Server Bun unit/integration tests share one coverage run: bootstrap imports real transport so each file is measured over the combined behavior rather than applying thresholds to partial smoke-test imports. DOM and PostgreSQL stay isolated. The 80% per-file minimum and source inventory remain mandatory, without new product exclusions.
 
-O processo é uma autoridade única, com 256 salas, três salas por sessão, filas limitadas, limites de payload/rate e descarte de clientes lentos. Nenhum deploy, recurso remoto ou analytics foi provisionado. Reinício perde sessões e partidas: é falha técnica sem derrota registrada, não reconexão recuperável. Redis, recuperação durável e múltiplas instâncias continuam fora do M2.
+The process is a single authority with 256 rooms, three rooms per session, bounded queues, payload/rate limits and slow-client disconnection. No deployment, remote resource or analytics was provisioned. Restart loses sessions and matches: this is a technical failure without a recorded loss, not recoverable reconnection. Redis, durable recovery and multiple instances remain outside M2.

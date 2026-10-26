@@ -1,5 +1,4 @@
 import type { RoomCommand } from '../../dto/commands';
-import { beginMatch } from '../match/gameplay';
 import type { Ports } from '../../ports/runtime';
 import type { RoomRuntime } from '../../state/room-runtime';
 import { changeSeat } from '../../use-cases/lobby/change-seat';
@@ -22,7 +21,7 @@ export function applyLobby(
   if (!room.state.seats[seat]) throw new Error('NOT_MEMBER');
 
   const action = message.action;
-  if (action.type === 'REMATCH') requestRematch(room, seat);
+  if (action.type === 'REMATCH') requestRematch(room, seat, ports);
   else if (action.type === 'LEAVE') leaveRoom(room, seat);
   else {
     if (room.state.status !== 'lobby') throw new Error('INVALID_PHASE');
@@ -46,6 +45,5 @@ export function applyLobby(
     }
   }
 
-  if (room.state.solo && action.type === 'REMATCH') beginMatch(room, ports);
   room.state.revision++;
 }

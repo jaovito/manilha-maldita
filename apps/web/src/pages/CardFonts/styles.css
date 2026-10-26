@@ -1,0 +1,279 @@
+@font-face {
+  font-family: "Comparison Tiny5";
+  src: url("/fonts/comparison/tiny5.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Comparison Micro 5";
+  src: url("/fonts/comparison/micro5.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Comparison VT323";
+  src: url("/fonts/comparison/vt323.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Comparison Atkinson";
+  src: url("/fonts/comparison/atkinsonhyperlegible.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Comparison Plex";
+  src: url("/fonts/comparison/ibmplexsanscondensed.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Comparison Slab";
+  src: url("/fonts/comparison/robotoslab.ttf") format("truetype");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Comparison Serif";
+  src: url("/fonts/comparison/sourceserif4.ttf") format("truetype");
+  font-weight: 200 900;
+  font-display: swap;
+}
+.card-font-lab {
+  max-width: 1540px;
+  margin: 0 auto;
+  padding: 48px 32px 28px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #eee7d7;
+}
+.font-lab-header {
+  max-width: 900px;
+  margin-bottom: 28px;
+}
+.font-lab-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #d7b77b;
+  font-size: 12px;
+  letter-spacing: 0.13em;
+}
+.font-lab-eyebrow span {
+  font-size: 10px;
+  border: 1px solid #b7914f66;
+  padding: 6px 8px;
+  border-radius: 3px;
+}
+.font-lab-header h1 {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: clamp(26px, 4vw, 42px);
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  margin: 20px 0 14px;
+  color: #fff0cf;
+}
+.font-lab-header p,
+.font-lab-note {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #bfc9c2;
+}
+.font-lab-header a {
+  display: inline-block;
+  margin-top: 8px;
+  color: #e7c27e;
+  font-size: 13px;
+}
+.font-lab-controls {
+  margin: 0;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 18px 20px;
+  border: 1px solid #5a604a;
+  background: #0a2021;
+  border-radius: 6px;
+}
+.font-lab-controls label {
+  display: grid;
+  gap: 8px;
+  flex: 1;
+  min-width: 180px;
+  font-size: 12px;
+  color: #bfc9c2;
+}
+.font-lab-controls select {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid #66705b;
+  border-radius: 4px;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  color: #f7edd6;
+  background: #142e2b;
+}
+.font-lab-note {
+  margin: 14px 0 28px;
+  font-size: 12px;
+}
+.font-comparison {
+  margin: 0 0 28px;
+  border: 1px solid #5b604b;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #0a2021e8;
+}
+.font-comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 24px;
+  border-bottom: 1px solid #58604b;
+  background: #132d28;
+}
+.font-category {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #d6b67d;
+}
+.font-comparison h2 {
+  margin: 8px 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 22px;
+  color: #f9e8c4;
+}
+.font-comparison-header p {
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 0;
+  color: #bfc9c2;
+}
+.font-probe {
+  flex-shrink: 0;
+  display: grid;
+  gap: 6px;
+  min-width: 190px;
+  text-align: center;
+  font-family: var(--comparison-font), sans-serif;
+  font-weight: var(--comparison-weight);
+  color: #f2d9a1;
+}
+.font-probe span {
+  font-size: 38px;
+  letter-spacing: 0.1em;
+}
+.font-probe small {
+  font-size: 20px;
+  letter-spacing: 0.04em;
+}
+.font-deck-scroll {
+  overflow-x: auto;
+  padding: 22px 24px 28px;
+  scrollbar-color: #9d8457 #112824;
+}
+.font-deck-scroll:focus-visible {
+  outline: 2px solid #f4cc81;
+  outline-offset: -4px;
+}
+.font-deck {
+  width: max-content;
+  min-width: 100%;
+}
+.font-suit-group + .font-suit-group {
+  margin-top: 22px;
+}
+.font-suit-group h3 {
+  margin: 0 0 12px;
+  color: #a7b7ad;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 11px;
+}
+.font-card-row {
+  display: grid;
+  grid-template-columns: repeat(10, var(--comparison-card-width));
+  gap: 14px;
+  padding: 2px 4px 5px;
+}
+.font-sample-card {
+  width: var(--comparison-card-width);
+  aspect-ratio: 2 / 3;
+}
+.font-comparison .card-face {
+  container-type: inline-size;
+  border: 0;
+  outline: 0;
+  background: none;
+}
+.font-comparison .card-face::before,
+.font-comparison .card-face::after {
+  content: none;
+}
+.font-comparison .card-corner {
+  top: 6.09cqw;
+  left: 6.96cqw;
+  font-size: 21.74cqw;
+  line-height: 1;
+  row-gap: 0.18em;
+}
+.font-comparison .card-corner-bottom {
+  top: auto;
+  left: auto;
+  right: 6.96cqw;
+  bottom: 6.09cqw;
+}
+.font-comparison .card-face .card-rank {
+  font-family: var(--comparison-font), sans-serif;
+  font-size: 25.22cqw;
+  line-height: 1;
+  font-weight: var(--comparison-weight);
+  text-shadow: none;
+  font-variant-numeric: lining-nums;
+}
+.font-comparison .card-suit {
+  font-size: 66.09cqw;
+}
+.font-lab-footer {
+  padding: 8px 0 20px;
+  color: #a6b4aa;
+  font-size: 12px;
+  line-height: 1.6;
+}
+@media (max-width: 700px) {
+  .card-font-lab {
+    padding: 24px 14px;
+  }
+  .font-lab-eyebrow {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .font-lab-controls {
+    margin: 0;
+    min-width: 0;
+    gap: 14px;
+    padding: 14px;
+  }
+  .font-lab-controls label {
+    min-width: 100%;
+  }
+  .font-comparison-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 18px;
+    gap: 16px;
+  }
+  .font-probe {
+    min-width: 0;
+    text-align: left;
+  }
+  .font-deck-scroll {
+    padding: 18px 14px 24px;
+  }
+}

@@ -1,3 +1,4 @@
+import { Avatar } from '../../../../../shared/Avatar';
 import { t } from '../../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 import type { Action } from '../../../../../shared/transport/client';
@@ -31,9 +32,9 @@ export function LobbySeats({ room, send }: { room: RoomView; send: (action: Acti
                     className={`lobby-seat team-${seat % 2 === 0 ? 'a' : 'b'} ${player ? 'is-occupied' : 'is-empty'} ${player?.ready ? 'is-ready' : ''}`}
                   >
                     <div className="seat-portrait">
-                      <span
-                        aria-hidden="true"
-                        className={`avatar avatar-${seat} ${player ? '' : 'avatar-empty'}`}
+                      <Avatar
+                        index={player?.appearance?.avatar.spriteIndex ?? seat}
+                        className={`avatar ${player ? '' : 'avatar-empty'}`}
                       />
                     </div>
                     <div className="seat-info">

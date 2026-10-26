@@ -1,7 +1,7 @@
 import { expect, mock, test } from 'bun:test';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { EntryMenu } from './index';
 import { version } from '../../../../../package.json';
+import { EntryMenu } from './index';
 
 function handlers() {
   return {

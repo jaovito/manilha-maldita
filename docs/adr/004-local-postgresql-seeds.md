@@ -1,16 +1,16 @@
-# ADR 004 — PostgreSQL local e infraestrutura de seeds
+# ADR 004 — Local PostgreSQL and seed infrastructure
 
-- Estado: aceita conforme solicitação do proprietário.
-- Data: 2026-10-18.
+- Status: accepted as requested by the owner.
+- Date: 2026-10-18.
 
-## Decisão
+## Decision
 
-Preparar PostgreSQL 18.6 Alpine via Compose, com desenvolvimento persistente e testes em outra instância, usuário, banco e porta, com tmpfs. Ambos usam loopback e healthcheck. Usar Drizzle ORM 0.45.4 e Kit 0.31.11, versões estáveis atuais, com SQL nativo de Bun.
+Prepare PostgreSQL 18.6 Alpine through Compose, with persistent development storage and tests using a separate instance, user, database and port with tmpfs. Both use loopback and healthchecks. Use Drizzle ORM 0.45.4 and Kit 0.31.11, the current stable versions, with Bun's native SQL.
 
-Manter migrações e ferramentas locais no backend, sem acoplar o core ao banco ou criar modelos de produto. A primeira migração cria somente o namespace app. Seeds recebem tarefas explícitas, IDs únicos e transação; tarefas devem usar chaves estáveis/upsert. O registro de desenvolvimento permanece vazio até os modelos serem definidos. Testes criam e removem schemas próprios com fixtures fictícias.
+Keep local migrations/tooling in the backend without coupling the core to the database or creating product models. The first migration creates only the app namespace. Seeds receive explicit tasks, unique IDs and a transaction; tasks must use stable keys/upsert. The development registry stays empty until models are defined. Tests create and remove their own schemas with fictional fixtures.
 
-Ferramentas locais recusam produção e destinos fora dos bancos/roles locais designados. Testes nunca fazem fallback para DATABASE_URL. Não criar reset destrutivo ou truncamento do banco de desenvolvimento.
+Local tooling rejects production and targets outside the designated local databases/roles. Tests never fall back to DATABASE_URL. Do not create destructive resets or truncate the development database.
 
-## Consequências
+## Consequences
 
-A verificação completa inclui integração real PostgreSQL e cobertura mínima, exigindo Docker/Compose no desenvolvimento e CI. Testes do motor continuam independentes. A base de testes é compartilhável com isolamento por schema; não se encerra automaticamente serviço que possa estar em uso. CI remoto permanece não verificado até publicação.
+Full validation includes real PostgreSQL integration and minimum coverage, requiring Docker/Compose in development and CI. Engine tests remain independent. The test database can be shared through schema isolation; do not automatically stop a service that may be in use. Remote CI remains unverified until publication.

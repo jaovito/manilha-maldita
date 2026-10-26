@@ -1,440 +1,446 @@
 # Manilha Maldita — Game Design Document
 
-**Versão:** 0.1 — Proposta de pré-produção  
-**Estado:** Design inicial, pendente de playtests  
-**Público:** Jogadores casuais, grupos de amigos e pessoas que gostam de Truco competitivo  
-**Plataformas:** Desktop e navegadores mobile
+**Version:** 0.1 — Preproduction proposal
+**Status:** Initial design, pending playtests
+**Audience:** Casual players, groups of friends, and competitive Truco enthusiasts
+**Platforms:** Desktop and mobile browsers
 
 
-> **Escopo consolidado do MVP:** quatro poderes — Espião, Segunda Chance, Impulso e Máscara — disponíveis tanto no casual quanto no competitivo. As modalidades diferem pela política de sorteio e pelos temporizadores. Salas públicas, eventos e poderes experimentais ficam fora do MVP. As ideias futuras abaixo não constituem funcionalidades aprovadas.
+> **Consolidated MVP scope:** four powers — Espião, Segunda Chance, Impulso, and Máscara — available in both casual and competitive play. Modes differ in draw policies and timers. Public rooms, events, and experimental powers are outside the MVP. The future ideas below are not approved features.
 >
-> **Contrato para implementação:** [docs/rules.md](docs/rules.md) consolida as convenções vigentes, incluindo preparação selada, apostas, mãos especiais, temporizadores e reconexão. Use esse documento para implementar e testar o comportamento. Este GDD mantém a visão de produto e as propostas de expansão; novas divergências devem ser resolvidas explicitamente, sem alterar decisões de produto silenciosamente.
+> **Implementation contract:** [docs/rules.md](docs/rules.md) consolidates current conventions, including sealed preparation, stakes, special hands, timers, and reconnection. Use that document to implement and test behavior. This GDD retains the product vision and expansion proposals; new discrepancies must be resolved explicitly, without silently changing product decisions.
 
 ---
 
-## 1. Visão do produto
+## 1. Product vision
 
-Manilha Maldita é um jogo de cartas multiplayer baseado no Truco Paulista. O jogo preserva as regras fundamentais do Truco, incorporando poderes sorteados que alteram informações, força de cartas e possibilidades estratégicas.
+Manilha Maldita is a multiplayer card game based on Truco Paulista. It preserves the fundamental rules of Truco while adding randomly assigned powers that change information, card strength, and strategic possibilities.
 
-O objetivo é oferecer partidas rápidas, sociais, competitivas e com alto potencial de rejogabilidade.
+The goal is to offer quick, social, competitive matches with high replay value.
 
-### Objetivos principais
+### Main goals
 
-1. Permitir jogar 1v1 ou 2v2 em salas privadas.
-2. Ser compreensível para quem já conhece Truco.
-3. Adicionar profundidade sem criar centenas de regras adicionais.
-4. Oferecer modalidades casual e competitiva.
-5. Permitir poderes aleatórios sem benefícios pagos.
-6. Garantir que o servidor controle todas as decisões e informações secretas.
+1. Support 1v1 or 2v2 play in private rooms.
+2. Remain understandable to people who already know Truco.
+3. Add depth without creating hundreds of additional rules.
+4. Offer casual and competitive modes.
+5. Provide random powers without paid benefits.
+6. Ensure the server controls every decision and all secret information.
 
-### Fora do escopo inicial
+### Outside the initial scope
 
-Não haverá ranking global, loja de itens, torneios, campanha, bots sofisticados ou aplicativos nativos no MVP.
+The MVP will not include global rankings, an item store, tournaments, a campaign, sophisticated bots, or native apps.
+
+**Authorized M5 update (22/10/2026):** global rankings based on competitive wins, XP/levels, and exclusively cosmetic unlocks enter the M5 scope. Accounts remain optional for playing. Customization will have separate Avatars, Decks, and Tables tabs; avatars are predefined, without uploads, preserving the existing pixel art. Decks change card backs and suit/value styling without changing identity, readability, or rules; other players see the owner's theme while respecting authorized information. The vira uses the default theme. Stores, paid advantages, and power unlocks are not authorized. XP/point values, the level curve, account recovery, and eligibility criteria remain pending. The first M5 increment prepares only the database and result queue.
 
 ---
 
-## 2. Regras-base da partida
+## 2. Base match rules
 
-### Baralho
+### Deck
 
-- 40 cartas, sem 8, 9, 10 ou curingas.
-- Três cartas por jogador, distribuídas sem reposição.
-- Uma carta adicional é revelada como vira.
-- Um novo embaralhamento ocorre a cada mão.
+- 40 cards, without 8s, 9s, 10s, or jokers.
+- Three cards per player, dealt without replacement.
+- One additional card is revealed as the vira.
+- Shuffle again for every hand.
 
-**Hierarquia normal, da mais forte para a mais fraca:**
+**Normal hierarchy, strongest to weakest:**
 
 3 > 2 > A > K > J > Q > 7 > 6 > 5 > 4.
 
-A manilha corresponde ao valor imediatamente seguinte à vira, no ciclo:
+The manilha is the rank immediately following the vira in this cycle:
 
 4 → 5 → 6 → 7 → Q → J → K → A → 2 → 3 → 4.
 
-As quatro manilhas vencem qualquer carta normal. Entre manilhas, a ordem é:
+The four manilhas beat any normal card. Among manilhas, the order is:
 
-Paus > Copas > Espadas > Ouros.
+Clubs > Hearts > Spades > Diamonds.
 
-### Partida
+### Match
 
-- Uma partida termina quando uma equipe alcança 12 ou mais pontos.
-- Uma mão tem até três vazas.
-- Em cada vaza, cada jogador ativo coloca exatamente uma carta.
-- O jogador ou a equipe vencedora da mão recebe a pontuação em disputa.
-- Os parceiros são posicionados alternadamente no 2v2.
-- O jogador que inicia a mão gira na ordem dos assentos a cada nova mão.
-- A equipe vencedora de uma vaza inicia a próxima; em 2v2, inicia o jogador daquela equipe que jogou a carta vencedora.
-- Em caso de empate de vaza, inicia a próxima o jogador que iniciou a vaza empatada.
+- A match ends when a team reaches 12 or more points.
+- A hand contains up to three tricks.
+- In each trick, every active player plays exactly one card.
+- The player or team winning the hand receives the points at stake.
+- Partners occupy alternating seats in 2v2.
+- The hand's starting player rotates in seat order with every new hand.
+- The team winning a trick starts the next one; in 2v2, the player on that team who played the winning card starts.
+- When a trick ties, the player who started the tied trick starts the next one.
 
-### Empates
+### Ties
 
-Para impedir interpretações diferentes, adotaremos estas regras:
+To prevent differing interpretations, use these rules:
 
-| Resultado das vazas | Resultado da mão |
+| Trick results | Hand result |
 |---|---|
-| A vence a primeira; segunda empata | A vence |
-| Primeira empata; A vence a segunda | A vence |
-| Primeira e segunda empatam; A vence a terceira | A vence |
-| A vence a primeira; B vence a segunda; terceira empata | A vence |
-| As três empatam | Mão anulada, sem pontos |
-| A mesma equipe vence as duas primeiras | Mão encerrada imediatamente |
+| A wins the first; the second ties | A wins |
+| The first ties; A wins the second | A wins |
+| The first and second tie; A wins the third | A wins |
+| A wins the first; B wins the second; the third ties | A wins |
+| All three tie | Hand voided, no points |
+| The same team wins the first two | Hand ends immediately |
 
-Em empates na primeira vaza, não há desempate artificial por naipe de cartas comuns. Os empates continuam obedecendo à precedência das vazas.
+A tie in the first trick does not introduce an artificial suit tiebreaker for normal cards. Ties continue to follow trick precedence.
 
-### Cartas cobertas
+### Face-down cards
 
-Permitidas apenas a partir da segunda vaza.
+Allowed only from the second trick onward.
 
-Uma carta coberta equivale a uma carta sem força de disputa: perde para qualquer carta aberta e empata com outra carta coberta quando ambas forem as mais fortes restantes do confronto.
+A face-down card has no contest strength: it loses to any face-up card and ties another face-down card when both are the strongest remaining cards in the contest.
 
-A carta coberta é consumida normalmente e não tem seu valor revelado durante a mão.
+The face-down card is consumed normally, and its value is not revealed during the hand.
 
-### Pontuação e apostas
+### Scoring and stakes
 
-As apostas seguem a sequência:
+Stakes follow this sequence:
 
 1 → 3 → 6 → 9 → 12.
 
-Em um pedido de aumento, a equipe adversária pode:
+When a raise is requested, the opposing team may:
 
-- **Aceitar:** a mão passa a valer o novo montante.
-- **Correr:** a equipe que pediu recebe o valor anteriormente aceito.
-- **Aumentar:** propõe o próximo valor, transferindo a decisão para a outra equipe.
+- **Accept:** the hand becomes worth the new amount.
+- **Fold:** the requesting team receives the previously accepted value.
+- **Raise:** propose the next value, transferring the decision to the other team.
 
-O valor não aumenta enquanto o pedido estiver pendente.
+The value does not increase while the request is pending.
 
-Não é possível pular níveis de aposta, e uma equipe não pode fazer dois aumentos consecutivos sem que a outra equipe tenha assumido o aumento intermediário.
+Stake levels cannot be skipped, and a team cannot make two consecutive raises unless the other team has taken the intermediate raise.
 
-Os pedidos podem ser feitos pelo jogador cuja vez está ativa, antes de jogar sua carta. Enquanto existe uma resposta pendente, nenhuma carta pode ser jogada.
+Requests may be made by the player whose turn is active, before playing their card. No card may be played while a response is pending.
 
-No 2v2, qualquer membro da equipe desafiada pode responder; a primeira resposta válida recebida pelo servidor é definitiva para a equipe.
+In 2v2, either member of the challenged team may respond; the first valid response received by the server is final for the team.
 
-### Mão de onze
+### Eleven-point hand
 
-Quando uma equipe chega a 11 pontos:
+When a team reaches 11 points:
 
-- A equipe recebe suas cartas e observa a vira.
-- Os jogadores dessa equipe podem visualizar as cartas do parceiro durante a decisão, no 2v2.
-- A equipe decide jogar por 3 pontos ou correr e conceder 1 ponto aos adversários.
-- Se jogar, não são permitidos novos pedidos de Truco.
-- Poderes ficam desativados nessa mão.
+- The team receives its cards and sees the vira.
+- In 2v2, that team's players may view their partner's cards during the decision.
+- The team chooses to play for 3 points or fold and concede 1 point to the opponents.
+- If it plays, no further Truco requests are allowed.
+- Powers are disabled for that hand.
 
-No 1v1, a decisão é individual.
+In 1v1, the decision is individual.
 
-Quando ambas as equipes têm 11 pontos, ocorre a **mão de ferro**: a mão vale 3 pontos, não há poderes, pedidos de aumento ou cartas cobertas. A partida termina quando houver um vencedor.
+When both teams have 11 points, the **mão de ferro** occurs: the hand is worth 3 points, with no powers, raises, or face-down cards. The match ends when there is a winner.
 
-Estas são convenções escolhidas para o jogo; outras variantes de Truco podem tratar situações especiais de maneira diferente.
+These are conventions chosen for this game; other Truco variants may handle special situations differently.
 
 ---
 
-## 3. Modalidades
+## 3. Modes
 
 ### Casual — Truco Caótico
 
-O foco é jogar com amigos, experimentar poderes e produzir reviravoltas.
+The focus is playing with friends, experimenting with powers, and creating reversals.
 
-- Poderes sorteados independentemente para cada jogador.
-- Pode haver poderes repetidos entre adversários.
-- No MVP, apenas Espião, Segunda Chance, Impulso e Máscara, sem efeitos de pontuação.
-- Habilidades experimentais e eventos são propostas futuras, fora do MVP.
-- Sem ranking competitivo.
-- Salas privadas no MVP; salas públicas ficam para depois.
-- O anfitrião configura os temporizadores antes da partida.
+- Powers are drawn independently for each player.
+- Opponents may receive duplicate powers.
+- The MVP includes only Espião, Segunda Chance, Impulso, and Máscara, without scoring effects.
+- Experimental abilities and events are future proposals, outside the MVP.
+- No competitive ranking.
+- Private rooms in the MVP; public rooms come later.
+- The host configures timers before the match.
 
-### Competitivo — Truco Estratégico
+### Competitive — Truco Estratégico
 
-O foco é reduzir vantagens criadas exclusivamente pelo sorteio de poderes.
+The focus is reducing advantages created solely by power draws.
 
-- No MVP, os mesmos quatro poderes do casual, com sorteio espelhado; o equilíbrio ainda depende de playtests.
-- Sorteio espelhado entre as duas equipes.
-- Cada poder é conhecido somente pelo dono até sua ativação, inclusive em relação ao parceiro.
-- Sem eventos aleatórios adicionais.
-- Sem poderes que alterem a pontuação de uma mão.
-- Regras fixas e temporizadores padronizados.
-- Reconexão, desistência e limites de inatividade padronizados.
+- The MVP uses the same four powers as casual, with mirrored draws; balance still depends on playtests.
+- Mirrored draws between the two teams.
+- Each power is known only to its owner until activation, including with respect to their partner.
+- No additional random events.
+- No powers that change a hand's score.
+- Fixed rules and standardized timers.
+- Standardized reconnection, resignation, and inactivity limits.
 
-**Sorteio espelhado:**
+**Mirrored draws:**
 
-No 1v1, o servidor sorteia um poder e ambos os jogadores recebem o mesmo.
+In 1v1, the server draws one power, and both players receive it.
 
-No 2v2, o servidor sorteia dois poderes distintos, A e B. Cada equipe recebe uma instância de A e uma de B, distribuídas aleatoriamente entre seus integrantes.
+In 2v2, the server draws two distinct powers, A and B. Each team receives one instance of A and one of B, randomly assigned among its members.
 
-Isso mantém a aleatoriedade desejada, mas evita que uma equipe receba um conjunto de habilidades objetivamente mais forte que o da outra.
+This preserves the desired randomness while preventing one team from receiving an objectively stronger set of abilities than the other.
 
-O sorteio espelhado reduz a assimetria de acesso aos poderes, mas não garante equilíbrio perfeito, porque a ordem dos turnos, as cartas e a interação entre habilidades continuam afetando as vantagens. Mesmo sem exposição de atribuições alheias, essa política permite inferir poderes. Mudar o competitivo para sorteio independente está pendente de decisão do proprietário.
+Mirrored draws reduce asymmetry in access to powers but do not guarantee perfect balance, because turn order, cards, and ability interactions still affect advantages. Even without exposing others' assignments, this policy allows powers to be inferred. Changing competitive play to independent draws is pending an owner decision.
 
-### Truco Clássico (futuro)
+### Truco Clássico (future)
 
-Um terceiro modo poderá simplesmente desativar todas as habilidades, reutilizando o mesmo motor de Truco.
+A third mode could simply disable all abilities, reusing the same Truco engine.
 
 ---
 
-## 4. Sistema de poderes
+## 4. Power system
 
-### Distribuição
+### Assignment
 
-No início de cada mão, depois da distribuição de cartas e da revelação da vira:
+At the beginning of each hand, after dealing cards and revealing the vira:
 
-1. O servidor determina o conjunto de poderes permitido para a modalidade.
-2. Sorteia um poder para cada jogador, obedecendo à política casual ou competitiva.
-3. Entrega cada poder somente ao dono; parceiros e adversários não veem atribuições ainda não usadas.
-4. Libera as janelas de ativação.
-5. No encerramento da mão, descarta os poderes sorteados e sorteia novos na próxima.
+1. The server determines the power pool allowed for the mode.
+2. It draws one power for each player, following the casual or competitive policy.
+3. It delivers each power only to its owner; partners and opponents cannot see unused assignments.
+4. It opens activation windows.
+5. At the end of the hand, it discards assigned powers and draws new ones for the next hand.
 
-O sorteio não utiliza níveis, vitórias anteriores, dinheiro, cosméticos ou progressão da conta.
+Draws do not use levels, previous wins, money, cosmetics, or account progression.
 
-### Energia
+### Energy
 
-Cada jogador possui uma reserva individual.
+Each player has an individual reserve.
 
-| Propriedade | Regra |
+| Property | Rule |
 |---|---|
-| Energia inicial | 2 |
-| Regeneração | +1 por nova mão, exceto na primeira |
-| Energia máxima | 3 |
-| Usos por mão | Máximo de 1 |
-| Custo de habilidade | 1, 2 ou 3 |
-| Energia insuficiente | Habilidade indisponível |
+| Initial energy | 2 |
+| Regeneration | +1 per new hand, except the first |
+| Maximum energy | 3 |
+| Uses per hand | Maximum 1 |
+| Ability cost | 1, 2, or 3 |
+| Insufficient energy | Ability unavailable |
 
-A energia pode acumular entre mãos, mas nunca ultrapassa 3.
+Energy may accumulate between hands but never exceeds 3.
 
-No começo de uma partida, o primeiro sorteio já ocorre com 2 pontos de energia. Nas mãos especiais sem poderes, a reserva permanece inalterada.
+At the beginning of a match, the first draw already has 2 energy points available. In special hands without powers, the reserve remains unchanged.
 
-A energia de todos os jogadores é pública. A identidade de um poder só se torna pública após uma ativação aceita: na resolução selada da preparação ou junto da jogada. Poderes nunca usados continuam ocultos ao encerrar a mão/partida. O resultado de um poder de informação permanece privado ao beneficiário.
+All players' energy is public. A power's identity becomes public only after an accepted activation: during sealed preparation resolution or alongside a play. Powers never used remain hidden when the hand/match ends. The result of an information power remains private to its recipient.
 
-### Janelas de ativação
+### Activation windows
 
-Os poderes devem especificar uma janela única:
+Each power must specify one window:
 
-- **Preparação:** após o sorteio de poderes e antes da primeira jogada.
-- **Sua vez:** antes de colocar uma carta, enquanto não existe pedido de Truco pendente.
-- **Reação:** somente quando um efeito específico oferece uma oportunidade de resposta.
-- **Resolução:** efeitos previamente ativados são processados automaticamente.
+- **Preparation:** after power draws and before the first play.
+- **Your turn:** before placing a card, while no Truco request is pending.
+- **Reaction:** only when a specific effect offers an opportunity to respond.
+- **Resolution:** previously activated effects are processed automatically.
 
-A primeira versão deve evitar reações aninhadas e múltiplas ativações concorrentes.
+The first version should avoid nested reactions and multiple concurrent activations.
 
-Um jogador pode passar pela preparação sem ativar nada, mantendo seu poder disponível caso ele possua uma janela posterior.
+A player may pass during preparation without activating anything, retaining their power if it has a later window.
 
-### Limitações universais
+### Universal restrictions
 
-1. Nenhuma habilidade pode criar uma manilha física.
-2. Modificadores de força não podem superar manilhas.
-3. Nenhuma habilidade pode impedir uma equipe de correr de um pedido de Truco.
-4. Poderes não podem modificar cartas que já tiveram o resultado resolvido.
-5. Efeitos não podem continuar indefinidamente entre mãos.
-6. O cliente nunca decide o resultado de uma habilidade.
-7. Poderes direcionados precisam indicar explicitamente seu alvo válido.
-8. Se não houver alvo válido, a ativação é rejeitada sem consumo de energia.
-9. A resolução de efeitos deve ser determinística após sorteios gerados pelo servidor.
-10. Informações privadas nunca são incluídas nas atualizações públicas da sala.
+1. No ability may create a physical manilha.
+2. Strength modifiers cannot exceed manilhas.
+3. No ability may prevent a team from folding to a Truco request.
+4. Powers cannot modify cards whose result has already been resolved.
+5. Effects cannot continue indefinitely between hands.
+6. The client never decides an ability's result.
+7. Targeted powers must explicitly identify their valid target.
+8. If no valid target exists, activation is rejected without consuming energy.
+9. Effect resolution must be deterministic after server-generated draws.
+10. Private information is never included in public room updates.
 
 ---
 
-## 5. Catálogo inicial de habilidades
+## 5. Initial ability catalog
 
-### Poderes do MVP — casual e competitivo
+### MVP powers — casual and competitive
 
-| Poder | Custo | Efeito | Janela |
+| Power | Cost | Effect | Window |
 |---|---:|---|---|
-| Espião | 1 | Revela ao usuário uma carta aleatória ainda não jogada de um adversário | Preparação |
-| Segunda Chance | 2 | Troca uma carta escolhida da própria mão por outra sorteada do baralho restante | Preparação |
-| Impulso | 2 | Aumenta em um nível a força efetiva da próxima carta comum jogada | Sua vez |
-| Máscara | 1 | Oculta temporariamente a identidade da próxima carta, revelando-a na resolução da vaza | Sua vez |
+| Espião | 1 | Reveals to the user one random, unplayed card belonging to an opponent | Preparation |
+| Segunda Chance | 2 | Exchanges a selected card from the user's hand for a random card from the remaining deck | Preparation |
+| Impulso | 2 | Increases the next normal card's effective strength by one level | Your turn |
+| Máscara | 1 | Temporarily hides the next card's identity, revealing it when the trick resolves | Your turn |
 
-**Especificações especiais:**
+**Special specifications:**
 
-**Espião:** no 2v2, o jogador escolhe qual adversário investigar. A carta revelada é aleatória. A informação é enviada exclusivamente ao jogador que ativou a habilidade, não ao parceiro. O poder não altera a mão investigada.
+**Espião:** in 2v2, the player chooses which opponent to investigate. The revealed card is random. Information is sent exclusively to the player who activated the ability, not to their partner. The power does not change the investigated hand.
 
-**Segunda Chance:** a carta descartada vai para uma zona fora do baralho, sem retornar nesta mão. A nova carta vem do conjunto restante, sem reposição. A vira nunca pode ser comprada. A troca ocorre antes da primeira vaza.
+**Segunda Chance:** the discarded card goes to a zone outside the deck and does not return during this hand. The new card comes from the remaining pool, without replacement. The vira can never be drawn. The exchange occurs before the first trick.
 
-**Impulso:** funciona apenas com uma carta que não é manilha. Aumenta a força efetiva em exatamente um nível da hierarquia comum, com teto no nível do 3. O efeito altera somente a comparação; o identificador, o naipe e a identidade física da carta não mudam. A habilidade é anunciada antes da escolha da carta.
+**Impulso:** works only on a card that is not a manilha. Increases effective strength by exactly one level in the normal hierarchy, capped at the 3's level. The effect changes only comparison; the card's identifier, suit, and physical identity remain unchanged. The ability is announced before the card is chosen.
 
-**Máscara:** a carta permanece oculta para os adversários até todos os jogadores concluírem a vaza. Quando revelada, conserva sua força integral. É diferente de uma carta coberta tradicional, que não disputa força. A interface deve distinguir claramente os dois efeitos.
+**Máscara:** the card remains hidden from opponents until all players have completed the trick. When revealed, it retains full strength. This differs from a traditional face-down card, which does not contest strength. The interface must clearly distinguish the two effects.
 
-### Ideias para o casual — fora do MVP
+### Casual ideas — outside the MVP
 
-| Poder | Custo | Efeito |
+| Power | Cost | Effect |
 |---|---:|---|
-| Reflexo | 2 | A carta comum jogada empata com a carta comum mais forte já revelada na vaza |
-| Aposta Arriscada | 2 | Antes da primeira jogada, aposta na vitória da equipe; adiciona 1 ponto ao vencedor se a previsão estiver correta, ou 1 ponto aos adversários caso esteja errada |
-| Tudo ou Nada | 3 | Antes da primeira jogada, acrescenta 1 ponto à recompensa de quem vencer a mão |
-| Pressão | 1 | Reduz para 5 segundos a próxima decisão de carta do adversário escolhido, respeitando as configurações de acessibilidade |
+| Reflexo | 2 | The played normal card ties the strongest normal card already revealed in the trick |
+| Aposta Arriscada | 2 | Before the first play, predicts the team's win; adds 1 point to the winner if correct, or 1 point to the opponents if wrong |
+| Tudo ou Nada | 3 | Before the first play, adds 1 point to the reward of whoever wins the hand |
+| Pressão | 1 | Reduces the selected opponent's next card decision to 5 seconds, respecting accessibility settings |
 
-Esses quatro poderes são **experimentais e não aprovados para implementação**. As regras abaixo registram a proposta original para avaliação futura. Se retomados, os modificadores de pontos precisariam ser aplicados somente à pontuação final da mão, sem mudar o valor dos pedidos intermediários de Truco.
+These four powers are **experimental and not approved for implementation**. The rules below record the original proposal for future evaluation. If revisited, point modifiers would need to apply only to the hand's final score, without changing intermediate Truco request values.
 
-Para evitar combinações difíceis de controlar, apenas um modificador adicional de pontuação pode ser registrado por equipe em uma mão, e cada equipe pode receber, no máximo, um ponto adicional por habilidade naquela mão. O placar fica limitado a 12 pontos.
+To avoid combinations that are difficult to control, only one additional scoring modifier may be registered per team in a hand, and each team may receive at most one additional ability point in that hand. The score is capped at 12 points.
 
-**Reflexo** exige pelo menos uma carta comum adversária já revelada na vaza e não afeta manilhas.
+**Reflexo** requires at least one opposing normal card already revealed in the trick and does not affect manilhas.
 
-**Pressão** não substitui configurações de acessibilidade obrigatórias. Por esse motivo, não estará disponível em partidas competitivas e poderá ser desativada pelo anfitrião.
+**Pressão** does not override mandatory accessibility settings. For that reason, it will not be available in competitive matches and may be disabled by the host.
 
-### Poderes rejeitados para o lançamento
+### Powers rejected for launch
 
-- Roubar uma carta da mão de outro jogador.
-- Escolher uma manilha diferente.
-- Anular uma vaza já resolvida.
-- Impedir o adversário de pedir Truco.
-- Obrigar um adversário a descartar sua melhor carta.
-- Duplicar todos os pontos da mão.
+- Stealing a card from another player's hand.
+- Choosing a different manilha.
+- Voiding an already resolved trick.
+- Preventing the opponent from requesting Truco.
+- Forcing an opponent to discard their best card.
+- Doubling all hand points.
 
-Essas habilidades podem ser interessantes visualmente, mas criam assimetrias grandes, prejudicam a identidade do Truco ou tornam o resultado excessivamente dependente do sorteio.
-
----
-
-## 6. Eventos especiais — fora do MVP
-
-Nenhum evento será implementado no MVP. O restante desta seção registra uma proposta futura, sujeita a aprovação e playtests: eventos restritos ao modo casual e desativados por padrão.
-
-Quando ativados, ocorrem a cada três mãos concluídas. O evento é sorteado e anunciado antes da distribuição da próxima mão.
-
-### Conjunto inicial
-
-- **Energia Extra:** todos recebem uma energia adicional até o limite de 3.
-- **Mão Misteriosa:** a vira é revelada somente depois da primeira vaza; as cartas jogadas nessa vaza são resolvidas após a revelação, sem modificar suas identidades.
-- **Rodada Rápida:** todos os jogadores passam a ter um temporizador menor.
-- **Silêncio Mágico:** nenhum poder pode ser ativado naquela mão.
-
-Eventos não ocorrem na mão de onze nem na mão de ferro.
-
-Se a expansão de eventos for aprovada, a proposta é começar por Energia Extra e Silêncio Mágico. Os outros exigem validações adicionais de jogabilidade.
+These abilities may be visually interesting, but they create large asymmetries, undermine Truco's identity, or make the result excessively dependent on draws.
 
 ---
 
-## 7. Fluxo da sala
+## 6. Special events — outside the MVP
 
-### Criação
+No events will be implemented in the MVP. The rest of this section records a future proposal, subject to approval and playtests: events restricted to casual mode and disabled by default.
 
-O jogador acessa o site e escolhe **Criar Sala**.
+When enabled, events occur every three completed hands. The event is drawn and announced before dealing the next hand.
 
-Ele informa um apelido, escolhe 1v1 ou 2v2, casual ou competitivo, e recebe um código curto e um link de convite.
+### Initial set
 
-Não é obrigatório criar uma conta.
+- **Energia Extra:** everyone receives one additional energy, up to the limit of 3.
+- **Mão Misteriosa:** the vira is revealed only after the first trick; cards played in that trick are resolved after the reveal, without changing their identities.
+- **Rodada Rápida:** all players receive a shorter timer.
+- **Silêncio Mágico:** no power may be activated during that hand.
+
+Events do not occur in eleven-point hands or mão de ferro.
+
+If the event expansion is approved, the proposal is to begin with Energia Extra and Silêncio Mágico. The others require additional gameplay validation.
+
+---
+
+## 7. Room flow
+
+### Creation
+
+The player opens the website and selects **Criar Sala**.
+
+They enter a nickname, choose 1v1 or 2v2 and casual or competitive, and receive a short code and an invitation link.
+
+Creating an account is not mandatory.
 
 ### Lobby
 
-O lobby apresenta:
+The lobby displays:
 
-- Jogadores conectados.
-- Assentos e equipes.
-- Configurações da partida.
-- Indicadores de pronto.
-- Controle para iniciar, disponível ao anfitrião quando todos estiverem prontos.
+- Connected players.
+- Seats and teams.
+- Match settings.
+- Ready indicators.
+- A start control available to the host when everyone is ready.
 
-No 2v2, é possível escolher parceiros ou usar distribuição aleatória de equipes.
+In 2v2, players may choose partners or use random team assignment.
 
-Jogadores podem sair e retornar ao lobby. Após iniciar uma partida, as equipes não podem ser modificadas.
+Players may leave and return to the lobby. Teams cannot be changed after a match begins.
 
-### Durante a partida
+### During a match
 
-A interface mostra cartas próprias, vira, manilhas, placar, energia, poderes, vez atual, pedidos de Truco e histórico público de jogadas.
+The interface shows the player's cards, vira, manilhas, score, energy, powers, current turn, Truco requests, and public play history.
 
-Cada jogador vê apenas suas próprias cartas, salvo efeitos permitidos por habilidades e regras especiais.
+Each player sees only their own cards, except for effects permitted by abilities and special rules.
 
-### Finalização
+### Completion
 
-Ao terminar, a tela de resultado apresenta:
+When the match ends, the result screen shows:
 
-- Equipe vencedora.
-- Placar final.
-- Mãos disputadas.
-- Poderes utilizados.
-- Principais viradas da partida.
-- Opção de revanche com as mesmas equipes.
+- Winning team.
+- Final score.
+- Hands played.
+- Powers used.
+- Major match reversals.
+- A rematch option with the same teams.
 
-As informações ocultas podem ser disponibilizadas no replay posterior, mas não durante a partida ativa.
+Hidden information may be made available in a later replay, but not during an active match.
 
 ---
 
-## 8. Temporizadores e desconexões
+## 8. Timers and disconnections
 
-### Limites iniciais propostos
+### Proposed initial limits
 
-| Situação | Casual | Competitivo |
+| Situation | Casual | Competitive |
 |---|---:|---:|
-| Jogar uma carta | 30 s | 20 s |
-| Responder a Truco | 20 s | 15 s |
-| Preparação da mão | 15 s | 10 s |
-| Reconexão protegida | 60 s | 30 s |
+| Play a card | 30 s | 20 s |
+| Respond to Truco | 20 s | 15 s |
+| Hand preparation | 15 s | 10 s |
+| Protected reconnection | 60 s | 30 s |
 
-Esses valores são hipóteses de design que serão ajustadas durante os testes.
+These values are design hypotheses to be adjusted during testing.
 
-No casual, o anfitrião poderá desativar o temporizador de cartas.
+In casual play, the host may disable the card timer.
 
-No competitivo, o temporizador é obrigatório. Se um jogador atingir o limite, o servidor registra uma jogada automática válida. A política inicial será jogar a carta comum de menor força, ou a carta disponível de menor força caso só existam manilhas.
+In competitive play, the timer is mandatory. If a player reaches the limit, the server records a valid automatic play. The initial policy is to play the weakest normal card, or the weakest available card when only manilhas remain.
 
-A resolução automática é determinística e nunca ativa poderes.
+Automatic resolution is deterministic and never activates powers.
 
-Quando houver pedido de Truco pendente e o tempo acabar, a equipe desafiada corre automaticamente. Se o jogador responsável pela decisão especial de mão de onze não responder, a equipe corre.
+When a Truco request is pending and time expires, the challenged team automatically folds. If the player responsible for the special eleven-point decision does not respond, the team folds.
 
-### Reconexão
+### Reconnection
 
-A desconexão não apaga as cartas nem o estado da partida.
+Disconnection does not erase cards or match state.
 
-- O jogador retorna usando um token de retomada vinculado ao assento.
-- O servidor fornece um snapshot privado completo e os eventos públicos necessários para sincronização.
-- Ações enviadas antes da desconexão não são processadas duas vezes.
-- Ao exceder a tolerância de reconexão, o temporizador normal da ação volta a valer.
-- A partida pode terminar por abandono se não houver participantes suficientes para continuar.
+- The player returns using a resume token bound to their seat.
+- The server provides a complete private snapshot and the public events needed for synchronization.
+- Actions sent before disconnection are not processed twice.
+- After the reconnection allowance is exceeded, the normal action timer resumes.
+- The match may end by abandonment if there are insufficient participants to continue.
 
-Mecanismos para evitar abuso de pausa ou reconexão deverão ser definidos antes de disponibilizar partidas ranqueadas.
+Mechanisms to prevent pause or reconnection abuse must be defined before ranked matches become available.
 
 ---
 
-## 9. Progressão cosmética
+## 9. Cosmetic progression
 
-Todos os poderes estarão disponíveis desde o início. Não haverá cartas mais fortes por nível de conta nem vantagens adquiridas com moeda virtual.
+All powers will be available from the start. Account levels will not grant stronger cards, and virtual currency will not buy advantages.
 
-Os jogadores poderão desbloquear:
+Players may unlock:
 
-- Versos e estilos de cartas.
-- Mesas e fundos.
-- Animações de Truco.
-- Efeitos de vitória.
+- Card backs and styles.
+- Tables and backgrounds.
+- Truco animations.
+- Victory effects.
 - Emotes.
-- Avatares.
-- Títulos e molduras.
+- Avatars.
+- Titles and frames.
 
-A progressão poderá utilizar experiência recebida por partidas concluídas, desafios semanais e marcos de participação.
+Progression may use experience earned from completed matches, weekly challenges, and participation milestones.
 
-A quantidade de experiência não deve depender exclusivamente de vitórias, para evitar que jogadores casuais sintam necessidade de competir intensamente.
+Experience amounts should not depend exclusively on wins, so casual players do not feel compelled to compete intensely.
 
-No MVP, contas e progressão serão opcionais. Os recursos cosméticos entram em uma fase posterior.
-
----
-
-## 10. Critérios de aceitação do gameplay
-
-O primeiro lançamento jogável deverá satisfazer:
-
-1. Dois ou quatro usuários entram na mesma sala e disputam uma partida completa.
-2. As regras de manilha e desempate são resolvidas corretamente.
-3. Nenhuma carta pode ser duplicada durante a distribuição ou habilidades.
-4. O estado público nunca contém cartas privadas de outros jogadores.
-5. O servidor rejeita ações fora do turno.
-6. Um pedido de Truco pendente bloqueia jogadas incompatíveis.
-7. Ativar um poder consome energia uma única vez.
-8. Um jogador desconectado pode retomar sua posição sem reiniciar a partida.
-9. A partida determina corretamente o vencedor ao atingir 12 pontos.
-10. As modalidades casual e competitiva utilizam políticas de sorteio distintas.
-11. Todos os estados relevantes são reproduzíveis em testes automatizados.
-12. Nenhuma condição de corrida deve permitir duas ações incompatíveis no mesmo estado da mão.
+Accounts and progression will be optional in the MVP. Cosmetic features enter a later phase.
 
 ---
 
-## 11. Questões em aberto para playtest
+## 10. Gameplay acceptance criteria
 
-As seguintes escolhas não são consideradas balanceadas ou definitivas apenas por terem sido especificadas:
+The first playable release must satisfy the following:
 
-- Energia inicial e regeneração.
-- Frequência de sorteio dos poderes.
-- Potência real do Impulso.
-- Efetividade da Máscara no 1v1.
-- Frequência adequada de efeitos de informação.
-- Duração das decisões.
-- Necessidade de limitar habilidades de pontuação.
-- Impacto de habilidades na duração das partidas.
+1. Two or four users enter the same room and play a complete match.
+2. Manilha and tiebreaking rules are resolved correctly.
+3. No card can be duplicated during dealing or abilities.
+4. Public state never contains other players' private cards.
+5. The server rejects actions outside the player's turn.
+6. A pending Truco request blocks incompatible plays.
+7. Activating a power consumes energy exactly once.
+8. A disconnected player can resume their position without restarting the match.
+9. The match correctly determines the winner upon reaching 12 points.
+10. Casual and competitive modes use distinct draw policies.
+11. All relevant states are reproducible in automated tests.
+12. No race condition may allow two incompatible actions in the same hand state.
 
-Esses elementos precisarão ser ajustados a partir de partidas simuladas e testes reais com jogadores.
+---
 
-### Extensão autorizada — treino solo (19/10/2026)
+## 11. Open playtest questions
 
-O botão Jogar pode abrir uma partida 1v1 contra um bot simples de treino, habilitada por flag independente. Não inclui bots sofisticados, ranking, progressão nem matchmaking. Ferramentas para montar mãos/poderes e reiniciar mão são exclusivas de development e de mesas solo do próprio jogador, nunca de produção. Contrato detalhado no ADR 009.
+The following choices are not considered balanced or final merely because they have been specified:
+
+- Initial energy and regeneration.
+- Power draw frequency.
+- Actual strength of Impulso.
+- Effectiveness of Máscara in 1v1.
+- Appropriate frequency of information effects.
+- Decision duration.
+- Whether scoring abilities need limits.
+- Impact of abilities on match duration.
+
+These elements must be adjusted using simulated matches and real player tests.
+
+### Authorized extension — solo training (19/10/2026)
+
+The Jogar button may open a 1v1 match against a simple training bot, enabled by an independent flag. The 26/10/2026 follow-up authorizes reduced cosmetic XP for completed solo matches and strength-based raise decisions, including occasional bluffs. Ranking points and matchmaking remain excluded. Tools to arrange hands/powers and restart hands are restricted to development and the player's own solo tables, never production. The detailed contract is in ADR 009.
+
+## Approved M5 backend extension
+
+Following the initial guest MVP, the owner authorized optional accounts, predefined pixel avatars, independent deck/table catalogs, cosmetic-only levels and an accumulated-points competitive ranking. Deck themes describe backs, suits and ranks, and the owner's theme is visible to opponents without revealing hidden card identities. There are no avatar uploads, selected/unlocked powers or gameplay advantages. The approved initial progression policy and eligibility are defined in [rules.md](docs/rules.md#m5-account-progression-extension); [ADR 015](docs/adr/015-persistent-player-backend.md) describes the implementation and operational limits. Browser account/customization screens and rendering the new theme manifests remain frontend work.

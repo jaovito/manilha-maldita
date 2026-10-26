@@ -1,0 +1,243 @@
+@media (max-width: 700px) {
+  .player-backdrop {
+    padding: 8px;
+  }
+  .player-panel {
+    max-height: calc(100svh - 16px);
+    border-width: 10px;
+  }
+  .player-panel-header {
+    padding: 12px;
+  }
+  .player-panel h2 {
+    font-size: 27px;
+  }
+  .player-panel-body {
+    padding: 12px;
+  }
+  .player-summary {
+    gap: 10px;
+    padding: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .player-summary .avatar {
+    width: 50px;
+    height: 50px;
+  }
+  .player-summary strong {
+    font-size: 19px;
+  }
+  .player-summary p {
+    font-size: 12px;
+  }
+  .player-points {
+    font-size: 14px;
+    margin-left: auto;
+  }
+  .cosmetic-tabs {
+    top: -12px;
+    margin-bottom: 12px;
+  }
+  .cosmetic-tabs button {
+    font-size: 16px;
+    padding: 10px 4px;
+  }
+  .wardrobe-workspace {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .cosmetic-showcase {
+    min-height: 0;
+    padding: 14px;
+  }
+  .cosmetic-showcase > .cosmetic-art {
+    height: 170px;
+  }
+  .cosmetic-showcase .cosmetic-art > .avatar {
+    width: 125px;
+    height: 125px;
+  }
+  .cosmetic-showcase h3 {
+    margin-top: 8px;
+  }
+  .cosmetic-showcase p {
+    margin: 3px 0 5px;
+    max-width: none;
+    font-size: 12px;
+  }
+  .cosmetic-grid {
+    gap: 10px;
+  }
+  .cosmetic-item strong {
+    font-size: 17px;
+  }
+  .player-panel-footer {
+    padding: 9px 12px;
+    gap: 8px;
+  }
+  .player-panel-footer span {
+    font-size: 10px;
+    max-width: 50%;
+  }
+  .player-panel-footer button {
+    font-size: 14px;
+    padding: 6px 10px;
+  }
+  .account-entry,
+  .account-management {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding: 6px 0;
+  }
+  .account-intro {
+    padding: 8px 10px;
+  }
+  .account-intro > span {
+    font-size: 44px;
+  }
+  .account-intro h3 {
+    font-size: 22px;
+  }
+  .account-intro p {
+    margin: 6px 0;
+  }
+  .player-ranking th,
+  .player-ranking td {
+    padding: 10px 8px;
+  }
+  .player-panel .player-ranking .avatar {
+    width: 34px;
+    height: 34px;
+  }
+  .player-ranking td:nth-child(2) {
+    gap: 8px;
+  }
+  .player-ranking td:first-child,
+  .player-ranking td:last-child {
+    font-size: 17px;
+  }
+  .ranking-pagination {
+    gap: 10px;
+  }
+}
+
+@media (max-height: 650px) and (max-width: 700px) {
+  .player-panel-header {
+    padding: 8px 12px;
+  }
+  .player-panel h2 {
+    font-size: 22px;
+    margin: 3px 0;
+  }
+  .player-panel-header .eyebrow {
+    font-size: 10px;
+  }
+  .player-summary p {
+    display: none;
+  }
+  .player-summary .avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .player-summary strong {
+    font-size: 16px;
+  }
+}
+
+@media (min-width: 701px) {
+  .is-cosmetics {
+    --collection-art-height: clamp(54px, calc((100svh - 540px) / 2), 120px);
+    --showcase-art-height: clamp(100px, calc(100svh - 550px), 200px);
+  }
+  .is-cosmetics .player-panel-header {
+    padding: 8px 20px;
+  }
+  .is-cosmetics .player-panel-header h2 {
+    font-size: 28px;
+  }
+  .is-cosmetics .player-panel-body {
+    padding: 10px 20px 14px;
+  }
+  .is-cosmetics .cosmetic-tabs {
+    position: static;
+    padding-top: 0;
+    margin-bottom: 12px;
+  }
+  .is-cosmetics .cosmetic-tabs button {
+    padding: 8px 12px;
+  }
+  .is-cosmetics .wardrobe-workspace {
+    gap: 20px;
+  }
+  .is-cosmetics .cosmetic-showcase {
+    min-height: 0;
+    padding: 16px;
+  }
+  .is-cosmetics .cosmetic-showcase > .cosmetic-art {
+    height: var(--showcase-art-height);
+  }
+  .is-cosmetics .cosmetic-showcase .cosmetic-table {
+    width: min(240px, calc(100% - 8px), calc((var(--showcase-art-height) - 12px) * 1.5));
+  }
+  .is-cosmetics .cosmetic-showcase .cosmetic-table > span {
+    font-size: min(68px, calc(var(--showcase-art-height) * 0.4));
+  }
+  .is-cosmetics .is-compact .cosmetic-table > span {
+    font-size: min(40px, calc(var(--collection-art-height) * 0.32));
+  }
+  .is-cosmetics .cosmetic-showcase .avatar {
+    width: clamp(88px, calc(100svh - 550px), 180px);
+    height: clamp(88px, calc(100svh - 550px), 180px);
+  }
+  .is-cosmetics .cosmetic-art.is-compact {
+    height: var(--collection-art-height);
+  }
+  .is-cosmetics .is-compact > .avatar {
+    width: min(100px, calc(var(--collection-art-height) - 10px));
+    height: min(100px, calc(var(--collection-art-height) - 10px));
+  }
+  .is-cosmetics .is-compact .cosmetic-table {
+    width: min(150px, calc(100% - 8px), calc((var(--collection-art-height) - 12px) * 1.5));
+  }
+  .is-cosmetics .cosmetic-grid {
+    gap: 10px;
+  }
+  .is-cosmetics .cosmetic-item {
+    padding: 8px;
+  }
+  .is-cosmetics .cosmetic-item strong {
+    font-size: 18px;
+  }
+  .is-cosmetics .player-panel-footer {
+    padding: 8px 20px;
+  }
+}
+@media (min-width: 701px) and (max-height: 780px) {
+  .is-cosmetics .cosmetic-collection:has(.cosmetic-table) {
+    --collection-art-height: 100px;
+  }
+  .is-cosmetics .cosmetic-grid:has(.cosmetic-table) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .is-cosmetics .is-compact .deck-fan {
+    transform: scale(0.42);
+  }
+  .is-cosmetics .cosmetic-showcase .deck-fan {
+    transform: scale(0.75);
+  }
+}
+@media (min-width: 701px) and (max-height: 700px) {
+  .is-cosmetics .cosmetic-showcase {
+    padding: 10px;
+  }
+  .is-cosmetics .cosmetic-showcase button {
+    margin-top: 10px;
+  }
+  .is-cosmetics .is-compact .deck-fan {
+    transform: scale(0.24);
+  }
+  .is-cosmetics .cosmetic-showcase .deck-fan {
+    transform: scale(0.5);
+  }
+}

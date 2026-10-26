@@ -1,0 +1,66 @@
+.welcome-account {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  background: #102b32;
+  border-color: #c39c56;
+}
+.entry-shell .account-profile {
+  height: auto;
+}
+.entry-shell .account-profile .profile-info {
+  display: grid;
+  gap: 3px;
+  height: auto;
+}
+.entry-shell .account-profile .profile-level {
+  margin-top: 0;
+}
+.entry-shell .account-profile .profile-progress {
+  display: none;
+}
+.entry-shell .account-profile .profile-economy {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 3px 0 0;
+  padding: 0;
+  border: 0;
+  height: auto;
+  min-height: 34px;
+}
+.entry-shell .account-profile .profile-economy::before {
+  content: none;
+}
+.entry-shell .account-profile .profile-economy button {
+  position: static;
+  flex: 1;
+  aspect-ratio: auto;
+  width: auto;
+  height: 34px;
+  min-height: 34px;
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  padding: 4px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+@media (max-width: 700px) and (orientation: portrait) {
+  .entry-shell .main-menu:has(.account-profile) {
+    padding-top: 286px;
+  }
+  .entry-shell .account-profile {
+    padding: 8px 12px;
+  }
+  .entry-shell .account-profile .profile-info label {
+    height: 28px;
+  }
+  .entry-shell .account-profile .profile-info input {
+    min-height: 28px;
+    height: 28px;
+  }
+}

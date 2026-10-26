@@ -1,0 +1,136 @@
+.account-entry,
+.account-management {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  padding: 15px 8px;
+}
+.account-intro {
+  text-align: center;
+  padding: 30px 20px;
+  background: radial-gradient(ellipse, #2a463a, transparent);
+}
+.account-intro > span {
+  display: block;
+  color: #d4ac60;
+  font-size: 110px;
+  line-height: 1.4;
+  text-shadow: 3px 5px #06131c;
+}
+.account-intro p,
+.account-intro small {
+  color: #c5c8ae;
+}
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+.account-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 16px;
+}
+.account-form input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #8e7547;
+  color: #ffedce;
+  background: #05151d;
+  font:
+    18px "Pixelify Sans",
+    sans-serif;
+}
+.account-form small {
+  color: #acb8a5;
+  font-size: 12px;
+}
+.account-form .delete-confirmation {
+  flex-direction: row;
+  align-items: center;
+  font-size: 14px;
+}
+.delete-confirmation input {
+  width: 22px;
+  min-height: 22px;
+  flex-shrink: 0;
+  accent-color: #b26749;
+}
+.account-modes,
+.security-options {
+  display: flex;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.account-modes button {
+  flex: 1;
+}
+.security-options {
+  flex-direction: column;
+}
+.account-modes [aria-pressed="true"],
+.security-options [aria-pressed="true"] {
+  background: #385640;
+  border-color: #edc57b;
+}
+.player-panel .player-link {
+  background: transparent;
+  box-shadow: none;
+  border-color: #40564e;
+}
+.recovery-result {
+  padding: 20px;
+  border: 2px solid #cba764;
+  background: #22372e;
+  margin: 0 0 22px;
+}
+.recovery-result output {
+  display: block;
+  font-family: monospace;
+  font-size: 16px;
+  padding: 14px;
+  overflow-wrap: anywhere;
+  background: #081922;
+  user-select: all;
+  margin: 14px 0;
+}
+
+.account-context {
+  color: #e8cc99;
+  text-align: center;
+}
+
+.password-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 16px;
+}
+.password-field {
+  position: relative;
+  display: flex;
+}
+.password-field input {
+  margin: 0;
+  padding-right: 58px;
+}
+.player-panel .password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  height: 100%;
+  padding: 0;
+  color: #edc57b;
+  background: transparent;
+  border: 0;
+  border-left: 1px solid #8e7547;
+  border-radius: 0;
+  box-shadow: none;
+}

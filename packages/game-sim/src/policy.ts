@@ -1,8 +1,9 @@
 import { cardKey, cardStrength } from '@truco/game-core/cards';
 import type { PlayerCommand } from '@truco/game-core/match';
 import type { PlayerView } from '@truco/game-core/projections';
+import { trainingRaises } from './training-policy';
 
-export type Policy = 'conservative' | 'aggressive' | 'probabilistic';
+export type Policy = 'conservative' | 'aggressive' | 'probabilistic' | 'training';
 
 /** The policy receives an authorized view, never a match state or an opponent hand. */
 export function chooseAction(view: PlayerView, policy: Policy, sample: number): PlayerCommand {
@@ -33,7 +34,10 @@ export function chooseAction(view: PlayerView, policy: Policy, sample: number): 
   const conservativeCard =
     cards.find((card) => cardStrength(card, view.hand.vira) > observedMaximum) ?? weakest;
 
-  const aggressive = policy === 'aggressive' || (policy === 'probabilistic' && sample >= 0.5);
+  const aggressive =
+    policy === 'training'
+      ? trainingRaises(view, sample)
+      : policy === 'aggressive' || (policy === 'probabilistic' && sample >= 0.5);
   const power = view.powers?.players[view.seat];
   const affordable =
     power?.power &&

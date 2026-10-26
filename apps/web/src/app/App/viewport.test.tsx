@@ -1,9 +1,9 @@
 import { afterEach, expect, mock, test } from 'bun:test';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import {
+  type ClientMessage,
   clientMessageSchema,
   defaultRoomConfig,
-  type ClientMessage,
   type RoomView,
 } from '@truco/game-protocol';
 import { App } from './index';

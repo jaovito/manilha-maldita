@@ -41,3 +41,30 @@ test('startup failure releases room service and transport resources', async () =
     await runtime.stop();
   }
 });
+
+test('account routes are opt-in, keep guest routes available and require Secure cookies in production', async () => {
+  const { authenticationFixture } = await import(
+    '../modules/accounts/application/tests/authentication-fixture'
+  );
+  const fixture = authenticationFixture();
+  expect(() => startServer({ accounts: fixture.app })).toThrow('SECURE_ACCOUNT_COOKIES_REQUIRED');
+  const runtime = startServer({
+    port: 0,
+    environment: 'test',
+    accounts: fixture.app,
+    allowedOrigins: ['http://accounts.test'],
+  });
+
+  try {
+    const response = await fetch(new URL('/api/accounts/login', runtime.server.url), {
+      method: 'POST',
+      headers: { Origin: 'http://accounts.test', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login: 'player', password: 'correct password fixture' }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ nickname: 'Player' });
+    expect((await fetch(new URL('/api/guest', runtime.server.url))).status).toBe(401);
+  } finally {
+    await runtime.stop();
+  }
+});

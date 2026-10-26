@@ -1,19 +1,19 @@
-# ADR 003 — Biome e dependências estáveis atuais
+# ADR 003 — Biome and current stable dependencies
 
-- Estado: aceita conforme solicitação do proprietário.
-- Data: 2026-10-17.
-- Atualiza as escolhas de ferramentas e versões da [ADR 002](002-bun-test-bootstrap.md).
+- Status: accepted as requested by the owner.
+- Date: 2026-10-17.
+- Updates tooling and version choices from [ADR 002](002-bun-test-bootstrap.md).
 
-## Decisão
+## Decision
 
-Substituir ESLint, seus plugins e Prettier por Biome 2.5.15. Remover configurações e dependências anteriores, sem manter dois linters/formatadores. As restrições específicas de arquitetura passam para `tooling/architecture`, com parser Oxc 0.154.0, chamado por `bun run lint`. Manter regressões das fronteiras e acrescentar testes da configuração real de Biome.
+Replace ESLint, its plugins and Prettier with Biome 2.5.15. Remove previous configuration/dependencies instead of retaining two linters/formatters. Project-specific architecture restrictions move to `tooling/architecture`, using Oxc parser 0.154.0, called by `bun run lint`. Preserve boundary regressions and add tests of the actual Biome configuration.
 
-Usar versões estáveis atuais das dependências diretas e fixá-las exatamente, com um único lockfile. Atualizar Bun para 1.4.3, TypeScript para 7.0.2, Vite para 8.3.4, plugin React para 6.1.2 e tipos Bun para 1.4.3. As demais dependências diretas já correspondiam às versões estáveis mais recentes publicadas no npm e foram conferidas novamente.
+Use current stable direct dependencies, pinned exactly in one lockfile. Upgrade Bun to 1.4.3, TypeScript to 7.0.2, Vite to 8.3.4, the React plugin to 6.1.2 and Bun types to 1.4.3. Other direct dependencies already matched the latest stable npm releases and were checked again.
 
-A API de compilador JavaScript das versões anteriores de TypeScript não está disponível no pacote 7.0.2 usado. O analisador de arquitetura usa a AST de Oxc para preservar verificação sintática sem prender o typecheck a TypeScript antigo. Oxc é usado somente como parser, não como segundo linter ou formatter.
+The JavaScript compiler API from earlier TypeScript versions is unavailable in the 7.0.2 package used here. The architecture analyzer uses Oxc's AST to preserve syntactic checks without pinning typechecking to old TypeScript. Oxc is only a parser, not another linter or formatter.
 
-## Consequências e validação
+## Consequences and validation
 
-Lint, formatação, typecheck, testes e build continuam separados e executáveis. A apresentação da raiz fica fora da formatação; formatos não suportados pelo Biome, como Markdown/YAML nesta configuração, não recebem formatação automática.
+Lint, formatting, typechecking, tests and build remain separate and executable. The root presentation is excluded from formatting; formats unsupported by this Biome configuration, such as Markdown/YAML, receive no automatic formatting.
 
-A instalação completa dos browsers Playwright em cache vazio foi validada sob Bun 1.4.3, com TLS validado. Remover a antiga exceção de Node do instalador e do CI. O runtime Bun instalado localmente também foi atualizado pela ferramenta oficial de upgrade. CI continua configurado, sem execução remota confirmada.
+A complete Playwright browser installation into an empty cache was validated under Bun 1.4.3 with TLS validation. Remove the old Node exception from installer and CI. The locally installed Bun runtime was also updated through the official upgrade tool. CI remains configured without a confirmed remote run.

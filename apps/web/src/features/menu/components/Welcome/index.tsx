@@ -1,7 +1,7 @@
-import { t } from '../../../../shared/i18n';
 import { nicknameSchema } from '@truco/game-protocol';
 import { useEffect, useRef } from 'react';
 import { disabledHint } from '../../../../shared/DisabledTooltip';
+import { t } from '../../../../shared/i18n';
 
 type Props = {
   nickname: string;

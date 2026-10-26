@@ -1,8 +1,8 @@
 import { executeCommand } from '@truco/game-core/match';
 import type { Action, RoomCommand } from '../../dto/commands';
+import type { Ports } from '../../ports/runtime';
 import { closeAbnormally } from '../../services/match/gameplay';
 import { settleGameplay } from '../../services/match/transitions';
-import type { Ports } from '../../ports/runtime';
 import type { RoomRuntime } from '../../state/room-runtime';
 import { prepareHand } from './prepare-hand';
 

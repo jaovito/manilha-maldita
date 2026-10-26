@@ -89,3 +89,36 @@ test('a delayed disconnect from a departed membership cannot detach the same ses
   });
   f.service.close();
 });
+
+test('queued commands recheck authorization before any room mutation or command caching', async () => {
+  const f = fixture();
+  try {
+    const room = await f.room();
+    const before = room.host.view;
+    const message = room.host.message({ type: 'READY', ready: true });
+    let authorized = true;
+    const pending = f.service.receive(
+      room.code,
+      room.host.session,
+      room.host.connection,
+      message,
+      () => authorized,
+    );
+    authorized = false;
+    await expect(pending).rejects.toThrow('UNAUTHENTICATED');
+    expect(room.host.view).toEqual(before);
+    authorized = true;
+    expect(
+      await f.service.receive(
+        room.code,
+        room.host.session,
+        room.host.connection,
+        message,
+        () => authorized,
+      ),
+    ).toMatchObject({ type: 'ACK' });
+    expect(room.host.view.seats[0]?.ready).toBe(true);
+  } finally {
+    f.service.close();
+  }
+});

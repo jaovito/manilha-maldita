@@ -1,9 +1,9 @@
 import { projectPlayerView } from '@truco/game-core/projections';
 import { chooseAction } from '@truco/game-sim';
 import type { Ports } from '../../ports/runtime';
-import { humanConnected } from '../membership/presence';
 import type { RoomRuntime } from '../../state/room-runtime';
 import { applyGameplay } from '../../use-cases/match/execute-gameplay';
+import { humanConnected } from '../membership/presence';
 
 /** Only projected information crosses the policy boundary. Timers share the room queue. */
 export function botWakeAt(room: RoomRuntime, ports: Ports): number | null {
@@ -35,7 +35,7 @@ export function advanceBot(room: RoomRuntime, ports: Ports): boolean {
   if (seat === undefined) return false;
 
   const view = projectPlayerView(room.state.match, seat);
-  const action = chooseAction(view, 'conservative', ports.randomInt(1000) / 1000);
+  const action = chooseAction(view, 'training', ports.randomInt(1000) / 1000);
 
   applyGameplay(
     room,

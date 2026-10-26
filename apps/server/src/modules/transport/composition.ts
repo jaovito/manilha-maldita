@@ -11,8 +11,20 @@ export function createTransport(options: TransportDependencies) {
   const sockets = new Set<{ close(): void }>();
 
   app.get('/health', (context) => context.json({ status: 'ok' }));
+  app.get('/ready', (context) => {
+    const ready = options.ready?.() ?? true;
+
+    return context.json({ status: ready ? 'ready' : 'unavailable' }, ready ? 200 : 503);
+  });
   installRequestSecurity(app, options);
-  app.get('/api/features', (context) => context.json({ solo: options.soloEnabled === true }));
+  app.get('/api/features', (context) =>
+    context.json({
+      solo: options.soloEnabled === true,
+      ...(options.accountsEnabled ? { accounts: true } : {}),
+    }),
+  );
+  options.registerAccounts?.(app);
+  app.all('/api/accounts/*', (context) => context.json({ code: 'NOT_FOUND' }, 404));
   registerGuestEntry(app, options);
   requireSession(app, options);
   registerGuestProfile(app, options);

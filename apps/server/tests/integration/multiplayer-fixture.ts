@@ -1,13 +1,14 @@
 import { expect } from 'bun:test';
 import {
-  defaultRoomConfig,
-  serverMessageSchema,
   type Action,
   type ClientMessage,
   type CommandReply,
-  type RoomView,
+  defaultRoomConfig,
   type RoomConfig,
+  type RoomView,
+  serverMessageSchema,
 } from '@truco/game-protocol';
+import type { ServerOptions } from '../../src/bootstrap/environment';
 import { startServer } from '../../src/bootstrap/runtime';
 
 const origin = 'http://multiplayer.test';
@@ -74,8 +75,13 @@ export class Player {
     return this.send(this.envelope(action));
   }
 }
-export async function setup(count: 2 | 4, config: RoomConfig = defaultRoomConfig) {
-  const runtime = startServer({ port: 0, allowedOrigins: [origin] });
+export async function setup(
+  count: 2 | 4,
+  config: RoomConfig = defaultRoomConfig,
+  options: ServerOptions = {},
+  advance?: (until: number) => Promise<void>,
+) {
+  const runtime = startServer({ ...options, port: 0, allowedOrigins: [origin] });
   const players: Player[] = [];
   const cookies: string[] = [];
   async function post(path: string, body: unknown, cookie?: string) {
@@ -94,7 +100,13 @@ export async function setup(count: 2 | 4, config: RoomConfig = defaultRoomConfig
       status: 'ok',
     });
     for (let seat = 0; seat < count; seat++) {
-      const response = await post('/api/guest', { nickname: `Jogador ${seat}` });
+      const response = options.backend
+        ? await post('/api/accounts/register', {
+            nickname: `Jogador ${seat}`,
+            login: `e_${crypto.randomUUID().replaceAll('-', '').slice(0, 24)}`,
+            password: 'integration account password fixture',
+          })
+        : await post('/api/guest', { nickname: `Jogador ${seat}` });
       const cookie = response.headers.get('set-cookie')?.split(';')[0];
       if (!cookie) throw new Error('Missing guest cookie');
       cookies.push(cookie);
@@ -133,6 +145,7 @@ export async function setup(count: 2 | 4, config: RoomConfig = defaultRoomConfig
     async function settle() {
       while (players[0]?.view?.transition) {
         const transition = players[0].view.transition;
+        await advance?.(transition.until);
         const view = await players[0].wait((current) => current.transition?.id !== transition.id);
         await all(view.sequence);
       }
@@ -145,8 +158,8 @@ export async function setup(count: 2 | 4, config: RoomConfig = defaultRoomConfig
     }
     async function begin(withPreparation = true) {
       for (let seat = 0; seat < count; seat++)
-        expect((await act(seat, { type: 'READY', ready: true })).type).toBe('ACK');
-      expect((await act(0, { type: 'START_MATCH' })).type).toBe('ACK');
+        expect(await act(seat, { type: 'READY', ready: true })).toMatchObject({ type: 'ACK' });
+      expect(await act(0, { type: 'START_MATCH' })).toMatchObject({ type: 'ACK' });
       await settle();
       if (withPreparation) await prepare();
     }

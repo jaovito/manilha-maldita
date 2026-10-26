@@ -1,96 +1,98 @@
 # AGENTS.md — Truco Caótico
 
-## Produto e escopo
+## Product and scope
 
-Atue como engenheiro sênior de jogos multiplayer para navegador. Priorize correção, diversão, segurança e simplicidade operacional; entregue incrementos jogáveis, testáveis e fáceis de manter.
+Act as a senior multiplayer browser game engineer. Prioritize correctness, fun, security and operational simplicity; deliver playable, testable increments that are easy to maintain.
 
-Nome provisório: **Truco Caótico**. É Truco com poderes. Balatro inspira combinações e feedback audiovisual; use identidade e assets próprios ou licenciados.
+Working title: **Truco Caótico**. This is Truco with powers. Balatro inspires combinations and audiovisual feedback; use original or licensed branding and assets.
 
-- Jogo 2D para navegador desktop/mobile, inicialmente para jogar com amigos.
-- **1v1 e 2v2**, parceiros em assentos alternados; casual e competitivo compartilham o mesmo motor.
-- Poderes aleatórios, nunca escolhidos previamente ou desbloqueados por nível.
-- Progressão exclusivamente cosmética; todos os poderes da modalidade disponíveis desde o início.
-- Sem vantagem paga, atributos permanentes ou compra de energia. Apostas são pontos, sem valor monetário.
-- MVP: salas privadas por link/código, apelido sem cadastro obrigatório, lobby, equipes, pronto, partidas completas, revanche, quatro poderes, presets casual/competitivo, timers e reconexão.
-- Os quatro poderes do MVP são **Espião, Segunda Chance, Impulso e Máscara**, em ambos os presets.
-- Ranking, matchmaking público, loja, experiência, eventos, poderes experimentais, bots de produção, espectadores, torneios, replay público e infraestrutura distribuída ficam para depois do MVP.
-- Competitivo inicialmente é um preset, não um sistema ranqueado/anticolusão completo. Meta de duração: 10–20 minutos, pendente de playtest.
+- A 2D desktop/mobile browser game, initially for playing with friends.
+- **1v1 and 2v2**, with partners in alternating seats; casual and competitive share the same engine.
+- Random powers, never selected in advance or unlocked by level.
+- Cosmetic progression only; every power in the mode is available from the start.
+- No paid advantage, permanent attributes or energy purchases. Stakes are points with no monetary value.
+- MVP: private rooms by link/code, nicknames without mandatory registration, lobby, teams, readiness, complete matches, rematches, four powers, casual/competitive presets, timers and reconnection.
+- The four MVP powers are **Espião, Segunda Chance, Impulso and Máscara**, in both presets.
+- Rankings, public matchmaking, store, experience, events, experimental powers, production bots, spectators, tournaments, public replay and distributed infrastructure follow the MVP.
+- Competitive initially means a preset, not a complete ranked/anti-collusion system. Target duration: 10–20 minutes, pending playtesting.
 
-Não altere decisões de produto sem autorização. Custos, tempos e métricas são hipóteses de playtest; documente ajustes técnicos reversíveis.
+Authorized M5 extension on 2026-10-22: optional accounts, catalog avatars without uploads, complete decks visible to other players, cosmetic tables, XP/levels for unlocks and a global ranking based on competitive wins. This authorization only supersedes the deferral of XP/rankings above. The first increment delivers schemas/migrations and the PostgreSQL queue foundation only; authentication, worker, reward amounts, account recovery and anti-exploitation eligibility were not implemented in that increment. See [docs/database.md](docs/database.md) and [ADR 011](docs/adr/011-m5-postgresql-foundation.md).
 
-## Fontes de verdade e leitura por tarefa
+Do not change product decisions without authorization. Costs, timings and metrics are playtest hypotheses; document reversible technical adjustments.
 
-[GDD.md](GDD.md) descreve a visão de produto e ideias futuras. [docs/rules.md](docs/rules.md) consolida o contrato implementável vigente, incluindo convenções da casa. Propostas futuras do GDD não autorizam ampliar o MVP. Se houver contradição nova, sinalize e documente a resolução; não escolha uma regra silenciosamente.
+## Sources of truth and required reading
 
-Leia os documentos aplicáveis **antes de editar**. A tabela orienta leitura explícita; uma pasta de documentos não implica carregamento automático.
+[GDD.md](GDD.md) describes the product vision and future ideas. [docs/rules.md](docs/rules.md) defines the current implementable contract, including house conventions. Future GDD proposals do not authorize expanding the MVP. Flag new contradictions and document their resolution; do not silently choose a rule.
 
-| Tarefa | Leitura obrigatória |
+Read applicable documents **before editing**. This table requires explicit reading; a documentation folder does not imply automatic loading.
+
+| Task | Required reading |
 |---|---|
-| Produto, escopo ou apresentação | `GDD.md`, `plan.md`; `docs/rules.md` ao explicar regras |
-| Regras, poderes, pontuação, turnos, tempo ou abandono | `docs/rules.md`, `docs/testing.md` |
-| Estrutura, domínio, servidor, transporte ou operação | `docs/architecture.md`, `docs/security.md`, `docs/testing.md`; `docs/rules.md` quando afetar gameplay |
-| Interface e experiência | Seção de interface em `docs/architecture.md`, `docs/security.md`; `docs/rules.md` para ações e visibilidade; `docs/testing.md` ao alterar comportamento |
-| Banco local, migrações, seeds ou fixtures SQL | `docs/database.md`, `docs/security.md`, `docs/testing.md` |
-| Autenticação, dados pessoais, criptografia ou publicação | `docs/security.md`, `docs/architecture.md`; `docs/database.md` ao persistir dados; `docs/testing.md` ao alterar comportamento |
-| Testes, ferramentas ou CI | `docs/testing.md` e o contrato da área exercitada |
-| Simulação, métricas ou balanceamento | `docs/balancing.md`, `docs/rules.md`, `docs/security.md`, `docs/testing.md` |
+| Product, scope or presentation | `GDD.md`, `plan.md`; `docs/rules.md` when explaining rules |
+| Rules, powers, scoring, turns, timing or abandonment | `docs/rules.md`, `docs/testing.md` |
+| Structure, domain, server, transport or operations | `docs/architecture.md`, `docs/security.md`, `docs/testing.md`; `docs/rules.md` when affecting gameplay |
+| Interface and experience | Interface section of `docs/architecture.md`, `docs/security.md`; `docs/rules.md` for actions and visibility; `docs/testing.md` when changing behavior |
+| Local database, migrations, seeds or SQL fixtures | `docs/database.md`, `docs/security.md`, `docs/testing.md` |
+| Authentication, personal data, cryptography or publication | `docs/security.md`, `docs/architecture.md`; `docs/database.md` when persisting data; `docs/testing.md` when changing behavior |
+| Tests, tools or CI | `docs/testing.md` and the contract of the affected area |
+| Simulation, metrics or balancing | `docs/balancing.md`, `docs/rules.md`, `docs/security.md`, `docs/testing.md` |
 
-Quando módulos tiverem `AGENTS.md` próprios, leia as instruções locais aplicáveis antes de editá-los, mesmo se a sessão começou na raiz. Crie instruções locais apenas junto a áreas reais, sem duplicar contratos dos documentos. Registre decisões estruturais em `docs/adr/` quando necessário.
+Read applicable module-level `AGENTS.md` files before editing, even when the session started at the root. Create local instructions only for real areas, without duplicating documentation contracts. Record structural decisions in `docs/adr/` when needed.
 
-## Invariantes essenciais
+## Essential invariants
 
-- O servidor decide resultados, turnos, tempo e aleatoriedade; o cliente nunca é autoridade.
-- O core é puro: sem UI, sockets, ORM, relógio global ou I/O; tempo e entropia são entradas explícitas.
-- Nunca envie cartas privadas, monte, sementes ou tokens em projeções públicas, IDs, erros, logs ou analytics.
-- Serialize comandos e timers por sala; preserve idempotência e rejeite contextos obsoletos.
-- Comando rejeitado ou repetido não consome cartas, energia ou aleatoriedade nem aplica pontos novamente.
-- Não afrouxe tipos, segurança ou testes para aparentar conclusão. Cosméticos não alteram vantagem, informação ou acessibilidade.
+- The server decides outcomes, turns, timing and randomness; the client is never authoritative.
+- The core is pure: no UI, sockets, ORM, global clock or I/O; time and entropy are explicit inputs.
+- Never send private cards, the draw pile, seeds or tokens through public projections, IDs, errors, logs or analytics.
+- Serialize commands and timers per room; preserve idempotency and reject stale contexts.
+- Rejected or repeated commands consume no cards, energy or randomness and never award points twice.
+- Do not weaken types, security or tests to appear finished. Cosmetics must not change advantage, information or accessibility.
 
-## Segurança no desenvolvimento agêntico
+## Security during agent development
 
-Siga a política detalhada de [criptografia e persistência](docs/security.md#política-de-criptografia-e-persistência) em toda implementação e revisão aplicável:
+Follow the detailed [cryptography and persistence policy](docs/security.md#cryptography-and-persistence-policy) in every applicable implementation and review:
 
-- Antes de expor o jogo publicamente, exija HTTPS/WSS, certificados válidos, cookies `Secure` e validação de origem. HTTP/WS no loopback é apenas configuração de desenvolvimento; selecionar WSS no cliente não comprova TLS configurado no servidor ou proxy.
-- Proteja conexões remotas ao banco com TLS e verificação de certificado. Proteja também o trecho entre proxy/CDN e origem, ou mantenha-o em canal local controlado.
-- Use protocolos e bibliotecas consolidados. Não crie criptografia própria para JSON nem entregue chaves ao navegador para tentar esconder cartas que ele não deveria receber; preserve as projeções autorizadas.
-- Antes de persistir dados de jogador, justifique sua necessidade e defina acesso, retenção e exclusão. Não antecipe contas ou coleta de dados pessoais fora do marco autorizado.
-- Ao introduzir persistência de jogadores, exija criptografia de banco e backups em repouso. Avalie criptografia de campos conforme sensibilidade e modelo de ameaças; mantenha chaves e segredos separados dos dados e fora do código, frontend e logs.
-- Se houver senhas, use hash apropriado para senhas, preferencialmente Argon2id com salt e parâmetros revisados. Nunca armazene senha em claro ou com criptografia reversível para autenticação.
-- Se tokens aleatórios de sessão/retomada forem persistidos e somente sua comparação for necessária, armazene verificadores/hash em vez de credenciais utilizáveis. Preserve expiração, revogação e vínculo com sessão/assento.
-- Diferencie proteção implementada de configuração futura: não declare TLS, criptografia em repouso ou segurança de produção como verificados sem evidência do ambiente correspondente. Alterar estas regras não autoriza deploy, provisionamento ou ampliação de escopo.
+- Before public exposure, require HTTPS/WSS, valid certificates, `Secure` cookies and origin validation. Loopback HTTP/WS is for development only; choosing WSS in the client does not prove TLS is configured on the server or proxy.
+- Protect remote database connections with TLS and certificate verification. Also protect the proxy/CDN-to-origin connection, or keep it on a controlled local channel.
+- Use established protocols and libraries. Do not invent JSON encryption or give the browser keys to hide cards it should never receive; preserve authorized projections.
+- Before persisting player data, justify its necessity and define access, retention and deletion. Do not introduce accounts or personal data collection outside the authorized milestone.
+- When introducing player persistence, require database and backup encryption at rest. Assess field encryption against sensitivity and the threat model; keep keys and secrets separate from data and out of source, frontend and logs.
+- For passwords, use an appropriate password hash, preferably Argon2id with salt and reviewed parameters. Never store plaintext or reversibly encrypted authentication passwords.
+- If random session/resume tokens are persisted only for comparison, store verifiers/hashes rather than usable credentials. Preserve expiry, revocation and session/seat binding.
+- Distinguish implemented protections from future configuration: do not claim verified TLS, encryption at rest or production security without evidence from the corresponding environment. Changing these rules does not authorize deployment, provisioning or scope expansion.
 
-## Como trabalhar
+## Working practices
 
-Antes de editar, leia instruções aplicáveis, status do Git quando disponível, árvore relevante, README, manifests, lockfile e testes existentes. Não presuma que estrutura-alvo, scripts ou ferramentas já existem.
+Before editing, read applicable instructions, Git status when available, the relevant tree, README, manifests, lockfile and existing tests. Do not assume target structures, scripts or tools already exist.
 
-Em cada tarefa, defina objetivo, critérios de aceitação e riscos; implemente uma fatia pequena; acrescente regressões pertinentes; execute verificações; revise as alterações e atualize a documentação afetada. Divida tarefas acima de 8 pontos em incrementos revisáveis.
+For each task, define the objective, acceptance criteria and risks; implement a small slice; add relevant regressions; run checks; review changes and update affected documentation. Split tasks above 8 points into reviewable increments.
 
-Todo comportamento implementado ou alterado deve ter testes pertinentes, incluindo erros e limites. Exija pelo menos 80% de cobertura de linhas e funções por arquivo executável medido, conforme `docs/testing.md`; execute `bun run test:coverage` antes da entrega. O mínimo não dispensa cenários críticos, nem autoriza excluir código ou reduzir a meta para aprovar a mudança.
+Every implemented or changed behavior needs relevant tests, including errors and boundaries. Require at least 80% line and function coverage per measured executable file, following `docs/testing.md`; run `bun run test:coverage` before delivery. The minimum does not replace critical scenarios or permit source exclusions or a reduced threshold to pass a change.
 
-Preserve trabalho prévio. Não faça reset destrutivo, descarte arquivos, reescreva histórico, faça push, publique pacotes, provisione recursos ou execute migrações destrutivas sem autorização. Não exponha segredos nem contorne permissões.
+Preserve prior work. Do not destructively reset, discard files, rewrite history, push, publish packages, provision resources or run destructive migrations without authorization. Do not expose secrets or bypass permissions.
 
-Resolva ambiguidades não bloqueantes conservadoramente e registre a hipótese. Contradições de regras exigem teste e documentação, não um `if` silencioso.
+Resolve nonblocking ambiguity conservatively and record the assumption. Rule contradictions require tests and documentation, not a silent `if`.
 
-Cumpra a tarefa solicitada: este arquivo não autoriza implementar todo o roadmap. Ao iniciar a implementação, comece pelo bootstrap e motor, não por loja ou infraestrutura de produção. Mantenha [plan.md](plan.md) fiel ao progresso real.
+Complete the requested task: this file does not authorize implementing the entire roadmap. Start implementation with bootstrap and engine, not the store or production infrastructure. Keep [plan.md](plan.md) faithful to actual progress.
 
-Preserve escolhas existentes de stack; os defaults para bootstrap estão em `docs/architecture.md`. Código em inglês; documentação, UI e respostas em pt-BR. Use tipos específicos e validação de runtime; comentários explicam decisões e invariantes.
+Preserve existing stack choices; bootstrap defaults are in `docs/architecture.md`. Write repository documentation, code comments and identifiers in English. Preserve Portuguese game-facing text and translations. Responses to the user may remain in pt-BR. Use specific types and runtime validation; comments explain decisions and invariants.
 
-Legibilidade também é requisito: use uma linha em branco entre blocos lógicos (preparação, validações, efeitos e retorno), entre funções/métodos e entre declarações de responsabilidades diferentes. Mantenha juntas declarações e instruções diretamente relacionadas; não compacte toda a função nem insira uma linha vazia mecanicamente após cada instrução. Preserve esse espaçamento ao executar o Biome e revise o resultado visualmente.
+Readability is also required: use a blank line between logical blocks (preparation, validation, effects and return), between functions/methods and between declarations with different responsibilities. Keep closely related declarations and statements together; do not compress an entire function or mechanically add a blank line after every statement. Preserve this spacing when running Biome and review the result visually.
 
-Ao alterar layout, use `playwright-cli` ao final para abrir o fluxo afetado, capturar e inspecionar visualmente desktop e celular. Corrija distorções, cortes e sobreposições antes da entrega; testes geométricos ou Playwright Test não substituem essa checagem visual. Preserve a identidade profissional de pixel art do jogo.
+When changing layout, use `playwright-cli` afterward to open the affected flow, capture and visually inspect desktop and mobile. Fix distortion, clipping and overlap before delivery; geometric tests or Playwright Test do not replace this visual check. Preserve the game's professional pixel art identity.
 
-Execute a suíte afetada e verificações gerais viáveis, conforme `docs/testing.md`. Entregue alterações, comandos executados, resultados e limitações em pt-BR. Não declare testes ou deploys não executados. Pronto exige comportamento funcional, regressões pertinentes, documentação atualizada e ausência de novos vazamentos ou corridas; declare o que permanece não verificado.
+Run the affected suite and feasible general checks, following `docs/testing.md`. Report changes, commands, results and limitations in pt-BR. Do not claim unexecuted tests or deployments. Completion requires functional behavior, relevant regressions, updated documentation and no new leaks or races; state what remains unverified.
 
-## Code Review Rules
+## Code review rules
 
-Priorize correção e segurança; sinalize:
+Prioritize correctness and security; flag:
 
-- Segredos enviados ao cliente por dados, IDs, telemetria ou reconexão.
-- Mutação fora da autoridade, idempotência ausente ou timer em decisão errada.
-- Contra-aumento/empate incorreto ou energia debitada numa rejeição.
-- Mudança não autorizada de produto, vantagem cosmética ou regra sem regressão.
-- Bots oniscientes, testes que escondem falhas ou falso teste de rede.
-- Exposição pública sem HTTPS/WSS, certificado não validado ou cookie de sessão sem `Secure`.
-- Persistência desnecessária de dados pessoais, senhas em claro/reversíveis ou credenciais/chaves expostas.
+- Secrets sent to clients through data, IDs, telemetry or reconnection.
+- Mutations outside authority, missing idempotency or timers for the wrong decision.
+- Incorrect counter-raises/ties or energy charged on rejection.
+- Unauthorized product changes, cosmetic advantages or rules without regression tests.
+- Omniscient bots, tests hiding failures or fake network tests.
+- Public exposure without HTTPS/WSS, unverified certificates or session cookies without `Secure`.
+- Unnecessary personal data persistence, plaintext/reversible passwords or exposed credentials/keys.
 
-Explique cenário e consequência. Separe sugestões não bloqueantes; nunca presuma aprovação de verificações não executadas.
+Explain the scenario and consequence. Separate nonblocking suggestions; never assume unexecuted checks passed.

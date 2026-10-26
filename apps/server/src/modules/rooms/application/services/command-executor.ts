@@ -1,10 +1,10 @@
 import type { CommandReply } from '../dto/commands';
 import { commandError } from '../dto/mappers/command-error';
-import { dispatchCommand } from './messaging/dispatch';
 import { roomView } from '../dto/mappers/room-view';
-import { cacheKey } from './room-queue';
-import { memberSeat } from './membership/presence';
 import type { RoomContext } from '../use-cases/context';
+import { memberSeat } from './membership/presence';
+import { dispatchCommand } from './messaging/dispatch';
+import { cacheKey } from './room-queue';
 
 /** All validated commands run here: identity, idempotency and context remain one transaction. */
 export async function executeRoomCommand(
@@ -13,10 +13,13 @@ export async function executeRoomCommand(
   sessionId: string,
   connectionId: string,
   input: unknown,
+  authorized?: () => boolean,
 ): Promise<CommandReply> {
   const room = context.lifecycle.getRoom(code);
 
   return context.lifecycle.enqueue(room, () => {
+    if (authorized && !authorized()) throw new Error('UNAUTHENTICATED');
+
     const seat = memberSeat(room, sessionId);
     if (room.connections.get(room.state.seats[seat]?.sessionId ?? '')?.id !== connectionId)
       throw new Error('CONNECTION_REPLACED');

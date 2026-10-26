@@ -29,6 +29,29 @@ test('M4 real clients see distribution, result pauses, next leader, sound contro
   for (const page of pages) {
     await page.addInitScript(`
       window.cardFlightCount = 0;
+      window.dealPresentation = null;
+      const observer = new MutationObserver(() => {
+        const table = document.querySelector('.game-table[data-transition="deal"]');
+        const deck = table?.querySelector('.deal-deck');
+        const plays = table?.querySelector('.center-plays');
+        const card = table?.querySelector('.deal-card');
+        const caption = table?.querySelector('.resolution-feedback strong');
+        const atmosphere = table?.querySelector('.table-atmosphere');
+        if (!table || !deck || !plays || !card || !caption || !atmosphere) return;
+        const a = deck.getBoundingClientRect();
+        const b = plays.getBoundingClientRect();
+        window.dealPresentation = {
+          caption: caption.textContent,
+          captionVisible: caption.getClientRects().length > 0,
+          enabledCards: table.querySelectorAll('.hand-cards .card:enabled').length,
+          turnBadges: table.querySelectorAll('.turn-badge').length,
+          alignment: Math.abs(a.x + a.width / 2 - b.x - b.width / 2),
+          animation: getComputedStyle(card).animationName,
+          atmosphereVisible: atmosphere.getClientRects().length > 0,
+        };
+        observer.disconnect();
+      });
+      observer.observe(document, {subtree: true, childList: true, attributes: true});
       const animate = Element.prototype.animate;
       Element.prototype.animate = function (frames, options) {
         if (this.parentElement?.matches('.played-card')) window.cardFlightCount++;
@@ -61,31 +84,33 @@ test('M4 real clients see distribution, result pauses, next leader, sound contro
 
     for (const page of pages)
       await clickAndSync(pages, page, page.getByRole('button', { name: 'Estou pronto' }));
+    // A native DOM observer captures the actual transient frame, even if RPC assertions arrive late.
     await clickAndSync(pages, host, host.getByRole('button', { name: 'Iniciar partida' }));
-    for (const page of pages) {
-      await expect(page.locator('.game-table')).toHaveAttribute('data-transition', 'deal');
-      await expect(page.getByText('Distribuindo · mão 1', { exact: true })).toBeVisible();
-      await expect(page.locator('.hand-cards .card:enabled')).toHaveCount(0);
-      await expect(page.locator('.turn-badge')).toHaveCount(0);
+    for (const [index, page] of pages.entries()) {
+      await expect.poll(() => page.evaluate('window.dealPresentation !== null')).toBe(true);
+      const frame = await page.evaluate<{
+        caption: string;
+        captionVisible: boolean;
+        enabledCards: number;
+        turnBadges: number;
+        alignment: number;
+        animation: string;
+        atmosphereVisible: boolean;
+      }>('window.dealPresentation');
+      expect(frame).toMatchObject({
+        caption: 'Distribuindo · mão 1',
+        captionVisible: true,
+        enabledCards: 0,
+        turnBadges: 0,
+        animation: index === 0 ? 'deal-card-flight' : 'none',
+        atmosphereVisible: index === 0,
+      });
+      if (index === 0) expect(frame.alignment).toBeLessThanOrEqual(1);
     }
-    const alignment = await host.locator('.deal-deck').evaluate((deck) => {
-      const arena = deck.closest('.arena');
-      const plays = arena?.querySelector('.center-plays');
-      if (!arena || !plays) throw new Error('Mesa ausente.');
-      const deckBox = deck.getBoundingClientRect();
-      const playsBox = plays.getBoundingClientRect();
-      return Math.abs(deckBox.x + deckBox.width / 2 - playsBox.x - playsBox.width / 2);
-    });
-    expect(alignment).toBeLessThanOrEqual(1);
-    const deal = views[0]?.();
+    const deal = views[0]?.deal();
+    expect(deal).toBeDefined();
     expect(deal?.decisionId).toBeNull();
     expect(deal?.deadline).toBeNull();
-    await expect(host.locator('.deal-card').first()).toHaveCSS(
-      'animation-name',
-      'deal-card-flight',
-    );
-    await expect(guest.locator('.table-atmosphere')).toBeHidden();
-    await expect(guest.locator('.deal-card').first()).toHaveCSS('animation-name', 'none');
     await expect(guest.locator('.prop-candle-body')).toHaveCSS('filter', 'none');
     await expect(host.locator('.prop-candle-body')).not.toHaveCSS('filter', 'none');
     await expect(host.locator('.prop-candle-glow')).toHaveCSS(

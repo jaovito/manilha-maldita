@@ -1,21 +1,23 @@
-# Balanceamento e simulação
+# Balancing and simulation
 
-Leia antes de criar simulações, interpretar métricas de equilíbrio ou propor ajustes. O contrato vigente está em [rules.md](rules.md); hipóteses não autorizam mudanças automáticas de produto.
+Read before building simulations, interpreting balance metrics or proposing adjustments. The current contract is in [rules.md](rules.md); hypotheses do not authorize automatic product changes.
 
-## Balanceamento e simulação
+## Balancing and simulation
 
-Simule com o mesmo core e bots que enxergam apenas sua projeção. Use políticas conservadora, agressiva e probabilística, sem tratá-las como bots de produção.
+Simulate with the same core and bots that see only their own projection. Use conservative, aggressive and probabilistic policies, without treating them as production bots.
 
-Compare cenários pareados com distribuição inicial igual, fontes separadas de aleatoriedade e troca de assentos/equipes. Permita que a política reaja às novas observações; não force ações-base ilegais após um poder.
+Compare paired scenarios with identical initial deals, separate randomness sources and swapped seats/teams. Allow policies to react to new observations; do not force illegal baseline actions after a power.
 
-Registre versão, política, tamanho amostral, incerteza e seeds privadas. Diferencie efeito do poder sorteado de associação com uso seletivo. Vitória global de 50% em sorteio espelhado não prova equilíbrio.
+Record version, policy, sample size, uncertainty and private seeds. Distinguish the effect of an assigned power from association with selective use. A global 50% win rate under mirrored assignment does not prove balance.
 
-Hipóteses: investigar viés de iniciador acima de 2 pontos percentuais ou efeito marginal acima de 5 em cenários comparáveis, sem ajuste automático. Separe 1v1/2v2, modalidade, posição e experiência.
+Hypotheses: investigate opening-player bias above 2 percentage points or marginal effects above 5 in comparable scenarios, without automatic adjustments. Separate 1v1/2v2, mode, position and experience.
 
-Playtests humanos avaliam blefe, cooperação, clareza, frustração, poderes inutilizáveis e vontade de revanche. Simulação não valida diversão. Não adicione poderes extras para corrigir baixa utilização antes de medir.
+Human playtests assess bluffing, cooperation, clarity, frustration, unusable powers and desire for a rematch. Simulation cannot validate fun. Do not add extra powers to fix low utilization before measuring it.
 
-## Ferramenta inicial do M3
+## Initial M3 tool
 
-Execute `bun run simulate <cenários-por-estrato> [seed-sintética]`. `game-sim` compara os dois formatos e presets sob políticas conservadora, agressiva e probabilística. Cada cenário tem braços com/sem poderes e permutação de assentos/equipes; streams independentes por mão preservam a mesma distribuição de cartas entre braços mesmo quando há mais decisões. A política pode reagir às trocas, jogadas públicas e informação do Espião pela sua projeção.
+Run `bun run simulate <scenarios-per-stratum> [synthetic-seed]`. `game-sim` compares both formats and presets under conservative, aggressive and probabilistic policies. Each scenario has arms with/without powers and seat/team permutations; independent streams per hand preserve identical card deals across arms even when decision counts differ. Policies may react to exchanges, public plays and Espião information through their own projection.
 
-O JSON inclui versão, tamanho amostral, média de mãos/decisões, vitória do iniciador, diferença pareada e IC normal aproximado por cenário, além de contagens de poderes atribuídos e usados. A contagem de uso não identifica efeito causal individual. Não se estima duração em minutos, efeito marginal individual de cada poder ou diversão. Seeds sintéticas são parâmetros locais de reprodução, separados de seeds/entropia de partidas reais e omitidos dos relatórios agregados. Veja [a primeira execução](simulation-m3.md).
+JSON includes version, sample size, mean hands/decisions, opening-player wins, paired differences and approximate normal confidence intervals per scenario, plus assigned/used power counts. Usage counts do not identify individual causal effects. The tool does not estimate duration in minutes, individual marginal power effects or fun. Synthetic seeds are local reproducibility parameters, separate from real-match seeds/entropy and omitted from aggregate reports. See [the initial run](simulation-m3.md).
+
+The authorized solo training policy now uses observable card strength, public trick wins and exposed opposing cards for wager confidence, with occasional bluffs. It is separate from the three comparison policies above. Initial raise/bluff probabilities and confidence thresholds are hypotheses for human playtests; stronger bidding does not establish a measured win-rate target.
