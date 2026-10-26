@@ -196,6 +196,17 @@ async function assertPowerReveal(page: Page) {
   expect(power.x + power.width, 'Poder deve ocupar a esquerda da mão').toBeLessThanOrEqual(hand.x);
 }
 
+export async function assertCompactPowerSpacing(page: Page) {
+  const dock = await page.locator('.power-dock').boundingBox();
+  const side = await page.locator('.seat-relative-3').boundingBox();
+  if (!dock || !side) throw new Error('Missing compact power or side seat');
+
+  expect(
+    dock.y - side.y - side.height,
+    'Power stack clears the side nameplate by 8px',
+  ).toBeGreaterThanOrEqual(8);
+}
+
 export async function checkSmallPhones(page: Page, count: 2 | 4, phase: 'initial' | 'played') {
   for (const viewport of [
     { width: 375, height: 667 },
@@ -207,6 +218,7 @@ export async function checkSmallPhones(page: Page, count: 2 | 4, phase: 'initial
       fullPage: true,
     });
     await assertTableGeometry(page, count);
+    if (count === 4) await assertCompactPowerSpacing(page);
   }
   await page.setViewportSize({ width: 390, height: 844 });
 }

@@ -6,6 +6,7 @@ import { clickAndSync, findActivePlayer, observeRoomSnapshots } from '../support
 import { playWithPower, preparePowers } from '../support/multiplayer-powers';
 import { assertSeatAlignment } from '../support/seat-alignment';
 import {
+  assertCompactPowerSpacing,
   assertNoOverflow,
   assertTableGeometry,
   captureRoomSurface,
@@ -125,6 +126,12 @@ for (const count of [2, 4] as const) {
         path: `/tmp/truco-m3-preparation-${count}-${testInfo.project.name}.png`,
         fullPage: true,
       });
+      if (count === 4 && testInfo.project.name === 'mobile-chromium') {
+        // Check before any randomly assigned power can be consumed by preparation.
+        await host.setViewportSize({ width: 320, height: 568 });
+        await assertCompactPowerSpacing(host);
+        await host.setViewportSize({ width: 390, height: 844 });
+      }
       await preparePowers(pages);
       await host.screenshot({
         path: `/tmp/truco-viewport-initial-${count}-${testInfo.project.name}.png`,
