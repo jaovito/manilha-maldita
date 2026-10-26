@@ -158,8 +158,8 @@ export async function setup(
     }
     async function begin(withPreparation = true) {
       for (let seat = 0; seat < count; seat++)
-        expect((await act(seat, { type: 'READY', ready: true })).type).toBe('ACK');
-      expect((await act(0, { type: 'START_MATCH' })).type).toBe('ACK');
+        expect(await act(seat, { type: 'READY', ready: true })).toMatchObject({ type: 'ACK' });
+      expect(await act(0, { type: 'START_MATCH' })).toMatchObject({ type: 'ACK' });
       await settle();
       if (withPreparation) await prepare();
     }

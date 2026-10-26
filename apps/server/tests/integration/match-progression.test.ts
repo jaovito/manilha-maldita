@@ -55,6 +55,7 @@ test('full HTTP/WebSocket/PostgreSQL game commits a result and grants rewards wi
         )
       ).status,
     ).toBe(400);
+    const beforeSelection = game.players[0]?.view?.sequence ?? -1;
     expect(
       (
         await game.post(
@@ -64,6 +65,11 @@ test('full HTTP/WebSocket/PostgreSQL game commits a result and grants rewards wi
         )
       ).status,
     ).toBe(200);
+    // HTTP completion does not mean every WebSocket has rendered the new lobby revision.
+    const selected = await game.players[0]?.wait((view) => view.sequence > beforeSelection);
+    if (!selected) throw new Error('Missing cosmetic selection snapshot');
+    await game.all(selected.sequence);
+
     await game.begin();
     matchId = game.players[0]?.view?.matchId ?? null;
     expect(game.players[1]?.view?.seats[0]?.appearance?.deck.assetKey).toBe('classic');
