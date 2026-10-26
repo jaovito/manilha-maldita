@@ -29,3 +29,29 @@ export function localDatabaseUrl(target: DatabaseTarget, env: DatabaseEnvironmen
   }
   return url.toString();
 }
+
+/** Deployment migration credentials are explicit and never fall back to local defaults. */
+export function productionMigrationUrl(env: DatabaseEnvironment) {
+  try {
+    if (env.NODE_ENV !== 'production' || !env.DATABASE_URL) throw new Error();
+
+    const url = new URL(env.DATABASE_URL);
+
+    if (
+      !['postgres:', 'postgresql:'].includes(url.protocol) ||
+      !url.hostname ||
+      !url.username ||
+      !url.password ||
+      url.pathname.length < 2 ||
+      url.hash ||
+      url.searchParams.getAll('sslmode').length !== 1 ||
+      url.searchParams.get('sslmode') !== 'verify-full' ||
+      [...url.searchParams.keys()].some((key) => key !== 'sslmode')
+    )
+      throw new Error();
+
+    return url.toString();
+  } catch {
+    throw new Error('INVALID_MIGRATION_ENVIRONMENT');
+  }
+}

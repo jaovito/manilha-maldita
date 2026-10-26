@@ -1,4 +1,4 @@
-# Local database, migrations, and seeds
+# Database migrations, deployment, and local seeds
 
 PostgreSQL 18.6 Alpine runs in Docker Compose, with Drizzle ORM 0.45.4, Drizzle Kit 0.31.11, and Bun's native SQL driver. The authorized M5 setup adds product schemas and migrations; the server does not use them yet, and gameplay does not query the database.
 
@@ -9,7 +9,6 @@ PostgreSQL 18.6 Alpine runs in Docker Compose, with Drizzle ORM 0.45.4, Drizzle 
 cp .env.example .env
 bun run db:up
 bun run db:migrate
-bun run db:seed
 ```
 
 Do not overwrite an existing `.env`. Without one, commands use the local defaults in `.env.example`. If you change ports/passwords, keep `DATABASE_URL` and `TEST_DATABASE_URL` consistent with the Compose variables.
@@ -44,7 +43,7 @@ Migrations 0000/0001 reserve the `app` namespace and remain unchanged. Migration
 
 When introducing approved models, declare them in schema files grouped by feature and adjust the glob in `drizzle.config.ts` when necessary. Generate SQL with `bun run db:generate --name=description`, review it, and run `bun run db:migrate`. Commit new migrations with their snapshots and journal. Do not rewrite applied migrations or use `push` to bypass review.
 
-`bun run db:migrate:test` applies the same history exclusively to the test database. Local commands reject production mode, remote hosts, databases/users outside the target, and connection parameters that could redirect the destination. `TEST_DATABASE_URL` never falls back to `DATABASE_URL`. Validation errors do not print the URL or credentials. These commands are not a production deployment mechanism.
+`bun run db:migrate:test` applies the same history exclusively to the test database. Local test/seed commands reject production mode, remote hosts, databases/users outside the target, and connection parameters that could redirect the destination. In non-production mode, `db:migrate` retains the same development-target guards. `TEST_DATABASE_URL` never falls back to `DATABASE_URL`. Validation errors do not print the URL or credentials. Production migrations use the explicit deployment path described below; test and seed commands never use that path.
 
 ## Seeds and fixtures
 
@@ -52,7 +51,7 @@ Each seed task declares an `id` and `run(transaction)`. Register only determinis
 
 `runSeeds` rejects empty/duplicate IDs and runs the entire batch in one transaction: if a task fails, the batch rolls back. It does not truncate tables, reset automatically, or bypass domain validation. Once modules exist, data creation that requires business rules must use their authorized operations.
 
-The registry should only list imported tasks: implement operations in separate seed files, which also participate in coverage. The product registry remains empty: assets, the level curve, and reward policy have not been configured. `db:seed` reports this explicitly; test fixtures are not added to the registry.
+The registry should only list imported tasks: implement operations in separate seed files, which also participate in coverage. The local registry contains the cosmetic catalog seed. Migration 0007 now supplies that same product reference data during setup, so `db:seed` is optional for development and is never required in production. Test fixtures are not added to the registry.
 
 Integration tests create a dedicated schema with a random identifier, insert two deterministic fictitious rows, verify repetition without duplication and rollback, and remove their own schema afterward. They do not depend on developer data and can coexist without deleting unrelated tables. The random name isolates the test namespace; fixture contents remain fixed.
 
@@ -147,17 +146,16 @@ Rate checks use atomic PostgreSQL upserts, shared across consumer instances, bef
 
 ## Persistent player backend and operation
 
-Migration `0005_player-progression-security.sql` adds recovery verifiers, fixed audit events, immutable reward policies, replay receipts and avatar atlas indices. Product seeds now populate four current pixel avatars and three independent deck/table choices. Re-running seeds preserves existing curated rows; runtime manifests allow only supported presentation assets. Apply migrations and seeds explicitly before enabling accounts:
+Migration `0005_player-progression-security.sql` adds recovery verifiers, fixed audit events, immutable reward policies, replay receipts and avatar atlas indices. Migration 0007 populates four current pixel avatars and three independent deck/table choices using stable IDs. Existing curated rows are preserved with `ON CONFLICT (id) DO NOTHING`; runtime manifests allow only supported presentation assets. Apply migrations explicitly before enabling accounts:
 
 ```sh
 bun run db:up
 bun run db:migrate
-bun run db:seed
 # Set PASSWORD_PEPPER securely in the server environment before activation.
 NODE_ENV=development ENABLE_ACCOUNTS=true bun run start:server
 ```
 
-These commands target the designated local development database. The existing local CLI refuses remote URLs/production; a production migration/seed procedure with a separate privileged deployment role must be reviewed before publication. Tests use only `TEST_DATABASE_URL` and the isolated Compose test database. No remote database was changed by this increment.
+The example above targets the designated local development database. For production, use the deployment command below with a separate privileged migration role; seed and test commands remain local-only. Tests use only `TEST_DATABASE_URL` and the isolated Compose test database. No remote database was changed by this increment.
 
 The live application uses a bounded Bun.SQL pool (`DATABASE_POOL_SIZE=4`, range 2–8) and a dedicated LISTEN connection, with certificate verification for remote URLs (`sslmode=verify-full`). `ENABLE_ACCOUNTS=false` avoids persistent composition. Database migrations are never applied automatically by server startup. A missing curated default fails startup, and reusing a reward version with different values fails closed. [ADR 015](adr/015-persistent-player-backend.md) lists all typed worker, outbox, lease and policy settings, data access/retention, and failure boundaries.
 
@@ -166,3 +164,21 @@ One result transaction also inserts participants and its `match_rewards` job. Th
 Maintenance uses bounded 100-row deletes per category and existing targeted indexes, not pg_partman. Finished/revoked sessions are retained for one day, audit for seven days, completed jobs for seven days, failed jobs for thirty days, and results/participants/reward ledgers for ninety days when no unfinished job remains. Pending work is preserved. Progress remains until account deletion. Opaque match receipts remain after result deletion so a repeated result cannot produce new rewards. These receipts and versioned policy rows have no player references. Account deletion cascades profile/progress/session/security rows and nulls historical participant/audit references. No database administrator credential or operational retry endpoint is exposed to players.
 
 Migration 0006 adds `reward_policies.solo_xp_percent` with a 0–99 constraint. Existing policies default to zero, preserving historical training eligibility. New default policy `m5-v2` uses 50%; operators must choose a fresh version when changing any policy field. Reward rows preserve the actual solo context, and the existing database constraint still forbids positive competitive points for solo play.
+
+## Production pre-deploy
+
+Configure Railway's **Pre-deploy Command** to run from the repository root:
+
+```sh
+bun run db:migrate
+```
+
+With `NODE_ENV=production`, this command requires an explicit `DATABASE_URL` with database name, username/password and exactly `sslmode=verify-full`. No other URL query parameters or fragments are accepted. The Bun SQL connection explicitly verifies the certificate (`rejectUnauthorized: true`); private networks do not waive TLS requirements. Provision a trusted certificate chain before deployment; never disable verification to work around connection errors. This command does not require `ENABLE_ACCOUNTS` or `PASSWORD_PEPPER` and has no local fallback in production.
+
+Use a deployment role permitted to create the `app`/`drizzle` schemas and their tables, indexes, triggers and functions, and to insert the reference catalog. Keep its credentials in deployment secrets; use a separately provisioned least-privilege role for the game server. If the platform shares `DATABASE_URL` between phases, arrange separate credentials/environment for the migration job rather than leaving schema-owner access in the runtime. This change does not provision roles, TLS or backup encryption.
+
+One connection acquires a fixed PostgreSQL advisory lock before Drizzle reads history. Concurrent invocations wait up to the lock timeout (30 seconds); statements have a 120-second timeout. Connection closure releases the lock on success/failure. Drizzle applies only pending migrations in its transaction and records them in `drizzle.__drizzle_migrations`. Failures exit nonzero with a fixed message, without printing driver errors or credentials; the deployment must stop. Database administration tools can inspect migration state separately.
+
+Migration `0007_initial-cosmetic-catalog.sql` inserts only product data: four avatars, three decks and three tables. It creates no player account, progress, reward or fixture. Existing rows are preserved, including curated availability and unlock levels; repeating migration commands does not restore changed/deleted items. Future catalog changes require a new reviewed data migration. Assets remain bundled with the frontend, and the database stores only trusted references.
+
+Do not run `db:seed` in production. `NODE_ENV=production` with `seed` or `--test` is rejected, and unsupported CLI arguments fail before connecting. Do not edit applied migrations, delete migration history or reset the database during deployment. No production database was migrated during local verification.

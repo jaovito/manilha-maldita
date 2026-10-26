@@ -198,10 +198,14 @@ The menu footer displays `v<version>+<build>`, for example `v0.1.0+1792414800`. 
 
 ## Optional persistent player backend
 
-The default server continues to support guests. M5 adds optional account authentication/maintenance, server-authoritative cosmetic levels, curated avatar/deck/table catalogs, competitive points/ranking and durable PostgreSQL reward jobs. Enable with `ENABLE_ACCOUNTS=true` only after migrations, product seeds and a securely configured `PASSWORD_PEPPER`; local startup also requires `NODE_ENV=development` or `test`. See [.env.example](.env.example), [database operation](docs/database.md#persistent-player-backend-and-operation) and [ADR 015](docs/adr/015-persistent-player-backend.md). Remote SQL requires verified TLS; public deployment security remains an environment validation step.
+The default server continues to support guests. M5 adds optional account authentication/maintenance, server-authoritative cosmetic levels, curated avatar/deck/table catalogs, competitive points/ranking and durable PostgreSQL reward jobs. Enable with `ENABLE_ACCOUNTS=true` only after migrations and a securely configured `PASSWORD_PEPPER`; local startup also requires `NODE_ENV=development` or `test`. See [.env.example](.env.example), [database operation](docs/database.md#persistent-player-backend-and-operation) and [ADR 015](docs/adr/015-persistent-player-backend.md). Remote SQL requires verified TLS; public deployment security remains an environment validation step.
 
 The [player API contract](docs/player-api.md) covers registration/login/session/logout, progression, profile/cosmetic selection, current-password recovery-code issuance, one-time recovery, password change and deletion. Public catalog/ranking reads require no account. Game HTTP/WebSocket handshakes derive identity from account cookies, while guests retain their original flow. No frontend account screens or new theme rendering is included in this backend increment. Live rooms and pre-commit results remain in memory; durable result/job storage begins at commit.
 
 ## Player customization (M5)
 
 With `ENABLE_ACCOUNTS=true` and the persistent backend configured, the menu includes optional accounts, global competitive ranking and separate Avatars/Decks/Tables tabs. Guest play remains available. Unlock levels and equipped cosmetics are confirmed by the server. Deck fronts/backs follow each card owner; table style is local to its viewer. See [player API](docs/player-api.md), [asset provenance](apps/web/public/art/cosmetics/README.md) and `bun run test:e2e:player` for the isolated browser flow.
+
+### Production database setup
+
+Set `NODE_ENV=production` and an explicit certificate-verified `DATABASE_URL` ending in `?sslmode=verify-full`, then use `bun run db:migrate` as the Railway pre-deploy command. Pending schema migrations and the initial cosmetic catalog are applied together; no production seed command is needed. Use deployment credentials with migration privileges and separate least-privilege runtime credentials. See [deployment requirements](docs/database.md#production-pre-deploy). Seed and test database tools remain restricted to their local targets.
