@@ -2,7 +2,12 @@ import { devices, expect, type Page, test } from '@playwright/test';
 import { enterNickname } from '../support/entry-flow';
 import { assertLobbyContrast } from '../support/lobby-contrast';
 import { assertCompletedMatch } from '../support/match-results';
-import { clickAndSync, findActivePlayer, observeRoomSnapshots } from '../support/multiplayer-flow';
+import {
+  clickAndSync,
+  findActivePlayer,
+  observeRoomSnapshots,
+  waitForPresentation,
+} from '../support/multiplayer-flow';
 import { playWithPower, preparePowers } from '../support/multiplayer-powers';
 import { assertSeatAlignment } from '../support/seat-alignment';
 import {
@@ -132,6 +137,8 @@ for (const count of [2, 4] as const) {
         await assertCompactPowerSpacing(host);
         await host.setViewportSize({ width: 390, height: 844 });
       }
+      await waitForPresentation(pages);
+      await assertTableGeometry(host, count);
       await preparePowers(pages);
       await host.screenshot({
         path: `/tmp/truco-viewport-initial-${count}-${testInfo.project.name}.png`,
