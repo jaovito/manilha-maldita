@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible defect in the game or tooling.
+title: "BUG: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include passwords, recovery codes, cookies, tokens or private player data. Report vulnerabilities through the private security channel."
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Explain what is broken and how it affects the player or contributor.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Include the game mode and a minimal sequence of actions.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser/device, viewport, game version or commit, and local/hosted environment.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sanitized evidence
+      description: Screenshots or relevant errors without secrets or private information.

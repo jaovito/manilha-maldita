@@ -73,7 +73,7 @@ Preserve prior work. Do not destructively reset, discard files, rewrite history,
 
 Resolve nonblocking ambiguity conservatively and record the assumption. Rule contradictions require tests and documentation, not a silent `if`.
 
-Complete the requested task: this file does not authorize implementing the entire roadmap. Start implementation with bootstrap and engine, not the store or production infrastructure. Keep [plan.md](plan.md) faithful to actual progress.
+Complete the requested task: this file does not authorize implementing the entire roadmap. Start implementation with bootstrap and engine, not the store or production infrastructure. Use [GitHub issues](https://github.com/jaovito/manilha-maldita/issues) and [milestones](https://github.com/jaovito/manilha-maldita/milestones) as the source of truth for planned work and status. Keep `plan.md` as a historical implementation/validation record; link new work to an issue and update the relevant GitHub milestone instead of maintaining a competing roadmap.
 
 Preserve existing stack choices; bootstrap defaults are in `docs/architecture.md`. Write repository documentation, code comments and identifiers in English. Preserve Portuguese game-facing text and translations. Responses to the user may remain in pt-BR. Use specific types and runtime validation; comments explain decisions and invariants.
 
@@ -96,3 +96,11 @@ Prioritize correctness and security; flag:
 - Unnecessary personal data persistence, plaintext/reversible passwords or exposed credentials/keys.
 
 Explain the scenario and consequence. Separate nonblocking suggestions; never assume unexecuted checks passed.
+
+## GitHub contribution workflow
+
+Follow [CONTRIBUTING.md](CONTRIBUTING.md). README contains only setup, installation and execution instructions. Keep repository instructions, templates, issues and PR descriptions in English; game-facing Portuguese text and translations remain allowed.
+
+Before starting new work, consult the linked issue and milestone. Record acceptance criteria, blockers and executed validation in the issue/PR. Future milestones are planning, not blanket approval to change product scope. Close issues only when their acceptance criteria are satisfied.
+
+All paths require @jaovito as CODEOWNER. Other contributors need CODEOWNER approval and required checks before merge. Only @jaovito has the configured review bypass; do not infer authority to bypass protections or merge from being an agent or collaborator. Never weaken CI or authorization to make a contribution pass.
