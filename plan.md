@@ -2,9 +2,13 @@
 
 ## Current status
 
-The repository contains documentation, an HTML presentation, and bootstrap with five Bun Workspaces, pinned dependencies, strict TypeScript, Biome and boundary checks, formatting, environment tests, CI configuration, and local PostgreSQL/Drizzle infrastructure with migrations and transactional seeds. The M1 base rules engine is complete and tested: cards, dealing, tricks, stakes, eleven-point hands, scoring, the complete match lifecycle, and authorized projections. M2 adds an authoritative HTTP/WS server and a React client with a lobby and playable DOM table. The root HTML presentation remains a separate conceptual artifact. Code is now versioned in Git; the history of earlier increments is recorded in this plan.
+M1–M3 and the M5 account/progression implementation are merged into `main`; PR #1 records the M5 delivery. M4 accessibility and human playtest validation remains tracked under M6/M7. Live rooms remain in memory, and hosted security/operations require explicit verification before release.
 
-M1, M2, and M3 are complete within their respective scopes. Private browser matches with energy, sealed preparation, and four powers are playable with two or four distinct sessions. M3 adds paired simulations. M4 is in progress: the first increment adds audiovisual feedback and readable intervals between decisions; comprehensive accessibility review and human playtests remain pending. Completing a milestone does not mean completing the entire MVP.
+[GitHub issues](https://github.com/jaovito/manilha-maldita/issues) and [milestones](https://github.com/jaovito/manilha-maldita/milestones) are now the source of truth for future work, acceptance criteria and progress. The entries below preserve implementation history and validation evidence. See [governance](docs/governance.md) for the workflow and branch protections.
+
+## Open-source governance — 2026-10-26
+
+Tracked in [issue #2](https://github.com/jaovito/manilha-maldita/issues/2). Created milestones M5–M9 and eighteen focused issues with acceptance criteria/dependencies; M5 is closed and linked to merged PR #1, while M8/M9 remain proposals. Configured active review/integrity rulesets with an exact-user owner review exception and no CI/integrity bypass; enabled private vulnerability reports. Added English contribution/security/conduct guidance, ownership, issue/PR templates, MIT code/documentation licensing and third-party notice scope. README now contains only installation/setup/execution instructions. Default-branch ownership/template/license publication remains gated by the governance PR and owner approval. Validation: `VITE_BACKEND_URL='' bun run check` passed with 521 tests and 228 measured runtime sources meeting coverage thresholds. New Markdown links and issue-form YAML were checked; three governance regressions cover exact-user review bypass, unbypassable integrity checks, CI job/context alignment, read-only PR permissions and global CODEOWNERS coverage.
 
 ## M5 — integrated player frontend (2026-10-22)
 
@@ -222,13 +226,9 @@ Successfully executed: `bun install --frozen-lockfile`, lint, formatting, typech
 
 ## Roadmap and definition of done
 
-- [x] M1: bootstrap and tested engine: cards, trump cards, tricks, ties, wagers, and eleven.
-- [x] M2: rooms, guests, lobby, authority, 1v1/2v2, timers, and reconnection.
-- [x] M3: energy, assignment, sealed preparation, four powers, and simulations.
-- [ ] M4: responsive table, audio, accessibility, complete E2E, and playtests.
-- [x] M5: results, optional accounts, avatars/decks/tables, XP/levels and competitive ranking implemented and locally validated in the review worktree. Publication and production verification remain separate. Experiments afterward.
+Active planning lives in [GitHub milestones](https://github.com/jaovito/manilha-maldita/milestones), with tasks and dependencies in [GitHub issues](https://github.com/jaovito/manilha-maldita/issues). M1–M3 and the M5 implementation are historical deliveries. Remaining M4 validation is tracked in M6/M7; future public matchmaking and seasons remain proposals until scope approval.
 
-Do not wait for polish to obtain playable multiplayer. Done requires functional behavior, regressions, executed checks where feasible, updated contracts/documentation, and no new leaks or races. State what remains unverified; finishing a milestone does not finish the game.
+Done requires functional behavior, meaningful regressions, executed applicable checks, updated contracts/documentation and no new privacy leaks or races. Disclose anything unverified. Close GitHub issues only when their acceptance criteria are met; milestone completion does not imply production security or deployment validation.
 
 ## Local database infrastructure
 

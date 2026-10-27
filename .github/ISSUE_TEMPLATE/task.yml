@@ -1,0 +1,22 @@
+name: Task
+description: Track a focused maintenance, documentation or roadmap task.
+title: "TASK: "
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective and scope
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Use checkboxes for concrete, verifiable outcomes.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation and dependencies
+      description: List applicable checks and link blockers or related PRs.
