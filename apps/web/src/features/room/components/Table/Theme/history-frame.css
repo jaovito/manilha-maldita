@@ -45,3 +45,10 @@
 .game-shell .table-history .history-empty {
   margin: 0;
 }
+
+/* Leave the right opponent's anonymous cards reachable in four-seat desktop games. */
+@media (min-width: 601px) and (min-height: 501px) {
+  .game-shell:has(.arena[data-player-count="4"]) .table-information {
+    width: min(23vw, calc(30dvh * 614 / 768));
+  }
+}
