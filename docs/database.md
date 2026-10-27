@@ -177,8 +177,26 @@ With `NODE_ENV=production`, this command requires an explicit `DATABASE_URL` wit
 
 Use a deployment role permitted to create the `app`/`drizzle` schemas and their tables, indexes, triggers and functions, and to insert the reference catalog. Keep its credentials in deployment secrets; use a separately provisioned least-privilege role for the game server. If the platform shares `DATABASE_URL` between phases, arrange separate credentials/environment for the migration job rather than leaving schema-owner access in the runtime. This change does not provision roles, TLS or backup encryption.
 
-One connection acquires a fixed PostgreSQL advisory lock before Drizzle reads history. Concurrent invocations wait up to the lock timeout (30 seconds); statements have a 120-second timeout. Connection closure releases the lock on success/failure. Drizzle applies only pending migrations in its transaction and records them in `drizzle.__drizzle_migrations`. Failures exit nonzero with a fixed message, without printing driver errors or credentials; the deployment must stop. Database administration tools can inspect migration state separately.
+One connection acquires a fixed PostgreSQL advisory lock before Drizzle reads history. Concurrent invocations wait up to the lock timeout (30 seconds); statements have a 120-second timeout. Connection closure releases the lock on success/failure. Drizzle applies only pending migrations in its transaction and records them in `drizzle.__drizzle_migrations`. Failures exit nonzero with an allowlisted category, execution phase and fixed hint, without printing driver messages, SQL, URLs or credentials; the deployment must stop. Database administration tools can inspect migration state separately.
 
 Migration `0007_initial-cosmetic-catalog.sql` inserts only product data: four avatars, three decks and three tables. It creates no player account, progress, reward or fixture. Existing rows are preserved, including curated availability and unlock levels; repeating migration commands does not restore changed/deleted items. Future catalog changes require a new reviewed data migration. Assets remain bundled with the frontend, and the database stores only trusted references.
 
 Do not run `db:seed` in production. `NODE_ENV=production` with `seed` or `--test` is rejected, and unsupported CLI arguments fail before connecting. Do not edit applied migrations, delete migration history or reset the database during deployment. No production database was migrated during local verification.
+
+### Safe migration failure diagnostics
+
+The CLI reports `Database command failed [CATEGORY; phase=PHASE]` followed by a fixed hint. Configuration failures remain distinct from connection, lock and migration execution. Recognized Bun transport/TLS codes and PostgreSQL SQLSTATE values are mapped through an allowlist, including nested Drizzle causes; unknown driver details are discarded. Only five nested causes are inspected, and arbitrary error properties never become log text.
+
+| Category | Next investigation |
+|---|---|
+| `INVALID_MIGRATION_ENVIRONMENT` | Explicit production `NODE_ENV`, required `DATABASE_URL`, URL syntax and exactly `sslmode=verify-full` |
+| `INVALID_LOCAL_DATABASE_TARGET` | A hosted command may be running through local tooling; verify the intended environment/target |
+| `DATABASE_TLS_FAILED` | Trusted certificate chain, validity and matching hostname; do not disable verification |
+| `DATABASE_CONNECTION_FAILED` | Database availability, DNS, port, network access and TLS configuration |
+| `DATABASE_AUTHENTICATION_FAILED` | Deployment credentials and authentication policy |
+| `DATABASE_PERMISSION_DENIED` | Deployment role privileges for the reviewed schema/migrations |
+| `DATABASE_OPERATION_TIMED_OUT` | Competing migration locks or operation duration |
+| `MIGRATION_HISTORY_CONFLICT` / `MIGRATION_SQL_FAILED` | Review database state and the versioned migration using authorized tools; never reset production to force application |
+| `MIGRATION_FILES_MISSING` | Packaging of versioned migrations and the journal |
+
+The category is diagnostic evidence, not proof that a hosted environment has been repaired. If the driver supplies no recognized code, the CLI retains `DATABASE_COMMAND_FAILED`. Record the commit, command, category and phase; never paste a connection URL, pepper, password or raw SQL/driver error into a public issue. These diagnostics do not change TLS requirements, local-only seed/test guards, timeouts or migration transactions.

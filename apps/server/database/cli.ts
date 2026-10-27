@@ -1,8 +1,9 @@
 import { runDatabaseCommand } from './commands';
+import { databaseFailureMessage } from './diagnostics';
 
 try {
   console.log(await runDatabaseCommand(process.argv.slice(2)));
-} catch {
-  console.error('Database command failed. Check the target, TLS, permissions and migration state.');
+} catch (error) {
+  console.error(databaseFailureMessage(error));
   process.exitCode = 1;
 }

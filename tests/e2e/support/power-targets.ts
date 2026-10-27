@@ -33,6 +33,17 @@ export async function assertPowerTargetGeometry(page: Page) {
 
     for (const target of await page.locator('.spy-target-card').all()) {
       await expect(target).toBeInViewport({ ratio: 1 });
+      const reachable = await target.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const hit = element.ownerDocument.elementFromPoint(
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+        );
+
+        return hit !== null && element.contains(hit);
+      });
+      expect(reachable, 'Every Spy target must receive pointer events').toBe(true);
+
       const box = await target.boundingBox();
       expect(box?.width).toBeGreaterThanOrEqual(44);
       expect(box?.height).toBeGreaterThanOrEqual(44);

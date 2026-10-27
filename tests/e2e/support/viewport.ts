@@ -66,6 +66,17 @@ export async function assertTableGeometry(page: Page, count: 2 | 4) {
       ).toBeGreaterThanOrEqual(8);
     }
   }
+  if (count === 4 && arena.width > 600 && arena.height > 500) {
+    const history = await page.locator('.table-information').boundingBox();
+    const rightSeat = await page.locator('.seat-relative-1').boundingBox();
+    if (!history || !rightSeat) throw new Error('Missing history or right opponent');
+
+    expect(
+      rightSeat.y - history.y - history.height,
+      'Desktop history must leave the right opponent and Spy targets clear',
+    ).toBeGreaterThanOrEqual(8);
+  }
+
   expect(opponent.y + opponent.height).toBeLessThanOrEqual(center.y);
   expect(center.y + center.height, JSON.stringify({ center, ownPlayer })).toBeLessThanOrEqual(
     ownPlayer.y,
