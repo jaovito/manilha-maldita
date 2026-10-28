@@ -5,7 +5,7 @@ export function Avatar({
   index?: number | undefined;
   className?: string;
 }) {
-  const safe = Number.isInteger(index) && index >= 0 && index <= 3 ? index : 0;
+  const safe = Number.isInteger(index) && index >= 0 && index <= 7 ? index : 0;
 
   return (
     <span

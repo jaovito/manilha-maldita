@@ -57,6 +57,20 @@
       "when": 1793052999260,
       "tag": "0007_initial-cosmetic-catalog",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793111678918,
+      "tag": "0008_auth-audit-request-context",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793111752636,
+      "tag": "0009_additional-pixel-avatars",
+      "breakpoints": true
     }
   ]
 }

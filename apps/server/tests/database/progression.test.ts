@@ -112,7 +112,7 @@ test('catalog selection derives level from locked progress and rejects forged in
     const app = createPlayerApplication(players);
     const id = accounts[0] ?? '';
     const selection = { avatarId: 'avatar-2', deckThemeId: 'ember', tableThemeId: 'classic' };
-    expect((await app.catalog()).avatars).toHaveLength(4);
+    expect((await app.catalog()).avatars).toHaveLength(8);
     await expect(app.select(id, selection)).rejects.toThrow('COSMETIC_LOCKED');
     for (const input of [
       { ...selection, level: 999 },
@@ -255,3 +255,34 @@ test('solo grants reduced XP only to its human account, never ranked points, and
     ).rejects.toThrow('INVALID_REWARD_POLICY');
   });
 });
+
+test('four new avatars keep independent level boundaries and trusted appearance assets', () =>
+  withProgressionFixture(async ({ client, accounts, players }) => {
+    const app = createPlayerApplication(players);
+    const id = accounts[0]!;
+    for (let number = 5; number <= 8; number++) {
+      const selection = {
+        avatarId: `avatar-${number}`,
+        deckThemeId: 'classic',
+        tableThemeId: 'classic',
+      };
+      const threshold = (number - 1) * 500;
+      await client`UPDATE app.player_progress SET xp=${threshold - 1} WHERE account_id=${id}`;
+      const before = await app.current(id);
+      await expect(app.select(id, selection)).rejects.toThrow('COSMETIC_LOCKED');
+      expect(await app.current(id)).toEqual(before);
+      await client`UPDATE app.player_progress SET xp=${threshold} WHERE account_id=${id}`;
+      const unlocked = await app.select(id, selection);
+      expect(unlocked).toMatchObject({
+        level: String(number),
+        appearance: {
+          avatar: {
+            id: selection.avatarId,
+            spriteIndex: number - 1,
+            avatarUrl: `/art/avatars/avatar-${number}.png`,
+          },
+        },
+      });
+      expect(await app.current(id)).toEqual(unlocked);
+    }
+  }));

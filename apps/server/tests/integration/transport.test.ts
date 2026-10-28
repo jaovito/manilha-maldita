@@ -343,7 +343,9 @@ test('CORS allows credentialed HTTP only for exact configured origins, including
         candidate === origin ? origin : null,
       );
       expect(options.headers.get('Access-Control-Allow-Methods')).toBe('GET,POST');
-      expect(options.headers.get('Access-Control-Allow-Headers')).toBe('Content-Type');
+      expect(options.headers.get('Access-Control-Allow-Headers')).toBe(
+        'Content-Type,X-Client-Version',
+      );
       const denied = await f.request('/api/guest', { nickname: 'Beto' }, undefined, candidate);
       expect(denied.status).toBe(candidate === origin ? 201 : 403);
       expect(denied.headers.get('Access-Control-Allow-Origin')).toBe(

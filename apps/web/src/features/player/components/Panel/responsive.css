@@ -241,3 +241,17 @@
     transform: scale(0.5);
   }
 }
+
+@media (min-width: 701px) {
+  .is-cosmetics .cosmetic-grid[data-category="avatars"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .is-cosmetics .cosmetic-grid[data-category="avatars"] .cosmetic-item strong {
+    font-size: 16px;
+  }
+  .is-cosmetics .cosmetic-grid[data-category="avatars"] .is-compact > .avatar {
+    max-width: 100%;
+    aspect-ratio: 1;
+    height: auto;
+  }
+}

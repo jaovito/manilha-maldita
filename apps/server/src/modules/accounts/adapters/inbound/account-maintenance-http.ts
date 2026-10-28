@@ -1,3 +1,4 @@
+import { normalizeAuditContext } from '../audit-context';
 import type { Hono } from 'hono';
 import { deleteCookie, getCookie } from 'hono/cookie';
 import { requestPeer } from '../../../../shared/request-peer';
@@ -34,7 +35,19 @@ export function registerAccountMaintenanceRoutes(
       const peer = requestPeer(context, trustedProxies);
 
       try {
-        const result = await maintenance(mode, input, getCookie(context, 'truco_account'), peer);
+        const result = await maintenance(
+          mode,
+          input,
+          getCookie(context, 'truco_account'),
+          peer,
+          normalizeAuditContext({
+            clientIp: peer,
+            clientContext: {
+              userAgent: context.req.header('User-Agent'),
+              clientVersion: context.req.header('X-Client-Version'),
+            },
+          }),
+        );
 
         if (mode !== 'recovery-code') {
           for (const path of ['/api', '/api/accounts'])

@@ -1,3 +1,4 @@
+import type { AuthAuditContext } from './audit';
 import type { PasswordService } from '../services/password-service';
 import type { AuthAuditEvent } from './account-maintenance';
 
@@ -44,5 +45,5 @@ export type AuthenticationDependencies = Readonly<{
   credentials(): Promise<{ token: string; tokenHash: string }>;
   onRevoked?: (event: Readonly<{ tokenHash: string } | { accountId: string }>) => void;
   tokenHash(value: unknown): Promise<string | null>;
-  audit?: (event: AuthAuditEvent, accountId?: string) => Promise<void>;
+  audit?: (event: AuthAuditEvent, accountId?: string, context?: AuthAuditContext) => Promise<void>;
 }>;

@@ -57,6 +57,7 @@ test('desktop cosmetic collections fit without scrolling or clipped controls', a
     await page.setViewportSize({ width, height });
     for (const tab of ['Avatares', 'Baralhos', 'Mesas']) {
       await panel.getByRole('tab', { name: tab }).click();
+      await expect(panel.locator('.cosmetic-item')).toHaveCount(tab === 'Avatares' ? 8 : 3);
       await expect(panel.locator('.cosmetic-item').first()).toBeVisible();
       await expect
         .poll(() => body.evaluate((node) => node.scrollHeight - node.clientHeight), {
@@ -154,5 +155,43 @@ test('arcane corner suits remain separated from their ranks at desktop and mobil
       });
       expect(gap).toBeGreaterThan(0.1);
     }
+  }
+});
+
+test('eight avatar portraits load and the four new portraits stay contained on phones', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await enterNickname(page, 'Avatar Preview');
+  await page.getByRole('button', { name: /Cosméticos/ }).click();
+  await expect(page.locator('.cosmetic-item')).toHaveCount(8);
+  for (const width of [320, 375, 390, 1280]) {
+    await page.setViewportSize({ width, height: width > 700 ? 720 : 844 });
+    for (const item of await page.locator('.cosmetic-item').all()) {
+      await item.scrollIntoViewIfNeeded();
+      const art = item.locator('.avatar');
+      const loaded = await art.evaluate(async (node) => {
+        const view = node.ownerDocument.defaultView;
+        if (!view) return false;
+        const src = view.getComputedStyle(node).backgroundImage.slice(5, -2);
+        const image = node.ownerDocument.createElement('img');
+        image.src = src;
+        try {
+          await image.decode();
+          return image.naturalWidth > 0;
+        } catch {
+          return false;
+        }
+      });
+      expect(loaded).toBe(true);
+      const bounds = await item.boundingBox();
+      const picture = await art.boundingBox();
+      if (!bounds || !picture) throw new Error('Missing avatar bounds');
+      expect(picture.x).toBeGreaterThanOrEqual(bounds.x);
+      expect(picture.x + picture.width).toBeLessThanOrEqual(bounds.x + bounds.width);
+      expect(picture.y + picture.height).toBeLessThanOrEqual(bounds.y + bounds.height);
+    }
+    await page.getByRole('button', { name: /Avatar 8/ }).click();
+    await expect(page.locator('.cosmetic-showcase .avatar')).toHaveAttribute('data-avatar', '7');
   }
 });

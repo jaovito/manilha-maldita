@@ -144,7 +144,7 @@ export function Cosmetics({
         <div className="cosmetic-collection">
           <h3>{t(labels[tab])}</h3>
           <p>{t('Escolha seu próximo desbloqueio.')}</p>
-          <div className="cosmetic-grid">
+          <div className="cosmetic-grid" data-category={tab}>
             {items.map((item) => {
               const available = profile && BigInt(profile.level) >= BigInt(item.requiredLevel);
               return (

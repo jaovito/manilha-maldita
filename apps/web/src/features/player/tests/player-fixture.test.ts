@@ -15,9 +15,20 @@ export const profile: PlayerProgress = {
 };
 export const catalog: PlayerCatalog = {
   xpPerLevel: '500',
-  avatars: [0, 1, 2, 3].map((spriteIndex) => ({
+  avatars: (
+    [
+      '/art/avatars-pixel.png',
+      '/art/avatars-pixel.png',
+      '/art/avatars-pixel.png',
+      '/art/avatars-pixel.png',
+      '/art/avatars/avatar-5.png',
+      '/art/avatars/avatar-6.png',
+      '/art/avatars/avatar-7.png',
+      '/art/avatars/avatar-8.png',
+    ] as const
+  ).map((avatarUrl, spriteIndex) => ({
     id: `avatar-${spriteIndex + 1}`,
-    avatarUrl: '/art/avatars-pixel.png',
+    avatarUrl,
     spriteIndex,
     name: `Avatar ${spriteIndex + 1}`,
     requiredLevel: spriteIndex + 1,

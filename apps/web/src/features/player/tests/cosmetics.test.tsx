@@ -149,6 +149,9 @@ test('all deck suits remain readable faces; hidden cards never carry rank or sui
   const view = render(
     <>
       <Avatar index={9} />
+      {[4, 5, 6, 7].map((index) => (
+        <Avatar key={index} index={index} />
+      ))}
       {(['classic', 'ember', 'arcane'] as const).map((theme) => (
         <div key={theme}>
           <CardBack theme={theme} />
@@ -160,6 +163,8 @@ test('all deck suits remain readable faces; hidden cards never carry rank or sui
     </>,
   );
   expect(view.container.querySelector('.avatar-0')).not.toBeNull();
+  for (const index of [4, 5, 6, 7])
+    expect(view.container.querySelector(`.avatar-${index}`)).not.toBeNull();
   for (const back of view.container.querySelectorAll('.card-back'))
     expect(back.textContent).not.toContain('A');
   expect(view.container.querySelectorAll('svg')).toHaveLength(24);

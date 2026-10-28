@@ -91,3 +91,24 @@
   border-radius: 4px;
   padding: 4px 0;
 }
+
+.player-avatar.avatar-4 {
+  background-image: url("/art/avatars/avatar-5.png");
+  background-size: cover;
+  background-position: center;
+}
+.player-avatar.avatar-5 {
+  background-image: url("/art/avatars/avatar-6.png");
+  background-size: cover;
+  background-position: center;
+}
+.player-avatar.avatar-6 {
+  background-image: url("/art/avatars/avatar-7.png");
+  background-size: cover;
+  background-position: center;
+}
+.player-avatar.avatar-7 {
+  background-image: url("/art/avatars/avatar-8.png");
+  background-size: cover;
+  background-position: center;
+}

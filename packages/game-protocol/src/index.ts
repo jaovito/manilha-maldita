@@ -1,3 +1,4 @@
+import { avatarSchema } from './player';
 import { z } from 'zod';
 
 const id = z
@@ -201,11 +202,7 @@ export const roomViewSchema = z.strictObject({
           nickname: nicknameSchema,
           appearance: z
             .strictObject({
-              avatar: z.strictObject({
-                id: z.string().regex(/^[a-z][a-z0-9-]{0,63}$/),
-                avatarUrl: z.literal('/art/avatars-pixel.png'),
-                spriteIndex: z.number().int().min(0).max(3),
-              }),
+              avatar: avatarSchema,
               deck: z.strictObject({
                 id: z.enum(['classic', 'ember', 'arcane']),
                 assetKey: z.enum(['classic', 'ember', 'arcane']),
