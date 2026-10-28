@@ -7,8 +7,14 @@ export const deckThemeSchema = z.enum(['classic', 'ember', 'arcane']);
 export const tableThemeSchema = z.enum(['classic', 'burgundy', 'midnight']);
 export const avatarSchema = z.strictObject({
   id: cosmeticId,
-  avatarUrl: z.literal('/art/avatars-pixel.png'),
-  spriteIndex: z.number().int().min(0).max(3),
+  avatarUrl: z.enum([
+    '/art/avatars-pixel.png',
+    '/art/avatars/avatar-5.png',
+    '/art/avatars/avatar-6.png',
+    '/art/avatars/avatar-7.png',
+    '/art/avatars/avatar-8.png',
+  ]),
+  spriteIndex: z.number().int().min(0).max(7),
 });
 export const playerProgressSchema = z.strictObject({
   nickname: z.string().min(1).max(24),

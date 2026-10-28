@@ -1,5 +1,9 @@
 export type PlayerAppearance = Readonly<{
-  avatar: Readonly<{ id: string; avatarUrl: '/art/avatars-pixel.png'; spriteIndex: number }>;
+  avatar: Readonly<{
+    id: string;
+    avatarUrl: (typeof avatarDefinitions)[number]['avatarUrl'];
+    spriteIndex: number;
+  }>;
   deck: Readonly<{ id: 'classic' | 'ember' | 'arcane'; assetKey: 'classic' | 'ember' | 'arcane' }>;
   table: Readonly<{
     id: 'classic' | 'burgundy' | 'midnight';
@@ -35,6 +39,34 @@ export const avatarDefinitions = [
     avatarUrl: '/art/avatars-pixel.png',
     spriteIndex: 3,
     requiredLevel: 4,
+  },
+  {
+    id: 'avatar-5',
+    name: 'Avatar 5',
+    avatarUrl: '/art/avatars/avatar-5.png',
+    spriteIndex: 4,
+    requiredLevel: 5,
+  },
+  {
+    id: 'avatar-6',
+    name: 'Avatar 6',
+    avatarUrl: '/art/avatars/avatar-6.png',
+    spriteIndex: 5,
+    requiredLevel: 6,
+  },
+  {
+    id: 'avatar-7',
+    name: 'Avatar 7',
+    avatarUrl: '/art/avatars/avatar-7.png',
+    spriteIndex: 6,
+    requiredLevel: 7,
+  },
+  {
+    id: 'avatar-8',
+    name: 'Avatar 8',
+    avatarUrl: '/art/avatars/avatar-8.png',
+    spriteIndex: 7,
+    requiredLevel: 8,
   },
 ] as const;
 

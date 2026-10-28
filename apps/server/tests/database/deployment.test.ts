@@ -90,7 +90,7 @@ test('catalog data migration initializes empty catalogs and preserves existing c
     const avatars = await tx.execute(sql`SELECT id, name, avatar_url AS "avatarUrl",
       sprite_index AS "spriteIndex", required_level AS "requiredLevel"
       FROM app.avatars ORDER BY sort_order`);
-    expect(Array.from(avatars)).toEqual([...avatarDefinitions]);
+    expect(Array.from(avatars)).toEqual([...avatarDefinitions.slice(0, 4)]);
 
     for (const [query, definitions] of [
       [
@@ -134,4 +134,34 @@ test('catalog data migration initializes empty catalogs and preserves existing c
     expect(
       (await tx.execute(sql`SELECT count(*)::int AS count FROM app.table_themes`))[0]?.count,
     ).toBe(3);
+  }));
+
+test('additional avatar data migration preserves curated rows and all existing selections', () =>
+  withDatabaseFixture(async (tx) => {
+    await tx.execute(
+      sql`DELETE FROM app.avatars WHERE id IN ('avatar-5','avatar-6','avatar-7','avatar-8')`,
+    );
+    const migration = await Bun.file(
+      new URL('../../database/migrations/0009_additional-pixel-avatars.sql', import.meta.url),
+    ).text();
+    const insert = migration
+      .split('--> statement-breakpoint')
+      .find((statement) => statement.includes('INSERT INTO app.avatars'));
+    if (!insert) throw new Error('Missing avatar catalog migration');
+    await tx.execute(sql.raw(insert));
+    const rows = await tx.execute(
+      sql`SELECT id,name,avatar_url AS "avatarUrl",sprite_index AS "spriteIndex",required_level AS "requiredLevel" FROM app.avatars WHERE sprite_index >= 4 ORDER BY sort_order`,
+    );
+    expect(Array.from(rows)).toEqual([...avatarDefinitions.slice(4)]);
+    await tx.execute(
+      sql`UPDATE app.avatars SET name='Curated new avatar',active=false,required_level=12 WHERE id='avatar-5'`,
+    );
+    await tx.execute(sql.raw(insert));
+    expect(
+      (
+        await tx.execute(
+          sql`SELECT name,active,required_level FROM app.avatars WHERE id='avatar-5'`,
+        )
+      )[0],
+    ).toEqual({ name: 'Curated new avatar', active: false, required_level: 12 });
   }));

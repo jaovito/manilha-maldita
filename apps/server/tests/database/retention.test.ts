@@ -8,7 +8,10 @@ import { rewardPolicy, withProgressionFixture } from './progression-fixture';
 test('bounded retention removes expired personal records and old finished work while preserving active results and replay receipts', async () => {
   await withProgressionFixture(async ({ client, accounts, matches, persist, maintenance }) => {
     const accountId = accounts[0];
-    await maintenance.audit('login_success', accountId);
+    await maintenance.audit('login_success', accountId, {
+      clientIp: '192.0.2.99',
+      clientContext: { userAgent: 'retention-fixture', clientVersion: '1.0' },
+    });
     await client`UPDATE app.auth_audit SET occurred_at = statement_timestamp() - interval '8 days' WHERE account_id = ${accountId}`;
     const tokenHash =
       crypto.randomUUID().replaceAll('-', '') + crypto.randomUUID().replaceAll('-', '');

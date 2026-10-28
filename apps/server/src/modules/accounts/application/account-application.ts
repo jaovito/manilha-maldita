@@ -1,3 +1,4 @@
+import type { AuthAuditContext } from './ports/audit';
 import type { AuthenticationDependencies, AuthenticationPolicy } from './ports/authentication';
 import { authenticate } from './use-cases/authenticate';
 
@@ -47,6 +48,7 @@ export function createAccountApplication(dependencies: AuthenticationDependencie
       input: unknown,
       peer: string,
       previousToken?: unknown,
+      context?: AuthAuditContext,
     ) =>
       (async () => {
         try {
@@ -54,6 +56,7 @@ export function createAccountApplication(dependencies: AuthenticationDependencie
           await configured.audit?.(
             mode === 'register' ? 'register_success' : 'login_success',
             result.profile.accountId,
+            context,
           );
 
           return result;
@@ -65,7 +68,11 @@ export function createAccountApplication(dependencies: AuthenticationDependencie
               error.message,
             )
           )
-            await configured.audit?.(mode === 'register' ? 'register_failure' : 'login_failure');
+            await configured.audit?.(
+              mode === 'register' ? 'register_failure' : 'login_failure',
+              undefined,
+              context,
+            );
 
           throw error;
         }
@@ -83,13 +90,15 @@ export function createAccountApplication(dependencies: AuthenticationDependencie
       return hash ? configured.repository.findSession(hash) : null;
     },
 
-    async logout(token: unknown) {
+    async logout(token: unknown, context?: AuthAuditContext) {
       const hash = await configured.tokenHash(token);
 
       if (hash) {
+        const profile = await configured.repository.findSession(hash);
+
         await configured.repository.revokeSession(hash);
         configured.onRevoked?.({ tokenHash: hash });
-        await configured.audit?.('logout');
+        if (profile) await configured.audit?.('logout', profile.accountId, context);
       }
     },
   };

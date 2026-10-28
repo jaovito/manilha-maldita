@@ -41,7 +41,12 @@ async function sendRequest(path: string, body?: unknown): Promise<Response> {
     response = await fetch(url, {
       method: body === undefined ? 'GET' : 'POST',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(path.startsWith('/accounts/') && import.meta.env.VITE_BUILD_NUMBER
+          ? { 'X-Client-Version': import.meta.env.VITE_BUILD_NUMBER }
+          : {}),
+      },
       ...(body === undefined ? {} : { body: JSON.stringify(body) }),
     });
   } catch {

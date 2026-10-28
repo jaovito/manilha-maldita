@@ -1,3 +1,4 @@
+import { normalizeAuditContext } from '../audit-context';
 import type { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
@@ -29,7 +30,7 @@ export function registerAccountRoutes(
       origin: [...origins],
       credentials: true,
       allowMethods: ['GET', 'POST'],
-      allowHeaders: ['Content-Type'],
+      allowHeaders: ['Content-Type', 'X-Client-Version'],
     }),
   );
   app.use(
@@ -69,6 +70,13 @@ export function registerAccountRoutes(
           input,
           peer,
           getCookie(context, ACCOUNT_COOKIE),
+          normalizeAuditContext({
+            clientIp: peer,
+            clientContext: {
+              userAgent: context.req.header('User-Agent'),
+              clientVersion: context.req.header('X-Client-Version'),
+            },
+          }),
         );
         setCookie(context, ACCOUNT_COOKIE, result.token, {
           httpOnly: true,
@@ -109,7 +117,16 @@ export function registerAccountRoutes(
 
   app.post(`${ACCOUNT_PATH}/logout`, async (context) => {
     try {
-      await accounts.logout(getCookie(context, ACCOUNT_COOKIE));
+      await accounts.logout(
+        getCookie(context, ACCOUNT_COOKIE),
+        normalizeAuditContext({
+          clientIp: requestPeer(context, trustedProxies),
+          clientContext: {
+            userAgent: context.req.header('User-Agent'),
+            clientVersion: context.req.header('X-Client-Version'),
+          },
+        }),
+      );
       deleteCookie(context, ACCOUNT_COOKIE, {
         path: '/api',
         httpOnly: true,

@@ -1,3 +1,4 @@
+import type { AuthAuditContext } from './ports/audit';
 import { isLoginName, isPassword } from '../domain/credential-policy';
 import type { AccountApplication } from './account-application';
 import type { AccountMaintenanceRepository } from './ports/account-maintenance';
@@ -20,6 +21,7 @@ export function createAccountMaintenance(deps: Dependencies) {
     input: unknown,
     token: unknown,
     peer: string,
+    context?: AuthAuditContext,
   ) => {
     const fields =
       mode === 'recover'
@@ -76,7 +78,7 @@ export function createAccountMaintenance(deps: Dependencies) {
       if (!changed) throw new Error('INVALID_CREDENTIALS');
 
       deps.accounts.revoke({ accountId: changed });
-      await deps.repository.audit('password_recovered', changed);
+      await deps.repository.audit('password_recovered', changed, context);
 
       return { recoveryCode: recovery.code };
     }
@@ -123,7 +125,7 @@ export function createAccountMaintenance(deps: Dependencies) {
       )
         throw new Error('INVALID_CREDENTIALS');
 
-      await deps.repository.audit('recovery_code_issued', account.accountId);
+      await deps.repository.audit('recovery_code_issued', account.accountId, context);
 
       return { recoveryCode: recovery.code };
     }
@@ -143,6 +145,7 @@ export function createAccountMaintenance(deps: Dependencies) {
     await deps.repository.audit(
       mode === 'delete' ? 'account_deleted' : 'password_changed',
       mode === 'delete' ? undefined : account.accountId,
+      mode === 'delete' ? undefined : context,
     );
 
     return {};

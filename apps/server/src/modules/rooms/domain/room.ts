@@ -9,7 +9,16 @@ export type RoomConfig = {
 };
 
 export type MemberAppearance = Readonly<{
-  avatar: Readonly<{ id: string; avatarUrl: '/art/avatars-pixel.png'; spriteIndex: number }>;
+  avatar: Readonly<{
+    id: string;
+    avatarUrl:
+      | '/art/avatars-pixel.png'
+      | '/art/avatars/avatar-5.png'
+      | '/art/avatars/avatar-6.png'
+      | '/art/avatars/avatar-7.png'
+      | '/art/avatars/avatar-8.png';
+    spriteIndex: number;
+  }>;
   deck: Readonly<{ id: 'classic' | 'ember' | 'arcane'; assetKey: 'classic' | 'ember' | 'arcane' }>;
   table: Readonly<{
     id: 'classic' | 'burgundy' | 'midnight';

@@ -11,7 +11,7 @@ test('security schema uses cascade for credentials and anonymizes retained audit
   );
   expect(getTableConfig(authAudit).foreignKeys[0]?.onDelete).toBe('set null');
   expect(getTableConfig(authAudit).foreignKeys[0]?.reference().foreignColumns[0]?.name).toBe('id');
-  expect(getTableConfig(authAudit).indexes).toHaveLength(1);
+  expect(getTableConfig(authAudit).indexes).toHaveLength(2);
   expect(getTableConfig(rewardPolicies).checks).toHaveLength(3);
   expect(getTableConfig(matchReceipts).foreignKeys).toHaveLength(0);
   await withDatabaseFixture(async (tx) => {

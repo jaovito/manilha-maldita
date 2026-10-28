@@ -1,3 +1,4 @@
+import type { AuthAuditContext } from './audit';
 export type AuthAuditEvent =
   | 'register_success'
   | 'register_failure'
@@ -29,5 +30,5 @@ export type AccountMaintenanceRepository = Readonly<{
     newPasswordHash: string,
   ): Promise<boolean>;
   delete(accountId: string, expectedPasswordHash: string): Promise<boolean>;
-  audit(event: AuthAuditEvent, accountId?: string): Promise<void>;
+  audit(event: AuthAuditEvent, accountId?: string, context?: AuthAuditContext): Promise<void>;
 }>;

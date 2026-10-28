@@ -15,7 +15,7 @@ export function installRequestSecurity(app: Hono, options: TransportDependencies
     origin: [...options.allowedOrigins],
     credentials: true,
     allowMethods: ['GET', 'POST'],
-    allowHeaders: ['Content-Type'],
+    allowHeaders: ['Content-Type', 'X-Client-Version'],
   });
   app.use('/api/*', (context, next) => {
     // CORS applies to HTTP only; the WS handshake retains its explicit origin check.

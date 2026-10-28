@@ -1,3 +1,4 @@
+import { normalizeAuditContext } from '../audit-context';
 import type { SQL, TransactionSQL } from 'bun';
 import type { AccountMaintenanceRepository } from '../../application/ports/account-maintenance';
 
@@ -86,9 +87,21 @@ export function createPostgresAccountMaintenance(client: SQL): AccountMaintenanc
       });
     },
 
-    async audit(event, accountId) {
+    async audit(event, accountId, context) {
       await within(async (tx) => {
-        await tx`INSERT INTO app.auth_audit (event, account_id) VALUES (${event}, (SELECT id FROM app.accounts WHERE id = ${accountId ?? null}))`;
+        // Serialize with account deletion: late audit writes cannot restore identifying context.
+        const [account] = accountId
+          ? await tx<
+              { id: string }[]
+            >`SELECT id FROM app.accounts WHERE id = ${accountId} FOR KEY SHARE`
+          : [];
+        const keepContext = event !== 'account_deleted' && (!accountId || Boolean(account));
+        const safe = normalizeAuditContext(keepContext ? context : undefined);
+
+        const hints = Object.keys(safe.clientContext).length ? safe.clientContext : null;
+
+        await tx`INSERT INTO app.auth_audit (event, account_id, client_ip, client_context)
+          VALUES (${event}, ${account?.id ?? null}, ${safe.clientIp}::inet, ${hints}::jsonb)`;
       });
     },
   };
