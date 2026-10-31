@@ -32,3 +32,7 @@ Assets generated with integrated ImageGen using **`../tabletop.png`** as direct 
 ### Cloth (`cloth.png`, alpha generation)
 
 > Reference: supplied Manilha Maldita pixel-art table background. Create ONE independent decorative cloth corner sprite matching the elaborately patterned dark navy/emerald and muted gold brocade cloth seen at upper left and lower left of reference. Top down, roughly triangular draped textile occupying the top-left corner of a square canvas, irregular diagonal fringed edge running from top-right towards bottom-left, empty transparent bottom-right. Dense woven gold card-suit arabesque motifs, emerald and near-black navy fabric folds, golden tassels along diagonal lower edge, crisp rich 16-bit pixel art. Real alpha transparent outside cloth. NO wood, furniture, cards, candle, coins, lettering, backdrop or other objects. Complete cloth patch with folds and ornamental trim, not minimalist. It will be independently anchored behind the game's candle/cards at viewport corners.
+
+## Asset rights and redistribution review
+
+The owner chose on 2026-10-30 to preserve original artwork/audio without an open reuse license. See [NOTICE](../../../../../NOTICE.md) for the rights-reserved scope and exceptions, and the [M6 inventory](../../../../../docs/assets-audit-m6.md) for hashes, source notices and unresolved third-party reference/rendering-bank evidence. Separate permission is required where applicable; this notice does not establish ownership or clear third-party rights.
