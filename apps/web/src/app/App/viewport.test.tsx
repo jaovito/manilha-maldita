@@ -191,8 +191,10 @@ test('finishing holds the celebration before a compact menu with rematch and imm
   expect(screen.queryByRole('button', { name: 'Revanche' })).toBeNull();
   expect(screen.queryByRole('button', { name: 'Sair da sala' })).toBeNull();
   expect(view.container.querySelector('.table-surface')?.hasAttribute('inert')).toBe(true);
+  expect(screen.queryByRole('button', { name: 'Configurações' })).toBeNull();
   act(() => finishCelebration?.());
   expect(screen.getByRole('dialog', { name: 'Resultado da partida' })).toBeDefined();
+  expect(screen.queryByRole('button', { name: 'Configurações' })).toBeNull();
   expect(screen.getByRole('button', { name: 'Voltar ao lobby' })).toBeDefined();
   expect(screen.queryByLabelText('Tempo de carta')).toBeNull();
   expect(screen.getByRole('button', { name: 'Revanche' })).toBeDefined();
