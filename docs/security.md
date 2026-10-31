@@ -26,6 +26,14 @@ Limits: 8 KiB per HTTP/WS input; 64 KiB per outbound message/native queue; 16 in
 
 There is no external analytics collection or payload logging. HTTP and WS errors use allowlists/stable codes without stacks, cards, tokens or seeds. In-memory deduplication retains 512 recent results per room, partitioned by logical player and match; revisions/contexts continue rejecting old replays after eviction. Restart loses state and credentials; it neither records a loss nor allows rebuilding a room using client identity.
 
+## Frontend framing policy
+
+Frontend responses must send `Content-Security-Policy: frame-ancestors 'none'` and `X-Frame-Options: DENY`. Embedding the game is unsupported, including same-origin frames. The CSP controls document ancestors only; it does not restrict scripts, assets, audio, HTTP or WebSocket connections and is not a complete content security policy. Cookies and Origin checks remain independent protections.
+
+`apps/web/vercel.json` configures these headers for every path when the Vercel project root is `apps/web`. The matching repository-root `vercel.json` covers projects built from the repository root; regression tests keep both configurations aligned. Existing build/output and routing settings remain the hosting project's responsibility. Vite development and built-preview servers reuse the workspace header values. A different static host must configure the same HTTP response headers: building `dist/` alone does not install them, and HTML meta tags cannot enforce this framing policy.
+
+After a reviewed deployment, verify the final public HTML response at the canonical URL and navigation paths, then verify iframe rejection in a browser. Local tests establish configuration and browser enforcement under Vite; they do not certify deployed Vercel behavior, HTTPS/WSS, proxy-to-origin encryption or other production controls. This change is tracked as a partial increment of [release deployment validation #3](https://github.com/jaovito/manilha-maldita/issues/3), in M6. Rollback is a revert and frontend redeploy; it restores the previous embedding behavior and requires no migration.
+
 ## Cryptography and persistence policy
 
 On first access, the nickname draft stays in local welcome-screen state; only confirmation of a valid value saves the preference. Confirmation does not create a session or send the nickname: the guest endpoint is still called when creating/joining a room. Profile edits after confirmation update/remove the preference.
