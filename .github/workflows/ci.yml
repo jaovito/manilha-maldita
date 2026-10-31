@@ -23,7 +23,7 @@ jobs:
   browser:
     needs: verify
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -39,8 +39,15 @@ jobs:
       - run: bun run test:e2e --project=${{ matrix.project }}
         env:
           ENABLE_ACCOUNTS: 'false'
+          VITE_BACKEND_URL: ''
+      # The required viewport gate also covers persistent accounts and earned rewards.
+      # Each matrix job owns a disposable local PostgreSQL and fresh player servers.
+      - run: bun run db:test:up
+      - run: bun run test:e2e:player --project=${{ matrix.project }}
+        env:
+          VITE_BACKEND_URL: ''
       - uses: actions/upload-artifact@v7.0.2
-        if: failure()
+        if: ${{ !cancelled() }}
         with:
           name: playwright-${{ matrix.project }}
           path: |
