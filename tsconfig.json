@@ -7,6 +7,7 @@
     "tooling/**/*.ts",
     "playwright*.config.ts",
     "tests/e2e/**/*.ts",
+    "tests/capacity/**/*.ts",
     "apps/web/vite.config.ts"
   ],
   "exclude": ["node_modules", "**/dist"]

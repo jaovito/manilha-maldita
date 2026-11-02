@@ -28,3 +28,7 @@ Create ONE standalone seamless square felt TEXTURE tile for the Burgundy table i
 ### Midnight
 
 Create ONE standalone seamless square felt TEXTURE tile for the Midnight table in a polished 16-bit pixel-art fantasy tavern card game. A subtle, very dark midnight indigo navy woven cloth field, small chunky visible square pixel clusters and restrained dithering, colors near #10172d #18203a #242b49. Consistent even lighting across edges; seamless repeat on all four sides. Flat top-down material only, no border, no frames, no playing cards, no objects, no text, no icons, no symbols, no gradients or vignette. Quiet low-contrast texture must not distract from parchment cards and readable UI.
+
+## Asset rights and redistribution review
+
+The owner chose on 2026-10-30 to preserve original artwork/audio without an open reuse license. See [NOTICE](../../../../../NOTICE.md) for the rights-reserved scope and exceptions, and the [M6 inventory](../../../../../docs/assets-audit-m6.md) for hashes, source notices and unresolved third-party reference/rendering-bank evidence. Separate permission is required where applicable; this notice does not establish ownership or clear third-party rights.

@@ -117,3 +117,11 @@ bun run test:e2e --config=playwright.i18n.config.ts
 ```
 
 Run database-backed browser suites separately from coverage/database tests. See [test execution](docs/testing.md) for prerequisites and focused commands.
+
+For the isolated synthetic capacity/recovery rehearsal (requires Docker):
+
+```sh
+bun run test:capacity
+```
+
+See [the workload and measured limits](docs/capacity-m6.md) for execution details. The command creates only its own disposable local test database and does not target production.

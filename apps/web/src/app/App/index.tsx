@@ -259,7 +259,7 @@ export function App() {
           <AudioControls preferences={preferences} onChange={changePreferences} />
         </GameSettings>
       )}
-      {((!room && !nicknameConfirmed) || (room && room.status !== 'playing')) && (
+      {((!room && !nicknameConfirmed) || room?.status === 'lobby') && (
         <button
           className="game-settings-trigger"
           type="button"

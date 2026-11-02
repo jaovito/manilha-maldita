@@ -3,12 +3,13 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests/e2e',
   testMatch: '**/*.e2e.ts',
+  outputDir: 'test-results/guest',
   // Solo and global-language flows require the isolated development servers.
   testIgnore: ['**/solo/**', '**/player/**', '**/settings/i18n.e2e.ts'],
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : '50%',
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report/guest' }]],
   use: {
     baseURL: 'http://127.0.0.1:4173',
     trace: 'retain-on-failure',

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/player-test';
 import { enterNickname } from '../support/entry-flow';
 
 test('browser Back and Forward restore internal menu screens instead of leaving the game', async ({

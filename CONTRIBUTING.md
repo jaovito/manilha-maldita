@@ -39,3 +39,5 @@ See [governance](docs/governance.md) for the active rulesets and milestone links
 ## License and attribution
 
 Project source code and documentation use the [MIT license](LICENSE). Contributions must be compatible with that license and retain attribution. Third-party fonts and other materials keep their own licenses and notices; see [NOTICE.md](NOTICE.md). Do not add assets without documenting their origin and redistribution terms. No CLA or transfer of copyright is required.
+
+Original artwork and audio files are excluded from the root MIT grant and have no open reuse license; separate permission is required as described in NOTICE. A code contribution does not grant permission to reuse those assets. Asset contributions need an explicit rights/provenance review with the maintainer rather than an assumed MIT grant.

@@ -19,3 +19,7 @@ Subject variations:
 2. Older adult male with warm tan skin, short silver beard, thick eyebrows, burgundy wide-brimmed hat/traveling coat, cream scarf, cunning friendly expression.
 3. Adult female with dark brown skin, curly black hair under a deep teal hood with gold trim, round gold earring, mustard scarf, clever assured expression.
 4. Adult female with light olive skin, straight dark bob, navy gambler hat with burgundy feather, cream coat with burgundy collar/gold clasp, bold playful expression.
+
+## Asset rights and redistribution review
+
+The owner chose on 2026-10-30 to preserve original artwork/audio without an open reuse license. See [NOTICE](../../../../../NOTICE.md) for the rights-reserved scope and exceptions, and the [M6 inventory](../../../../../docs/assets-audit-m6.md) for hashes, source notices and unresolved third-party reference/rendering-bank evidence. Separate permission is required where applicable; this notice does not establish ownership or clear third-party rights.

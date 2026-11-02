@@ -16,3 +16,7 @@ Usage: `Table/Theme` composes materials through CSS backgrounds/decorative layer
 Parchment uses its original 614×768 aspect ratio with uniform scaling and `image-rendering: pixelated`. Frame size follows the viewport rather than text volume; only the internal list scrolls. Do not scale axes independently or use border-image to stretch this piece.
 
 Distribution: alpha PNGs resized to at most 768 px (crests/parchment) or 1024 px (ribbons/wood), approximately 2 MB total.
+
+## Asset rights and redistribution review
+
+The owner chose on 2026-10-30 to preserve original artwork/audio without an open reuse license. See [NOTICE](../../../../../NOTICE.md) for the rights-reserved scope and exceptions, and the [M6 inventory](../../../../../docs/assets-audit-m6.md) for hashes, source notices and unresolved third-party reference/rendering-bank evidence. Separate permission is required where applicable; this notice does not establish ownership or clear third-party rights.
