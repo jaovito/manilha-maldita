@@ -5,9 +5,11 @@ export { expect } from '@playwright/test';
 export type { Locator, Page } from '@playwright/test';
 
 /** Each scenario owns real server state, including its unchanged HTTP/IP limits. */
-export const test = base.extend<{ playerServer: void }>({
+export const test = base.extend<{ playerServer: undefined }>({
   playerServer: [
-    async ({}, use) => {
+    async ({ baseURL }, use) => {
+      if (baseURL !== 'http://127.0.0.1:4173') throw new Error('PLAYER_LOCAL_PREVIEW_REQUIRED');
+
       // Refuse an occupied port instead of accidentally using another local server.
       const probe = Bun.serve({
         hostname: '127.0.0.1',
@@ -38,7 +40,7 @@ export const test = base.extend<{ playerServer: void }>({
           )
           .toBe(true);
         ready = true;
-        await use();
+        await use(undefined);
       } finally {
         try {
           if (ready && server.exitCode === null) await cleanupPlayerFixtures();
