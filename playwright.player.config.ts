@@ -8,7 +8,6 @@ export default defineConfig({
   retries: 0,
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report/player' }]],
   workers: 1,
-  globalTeardown: './tests/e2e/player-cleanup.ts',
   timeout: 60_000,
   use: {
     baseURL: 'http://127.0.0.1:4173',
@@ -21,12 +20,6 @@ export default defineConfig({
     { name: 'mobile-chromium', use: { ...devices['Pixel 7'] } },
   ],
   webServer: [
-    {
-      command: 'bun tests/e2e/player-server.ts',
-      url: 'http://127.0.0.1:3001/health',
-      reuseExistingServer: false,
-      timeout: 30_000,
-    },
     {
       command: 'bun run build && bun run --filter @truco/web preview',
       url: 'http://127.0.0.1:4173',

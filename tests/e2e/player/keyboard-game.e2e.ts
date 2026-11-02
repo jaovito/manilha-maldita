@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/player-test';
 import { activateWithKeyboard, keyboardAndSync, tabTo } from '../support/keyboard-flow';
 import { observeRoomSnapshots, waitForPresentation } from '../support/multiplayer-flow';
 

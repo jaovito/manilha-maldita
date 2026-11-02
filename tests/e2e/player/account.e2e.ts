@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/player-test';
 import { enterNickname } from '../support/entry-flow';
 
 test('optional account, separate cosmetic tabs, server locks and persistent login', async ({

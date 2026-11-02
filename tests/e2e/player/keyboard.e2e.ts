@@ -1,4 +1,4 @@
-import { expect, type Locator, type Page, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '../support/player-test';
 
 test('onboarding, panels and lobby preserve keyboard navigation and focus', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });

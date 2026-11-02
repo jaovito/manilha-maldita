@@ -33,8 +33,15 @@ test('each required browser gate runs guest and persistent player flows with iso
   expect(player.webServer).toBeArray();
   if (!Array.isArray(player.webServer)) throw new Error('MISSING_PLAYER_SERVERS');
 
-  expect(player.webServer).toHaveLength(2);
+  expect(player.webServer).toHaveLength(1);
   for (const server of player.webServer) expect(server.reuseExistingServer).toBe(false);
+  expect(player.globalTeardown).toBeUndefined();
+
+  for await (const file of new Bun.Glob('tests/e2e/player/*.e2e.ts').scan()) {
+    const source = await Bun.file(file).text();
+    expect(source).toContain("from '../support/player-test'");
+    expect(source).not.toContain("from '@playwright/test'");
+  }
 });
 
 test('failure evidence survives a successful retry and the next browser suite', async () => {

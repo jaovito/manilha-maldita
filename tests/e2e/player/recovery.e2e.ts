@@ -1,4 +1,4 @@
-import { expect, type Locator, test } from '@playwright/test';
+import { expect, type Locator, test } from '../support/player-test';
 
 test('account maintenance and one-time recovery revoke old credentials and preserve the profile', async ({
   page,

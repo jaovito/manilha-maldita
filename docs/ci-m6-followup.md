@@ -1,0 +1,9 @@
+# M6 browser CI follow-up
+
+The first Linux run of [PR #27](https://github.com/jaovito/manilha-maldita/pull/27) passed general verification, all guest checks and the desktop player suite. Its mobile player suite failed in pending-entry navigation. The retained trace showed HTTP 429 for account progression and guest creation before the join request existed. The preceding scenarios had consumed the shared backend's unchanged 120-request/minute IP budget; the test's pending-response timeout obscured that admission failure.
+
+`support/player-test.ts` now starts and stops the actual account-enabled backend for each player scenario. It refuses an occupied backend port, waits for health, cleans known synthetic account fixtures through the real API while its backend is running, and closes its owned process. PostgreSQL is still the guarded local test database; migrations/seeds remain the existing bootstrap. The preview stays shared, but sessions, room state and in-memory request budgets belong to each scenario. All player tests use this automatic fixture. No rate limit, scenario timeout, retry count, security policy or gameplay behavior changes.
+
+`player/server-isolation.e2e.ts` exhausts the real default HTTP budget, requires the next request to receive HTTP 429 with `RATE_LIMITED`, then requires a subsequent independent scenario to create and leave a real room. Existing pending-navigation assertions remain unchanged. This checks isolation without weakening application admission or retrying denied requests.
+
+Initial validation on 2026-11-02: all ten navigation/isolation browser cases passed across Chromium desktop/mobile; typechecking, formatting and the two CI configuration regressions passed. The full suite and coverage are recorded after isolated validation below. Raw CI traces contain disposable fixture/session data and are not committed.

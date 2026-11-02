@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/player-test';
 import { enterNickname } from '../support/entry-flow';
 
 test('table cosmetic previews stay centered inside their items on small and desktop viewports', async ({
