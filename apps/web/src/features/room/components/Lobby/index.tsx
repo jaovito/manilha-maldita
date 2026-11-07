@@ -6,6 +6,7 @@ import { LobbyIcon } from './Icon';
 import { RoomInvite } from './Invite';
 import { LobbySeats } from './Seats';
 import { LobbySettings } from './Settings';
+import './styles/bots.css';
 
 export function Lobby({ room, send }: { room: RoomView; send: (action: Action) => void }) {
   const host = room.selfSeat === room.hostSeat;
@@ -13,18 +14,22 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
   const occupants = room.seats.flatMap((player) => (player === null ? [] : [player]));
   const disconnected = occupants.filter((player) => !player.connected);
   const unready = occupants.filter((player) => player.connected && !player.ready);
-  const canStart = missing === 0 && disconnected.length === 0 && unready.length === 0;
+  const hasBots = occupants.some((player) => player.bot);
+  const enoughHumans = occupants.filter((player) => !player.bot).length >= 2;
+  const canFillBots = enoughHumans && missing > 0;
   const startReason =
-    missing > 0
-      ? t('{0} para completar a sala {1}.', [
-          missing === 1 ? t('Falta 1 jogador') : t('Faltam {0} jogadores', [missing]),
-          room.config.format,
-        ])
-      : disconnected.length > 0
-        ? t('Aguarde todos os jogadores reconectarem.')
-        : unready.length > 0
-          ? t('Todos os jogadores precisam confirmar Estou pronto.')
-          : null;
+    hasBots && !enoughHumans
+      ? t('Jogar com bots no multiplayer exige pelo menos dois jogadores.')
+      : missing > 0
+        ? t('{0} para completar a sala {1}.', [
+            missing === 1 ? t('Falta 1 jogador') : t('Faltam {0} jogadores', [missing]),
+            room.config.format,
+          ])
+        : disconnected.length > 0
+          ? t('Aguarde todos os jogadores reconectarem.')
+          : unready.length > 0
+            ? t('Todos os jogadores precisam confirmar Estou pronto.')
+            : null;
 
   return (
     <section className={`room-lobby ${room.match ? 'compact-lobby' : ''}`} aria-label="Lobby">
@@ -128,11 +133,26 @@ export function Lobby({ room, send }: { room: RoomView; send: (action: Action) =
                 {t('Voltar')}
               </button>
             )}
+            {host && room.status === 'lobby' && room.botFillEnabled && (canFillBots || hasBots) && (
+              <fieldset className="lobby-bot-controls" aria-label={t('Bots da sala')}>
+                {canFillBots && (
+                  <button type="button" onClick={() => send({ type: 'FILL_BOTS' })}>
+                    {t('Preencher com bots')}
+                  </button>
+                )}
+                {hasBots && (
+                  <button type="button" onClick={() => send({ type: 'CLEAR_BOTS' })}>
+                    {t('Remover bots')}
+                  </button>
+                )}
+              </fieldset>
+            )}
+
             {room.status === 'lobby' && host && (
               <button
                 className="button-primary"
                 type="button"
-                disabled={!canStart}
+                disabled={startReason !== null}
                 {...disabledHint(startReason)}
                 aria-describedby="start-requirements"
                 onClick={() => send({ type: 'START_MATCH' })}

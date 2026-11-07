@@ -13,6 +13,10 @@ export function humanConnected(room: RoomRuntime): boolean {
   );
 }
 
+export function humanSeatCount(room: RoomRuntime): number {
+  return room.state.seats.filter((member) => member !== null && !member.bot).length;
+}
+
 export function connected(room: RoomRuntime): boolean[] {
   return room.state.seats.map((member) =>
     member?.bot === true ? humanConnected(room) : room.connections.has(member?.sessionId ?? ''),

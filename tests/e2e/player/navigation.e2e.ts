@@ -1,3 +1,4 @@
+import { startSoloGame } from '../support/solo-flow';
 import { expect, test } from '../support/player-test';
 import { enterNickname } from '../support/entry-flow';
 
@@ -38,7 +39,7 @@ test('Back from Jogar returns to the menu and Forward reconnects the existing bo
   await page.goto('/');
   await enterNickname(page, 'Back From Play');
   const origin = new URL(page.url()).origin;
-  await page.getByRole('button', { name: 'Jogar', exact: true }).click();
+  await startSoloGame(page);
   await expect(page.locator('.game-table')).toBeVisible();
   const invitation = page.url();
   expect(new URL(invitation).searchParams.get('room')).toMatch(/^[A-Z0-9]{6}$/);

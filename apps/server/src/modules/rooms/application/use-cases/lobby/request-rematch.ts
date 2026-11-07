@@ -19,6 +19,6 @@ export function requestRematch(room: RoomRuntime, seat: number, ports: Ports): v
   }
 
   for (const occupant of room.state.seats) {
-    if (occupant) occupant.ready = false;
+    if (occupant) occupant.ready = occupant.bot === true;
   }
 }

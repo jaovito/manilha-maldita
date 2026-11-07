@@ -9,7 +9,6 @@ import { humanConnected } from '../membership/presence';
 export function botWakeAt(room: RoomRuntime, ports: Ports): number | null {
   const seat = room.clock?.dependencies.find((index) => room.state.seats[index]?.bot);
   if (
-    !room.state.solo ||
     room.state.status !== 'playing' ||
     !room.state.match ||
     room.transition ||

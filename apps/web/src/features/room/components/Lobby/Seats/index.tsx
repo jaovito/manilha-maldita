@@ -54,6 +54,7 @@ export function LobbySeats({ room, send }: { room: RoomView; send: (action: Acti
                           {seat === room.hostSeat && (
                             <span className="seat-badge host-badge">{t('Anfitrião')}</span>
                           )}
+                          {player.bot && <span className="seat-badge">{t('Bot')}</span>}
                           {player.ready && (
                             <span className="seat-badge ready-badge">{t('Pronto')}</span>
                           )}

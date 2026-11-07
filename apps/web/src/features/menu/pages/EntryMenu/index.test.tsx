@@ -118,7 +118,7 @@ test('invitation code opens joining immediately and busy state protects its fiel
   expect(events.onEnter).toHaveBeenCalledWith(false);
 });
 
-test('Jogar is independently enabled for a valid nickname and never creates a multiplayer room', () => {
+test('Jogar asks for a format before starting and restores focus when cancelled', () => {
   const events = handlers();
   const play = mock(() => {});
   const props = {
@@ -130,11 +130,65 @@ test('Jogar is independently enabled for a valid nickname and never creates a mu
     onPlay: play,
   };
   const view = render(<EntryMenu {...props} />);
-  fireEvent.click(screen.getByRole('button', { name: 'Jogar' }));
-  expect(play).toHaveBeenCalledTimes(1);
+  const trigger = screen.getByRole('button', { name: 'Jogar' });
+  trigger.focus();
+  fireEvent.click(trigger);
+  expect(play).not.toHaveBeenCalled();
+  expect(events.onEnter).not.toHaveBeenCalled();
+  expect(screen.queryByRole('combobox')).toBeNull();
+  const dialog = screen.getByRole('dialog', { name: 'Como você quer jogar?' });
+  const first = screen.getByRole('button', { name: '1v1' });
+  const back = screen.getByRole('button', { name: 'Voltar ao menu' });
+  expect(document.activeElement).toBe(first);
+  fireEvent.keyDown(first, { key: 'ArrowRight' });
+  expect(document.activeElement).toBe(first);
+  fireEvent.keyDown(first, { key: 'Tab', shiftKey: true });
+  expect(document.activeElement).toBe(back);
+  fireEvent.keyDown(back, { key: 'Tab' });
+  expect(document.activeElement).toBe(first);
+  fireEvent.keyDown(first, { key: 'Tab' });
+  expect(screen.getByRole('dialog')).toBe(dialog);
+  fireEvent.click(screen.getByText('Escolha o formato da sua mesa.'));
+  expect(screen.getByRole('dialog')).toBe(dialog);
+  fireEvent.click(screen.getByRole('button', { name: 'Voltar ao menu' }));
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(document.activeElement).toBe(trigger);
+  expect(play).not.toHaveBeenCalled();
+
+  fireEvent.click(trigger);
+  fireEvent(screen.getByRole('dialog'), new Event('cancel', { cancelable: true }));
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(document.activeElement).toBe(trigger);
+  fireEvent.click(trigger);
+  fireEvent.click(screen.getByRole('dialog'));
+  expect(screen.queryByRole('dialog')).toBeNull();
+  expect(play).not.toHaveBeenCalled();
+
+  for (const format of ['1v1', '2v2']) {
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('button', { name: format }));
+    expect(play).toHaveBeenLastCalledWith(format);
+    expect(screen.queryByRole('dialog')).toBeNull();
+  }
+  expect(play).toHaveBeenCalledTimes(2);
   expect(events.onEnter).not.toHaveBeenCalled();
   view.rerender(<EntryMenu {...props} busy />);
-  expect(screen.getByRole('button', { name: 'Jogar' }).hasAttribute('disabled')).toBe(true);
+  expect(trigger.hasAttribute('disabled')).toBe(true);
+  fireEvent.click(trigger);
+  expect(screen.queryByRole('dialog')).toBeNull();
   view.rerender(<EntryMenu {...props} soloEnabled={false} />);
-  expect(screen.getByRole('button', { name: 'Jogar' }).hasAttribute('disabled')).toBe(true);
+  expect(trigger.hasAttribute('disabled')).toBe(true);
+  fireEvent.click(trigger);
+  expect(screen.queryByRole('dialog')).toBeNull();
+});
+
+test('bot format dialog explains both teams in English', () => {
+  localStorage.setItem('truco.locale', 'en');
+  render(<EntryMenu nickname="Ana" code="" busy={false} {...handlers()} soloEnabled />);
+  fireEvent.click(screen.getByRole('button', { name: 'Play' }));
+  expect(screen.getByRole('dialog', { name: 'How would you like to play?' })).toBeTruthy();
+  expect(screen.getByText('You against one bot.')).toBeTruthy();
+  expect(screen.getByText('You and a bot against two bots.')).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: '2v2' }));
+  expect(screen.queryByRole('dialog')).toBeNull();
 });

@@ -52,9 +52,16 @@ export class Player {
   envelope(action: Action): ClientMessage {
     const room = this.view;
     if (!room) throw new Error('Missing snapshot');
-    const lobby = ['READY', 'SET_SEAT', 'CONFIGURE', 'START_MATCH', 'REMATCH', 'LEAVE'].includes(
-      action.type,
-    );
+    const lobby = [
+      'READY',
+      'SET_SEAT',
+      'CONFIGURE',
+      'START_MATCH',
+      'FILL_BOTS',
+      'CLEAR_BOTS',
+      'REMATCH',
+      'LEAVE',
+    ].includes(action.type);
 
     return {
       protocol: 1,
@@ -76,7 +83,7 @@ export class Player {
   }
 }
 export async function setup(
-  count: 2 | 4,
+  count: 2 | 3 | 4,
   config: RoomConfig = defaultRoomConfig,
   options: ServerOptions = {},
   advance?: (until: number) => Promise<void>,

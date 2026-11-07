@@ -18,6 +18,8 @@ Working title: **Truco Caótico**. This is Truco with powers. Balatro inspires c
 
 Authorized M5 extension on 2026-10-22: optional accounts, catalog avatars without uploads, complete decks visible to other players, cosmetic tables, XP/levels for unlocks and a global ranking based on competitive wins. This authorization only supersedes the deferral of XP/rankings above. The first increment delivers schemas/migrations and the PostgreSQL queue foundation only; authentication, worker, reward amounts, account recovery and anti-exploitation eligibility were not implemented in that increment. See [docs/database.md](docs/database.md) and [ADR 011](docs/adr/011-m5-postgresql-foundation.md).
 
+Authorized bot extensions: simple solo training (2026-10-19), optional solo 2v2 (2026-11-02, #28), and host-controlled multiplayer lobby bot fill (2026-11-06, #29). Mixed multiplayer retains normal account XP/competitive rewards by explicit owner choice; private solo training retains reduced XP and no ranking. See [ADR 009](docs/adr/009-solo-training-and-development-tools.md) and [rules](docs/rules.md). This does not authorize sophisticated bots or replacing disconnected humans during play.
+
 Do not change product decisions without authorization. Costs, timings and metrics are playtest hypotheses; document reversible technical adjustments.
 
 ## Sources of truth and required reading

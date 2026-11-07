@@ -44,6 +44,7 @@ export type RoomOutcome = {
 
 /** Authoritative state only. Connections, queues and scheduling belong to the application. */
 export type RoomState = {
+  botFillEnabled?: boolean;
   solo?: boolean;
   devTools?: boolean;
   code: string;

@@ -439,8 +439,13 @@ These elements must be adjusted using simulated matches and real player tests.
 
 ### Authorized extension — solo training (19/10/2026)
 
-The Jogar button may open a 1v1 match against a simple training bot, enabled by an independent flag. The 26/10/2026 follow-up authorizes reduced cosmetic XP for completed solo matches and strength-based raise decisions, including occasional bluffs. Ranking points and matchmaking remain excluded. Tools to arrange hands/powers and restart hands are restricted to development and the player's own solo tables, never production. The detailed contract is in ADR 009.
+The Jogar button asks for 1v1 or 2v2 in a modal before starting training, enabled by an independent flag. The owner authorized 2v2 on 2026-11-02 in [#28](https://github.com/jaovito/manilha-maldita/issues/28): one human and a bot partner face two bot opponents in alternating seats. The 26/10/2026 follow-up authorizes reduced cosmetic XP for completed solo matches and strength-based raise decisions, including occasional bluffs. Ranking points and matchmaking remain excluded. Tools to arrange hands/powers and restart hands are restricted to development and the player's own solo tables, never production. The detailed contract is in ADR 009.
 
 ## Approved M5 backend extension
 
 Following the initial guest MVP, the owner authorized optional accounts, predefined pixel avatars, independent deck/table catalogs, cosmetic-only levels and an accumulated-points competitive ranking. Deck themes describe backs, suits and ranks, and the owner's theme is visible to opponents without revealing hidden card identities. There are no avatar uploads, selected/unlocked powers or gameplay advantages. The approved initial progression policy and eligibility are defined in [rules.md](docs/rules.md#m5-account-progression-extension); [ADR 015](docs/adr/015-persistent-player-backend.md) describes the implementation and operational limits. Browser account/customization screens and rendering the new theme manifests remain frontend work.
+
+
+## Authorized extension — multiplayer bot fill (2026-11-06)
+
+The host may fill missing 2v2 lobby seats with simple bots when at least two humans are present, including the fourth seat when three friends play. A multiplayer match requires at least two humans at start. Bots remain replaceable by friends before starting, follow the same rules/private observations and keep normal multiplayer readiness/rematch behavior. The owner explicitly selected normal multiplayer XP and competitive ranking eligibility for these mixed rooms; solo training retains its separate reduced policy. See [#29](https://github.com/jaovito/manilha-maldita/issues/29) and ADR 009.
