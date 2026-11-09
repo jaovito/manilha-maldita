@@ -444,7 +444,13 @@ Web Audio synthesizes four original raise effects and one descending acceptance 
 
 ### Solo training and development tools
 
-[ADR 009](adr/009-solo-training-and-development-tools.md) records the authorized extension. The room lifecycle service schedules bot/timers on the same queue; `solo/bot.ts` sends only the projection to game-sim. Bootstrap resolves independent flags and blocks tools outside development. `solo/dev-tools.ts` recreates a consistent hand preserving score; existing envelope/cache prevent replay/stale context. The frontend fetches `/api/features` to enable Play and conditionally imports the panel only in Vite dev, also requiring room authorization.
+[ADR 009](adr/009-solo-training-and-development-tools.md) records the authorized extension. Play opens `menu/components/SoloFormatDialog`, a native modal with explicit 1v1/2v2 choices and team descriptions. Only choosing a format invokes solo creation; dismissing restores Play focus without network mutations. Creation fills every remaining seat with a training bot, preserving alternating teams and distinct bot names. The room lifecycle service schedules all bots/timers on the same queue; `solo/bot.ts` sends only the projection to game-sim. Bootstrap resolves independent flags and blocks tools outside development. `solo/dev-tools.ts` recreates a consistent hand preserving score; existing envelope/cache prevent replay/stale context. The frontend fetches `/api/features` to enable Play and conditionally imports the panel only in Vite dev, also requiring room authorization.
+
+### Multiplayer bot fill
+
+[#29](https://github.com/jaovito/manilha-maldita/issues/29) extends the existing bot scheduler to mixed multiplayer rooms. `FILL_BOTS` and `CLEAR_BOTS` are strict lobby commands handled under host/phase/revision/idempotency checks. Room creation freezes `botFillEnabled` from the existing `soloEnabled` availability option; the room projection advertises that capability and allowlists the public bot marker per seat. Member/session IDs and bot decisions remain private.
+
+Fill requires at least two human seats and adds only missing seats. Start checks that minimum again, because a human may leave after fill and the host may shrink the lobby. Join prefers vacancies and then lobby bots, without replacing humans or changing live matches. Membership changes keep bots ready while invalidating human readiness; host transfer skips bots. Shrinking a lobby may drop truncated bots, never humans. Multiplayer rematches preserve bots and require human readiness again. The existing shared scheduler uses only each bot's projection and pauses bot decisions without connected humans; no new process, queue or persistence layer exists. Mixed rooms retain `solo=false`, preserving the normal reward policy explicitly chosen by the owner; bot participant account IDs remain null.
 
 ### Modular match scenery
 

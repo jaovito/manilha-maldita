@@ -5,6 +5,7 @@ import { changeSeat } from '../../use-cases/lobby/change-seat';
 import { configureRoom } from '../../use-cases/lobby/configure-room';
 import { leaveRoom } from '../../use-cases/lobby/leave-room';
 import { requestRematch } from '../../use-cases/lobby/request-rematch';
+import { setBots } from '../../use-cases/lobby/set-bots';
 import { setReady } from '../../use-cases/lobby/set-ready';
 import { startRoomMatch } from '../../use-cases/lobby/start-match';
 
@@ -28,6 +29,10 @@ export function applyLobby(
     if (room.state.solo && (action.type === 'SET_SEAT' || action.type === 'CONFIGURE'))
       throw new Error('INVALID_COMMAND');
     switch (action.type) {
+      case 'FILL_BOTS':
+      case 'CLEAR_BOTS':
+        setBots(room, seat, action.type === 'FILL_BOTS', ports);
+        break;
       case 'READY':
         setReady(room, seat, action.ready);
         break;

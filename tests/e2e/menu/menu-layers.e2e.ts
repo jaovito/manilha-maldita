@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { enterNickname } from '../support/entry-flow';
+import { captureRoomSurface } from '../support/viewport';
 
 test('layered menu loads its art and keeps entry controls readable across viewports', async ({
   page,
@@ -117,4 +118,11 @@ test('candle flame pixels move while wax stays fixed', async ({ page }) => {
   await setTime(0.4);
   expect((await page.screenshot({ clip: clip(0, 0.32), scale: 'css' })).equals(flame)).toBe(false);
   expect((await page.screenshot({ clip: clip(0.55, 0.2), scale: 'css' })).equals(wax)).toBe(true);
+});
+
+test('menu keeps full-width actions before choosing a bot format', async ({ page }, testInfo) => {
+  await page.goto('/');
+  await enterNickname(page, 'Treinador');
+  await expect(page.locator('.menu-navigation select')).toHaveCount(0);
+  await captureRoomSurface(page, 'menu', testInfo.project.name);
 });

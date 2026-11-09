@@ -29,9 +29,9 @@ bun run dev
 - Game: <http://127.0.0.1:5173>
 - Backend health: <http://127.0.0.1:3001/health>
 
-Use the same hostname throughout a session: `localhost` and `127.0.0.1` have separate cookies. Guest and bot play do not require PostgreSQL. Development enables solo play and local hand-editing tools by default.
+Use the same hostname throughout a session: `localhost` and `127.0.0.1` have separate cookies. Guest and bot play do not require PostgreSQL. Development enables solo play, multiplayer lobby bot fill and local hand-editing tools by default.
 
-To disable either development feature:
+To disable bot availability (solo and multiplayer fill) or development hand-editing:
 
 ```sh
 ENABLE_SOLO=false bun run dev

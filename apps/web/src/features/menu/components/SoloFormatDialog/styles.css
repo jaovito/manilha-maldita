@@ -1,0 +1,136 @@
+.solo-format-dialog {
+  width: min(560px, calc(100% - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 28px;
+  overflow-y: auto;
+  border: 5px double #d4a455;
+  border-radius: 0;
+  background: radial-gradient(ellipse at top, #124c3a, #051e23 75%);
+  color: #ffe5a7;
+  box-shadow:
+    8px 10px #0009,
+    inset 0 0 0 3px #02171c;
+  font-family: "Jersey 25", sans-serif;
+  text-align: center;
+}
+
+.solo-format-dialog::backdrop {
+  background: #000c12d9;
+  backdrop-filter: blur(3px);
+}
+
+.solo-format-dialog .solo-format-eyebrow {
+  margin: 0 0 8px;
+  color: #d4a455;
+  font-size: 16px;
+  letter-spacing: 3px;
+}
+
+.solo-format-dialog h2 {
+  margin: 0 0 10px;
+  font-size: clamp(28px, 6vw, 40px);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.solo-format-dialog p {
+  margin: 0;
+  font-size: 20px;
+}
+
+.solo-format-choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.solo-format-choices button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 190px;
+  padding: 20px 12px;
+  border: 3px double #d4a455;
+  border-radius: 0;
+  background: #08352b;
+  color: #ffe5a7;
+  font: inherit;
+  box-shadow: 3px 4px #0008;
+}
+
+.solo-format-choices button:hover {
+  background: #15523c;
+}
+
+.solo-format-choices strong {
+  font-size: 38px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.solo-format-choices span:not(.menu-icon) {
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.solo-format-choices .menu-icon {
+  display: block;
+  background-image: url("/art/menu-icons.png");
+  background-size: 200% 300%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+
+.solo-format-dialog .solo-format-back {
+  min-height: 44px;
+  padding: 8px 24px;
+  border: 1px solid #a98243;
+  border-radius: 0;
+  background: #061c23;
+  color: #ffe5a7;
+  font: inherit;
+  font-size: 20px;
+}
+
+@media (max-width: 420px) {
+  .solo-format-dialog {
+    padding: 22px 18px;
+  }
+
+  .solo-format-choices {
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .solo-format-choices button {
+    padding: 16px 8px;
+  }
+}
+
+@media (max-height: 450px) and (orientation: landscape) {
+  .solo-format-dialog {
+    padding: 16px 24px;
+  }
+
+  .solo-format-choices {
+    margin: 16px 0;
+  }
+
+  .solo-format-choices button {
+    min-height: 120px;
+    gap: 6px;
+    padding: 10px;
+  }
+
+  .solo-format-choices .menu-icon {
+    width: 30px;
+    height: 30px;
+  }
+}

@@ -80,6 +80,8 @@ export function fixture(
           'SET_SEAT',
           'CONFIGURE',
           'START_MATCH',
+          'FILL_BOTS',
+          'CLEAR_BOTS',
           'REMATCH',
           'LEAVE',
         ].includes(action.type);

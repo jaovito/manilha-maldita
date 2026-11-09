@@ -34,9 +34,7 @@ export function createRoom(
   assertSessionCapacity(rooms, sessionId);
 
   validation.nickname(nickname);
-  const config = normalizeConfig(
-    validation.configuration(solo ? { ...input, format: '1v1' } : input),
-  );
+  const config = normalizeConfig(validation.configuration(input));
 
   let code = '';
 
@@ -54,6 +52,7 @@ export function createRoom(
     state: {
       code,
       solo,
+      botFillEnabled: !solo && options.soloEnabled === true,
       devTools: solo && options.devTools === true,
       config,
       revision: 0,
@@ -87,13 +86,15 @@ export function createRoom(
   };
 
   if (solo) {
-    room.state.seats[1] = {
-      sessionId: ports.id(),
-      nickname: 'Bot Treino',
-      ready: true,
-      strikes: 0,
-      bot: true,
-    };
+    for (let seat = 1; seat < room.state.seats.length; seat++) {
+      room.state.seats[seat] = {
+        sessionId: ports.id(),
+        nickname: config.format === '1v1' ? 'Bot Treino' : `Bot Treino ${seat}`,
+        ready: true,
+        strikes: 0,
+        bot: true,
+      };
+    }
   }
 
   return room;

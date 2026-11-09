@@ -66,6 +66,8 @@ export const actionSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('READY'), ready: z.boolean() }),
   z.strictObject({ type: z.literal('SET_SEAT'), seat }),
   z.strictObject({ type: z.literal('CONFIGURE'), config: roomConfigSchema }),
+  z.strictObject({ type: z.literal('FILL_BOTS') }),
+  z.strictObject({ type: z.literal('CLEAR_BOTS') }),
   z.strictObject({ type: z.literal('START_MATCH') }),
   z.strictObject({ type: z.literal('REMATCH') }),
   z.strictObject({ type: z.literal('LEAVE') }),
@@ -181,6 +183,7 @@ export const matchViewSchema = z.strictObject({
 export type MatchView = z.infer<typeof matchViewSchema>;
 
 export const roomViewSchema = z.strictObject({
+  botFillEnabled: z.boolean().optional(),
   solo: z.boolean().optional(),
   devTools: z.boolean().optional(),
   code: roomCodeSchema,
@@ -209,6 +212,7 @@ export const roomViewSchema = z.strictObject({
               }),
             })
             .optional(),
+          bot: z.boolean().optional(),
           connected: z.boolean(),
           ready: z.boolean(),
         })

@@ -6,6 +6,7 @@ export type RoomTransition = { id: string; kind: 'deal' | 'trick' | 'hand'; unti
 
 /** Allowlisted projection; never an authoritative room serialized wholesale. */
 export type RoomView = {
+  botFillEnabled?: boolean | undefined;
   solo?: boolean | undefined;
   devTools?: boolean | undefined;
   code: string;
@@ -18,6 +19,7 @@ export type RoomView = {
   seats: readonly ({
     seat: number;
     nickname: string;
+    bot?: boolean | undefined;
     connected: boolean;
     ready: boolean;
     appearance?: Omit<MemberAppearance, 'table'> | undefined;

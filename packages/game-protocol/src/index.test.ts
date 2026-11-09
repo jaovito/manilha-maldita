@@ -10,7 +10,16 @@ import {
 
 test('validates every command and rejects spoofed authority and unsupported card identities', () => {
   const actions = [
-    ...['START_MATCH', 'REMATCH', 'LEAVE', 'SYNC', 'SURRENDER', 'REQUEST_RAISE'].map((type) => ({
+    ...[
+      'FILL_BOTS',
+      'CLEAR_BOTS',
+      'START_MATCH',
+      'REMATCH',
+      'LEAVE',
+      'SYNC',
+      'SURRENDER',
+      'REQUEST_RAISE',
+    ].map((type) => ({
       type,
     })),
     { type: 'READY', ready: true },
