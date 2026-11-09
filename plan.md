@@ -754,3 +754,9 @@ The lobby hides fill until two human seats are present and explains blocked star
 `VITE_BACKEND_URL='' bun run check` passed 565 tests (362 backend/tooling/integration/database and 203 DOM) with the coverage minimum met by all 232 runtime sources. An unavailable local Docker daemon and an ambiguous DOM test query were corrected before the successful run. Existing lint and bundle advisories remain.
 
 `bun run test:e2e:solo` passed all 16 cases in development and production builds across desktop and mobile Chromium. Playwright-cli verified the dialog, lobby bot marker and footer clearance at 1280×720 and 390×844. The inspection sessions were closed and the local development server with accounts and bots was kept running for manual testing.
+
+## Bot preparation deadline follow-up — 2026-11-08
+
+The review on [PR #30](https://github.com/jaovito/manilha-maldita/pull/30) found that sequential thinking waits could consume the shared preparation window before all bots acted. Bots now share a wait capped at one second and half the remaining window. The room queue commits their independently projected choices in seat order from the same sealed state. Human commitments preserve the scheduled wake. Pauses still stop the batch until reconnection.
+
+Four controlled-clock regressions reproduced the failure and passed after the fix. They cover 1 s and 2 s deadlines in both solo and mixed 2v2 and verify the deadline, hidden activations and transition after the last human commits. `VITE_BACKEND_URL='' bun run check` passed 569 tests and verified coverage for 232 runtime sources. `bun run test:e2e:solo` passed all 16 desktop and mobile cases against development and production builds.

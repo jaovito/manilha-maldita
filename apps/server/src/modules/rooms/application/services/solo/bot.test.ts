@@ -184,7 +184,7 @@ test('bot answers a raise, pauses with its human offline and ignores a retired d
   f.service.close();
 });
 
-test('2v2 bots stop without their human and resume only pending preparation seats', async () => {
+test('2v2 bots pause their preparation batch without a human and resume on reconnection', async () => {
   const f = fixture(options);
 
   try {
@@ -197,21 +197,18 @@ test('2v2 bots stop without their human and resume only pending preparation seat
     );
     await human.connect(code);
     await f.advance(900);
-    await f.advance(1900);
-    expect(human.view.match?.powers?.players[1]?.ready).toBe(true);
-    expect(human.view.match?.powers?.players[2]?.ready).toBe(false);
+    await f.advance(1899);
     const revision = human.view.match?.revision;
     await human.disconnect();
     await f.advance(4900);
     await human.connect(code);
     expect(human.view.match?.revision).toBe(revision);
-    expect(human.view.match?.powers?.players[2]?.ready).toBe(false);
+    expect(human.view.match?.powers?.players.slice(1).every(({ ready }) => !ready)).toBe(true);
     expect(
       human.view.match?.hand.hands.slice(1).every((hand) => hand.visibility === 'hidden'),
     ).toBe(true);
     await human.send({ type: 'PREPARE', intent: { type: 'pass' } });
     await f.advance(5900);
-    await f.advance(6900);
     expect(human.view.match?.phase.type).not.toBe('PREPARATION');
   } finally {
     f.service.close();
