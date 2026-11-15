@@ -1,4 +1,4 @@
-import type { PlayerProgress } from '@truco/game-protocol';
+import type { PlayerProgress, RoomConfig } from '@truco/game-protocol';
 import { nicknameSchema } from '@truco/game-protocol';
 import { useEffect, useRef, useState } from 'react';
 import { version } from '../../../../../package.json';
@@ -6,6 +6,7 @@ import { disabledHint } from '../../../../shared/DisabledTooltip';
 import { t } from '../../../../shared/i18n';
 import { MenuIcon } from '../../components/Icon';
 import { MenuProfile } from '../../components/Profile';
+import { SoloFormatDialog } from '../../components/SoloFormatDialog';
 import { Tutorial } from '../../components/Tutorial';
 
 type EntryPage = 'menu' | 'join' | 'tutorial';
@@ -19,7 +20,7 @@ type Props = {
   onCosmetics?: (() => void) | undefined;
   soloEnabled?: boolean;
   onSettings?: () => void;
-  onPlay?: () => void;
+  onPlay?: (format: RoomConfig['format']) => void;
   nickname: string;
   code: string;
   busy: boolean;
@@ -45,6 +46,7 @@ export function EntryMenu({
   onCodeChange,
   onEnter,
 }: Props) {
+  const [choosingFormat, setChoosingFormat] = useState(false);
   const [localPage, setLocalPage] = useState<EntryPage>(code ? 'join' : 'menu');
   const activePage = page ?? localPage;
   const navigate = onNavigate ?? setLocalPage;
@@ -123,13 +125,14 @@ export function EntryMenu({
             className="menu-button menu-green"
             type="button"
             aria-label={t('Jogar')}
+            aria-haspopup="dialog"
             disabled={!soloEnabled || Boolean(entryReason)}
             {...disabledHint(
               !soloEnabled
                 ? t('Partidas contra bot estão desativadas neste servidor.')
                 : entryReason,
             )}
-            onClick={onPlay}
+            onClick={() => setChoosingFormat(true)}
           >
             <MenuIcon name="cards" />
             <span>
@@ -195,6 +198,15 @@ export function EntryMenu({
             <span>{t('Configurações')}</span>
           </button>
         </nav>
+      )}
+      {choosingFormat && !joining && soloEnabled && !entryReason && (
+        <SoloFormatDialog
+          onClose={() => setChoosingFormat(false)}
+          onChoose={(format) => {
+            setChoosingFormat(false);
+            onPlay?.(format);
+          }}
+        />
       )}
       {busy && (
         <p className="menu-progress" role="status">

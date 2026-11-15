@@ -144,9 +144,17 @@ Casual may disable the card clock, not expiration of empty/disconnected rooms. D
 
 ## Solo training and development scenarios
 
-As authorized on 19/10/2026, “Jogar” may start 1v1 training against a simple bot, without changing rules, powers, or scoring. The bot uses only information authorized for its seat. Creation depends on an independent flag. Solo rematch is immediate; it does not require confirmation from a second human.
+As authorized on 19/10/2026 and extended on 2026-11-02 in [#28](https://github.com/jaovito/manilha-maldita/issues/28), “Jogar” opens a format dialog; choosing 1v1 or 2v2 starts training, without changing rules, powers, or scoring. In 2v2, the human occupies seat 0, their bot partner seat 2, and bot opponents seats 1 and 3. All other seats are filled automatically; additional humans cannot join. The bot uses only information authorized for its seat. Creation depends on an independent flag. Solo rematch is immediate; it does not require confirmation from a second human.
 
 Only in development and on the owner's solo table, a tooling command restarts the hand with selected cards/power/energy. It preserves score, card uniqueness, and eleven-point/11×11 restrictions. This is a test tool, unavailable in multiplayer matches and production. See [ADR 009](adr/009-solo-training-and-development-tools.md).
+
+## Multiplayer bot fill
+
+Authorized on 2026-11-06 in [#29](https://github.com/jaovito/manilha-maldita/issues/29). With bots enabled and at least two humans in the lobby, the host may fill vacant 2v2 seats with training bots or remove all lobby bots. Starting a multiplayer match still requires at least two humans, including after membership or format changes. Human seats are never replaced by a fill command; disconnected humans retain their seats. Bots are visibly identified and automatically ready. Membership/seat/configuration changes reset human readiness; humans must explicitly confirm before starting. Teams still alternate by seat.
+
+A new human takes a vacant seat first, then replaces a lobby bot when no vacant seat remains. Starting a match freezes this membership; late humans cannot replace bots during play. Rematches return multiplayer to the lobby with bots still ready and humans unready. Host ownership transfers only to humans. Empty-human rooms expire normally and bots do not continue without a connected human. Bots use only their own authorized projection and the same room queue as human commands. This does not enable solo development tools in multiplayer.
+
+The owner explicitly selected normal multiplayer account rewards for these rooms, including competitive victory points when otherwise eligible. Bots have no account and receive no rewards. The solo flag continues to distinguish private training and its reduced rewards; bot presence alone does not classify a multiplayer match as solo. The human-seat minimum keeps one-person matches on the solo policy. Multiple-session farming and collusion remain outside this protection.
 
 ## M5 account progression extension
 

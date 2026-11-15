@@ -302,6 +302,9 @@ async function assertMenuLayout(page: Page) {
   for (const button of await page.locator('.menu-navigation button').all()) {
     const box = await button.boundingBox();
     if (!box) throw new Error('Ação do menu ausente.');
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+
     buttonSize ??= box;
     expect(Math.abs(box.width - buttonSize.width)).toBeLessThan(1);
     expect(Math.abs(box.height - buttonSize.height)).toBeLessThan(1);

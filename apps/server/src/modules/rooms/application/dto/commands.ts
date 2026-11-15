@@ -7,7 +7,9 @@ export type Action =
   | { type: 'READY'; ready: boolean }
   | { type: 'SET_SEAT'; seat: number }
   | { type: 'CONFIGURE'; config: RoomConfig }
-  | { type: 'START_MATCH' | 'REMATCH' | 'LEAVE' | 'SYNC' | 'SURRENDER' }
+  | {
+      type: 'FILL_BOTS' | 'CLEAR_BOTS' | 'START_MATCH' | 'REMATCH' | 'LEAVE' | 'SYNC' | 'SURRENDER';
+    }
   | {
       type: 'DEV_RESET_HAND';
       cards?: Card[] | undefined;

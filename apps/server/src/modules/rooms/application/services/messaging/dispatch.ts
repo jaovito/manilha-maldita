@@ -7,6 +7,8 @@ import { resetDevelopmentHand } from '../../use-cases/solo/reset-development-han
 import { applyLobby } from '../lobby/commands';
 
 const LOBBY_ACTIONS = new Set([
+  'FILL_BOTS',
+  'CLEAR_BOTS',
   'READY',
   'SET_SEAT',
   'CONFIGURE',

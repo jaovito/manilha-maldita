@@ -164,7 +164,7 @@ export function App() {
     [join, reset],
   );
 
-  const enter = async (create: boolean, solo = false) => {
+  const enter = async (create: boolean, solo = false, format = defaultRoomConfig.format) => {
     const epoch = joining.current;
     const intent = ++entryIntent.current;
     setBusy(true);
@@ -181,7 +181,7 @@ export function App() {
 
       const next = create
         ? await request<{ code: string }>('/rooms', {
-            config: defaultRoomConfig,
+            config: { ...defaultRoomConfig, format },
             ...(solo ? { solo: true } : {}),
           })
         : { code: code.trim().toUpperCase() };
@@ -333,7 +333,7 @@ export function App() {
           onCodeChange={setCode}
           onEnter={enter}
           soloEnabled={soloEnabled}
-          onPlay={() => void enter(true, true)}
+          onPlay={(format) => void enter(true, true, format)}
           onSettings={() => navigate('settings', route.roomCode)}
         />
       ) : (

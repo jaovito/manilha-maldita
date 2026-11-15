@@ -20,7 +20,8 @@ export async function join(
     assertSessionCapacity(context.rooms, sessionId);
 
     context.validation.nickname(nickname);
-    const seat = room.state.seats.indexOf(null);
+    const empty = room.state.seats.indexOf(null);
+    const seat = empty < 0 ? room.state.seats.findIndex((member) => member?.bot) : empty;
     if (seat < 0) throw new Error('ROOM_FULL');
 
     room.state.seats[seat] = {
@@ -30,8 +31,11 @@ export async function join(
       strikes: 0,
       ...(identity ? { identity: structuredClone(identity) } : {}),
     };
+    if (!room.state.seats[room.state.hostSeat] || room.state.seats[room.state.hostSeat]?.bot)
+      room.state.hostSeat = seat;
+
     for (const member of room.state.seats) {
-      if (member) member.ready = false;
+      if (member) member.ready = member.bot === true;
     }
     room.state.revision++;
     context.lifecycle.publish(room);

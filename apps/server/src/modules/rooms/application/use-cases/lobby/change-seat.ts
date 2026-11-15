@@ -10,6 +10,6 @@ export function changeSeat(room: RoomRuntime, seat: number, target: number): voi
   room.state.seats[seat] = null;
   if (room.state.hostSeat === seat) room.state.hostSeat = target;
   for (const occupant of room.state.seats) {
-    if (occupant) occupant.ready = false;
+    if (occupant) occupant.ready = occupant.bot === true;
   }
 }

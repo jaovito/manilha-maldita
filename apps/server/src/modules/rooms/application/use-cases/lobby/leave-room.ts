@@ -6,12 +6,12 @@ export function leaveRoom(room: RoomRuntime, seat: number): void {
   const member = room.state.seats[seat];
   if (member) room.connections.delete(member.sessionId);
   room.state.seats[seat] = null;
-  if (room.state.hostSeat === seat)
-    room.state.hostSeat = Math.max(
-      0,
-      room.state.seats.findIndex((entry) => entry !== null),
-    );
+  if (room.state.hostSeat === seat) {
+    const nextHost = room.state.seats.findIndex((entry) => entry !== null && !entry.bot);
+    room.state.hostSeat = nextHost < 0 ? seat : nextHost;
+  }
+
   for (const occupant of room.state.seats) {
-    if (occupant) occupant.ready = false;
+    if (occupant) occupant.ready = occupant.bot === true;
   }
 }

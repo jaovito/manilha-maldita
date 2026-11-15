@@ -24,6 +24,7 @@ export function roomView(room: RoomRuntime, selfSeat: number): RoomView {
       ? { rewardEligibility }
       : {}),
     code: room.state.code,
+    ...(room.state.botFillEnabled ? { botFillEnabled: true } : {}),
     ...(ownAppearance ? { tableTheme: { ...ownAppearance.table } } : {}),
     ...(room.state.solo ? { solo: true, devTools: room.state.devTools === true } : {}),
     sequence: room.sequence,
@@ -40,6 +41,7 @@ export function roomView(room: RoomRuntime, selfSeat: number): RoomView {
         : {
             seat,
             nickname: member.nickname,
+            ...(member.bot ? { bot: true } : {}),
             connected: member.bot === true || room.connections.has(member.sessionId),
             ready: member.ready,
             ...(appearance

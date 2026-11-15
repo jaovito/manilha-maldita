@@ -1,3 +1,4 @@
+import { startSoloGame } from '../support/solo-flow';
 import { expect, test } from '@playwright/test';
 import { enterNickname } from '../support/entry-flow';
 
@@ -51,7 +52,7 @@ test('language changes during a real solo match preserve its state and translate
   );
   await page.goto('/');
   await enterNickname(page, 'Paus');
-  await page.getByRole('button', { name: 'Jogar', exact: true }).click();
+  await startSoloGame(page);
   await expect(page.locator('.game-table')).toBeVisible();
   await page.locator('.room-menu > summary').click();
   await page.getByText('Ferramentas de desenvolvimento', { exact: true }).click();

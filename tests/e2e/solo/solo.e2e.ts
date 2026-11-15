@@ -1,52 +1,53 @@
 import { expect, test } from '@playwright/test';
 import { enterNickname } from '../support/entry-flow';
+import { startSoloGame, waitForSoloTurn } from '../support/solo-flow';
 
 // This suite uses the explicit development server with independently enabled solo/dev flags.
-test('Jogar starts a bot match and the development menu applies each power with a custom hand', async ({
-  page,
-}) => {
-  await page.goto('/');
-  await enterNickname(page, 'Treinador');
-  await page.getByRole('button', { name: 'Jogar', exact: true }).click();
-  await expect(page.locator('.game-table')).toBeVisible();
-  await expect(page.locator('.game-table')).toContainText('Bot Treino');
-  await page.locator('.room-menu > summary').click();
-  await page.getByText('Ferramentas de desenvolvimento', { exact: true }).click();
-  for (const power of ['spy', 'exchange', 'boost', 'mask']) {
-    await page.getByLabel('Carta 1', { exact: true }).selectOption('3:clubs');
-    await page.getByLabel('Carta 2', { exact: true }).selectOption('A:hearts');
-    await page.getByLabel('Carta 3', { exact: true }).selectOption('4:spades');
-    await page.getByLabel('Poder de teste').selectOption(power);
-    await page.getByLabel('Energia de teste').selectOption('3');
-    const previous = await page.locator('[data-sequence]').getAttribute('data-sequence');
-    await page.getByRole('button', { name: 'Aplicar cenário e reiniciar mão' }).click();
-    await expect(page.locator('[data-sequence]')).not.toHaveAttribute(
-      'data-sequence',
-      previous ?? '',
-    );
-    await expect(page.locator('.error-banner')).toHaveCount(0);
+for (const format of ['1v1', '2v2'] as const) {
+  test(`${format} starts a bot match and development tools apply each power with a custom hand`, async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await enterNickname(page, 'Treinador');
+    await startSoloGame(page, format);
+    await expect(page.locator('.game-table')).toBeVisible();
+    await expect(page.locator('.game-table')).toContainText('Bot Treino');
+    await page.locator('.room-menu > summary').click();
     await page.getByText('Ferramentas de desenvolvimento', { exact: true }).click();
-    await expect(page.getByLabel('Carta 1', { exact: true })).toHaveValue('3:clubs');
-  }
-  await page.getByRole('button', { name: 'Fechar menu da sala' }).click();
-  await page.getByRole('button', { name: 'Passar preparação' }).click();
-  await expect(page.locator('.own-hand .card').first()).toBeVisible();
-  // The real bot resolves preparation and takes its turn, without a second browser client.
-  await expect(page.locator('.own-hand .card:not(:disabled)').first()).toBeEnabled({
-    timeout: 10000,
+    for (const power of ['spy', 'exchange', 'boost', 'mask']) {
+      await page.getByLabel('Carta 1', { exact: true }).selectOption('3:clubs');
+      await page.getByLabel('Carta 2', { exact: true }).selectOption('A:hearts');
+      await page.getByLabel('Carta 3', { exact: true }).selectOption('4:spades');
+      await page.getByLabel('Poder de teste').selectOption(power);
+      await page.getByLabel('Energia de teste').selectOption('3');
+      const previous = await page.locator('[data-sequence]').getAttribute('data-sequence');
+      await page.getByRole('button', { name: 'Aplicar cenário e reiniciar mão' }).click();
+      await expect(page.locator('[data-sequence]')).not.toHaveAttribute(
+        'data-sequence',
+        previous ?? '',
+      );
+      await expect(page.locator('.error-banner')).toHaveCount(0);
+      await page.getByText('Ferramentas de desenvolvimento', { exact: true }).click();
+      await expect(page.getByLabel('Carta 1', { exact: true })).toHaveValue('3:clubs');
+    }
+    await page.getByRole('button', { name: 'Fechar menu da sala' }).click();
+    await page.getByRole('button', { name: 'Passar preparação' }).click();
+    await expect(page.locator('.own-hand .card').first()).toBeVisible();
+    // The real bot resolves preparation and takes its turn, without a second browser client.
+    await waitForSoloTurn(page);
+    await page.locator('.own-hand .card:not(:disabled)').first().click();
+    await expect(page.locator('.error-banner')).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator('.game-table')).toBeVisible();
+    await page.locator('.room-menu > summary').click();
+    await expect(page.getByText('Ferramentas de desenvolvimento', { exact: true })).toBeVisible();
   });
-  await page.locator('.own-hand .card:not(:disabled)').first().click();
-  await expect(page.locator('.error-banner')).toHaveCount(0);
-  await page.reload();
-  await expect(page.locator('.game-table')).toBeVisible();
-  await page.locator('.room-menu > summary').click();
-  await expect(page.getByText('Ferramentas de desenvolvimento', { exact: true })).toBeVisible();
-});
+}
 
 test('Spy observation opens a proportional card preview and restores focus', async ({ page }) => {
   await page.goto('/');
   await enterNickname(page, 'Observador');
-  await page.getByRole('button', { name: 'Jogar', exact: true }).click();
+  await startSoloGame(page);
   await page.locator('.room-menu > summary').click();
   await page.getByText('Ferramentas de desenvolvimento', { exact: true }).click();
   await page.getByLabel('Poder de teste').selectOption('spy');
@@ -88,7 +89,7 @@ test('all power descriptions remain visible inside their parchment on small scre
 }) => {
   await page.goto('/');
   await enterNickname(page, 'Leitor');
-  await page.getByRole('button', { name: 'Jogar', exact: true }).click();
+  await startSoloGame(page);
   for (const power of ['spy', 'exchange', 'boost', 'mask']) {
     await page.locator('.room-menu > summary').click();
     await page.getByText('Ferramentas de desenvolvimento', { exact: true }).click();
