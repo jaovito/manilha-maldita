@@ -1,7 +1,6 @@
 import { t } from '../../../../../../shared/i18n';
-import { EnergyIcon } from '../../../../../../shared/EnergyIcon';
+import { EnergyIcon, disabledHint } from '../../../../../../shared/components';
 import type { Ref } from 'react';
-import { disabledHint } from '../../../../../../shared/DisabledTooltip';
 
 export function PowerCard({
   power,

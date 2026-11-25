@@ -1,7 +1,6 @@
 import type { PlayerProgress } from '@truco/game-protocol';
 import { useRef } from 'react';
-import { Avatar } from '../../../../shared/Avatar';
-import { disabledHint } from '../../../../shared/DisabledTooltip';
+import { Avatar, disabledHint } from '../../../../shared/components';
 import { t } from '../../../../shared/i18n';
 
 type Props = {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
-import { LanguageSelect } from '../../../../../shared/Settings';
+import { LanguageSelect } from '../../../../../shared/components';
 import { t, useLocale } from '../../../../../shared/i18n';
 import { firstLesson, guidedLessons } from './lessons';
 import { GuidedScene } from './Scene';

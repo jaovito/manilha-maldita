@@ -1,5 +1,5 @@
 import type { DeckTheme, MatchView } from '@truco/game-protocol';
-import { t } from '../i18n';
+import { t } from '../../i18n';
 import { Suit } from './Suit';
 
 type Card = MatchView['hand']['vira'];

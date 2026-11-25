@@ -1,5 +1,5 @@
 import type { RoomView } from '@truco/game-protocol';
-import { MATCH_RESULT_READING_MS } from '../match-presentation';
+import { MATCH_RESULT_READING_MS } from './match-presentation';
 import type { Sound } from './audio';
 
 /** Align the cue with the title after the final trick's reading interval. */

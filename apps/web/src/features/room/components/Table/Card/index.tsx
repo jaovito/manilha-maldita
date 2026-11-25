@@ -1,1 +1,1 @@
-export { CardBack, CardFace } from '../../../../../shared/PlayingCard';
+export { CardBack, CardFace } from '../../../../../shared/components';

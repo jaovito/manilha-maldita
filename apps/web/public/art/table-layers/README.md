@@ -9,7 +9,7 @@ Assets generated with integrated ImageGen using **`../tabletop.png`** as direct 
 | `ornament.png` | Club-suit ornament, repeated/mirrored on the sides and rotated at top/bottom |
 | `cloth.png` | Green/navy cloth with gold brocade/fringe, independently anchored at all four corners |
 
-`../layers/felt.png` supplies repeating felt at 320 px. Candle, coins, mate gourd and two decks reuse transparent `../layers/` sprites, each with its own position/aspect ratio. The candle uses `shared/ScenicCandle`, shared with the menu, without cropping the sprite and with displacement restricted to the flame tip. Reduced motion disables the filter/animated halo.
+`../layers/felt.png` supplies repeating felt at 320 px. Candle, coins, mate gourd and two decks reuse transparent `../layers/` sprites, each with its own position/aspect ratio. The candle uses `shared/components/ScenicCandle`, shared with the menu, without cropping the sprite and with displacement restricted to the flame tip. Reduced motion disables the filter/animated halo.
 
 ## Composition
 

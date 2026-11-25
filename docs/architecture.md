@@ -121,6 +121,7 @@ apps/web/src/
   app/
     main.tsx                 # application mounting
     App/                     # composition and its tests
+    card-fonts/              # development-only entry and its test
     styles/                  # global styles and cascade order
   features/
     menu/
@@ -151,6 +152,10 @@ apps/web/src/
           styles/
       utils/                 # feature card formatting
   shared/
+    components/              # reusable UI with a public index.ts
+    hooks/                   # shared React hooks and colocated tests
+    feedback/                # audio, confirmed events, and presentation timing
+    i18n/                    # localization and message catalogs
     preferences/             # local nickname preference
     transport/               # HTTP/WS shared by entry and room
 ```
@@ -244,7 +249,7 @@ At the table, avatar/nameplate spacing is 12 px on desktop and 8 px on compact s
 
 “Play covered” applies to one move: it expires when the snapshot confirms a reduction in the player's hand. Rejected commands and updates without card consumption preserve the selection; a different hand/match starts unchecked.
 
-The main menu lives in `features/menu/pages/EntryMenu`. `shared/MenuScenery` composes menu/lobby decoration: repeating felt in the shell, four corners, four central-symbol segments, candle, cup, coins, deck, and menu cards. Alpha PNGs preserve proportions; CSS defines anchors and bounded sizes without stretching a single image. The Manilha Maldita logo and other assets derive from the previous reference, with provenance/prompts in `public/art/layers/README.md`. Profile/navigation remain HTML. Decoration receives no match state, captures no pointer/focus, and is hidden from the accessibility tree. CSS card animations respect reduced motion. Secondary elements yield space in portrait and content may scroll; short landscape uses compact controls. Creation/joining and disabled future features preserve existing flows.
+The main menu lives in `features/menu/pages/EntryMenu`. `shared/components/MenuScenery` composes menu/lobby decoration: repeating felt in the shell, four corners, four central-symbol segments, candle, cup, coins, deck, and menu cards. Alpha PNGs preserve proportions; CSS defines anchors and bounded sizes without stretching a single image. The Manilha Maldita logo and other assets derive from the previous reference, with provenance/prompts in `public/art/layers/README.md`. Profile/navigation remain HTML. Decoration receives no match state, captures no pointer/focus, and is hidden from the accessibility tree. CSS card animations respect reduced motion. Secondary elements yield space in portrait and content may scroll; short landscape uses compact controls. Creation/joining and disabled future features preserve existing flows.
 
 The lobby composes `LobbySettings`, `LobbySeats`, and `RoomInvite`: host-only settings, player-relative teams, and public-link copying only after a click. Unavailable/rejected Clipboard access offers manual-copy guidance without false success. The code remains an invitation, not a credential. Menu artwork contains no text, actions, levels, currency, or match information.
 
@@ -260,7 +265,7 @@ Locked settings use desaturated gray icons, labels, and selectors plus a “Read
 
 Text uses ivory/light shades over opaque dark green/blue panels; gold highlights titles/codes. Captions are at least 14 px. At the owner's request, disabled action buttons are strongly attenuated (0.25 opacity) without hover glow/scale. Locked cards remain readable because faces/backs are game information. Instructions/title have their own surfaces without text directly on illustrated wood.
 
-`shared/DisabledTooltip` preserves native `disabled` and uses `title`, `aria-description`, and `data-disabled-reason` with the same fixed reason per state. One opaque, viewport-bounded portal avoids clipping and geometry-changing wrappers. Hover, touch, and focus on inspectable powers show explanations; natively disabled controls remain outside Tab order, with descriptions available to screen readers. Reconnection takes priority over stale decision reasons. Native tooltips are suspended while custom ones show and restored only if the reason remains current. Pointer movement and scrolling inside an explanation preserve reading; Escape, external scroll, resize, reason change, and control removal close it and clean up resources without sending actions.
+`shared/components/DisabledTooltip` preserves native `disabled` and uses `title`, `aria-description`, and `data-disabled-reason` with the same fixed reason per state. One opaque, viewport-bounded portal avoids clipping and geometry-changing wrappers. Hover, touch, and focus on inspectable powers show explanations; natively disabled controls remain outside Tab order, with descriptions available to screen readers. Reconnection takes priority over stale decision reasons. Native tooltips are suspended while custom ones show and restored only if the reason remains current. Pointer movement and scrolling inside an explanation preserve reading; Escape, external scroll, resize, reason change, and control removal close it and clean up resources without sending actions.
 
 Seat cards have uniform heights across teams and reserve a bottom action area even without a button for that player. Controls anchor there with a minimum height in font units to support two lines without shifting with nicknames/badges.
 
@@ -412,7 +417,7 @@ During play, `RoomMenu` provides an opaque panel with subtle felt/shared lobby f
 
 POST `/api/guest` updates an existing session's validated nickname while preserving token, identity, and expiration. New joins/creations use it; occupied seats retain their snapshot. This prevents create/join from restoring the previous nickname after a menu edit.
 
-`shared/EnergyIcon` supplies a pixelated SVG bolt for power costs, energy reserves, and decorative cards. Its shape is font-independent; accessible labels/numbers remain in source components. The decorative SVG preserves proportions across card sizes.
+`shared/components/EnergyIcon` supplies a pixelated SVG bolt for power costs, energy reserves, and decorative cards. Its shape is font-independent; accessible labels/numbers remain in source components. The decorative SVG preserves proportions across card sizes.
 
 Menu profiles use `profile-frame.svg` as a nine-slice border and `avatars-pixel.png` as a 2×2 atlas shared with seats. The pencil button focuses/selects the existing nickname field, respects busy state, and preserves persistence flow.
 
@@ -454,7 +459,7 @@ Fill requires at least two human seats and adds only missing seats. Start checks
 
 ### Modular match scenery
 
-`Table/Scenery` composes floor, repeating felt, nine-slice frame, four flourishes, and independently corner-anchored objects. It uses `art/table-layers/` assets derived from the preserved original background. `shared/ScenicCandle` reuses the same animated candle in menu/table. Scenery receives no projection or events: it stays behind the arena, inaccessible and pointer-transparent. Texture size is fixed; corners/objects have independent portrait/landscape scales. Real-card layout/authority remain in existing components.
+`Table/Scenery` composes floor, repeating felt, nine-slice frame, four flourishes, and independently corner-anchored objects. It uses `art/table-layers/` assets derived from the preserved original background. `shared/components/ScenicCandle` reuses the same animated candle in menu/table. Scenery receives no projection or events: it stays behind the arena, inaccessible and pointer-transparent. Texture size is fixed; corners/objects have independent portrait/landscape scales. Real-card layout/authority remain in existing components.
 
 ### Match interface materials
 
@@ -504,7 +509,7 @@ Bootstrap composes account security, durable admission, player catalogs/progress
 
 `features/player` owns the account controller, strict HTTP DTO parsing, account forms, catalog browser and global ranking. Its public index is the application integration boundary. The optional `/api/features.accounts` capability is advertised only when the complete persistent backend exists. Account state stays in React memory; the existing transport carries credentialed requests and supports logout's no-content response. Remote panels discard obsolete requests, and mutations invalidate outstanding profile reads.
 
-`shared/Avatar` and `shared/PlayingCard` provide presentation shared by catalog previews and the room. Deck/table keys come from the protocol allowlist; no arbitrary URL, CSS or uploaded asset enters the renderer. Card markup follows the existing authorized visibility projection and keeps anonymous backs independent of private faces. Rank/suit styling is independent of gameplay values. Original avatar art remains the common atlas. Cosmetic styles are split by panel, collection, account, summary and ranking; responsive rules keep navigation and close controls outside the scrolling content.
+`shared/components/Avatar` and `shared/components/PlayingCard` provide presentation shared by catalog previews and the room. Deck/table keys come from the protocol allowlist; no arbitrary URL, CSS or uploaded asset enters the renderer. Card markup follows the existing authorized visibility projection and keeps anonymous backs independent of private faces. Rank/suit styling is independent of gameplay values. Original avatar art remains the common atlas. Cosmetic styles are split by panel, collection, account, summary and ranking; responsive rules keep navigation and close controls outside the scrolling content.
 
 Account authentication opens contextually when a guest attempts to equip a cosmetic. The collection stays mounted, preserving the selected tab and preview on cancellation or successful authentication; equipment still requires an explicit, server-validated confirmation. Account management and the public ranking are independent profile actions. The collection contains only Avatars, Decks and Tables tabs.
 
@@ -536,7 +541,7 @@ Reward summaries use two restrained panels integrated with the result frame: gol
 
 ### Card typography comparison prototype
 
-The development-only `/card-fonts.html` entry mounts `pages/CardFonts` independently of the game/account flow. It renders all forty legal Truco cards with the shared CardFace component for ten font candidates, with six pixel-art options shown by default, a common rank size/spacing, three themes and three preview widths. The explicit “Tema da carta” selector applies Clássico, Brasa or Arcano to every visible font sample. The reference is pure Pixelify Sans without the special five substitution. Candidate CSS and alternative fonts load only through this separate entry; the selected Jersey 10 is shared with gameplay; no gameplay font selection or account preference is changed. The standard Vite production build continues to use only index.html. Imported font files and original licenses are documented in public/fonts/comparison/README.md.
+The development-only `/card-fonts.html` loads `app/card-fonts/index.tsx`, which mounts `pages/CardFonts` independently of the game/account flow. It renders all forty legal Truco cards with the shared CardFace component for ten font candidates, with six pixel-art options shown by default, a common rank size/spacing, three themes and three preview widths. The explicit “Tema da carta” selector applies Clássico, Brasa or Arcano to every visible font sample. The reference is pure Pixelify Sans without the special five substitution. Candidate CSS and alternative fonts load only through this separate entry; the selected Jersey 10 is shared with gameplay; no gameplay font selection or account preference is changed. The standard Vite production build continues to use only index.html. Imported font files and original licenses are documented in public/fonts/comparison/README.md.
 
 The comparison prioritizes Jersey 10, Tiny5, Micro 5 and VT323, followed by Pixelify Sans and Jersey 25. “Todas as fontes” additionally reveals the four serif/sans-serif references. Each candidate uses its supplied font weight; the newly added pixel faces use weight 400 without synthetic bold. Jersey 10 was selected for gameplay on 2026-10-26.
 

@@ -6,14 +6,14 @@ test('independent font comparison entry mounts into its own root', async () => {
   root.id = 'card-font-root';
   document.body.append(root);
   await act(async () => {
-    await import('./card-fonts');
+    await import('./index');
   });
   try {
     expect(
       screen.getByRole('heading', { level: 1, name: 'Qual fonte funciona melhor nas cartas?' }),
     ).toBeDefined();
   } finally {
-    const { comparison } = await import('./card-fonts');
+    const { comparison } = await import('./index');
     act(() => comparison?.unmount());
     root.remove();
   }

@@ -1,7 +1,6 @@
-import { Avatar } from '../../../../../shared/Avatar';
+import { Avatar, disabledHint } from '../../../../../shared/components';
 import { t } from '../../../../../shared/i18n';
 import type { Action, MatchView, RoomView } from '@truco/game-protocol';
-import { disabledHint } from '../../../../../shared/DisabledTooltip';
 import { cardLabel, manilhaRanks } from '../../../utils/cards';
 import { gameplayDisabledReason } from '../../../utils/disabled-reason';
 import { CardFace } from '../Card';

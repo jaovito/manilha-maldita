@@ -2,7 +2,7 @@ import type { PlayerProgress, RoomConfig } from '@truco/game-protocol';
 import { nicknameSchema } from '@truco/game-protocol';
 import { useEffect, useRef, useState } from 'react';
 import { version } from '../../../../../package.json';
-import { disabledHint } from '../../../../shared/DisabledTooltip';
+import { disabledHint } from '../../../../shared/components';
 import { t } from '../../../../shared/i18n';
 import { MenuIcon } from '../../components/Icon';
 import { MenuProfile } from '../../components/Profile';

@@ -1,7 +1,7 @@
 import { t } from '../../../../shared/i18n';
 import { useRef, useState, type ReactNode } from 'react';
 import type { RoomView } from '@truco/game-protocol';
-import { disabledHint } from '../../../../shared/DisabledTooltip';
+import { disabledHint } from '../../../../shared/components';
 import type { Action } from '../../../../shared/transport/client';
 
 export function RoomMenu({

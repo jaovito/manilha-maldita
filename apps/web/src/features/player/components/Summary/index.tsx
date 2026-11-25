@@ -1,5 +1,5 @@
 import type { PlayerProgress } from '@truco/game-protocol';
-import { Avatar } from '../../../../shared/Avatar';
+import { Avatar } from '../../../../shared/components';
 import { t, useLocale } from '../../../../shared/i18n';
 
 export function PlayerSummary({ profile }: { profile: PlayerProgress }) {

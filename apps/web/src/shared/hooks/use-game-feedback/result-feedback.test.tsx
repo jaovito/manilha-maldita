@@ -1,8 +1,8 @@
 import { expect, spyOn, test } from 'bun:test';
 import { act, fireEvent, render } from '@testing-library/react';
-import { GameAudio } from './audio';
+import { GameAudio } from '../../feedback/audio';
 import { useGameFeedback } from './index';
-import { resultRoom } from './tests/result-fixture';
+import { resultRoom } from '../../feedback/tests/result-fixture';
 
 test('feedback cancels queued music on mute, hidden tabs, navigation and unmount; latest volume wins', () => {
   const originalSet = window.setTimeout;

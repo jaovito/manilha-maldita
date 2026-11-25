@@ -1,4 +1,4 @@
-import { Avatar } from '../../../../../shared/Avatar';
+import { Avatar } from '../../../../../shared/components';
 import { t } from '../../../../../shared/i18n';
 import type { MatchView, RoomView } from '@truco/game-protocol';
 import { SeatCards } from './Cards';
