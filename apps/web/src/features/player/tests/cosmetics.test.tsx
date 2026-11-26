@@ -1,7 +1,6 @@
 import { afterEach, expect, mock, test } from 'bun:test';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Avatar } from '../../../shared/Avatar';
-import { CardBack, CardFace } from '../../../shared/PlayingCard';
+import { Avatar, CardBack, CardFace } from '../../../shared/components';
 import { Cosmetics } from '../components/Cosmetics';
 import { PlayerPanel } from '../components/Panel';
 import { Ranking } from '../components/Ranking';

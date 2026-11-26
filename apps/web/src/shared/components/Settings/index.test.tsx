@@ -1,8 +1,8 @@
 import { expect, mock, test } from 'bun:test';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { GameSettings, LanguageSelect } from './index';
-import { AudioControls } from '../feedback';
-import { changeLocale, t, useLocale } from '../i18n';
+import { AudioControls } from '../AudioControls';
+import { changeLocale, t, useLocale } from '../../i18n';
 
 function Scene() {
   useLocale();

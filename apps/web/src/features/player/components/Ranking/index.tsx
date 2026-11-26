@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Avatar } from '../../../../shared/Avatar';
+import { Avatar } from '../../../../shared/components';
 import { t, useLocale } from '../../../../shared/i18n';
 import { useRemote } from '../../hooks/use-remote';
 import { playerApi } from '../../services/player-api';

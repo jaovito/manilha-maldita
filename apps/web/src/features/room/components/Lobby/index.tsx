@@ -1,6 +1,6 @@
 import { t } from '../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
-import { disabledHint } from '../../../../shared/DisabledTooltip';
+import { disabledHint } from '../../../../shared/components';
 import type { Action } from '../../../../shared/transport/client';
 import { LobbyIcon } from './Icon';
 import { RoomInvite } from './Invite';

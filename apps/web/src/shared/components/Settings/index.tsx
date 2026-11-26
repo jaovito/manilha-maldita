@@ -1,6 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { t, useLocale } from '../i18n';
+import { t, useLocale } from '../../i18n';
 import './styles.css';
 
 export function LanguageSelect() {

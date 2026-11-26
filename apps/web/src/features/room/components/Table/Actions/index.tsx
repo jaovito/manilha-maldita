@@ -1,7 +1,7 @@
 import { CardBack } from '../Card';
 import { t, loadLocale } from '../../../../../shared/i18n';
 import type { MatchView, RoomView } from '@truco/game-protocol';
-import { disabledHint } from '../../../../../shared/DisabledTooltip';
+import { disabledHint } from '../../../../../shared/components';
 import type { Action } from '../../../../../shared/transport/client';
 import { nextRaise } from '../../../../../shared/feedback/raises';
 import { raiseMessages } from '../../../../../shared/i18n/raises';

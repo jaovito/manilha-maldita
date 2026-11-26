@@ -1,10 +1,8 @@
 import { type ComponentProps, type LazyExoticComponent, Suspense } from 'react';
 import { Lobby, MatchResult, Table } from '../../features/room';
 import { RoomMenu } from '../../features/room/components/RoomMenu';
-import { disabledHint } from '../../shared/DisabledTooltip';
-import { AudioControls } from '../../shared/feedback';
+import { AudioControls, LanguageSelect, disabledHint } from '../../shared/components';
 import { t } from '../../shared/i18n';
-import { LanguageSelect } from '../../shared/Settings';
 
 type Props = Omit<ComponentProps<typeof RoomMenu>, 'children'> &
   ComponentProps<typeof AudioControls> & {

@@ -1,13 +1,13 @@
 import {
   MATCH_RESULT_READING_MS,
   MATCH_RESULT_CELEBRATION_MS,
-} from '../../../../../../shared/match-presentation';
+} from '../../../../../../shared/feedback/match-presentation';
 import { MatchRewards } from './Rewards';
 import { t } from '../../../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 import { type CSSProperties, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { disabledHint } from '../../../../../../shared/DisabledTooltip';
+import { disabledHint } from '../../../../../../shared/components';
 import type { Action } from '../../../../../../shared/transport/client';
 import { completedVictory, resultPerspective, resultTitle } from '../results';
 

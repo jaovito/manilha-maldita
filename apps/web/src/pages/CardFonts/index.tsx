@@ -1,6 +1,6 @@
 import type { DeckTheme } from '@truco/game-protocol';
 import { type CSSProperties, useState } from 'react';
-import { CardFace } from '../../shared/PlayingCard';
+import { CardFace } from '../../shared/components';
 
 const fonts = [
   {

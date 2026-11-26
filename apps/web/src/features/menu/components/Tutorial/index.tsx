@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { GuidedTutorial } from './Guided';
 import { t } from '../../../../shared/i18n';
-import { EnergyIcon } from '../../../../shared/EnergyIcon';
+import { EnergyIcon } from '../../../../shared/components';
 import { useLocale } from '../../../../shared/i18n';
 import type { Locale } from '../../../../shared/i18n/types';
 

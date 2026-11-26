@@ -2,13 +2,11 @@ import { defaultRoomConfig, nicknameSchema, type RoomView } from '@truco/game-pr
 import { lazy, useCallback, useEffect, useRef, useState } from 'react';
 import { EntryMenu, Welcome } from '../../features/menu';
 import { PlayerPanel, usePlayer } from '../../features/player';
-import { DisabledTooltip } from '../../shared/DisabledTooltip';
-import { AudioControls, useGameFeedback } from '../../shared/feedback';
+import { AudioControls, DisabledTooltip, GameSettings, MenuScenery } from '../../shared/components';
+import { useGameFeedback } from '../../shared/hooks/use-game-feedback';
 import { t, useLocale } from '../../shared/i18n';
-import { MenuScenery } from '../../shared/MenuScenery';
-import { useBrowserNavigation } from '../../shared/navigation';
+import { useBrowserNavigation } from '../../shared/hooks/use-browser-navigation';
 import { loadNickname, saveNickname } from '../../shared/preferences/nickname';
-import { GameSettings } from '../../shared/Settings';
 import { type Action, connectRoom, envelope, request } from '../../shared/transport/client';
 
 import { GameRoomStage } from './RoomStage';

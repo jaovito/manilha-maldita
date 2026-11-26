@@ -24,26 +24,26 @@
 @import "../../features/room/components/Lobby/Seats/styles.css";
 @import "../../features/room/components/Lobby/styles/responsive.css";
 @import "../../features/room/components/Lobby/styles/desktop.css";
-@import "../../shared/feedback/styles.css";
-@import "../../shared/Candlelight/styles.css";
+@import "../../shared/components/AudioControls/styles.css";
+@import "../../shared/components/Candlelight/styles.css";
 @import "../../features/room/components/Table/Atmosphere/styles.css";
 @import "../../features/room/components/Table/Feedback/styles.css";
 @import "../../features/room/components/Table/Feedback/TurnAnnouncement/styles.css";
 @import "../../features/room/components/Table/Feedback/results.css";
 @import "../../features/menu/components/Welcome/styles.css";
-@import "../../shared/DisabledTooltip/styles.css";
+@import "../../shared/components/DisabledTooltip/styles.css";
 
 @import "../../features/room/components/Table/Powers/Card/ornaments.css";
-@import "../../shared/MenuScenery/styles.css";
-@import "../../shared/MenuScenery/layout.css";
-@import "../../shared/MenuScenery/composition.css";
-@import "../../shared/MenuScenery/responsive.css";
+@import "../../shared/components/MenuScenery/styles.css";
+@import "../../shared/components/MenuScenery/layout.css";
+@import "../../shared/components/MenuScenery/composition.css";
+@import "../../shared/components/MenuScenery/responsive.css";
 
-@import "../../shared/ScenicCandle/styles.css";
+@import "../../shared/components/ScenicCandle/styles.css";
 
 @import "../../features/room/components/RoomMenu/styles.css";
 
-@import "../../shared/EnergyIcon/styles.css";
+@import "../../shared/components/EnergyIcon/styles.css";
 
 @import "../../features/menu/components/Profile/restored.css";
 @import "../../features/room/components/Table/Feedback/MatchResult/sequence.css";
@@ -67,7 +67,7 @@
 
 @import "../../features/room/components/Table/Card/proportions.css";
 
-@import "../../shared/PlayingCard/themes.css";
+@import "../../shared/components/PlayingCard/themes.css";
 @import "../../features/player/components/Panel/styles.css";
 
 @import "../../features/player/components/Summary/styles.css";

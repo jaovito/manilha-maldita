@@ -1,5 +1,5 @@
 import { t, localized } from '../../../../../shared/i18n';
-import { EnergyIcon } from '../../../../../shared/EnergyIcon';
+import { EnergyIcon } from '../../../../../shared/components';
 import type { MatchView, RoomView } from '@truco/game-protocol';
 import { useId, useState, type RefObject } from 'react';
 import { PowerCard } from './Card';

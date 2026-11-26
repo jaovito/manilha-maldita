@@ -1,5 +1,5 @@
 import type { TableTheme } from '@truco/game-protocol';
-import { ScenicCandle } from '../../../../../shared/ScenicCandle';
+import { ScenicCandle } from '../../../../../shared/components';
 
 /** Static decoration is independent of players, private cards and match lifecycle. */
 export function TableScenery({ theme = 'classic' }: { theme?: TableTheme | undefined }) {

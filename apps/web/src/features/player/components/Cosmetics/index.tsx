@@ -1,5 +1,5 @@
 import { useId, useState } from 'react';
-import { disabledHint } from '../../../../shared/DisabledTooltip';
+import { disabledHint } from '../../../../shared/components';
 import { t } from '../../../../shared/i18n';
 import type { PlayerController } from '../../hooks/use-player';
 import { useRemote } from '../../hooks/use-remote';

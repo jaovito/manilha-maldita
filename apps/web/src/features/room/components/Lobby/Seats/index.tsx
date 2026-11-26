@@ -1,4 +1,4 @@
-import { Avatar } from '../../../../../shared/Avatar';
+import { Avatar } from '../../../../../shared/components';
 import { t } from '../../../../../shared/i18n';
 import type { RoomView } from '@truco/game-protocol';
 import type { Action } from '../../../../../shared/transport/client';

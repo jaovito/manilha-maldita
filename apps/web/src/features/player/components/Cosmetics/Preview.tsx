@@ -1,7 +1,6 @@
 import type { PlayerCatalog } from '@truco/game-protocol';
-import { Avatar } from '../../../../shared/Avatar';
+import { Avatar, CardBack, CardFace } from '../../../../shared/components';
 import { t } from '../../../../shared/i18n';
-import { CardBack, CardFace } from '../../../../shared/PlayingCard';
 
 export type CosmeticTab = 'avatars' | 'decks' | 'tables';
 type Item = PlayerCatalog[CosmeticTab][number];
